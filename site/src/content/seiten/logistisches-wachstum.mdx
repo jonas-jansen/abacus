@@ -1,0 +1,47 @@
+---
+titel: Wachstum mit Obergrenze
+kurz: Logistisches Wachstum – wann wächst es am schnellsten?
+woche: 3
+applet: log-ivp
+gesperrt: true
+voraussetzungen: [geometrische-folgen]
+---
+
+## Mit Papier
+
+Das Modell ist $x' = r\,x\,(1 - x/K)$. Für welche $x$ ist $x' = 0$, für welche $x' > 0$?
+
+<Quiz id="wachstum-parabel" nr={1} />
+
+## Vorhersage
+
+<Quiz id="wachstum-vorhersage" nr={2} schaltetFrei />
+
+Das Applet zeigt
+$$x(t) = \frac{K\,x_0}{x_0 + (K - x_0)\,e^{-rt}}.$$
+Ändern Sie nur $r$ (Steilheit), dann nur $K$ (Höhe).
+
+## Aufgaben
+
+<Quiz id="wachstum-wendepunkt" nr={3} />
+<Quiz id="wachstum-wendepunkt-5" nr={4} />
+
+## Vom Bild zur Behauptung
+
+<Behauptung>
+Für $0 < x_0 < K/2$ ist die Kurve genau bei $x = K/2$ am steilsten, zur Zeit $t^* = \frac1r \ln\frac{K - x_0}{x_0}$, mit Steigung $rK/4$.
+</Behauptung>
+
+<Beweis>
+$x'(t) = g(x(t))$, und $x(t)$ wächst streng monoton von $x_0$ nach $K$. $g$ ist genau bei $K/2$ maximal (Aufgabe 1). Aus $x(t^*) = K/2$ folgt $(K - x_0)e^{-rt^*} = x_0$, also die Formel.
+</Beweis>
+
+## Wo das Bild lügt
+
+<Bildluege>
+Mit [r = 3 und langem Zeitfenster](#log-ivp.r=3&log-ivp.T=60) sieht die Kurve wie eine Stufe aus. Sie ist glatt – die Steigung ist höchstens $rK/4$. Verkürzen Sie auf [T = 3](#log-ivp.r=3&log-ivp.T=3).
+</Bildluege>
+
+## Weiterdenken
+
+Die diskrete Version $x_{n+1} = x_n + r\,x_n(1 - x_n/K)$ sieht gleich aus. Verhält sie sich gleich?

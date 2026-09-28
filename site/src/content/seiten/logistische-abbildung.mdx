@@ -1,0 +1,102 @@
+---
+titel: Wann kommt eine Folge zur Ruhe?
+kurz: Die logistische Abbildung im Spinnwebdiagramm.
+woche: 2
+applet: logistic-cobweb
+gesperrt: true
+voraussetzungen: [geometrische-folgen]
+---
+
+## Die Frage
+
+Eine Population von Insekten lebt in Generationen. Ist sie klein, vermehrt sie sich fast ungebremst; ist sie groß, wird das Futter knapp. Misst man die Population als Anteil $y_n \in [0, 1]$ der größtmöglichen, so ist das einfachste Modell dafür
+
+$$
+y_{n+1} = a\,y_n\,(1 - y_n).
+$$
+
+Der Faktor $a\,y_n$ ist das ungebremste Wachstum wie in Woche 1, der Faktor $1 - y_n$ bremst es. Für manche Werte von $a$ pendelt sich die Population auf einen festen Wert ein, für andere schwankt sie für immer. Heute finden wir heraus, woran das liegt – zuerst mit Papier, dann mit dem Werkzeug rechts.
+
+## Mit Papier
+
+Wenn die Folge überhaupt zur Ruhe kommt, dann auf einem Wert, der sich beim nächsten Schritt nicht mehr ändert. Solche Werte haben einen Namen.
+
+<Definition begriff="Fixpunkt">
+Ein Punkt $y^*$ heißt **Fixpunkt** der Abbildung $f$, wenn $f(y^*) = y^*$ gilt. Startet die Folge in einem Fixpunkt, bleibt sie dort.
+</Definition>
+
+<Aufgabe nr={1} titel="Fixpunkte berechnen">
+Setzen Sie $f(y) = a\,y(1-y)$ gleich $y$ und lösen Sie nach $y$ auf. Sie sollten zwei Lösungen finden. Eine davon ist langweilig – welche? Bestimmen Sie außerdem die Ableitung $f'$ am anderen Fixpunkt; sie wird gleich eine Hauptrolle spielen.
+
+<Quiz id="log-fixpunkte" />
+</Aufgabe>
+
+## Vorhersage
+
+Bevor Sie das Werkzeug benutzen, legen Sie sich fest. Es geht nicht darum, richtig zu raten – sondern darum, hinterher zu wissen, **was** Sie überrascht hat.
+
+<Quiz id="log-vorhersage-32" schaltetFrei />
+
+Das Werkzeug zeigt zwei Bilder derselben Folge. Links das *Spinnwebdiagramm*: der Graph von $f$ und die Diagonale $y = x$. Ein Schritt der Folge besteht aus zwei Bewegungen:
+
+1. **senkrecht** vom aktuellen Wert $y_n$ bis zum Graphen – dort liest man $f(y_n) = y_{n+1}$ ab,
+2. **waagerecht** zur Diagonale – damit wird $y_{n+1}$ zum neuen Startwert.
+
+Rechts sehen Sie dieselbe Folge als Punkte über $n$. Den Startwert ziehen Sie am Kreis auf der Achse; mit ▶ gehen Sie Schritt für Schritt. Vergleichen Sie [a = 2,8](#logistic-cobweb.a=2.8) mit [a = 3,2](#logistic-cobweb.a=3.2).
+
+## Aufgaben
+
+<Aufgabe nr={2} titel="Die Schwelle">
+Bei $a = 2{,}8$ kommt die Folge zur Ruhe, bei $a = 3{,}2$ nicht. Irgendwo dazwischen muss sich etwas ändern. Erhöhen Sie $a$ langsam und beobachten Sie, wie lange die Folge braucht, um sich einzupendeln. Kurz vor der Schwelle wird es immer mühsamer – mit der Lupe am Regler können Sie den Bereich eingrenzen.
+
+Tragen Sie Ihren Wert ein. Er wird nicht sofort beurteilt: Die Antwort gibt der Beweis weiter unten.
+
+<Quiz id="log-schwelle" />
+</Aufgabe>
+
+<Aufgabe nr={3} titel="Ablesen">
+<Quiz id="log-grenzwert-25" />
+</Aufgabe>
+
+<Aufgabe nr={4} titel="Periode 4 herstellen">
+Jenseits der Schwelle springt die Folge zunächst zwischen zwei Werten. Erhöht man $a$ weiter, verdoppelt sich die Periode – und zwar immer schneller:
+
+| Periode | ab etwa $a =$ |
+| --- | --- |
+| 1 | $1$ |
+| 2 | $3$ |
+| 4 | $3{,}449$ |
+| 8 | $3{,}544$ |
+
+Stellen Sie eine Periode 4 her. Die Anzeige „Periode“ rechts hilft; sie untersucht die Folge nach 2000 Schritten.
+
+<Quiz id="log-periode-4" />
+</Aufgabe>
+
+<Aufgabe nr={5} titel="Spirale oder Treppe" stern>
+<Quiz id="log-spirale-treppe" />
+</Aufgabe>
+
+## Vom Bild zur Behauptung
+
+Die Bilder legen eine Vermutung nahe. Formulieren wir sie so, dass man sie beweisen kann.
+
+<Behauptung>
+Für $1 < a < 3$ zieht $y^* = 1 - 1/a$ alle nahe startenden Folgen an. Für $a > 3$ stößt er sie ab.
+</Behauptung>
+
+<Beweis>
+Mit $e_n = y_n - y^*$ gibt der Mittelwertsatz $e_{n+1} = f'(\xi_n)\,e_n$ mit $\xi_n$ zwischen $y_n$ und $y^*$. Ist $|f'(y^*)| = |2-a| < 1$, so gilt $|f'| \le q < 1$ auf einem Intervall um $y^*$, also $|e_n| \le q^n |e_0| \to 0$ – das ist die geometrische Folge aus Woche 1. Ist $|2 - a| > 1$, wächst jeder kleine Abstand.
+</Beweis>
+
+<Spaeter>Dass für $1 < a \le 3$ **jeder** Startwert in $(0,1)$ gegen $y^*$ läuft.</Spaeter>
+
+## Wo das Bild lügt
+
+<Bildluege>
+Bei [a = 3](#logistic-cobweb.a=3) sieht es nach 40 Schritten nach einem Zweierzyklus aus: Die Folge ist noch etwa $0{,}03$ von $2/3$ entfernt. Mit [einer Million Schritten](#logistic-cobweb.a=3&logistic-cobweb.N=1000000) sieht es dagegen nach Konvergenz aus. Beides ist nur ein Ausschnitt: Der Abstand schrumpft wie $1/\sqrt n$ – nach $10^4$ Schritten etwa $0{,}002$, nach $10^6$ etwa $0{,}0002$. Ob er je null wird, entscheidet kein Bild, sondern nur der Beweis.
+</Bildluege>
+
+## Weiterdenken
+
+Bei $a \approx 3{,}83$ taucht plötzlich ein Zyklus der Länge 3 auf. Wie sieht das Diagramm dort aus?

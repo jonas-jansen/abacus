@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+# colleague's MATLAB originals: reference only, not ours to publish
+apps/

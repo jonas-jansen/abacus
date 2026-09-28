@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content'
+import { applets } from '@abacus/applets'
+import Seite from '../layouts/Seite.astro'
+import { kurs, url } from '../config'
+import { previewSvg } from '../preview'
+
+const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort(
+  (a, b) => a.data.woche - b.data.woche || a.data.titel.localeCompare(b.data.titel, 'de'),
+)
+---
+<Seite titel="Übersicht" aktiv="applets">
+  <h1>{kurs.titel}</h1>
+
+  <h2 class="section-title">Applets</h2>
+  <div class="gallery">
+    {
+      Object.values(applets).map((a) => (
+        <a class="card" href={url(`/applet/${a.id}`)}>
+          <div class="card-preview" set:html={previewSvg(a)} />
+          <div class="card-body">
+            <strong>{a.titel}</strong>
+            <span>{a.kurz}</span>
+          </div>
+        </a>
+      ))
+    }
+  </div>
+
+  <h2 class="section-title" id="kurs">Kurs</h2>
+  <ol class="course-list">
+    {
+      seiten.map((s) => (
+        <li>
+          <a href={url(`/kurs/${s.id}`)}>
+            <span class="course-week">Woche {s.data.woche}</span>
+            <strong>{s.data.titel}</strong>
+            <span class="course-kurz">{s.data.kurz}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</Seite>

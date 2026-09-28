@@ -1,0 +1,13 @@
+---
+import { NotebookBar, NotebookOverview } from '@abacus/quiz'
+import Seite from '../layouts/Seite.astro'
+---
+<Seite titel="Notizbuch" breite="schmal" aktiv="notizbuch">
+  <h1>Notizbuch</h1>
+  <p class="lead">
+    Alle Ihre Antworten – nur auf diesem Gerät, nicht bewertet, nicht übertragen. Exportieren Sie regelmäßig; mit
+    „Importieren“ holen Sie sie auf einem anderen Gerät zurück.
+  </p>
+  <NotebookBar client:load />
+  <NotebookOverview client:only="react" />
+</Seite>

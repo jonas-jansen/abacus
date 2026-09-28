@@ -1,0 +1,44 @@
+---
+// Course page: text and quizzes in a reading column, the page's applet large and sticky beside
+// it. Narrow screens stack them, applet first.
+import { getCollection, render } from 'astro:content'
+import { getApplet } from '@abacus/applets'
+import { vocabulary } from '../../components'
+import { AppletIsland } from '../../islands'
+import Seite from '../../layouts/Seite.astro'
+import { url } from '../../config'
+
+export async function getStaticPaths() {
+  const seiten = await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)
+  return seiten.map((seite) => ({ params: { seite: seite.id }, props: { seite } }))
+}
+
+const { seite } = Astro.props
+const { data } = seite
+Astro.locals.applet = data.applet
+const def = getApplet(data.applet)
+const { Content } = await render(seite)
+---
+<Seite titel={data.titel} kurz={data.kurz} aktiv="kurs">
+  <header class="course-head">
+    <p class="eyebrow">Woche {data.woche}</p>
+    <h1>{data.titel}</h1>
+    <p class="lead">{data.kurz}</p>
+  </header>
+  <div class="course">
+    <article class="course-text prose">
+      <Content components={vocabulary} />
+    </article>
+    <div class="course-applet">
+      <div class="course-applet-sticky">
+        <AppletIsland
+          client:load
+          id={def.id}
+          zustand={data.zustand}
+          gesperrt={data.gesperrt}
+          vollbildHref={url(`/applet/${def.id}`)}
+        />
+      </div>
+    </div>
+  </div>
+</Seite>

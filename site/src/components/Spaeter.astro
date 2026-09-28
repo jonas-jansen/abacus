@@ -1,0 +1,10 @@
+---
+interface Props {
+  woche?: number
+}
+const { woche } = Astro.props
+---
+<aside class="box box-later">
+  <p class="box-label">{woche ? `Beweis folgt in Woche ${woche}` : 'Beweis folgt später'}</p>
+  <slot />
+</aside>

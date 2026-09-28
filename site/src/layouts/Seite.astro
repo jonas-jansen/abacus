@@ -1,0 +1,44 @@
+---
+import '@abacus/applet-ui/styles.css'
+import '@abacus/quiz/styles.css'
+import '../styles/site.css'
+import { kurs, url } from '../config'
+
+interface Props {
+  titel: string
+  kurz?: string
+  /** Page width: 'breit' for applet and course pages, 'schmal' for text pages. */
+  breite?: 'breit' | 'schmal'
+  aktiv?: 'applets' | 'kurs' | 'notizbuch'
+}
+const { titel, kurz, breite = 'breit', aktiv } = Astro.props
+---
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titel} · {kurs.titel}</title>
+    {kurz && <meta name="description" content={kurz} />}
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href={url('/')}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M3 20c3-12 6-12 9 0s6 0 9-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          {kurs.titel}
+        </a>
+        <nav>
+          <a href={url('/')} aria-current={aktiv === 'applets' ? 'page' : undefined}>Applets</a>
+          <a href={url('/#kurs')} aria-current={aktiv === 'kurs' ? 'page' : undefined}>Kurs</a>
+          <a href={url('/notizbuch')} aria-current={aktiv === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
+        </nav>
+      </div>
+    </header>
+    <main class:list={['main', breite]}>
+      <slot />
+    </main>
+  </body>
+</html>

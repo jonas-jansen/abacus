@@ -1,0 +1,287 @@
+/* Quiz container styles. Shares the --ab-* tokens from applet-ui when present, with fallbacks. */
+
+@import 'katex/dist/katex.min.css';
+
+.qz,
+.qz-bar,
+.qz-notebook {
+  font-family: var(--ab-font, ui-sans-serif, system-ui, sans-serif);
+  color: var(--ab-text, #16191d);
+}
+.qz *,
+.qz *::before,
+.qz *::after {
+  box-sizing: border-box;
+}
+
+.qz {
+  --qz-dot: var(--ab-accent, #2257c9);
+  margin: 1.5rem 0;
+  padding: 16px 20px 18px;
+  background: var(--ab-bg, #fff);
+  border: 1px solid var(--ab-line, #e6e8ec);
+  border-radius: 12px;
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+.qz[data-typ='vorhersage'] {
+  --qz-dot: var(--abacus-secondary, #c4540f);
+}
+.qz[data-typ='antwort'] {
+  --qz-dot: var(--abacus-tertiary, #7b3fa6);
+}
+.qz-typ::before {
+  content: '';
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--qz-dot);
+}
+
+.qz-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.qz-typ {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ab-muted, #5d6671);
+}
+.qz-nr {
+  font-size: 0.8rem;
+  color: var(--ab-text, #16191d);
+}
+.qz-stern {
+  color: var(--abacus-secondary, #c4540f);
+}
+.qz-count {
+  font-size: 0.78rem;
+  color: var(--ab-muted, #5d6671);
+}
+.qz-frage {
+  margin: 0 0 10px;
+}
+
+.qz-muted {
+  color: var(--ab-muted, #5d6671);
+}
+.qz-small {
+  font-size: 0.82rem;
+}
+.qz-invalid {
+  color: #b42318;
+}
+
+.qz-btn {
+  font: inherit;
+  font-size: 0.88rem;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--ab-line-strong, #c9ced5);
+  border-radius: 8px;
+  background: var(--ab-bg, #fff);
+  color: inherit;
+  cursor: pointer;
+}
+.qz-btn:hover:not(:disabled) {
+  background: var(--ab-panel, #f7f8fa);
+}
+.qz-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.qz-primary {
+  background: var(--ab-accent, #1d5fd1);
+  border-color: var(--ab-accent, #1d5fd1);
+  color: #fff;
+  font-weight: 600;
+}
+.qz-primary:hover:not(:disabled) {
+  background: var(--ab-accent, #1d5fd1);
+  filter: brightness(1.08);
+}
+.qz-danger {
+  color: #b42318;
+}
+.qz-link {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ab-accent, #1d5fd1);
+  cursor: pointer;
+}
+.qz :focus-visible {
+  outline: 2px solid var(--ab-accent, #1d5fd1);
+  outline-offset: 2px;
+}
+
+.qz-actions,
+.qz-finde {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+.qz-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.qz-field input {
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  width: 7em;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--ab-line-strong, #c9ced5);
+  border-radius: 8px;
+  background: var(--ab-bg, #fff);
+  color: inherit;
+}
+.qz-field input:focus {
+  border-color: var(--ab-accent, #1d5fd1);
+  outline: none;
+}
+.qz-field input[aria-invalid] {
+  border-color: #b42318;
+}
+.qz-text {
+  display: block;
+  width: 100%;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--ab-line-strong, #c9ced5);
+  border-radius: 8px;
+  background: var(--ab-bg, #fff);
+  color: inherit;
+  resize: vertical;
+}
+
+.qz-options {
+  display: grid;
+  gap: 6px;
+}
+.qz-options label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--ab-line, #e3e6ea);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.qz-options label:hover {
+  background: var(--ab-panel, #f7f8fa);
+}
+.qz-options label[data-active] {
+  border-color: var(--ab-accent, #1d5fd1);
+  background: var(--ab-accent-soft, #e8effc);
+}
+.qz-options input {
+  accent-color: var(--ab-accent, #1d5fd1);
+}
+.qz-committed {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--ab-panel, #f7f8fa);
+}
+
+.qz-diagnose {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--ab-panel, #f7f8fa);
+}
+.qz-diagnose[data-status='richtig'] strong {
+  color: #067647;
+}
+.qz-diagnose[data-status='nah'] strong {
+  color: #b54708;
+}
+.qz-diagnose[data-status='falsch'] strong {
+  color: #b42318;
+}
+
+.qz-history {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--ab-muted, #5d6671);
+  font-variant-numeric: tabular-nums;
+}
+.qz-history span {
+  margin-left: 10px;
+}
+.qz-history [data-status='richtig'] {
+  color: #067647;
+  font-weight: 600;
+}
+
+.qz-tipps {
+  margin-top: 10px;
+}
+.qz-tipp {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+.qz-loesung {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ab-line, #e3e6ea);
+}
+.qz-loesung summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.qz-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+.qz-bar > .qz-muted:first-child {
+  margin-right: auto;
+}
+
+.qz-notebook {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.qz-notebook li {
+  padding: 12px 14px;
+  border: 1px solid var(--ab-line, #e3e6ea);
+  border-radius: 10px;
+  background: var(--ab-bg, #fff);
+}
+.qz-notebook-frage {
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .qz-diagnose[data-status='richtig'] strong,
+  .qz-history [data-status='richtig'] {
+    color: #6ce9a6;
+  }
+  .qz-diagnose[data-status='nah'] strong {
+    color: #fdb022;
+  }
+  .qz-diagnose[data-status='falsch'] strong,
+  .qz-invalid,
+  .qz-danger {
+    color: #fda29b;
+  }
+}

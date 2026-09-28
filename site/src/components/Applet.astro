@@ -1,0 +1,14 @@
+---
+// An additional applet inside the prose. The page's main applet comes from the frontmatter.
+import { AppletIsland } from '../islands'
+import { url } from '../config'
+
+interface Props {
+  id: string
+  zustand?: Record<string, unknown>
+}
+const { id, zustand } = Astro.props
+---
+<div class="inline-applet">
+  <AppletIsland client:visible id={id} zustand={zustand} vollbildHref={url(`/applet/${id}`)} />
+</div>

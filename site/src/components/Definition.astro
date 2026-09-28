@@ -1,0 +1,7 @@
+---
+interface Props {
+  begriff?: string
+}
+const { begriff } = Astro.props
+---
+<aside class="box box-def"><p class="box-label">Definition{begriff && <span class="box-term">{begriff}</span>}</p><slot /></aside>

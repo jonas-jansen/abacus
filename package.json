@@ -1,0 +1,27 @@
+{
+  "name": "abacus",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "scripts": {
+    "dev": "pnpm --filter site dev",
+    "build": "pnpm --filter site build",
+    "preview": "pnpm --filter site preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm -r --parallel typecheck && tsc -p tsconfig.test.json",
+    "check:deps": "node scripts/check-deps.mjs",
+    "check": "pnpm check:deps && pnpm typecheck && pnpm test",
+    "new-applet": "node scripts/new-applet.mjs"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^19.3.0",
+    "fast-check": "^4.10.2",
+    "jsdom": "^30.1.1",
+    "playwright": "^1.63.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
+}

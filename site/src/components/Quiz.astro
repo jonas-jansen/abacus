@@ -1,0 +1,22 @@
+---
+// <Quiz id="log-schwelle" nr={3} />            — any quiz from @abacus/quizzes
+// <Quiz id="log-vorhersage-32" schaltetFrei /> — committing it unlocks the page's applet
+import { QuizIsland } from '../islands'
+import { scope } from '../config'
+
+interface Props {
+  id: string
+  nr?: number | string
+  stern?: boolean
+  schaltetFrei?: boolean | string
+}
+const { id, nr, stern, schaltetFrei } = Astro.props
+const unlock = schaltetFrei === true ? Astro.locals.applet : schaltetFrei || undefined
+---
+{
+  unlock ? (
+    <QuizIsland client:load id={id} scope={scope} nr={nr} stern={stern} schaltetFrei={unlock} />
+  ) : (
+    <QuizIsland client:visible id={id} scope={scope} nr={nr} stern={stern} />
+  )
+}

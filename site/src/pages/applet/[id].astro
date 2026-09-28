@@ -1,0 +1,39 @@
+---
+// Explore page: one applet, full width, nothing else in the way.
+import { getCollection } from 'astro:content'
+import { applets, getApplet } from '@abacus/applets'
+import { AppletIsland } from '../../islands'
+import Seite from '../../layouts/Seite.astro'
+import { url } from '../../config'
+
+export function getStaticPaths() {
+  return Object.keys(applets).map((id) => ({ params: { id } }))
+}
+
+const { id } = Astro.params
+const def = getApplet(id!)
+const seiten = (await getCollection('seiten', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.entwurf))).sort(
+  (a, b) => a.data.woche - b.data.woche,
+)
+---
+<Seite titel={def.titel} kurz={def.kurz} aktiv="applets">
+  <div class="explore-head">
+    <div>
+      <h1>{def.titel}</h1>
+      <p class="lead">{def.kurz}</p>
+    </div>
+    {
+      seiten.length > 0 && (
+        <div class="explore-links">
+          <span class="eyebrow">Im Kurs</span>
+          {seiten.map((s) => (
+            <a class="chip" href={url(`/kurs/${s.id}`)}>
+              {s.data.titel} →
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </div>
+  <AppletIsland client:load id={def.id} kopf={false} />
+</Seite>
