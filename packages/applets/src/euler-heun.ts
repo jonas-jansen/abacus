@@ -92,6 +92,12 @@ export default defineApplet({
   titel: 'Euler- und Heun-Verfahren',
   kurz: 'Zwei Näherungsverfahren gegen die exakte Lösung: Wie schnell wird der Fehler kleiner?',
   model,
+  formeln: [
+    { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr), \quad T(0) = 315` },
+    { label: 'Schrittweite', tex: String.raw`h = \frac{10}{{{m}}}` },
+    { label: 'Euler', tex: String.raw`T_{n+1} = T_n + h\,f(t_n, T_n)` },
+    { label: 'Heun', tex: String.raw`T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr)` },
+  ],
   plots: [
     {
       type: 'timeSeriesContinuous',

@@ -75,6 +75,10 @@ export default defineApplet({
   titel: 'Verzweigungsdiagramm der logistischen Abbildung',
   kurz: 'Von der Ruhe über Zyklen der Länge 2, 4, 8 … ins Chaos.',
   model,
+  formeln: [
+    { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n)` },
+    { label: 'Start', tex: String.raw`y_0 = {{y0}}` },
+  ],
   plots: [
     {
       type: 'scatter',

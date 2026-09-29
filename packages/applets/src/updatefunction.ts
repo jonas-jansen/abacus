@@ -51,6 +51,12 @@ export default defineApplet({
   titel: 'Die Update-Funktion',
   kurz: 'Erst die Funktion, dann die Folge: Nullstellen, Fixpunkte, Steigung.',
   model,
+  formeln: (p) => [
+    p.form === 'linear'
+      ? { label: 'Update-Funktion', tex: String.raw`f(x) = {{a}}{{*}}x {{+b}}` }
+      : { label: 'Update-Funktion', tex: String.raw`f(x) = x {{+r}}\left(1 - \frac{x}{{{K}}}\right) x` },
+    { label: 'Fixpunkt', tex: String.raw`f(x^*) = x^*` },
+  ],
   plots: [
     {
       type: 'functionGraph',

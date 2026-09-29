@@ -63,6 +63,11 @@ export default defineApplet({
   titel: 'Spinnwebdiagramm der logistischen Abbildung',
   kurz: 'Vom Graphen zur Diagonale und zurück: so entsteht die Folge.',
   model,
+  formeln: [
+    { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n)` },
+    { label: 'Start', tex: String.raw`y_0 = {{y0}}` },
+    { label: 'Fixpunkte', tex: String.raw`y^* = 0, \quad y^* = 1 - \frac{1}{{{a}}}` },
+  ],
   plots: [
     {
       type: 'cobweb',

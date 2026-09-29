@@ -5,6 +5,7 @@ import { ParamControl } from './controls'
 import { handlesOf, type AppletDef } from './define'
 import { Figure } from './Figure'
 import { Figure3D, type Spec3D } from './Figure3D'
+import { FormulaBar } from './FormulaBar'
 import { MathLabel } from './MathLabel'
 import { useAppletState } from './useAppletState'
 
@@ -60,6 +61,21 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   const [hotParam, setHotParam] = useState<string | null>(null)
   // the other direction: a handle in the plot is hovered or dragged → its slider row lights up
   const [dragged, setDragged] = useState<string | null>(null)
+  // a parameter pointed at in the formulas lights up its row and its handles
+  const [formulaHot, setFormulaHot] = useState<string | null>(null)
+  const rowLit = dragged ?? formulaHot
+  const handleHot = hotParam ?? formulaHot
+  const rootRef = useRef<HTMLElement>(null)
+  const focusParam = (id: string) => {
+    const row = rootRef.current?.querySelector<HTMLElement>(`[data-param-row="${id}"]`)
+    if (!row) return
+    const more = row.closest('details')
+    if (more && !more.open) more.open = true
+    row.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    const input = row.querySelector<HTMLElement>('input.ab-val, input, button')
+    input?.focus()
+  }
+  const formeln = typeof def.formeln === 'function' ? def.formeln(params) : def.formeln
   const spot = hover ?? pinned
   const marks = useMemo(() => {
     const o = spot && run?.observables[spot.id]
@@ -75,7 +91,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
     setHints((h) => ({ ...h, [id]: r.message }))
   }
   const control = (s: ParamSpec) => (
-    <div key={s.id} className="ab-param-wrap" data-hot={dragged === s.id || undefined} onPointerEnter={() => setHotParam(s.id)} onPointerLeave={() => setHotParam(null)}>
+    <div key={s.id} className="ab-param-wrap" data-param-row={s.id} data-hot={rowLit === s.id || undefined} onPointerEnter={() => setHotParam(s.id)} onPointerLeave={() => setHotParam(null)}>
       <ParamControl
         spec={s}
         value={params[s.id]}
@@ -97,7 +113,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   }
 
   return (
-    <section className="ab-applet" aria-label={def.titel} data-applet={def.id}>
+    <section className="ab-applet" aria-label={def.titel} data-applet={def.id} ref={rootRef}>
       {kopf && (
         <header className="ab-head">
           <div>
@@ -116,6 +132,17 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
 
       <div className="ab-body">
         <div className="ab-stage">
+          {formeln && formeln.length > 0 && (
+            <FormulaBar
+              formeln={formeln}
+              specs={all}
+              params={params}
+              onChange={(id, v) => change(id, v)}
+              onHot={setFormulaHot}
+              onFocusParam={focusParam}
+              hot={hotParam ?? dragged}
+            />
+          )}
           {locked ? (
             <div className="ab-locked" role="status">
               <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
@@ -143,7 +170,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       probe={probe}
                       onProbe={setProbe}
                       texOf={texOf}
-                      hotParam={hotParam}
+                      hotParam={handleHot}
                       onHandle={setDragged}
                     />
                     ),

@@ -63,6 +63,12 @@ Axes hold still while dragging, values snap to the slider's precision, and the h
 its slider row light each other up. Iterations and ODEs get a timeline (play, scrub);
 closed forms that describe a motion in time opt in with `zeitleiste: true`.
 
+Every applet states its model above the plots, as formulas with live parameters:
+`formeln: [{ label: 'Vorschrift', tex: String.raw\`x_{n+1} = {{a}}{{*}}x_n\` }]`.
+`{{a}}` is the parameter (symbol or current value, draggable, linked to slider and handle),
+`{{+b}}` a signed term, `{{(a)}}` parenthesised when negative, `{{*}}` a product sign that
+only appears between numbers. A test renders every applet's formulas in both modes.
+
 Observables can point into the plots: give them `marks` and the readout highlights that
 geometry on hover or click. Labels take `$math$`.
 `liste('Fixpunkte $y^*$', xs, { marks: xs.map((v, item) => ({ kind: 'value', v, item })) })` –

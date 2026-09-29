@@ -54,6 +54,10 @@ export default defineApplet({
   titel: 'Romeo und Julia',
   kurz: 'Zwei Gefühle, die aufeinander reagieren – ein lineares System als Liebesgeschichte.',
   model,
+  formeln: [
+    { label: 'System', tex: String.raw`\begin{aligned} R' &= {{a}}{{*}}R {{+b}}{{*}}J \\ J' &= {{c}}{{*}}R {{+d}}{{*}}J \end{aligned}` },
+    { label: 'Start', tex: String.raw`(R, J)(0) = {{start}}` },
+  ],
   plots: [
     { type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'R, J', y: [-2, 2] },
     { type: 'phasePlane', xSeries: 'R', ySeries: 'J', xLabel: 'R', yLabel: 'J', x: [-2, 2], y: [-2, 2], field: true, drag: { param: 'start', axis: 'xy' } },

@@ -62,6 +62,11 @@ export default defineApplet({
   titel: 'Logistisches Modell an Daten anpassen',
   kurz: 'Drei Regler, 37 Messwerte: Wie gut lässt sich das Wachstum beschreiben?',
   model,
+  formeln: [
+    { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N\left(1 - \frac{N}{{{K}}}\right)` },
+    { label: 'Start', tex: String.raw`N(0) = {{N0}}` },
+    { label: 'Lösung', tex: String.raw`N(t) = \frac{{{N0}}{{*}}{{K}}{{*}}e^{{{r}}\,t}}{{{K}} + {{N0}}\,(e^{{{r}}\,t} - 1)}` },
+  ],
   plots: [
     {
       type: 'timeSeriesContinuous',

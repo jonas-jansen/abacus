@@ -33,6 +33,11 @@ export default defineApplet({
   titel: 'Geometrische Folge',
   kurz: 'Jeder Wert ist das a-fache des vorigen.',
   model,
+  formeln: [
+    { label: 'Vorschrift', tex: String.raw`x_{n+1} = {{a}}{{*}}x_n` },
+    { label: 'Start', tex: String.raw`x_0 = {{x0}}` },
+    { label: 'Lösung', tex: String.raw`x_n = {{(a)}}^{n}{{*}}{{x0}}` },
+  ],
   plots: [
     {
       type: 'timeSeriesDiscrete',

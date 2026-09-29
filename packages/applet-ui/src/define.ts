@@ -6,6 +6,9 @@
 
 import type { Model, Params, RunOptions } from '@abacus/applet-core'
 import type { Domain, PlotSpec } from '@abacus/applet-plot'
+import type { Formel } from './formula'
+
+export type { Formel } from './formula'
 
 export type Resolvable<T, P> = T | ((p: P) => T)
 
@@ -58,6 +61,12 @@ export interface AppletDef<P extends Params = Params> {
   titel: string
   kurz: string
   model: Model<P>
+  /**
+   * The model as formulas with live parameters, e.g.
+   * `[{ label: 'Vorschrift', tex: 'x_{n+1} = {{a}}\\,x_n' }]` (syntax: formula.ts).
+   * A function when the formulas depend on a setting.
+   */
+  formeln?: readonly Formel[] | ((p: P) => readonly Formel[])
   /** One island, however many plots it drives (§10). */
   plots: readonly PlotEntry<P>[]
   layout?: LayoutHint<P>

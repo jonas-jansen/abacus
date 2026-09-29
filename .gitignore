@@ -4,3 +4,5 @@ dist/
 .DS_Store
 # colleague's MATLAB originals: reference only, not ours to publish
 apps/
+# lecture slides: reference only, not for the public repository
+slides/

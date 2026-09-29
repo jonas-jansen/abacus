@@ -41,6 +41,11 @@ export default defineApplet({
   titel: 'Allgemeine Lösung einer linearen Gleichung',
   kurz: 'Eine Differentialgleichung, unendlich viele Lösungen – die Konstante C wählt eine aus.',
   model,
+  formeln: [
+    { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },
+    { label: 'alle Lösungen', tex: String.raw`x(t) = {{C}}{{*}}e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
+    { label: 'Gleichgewicht', tex: String.raw`x^* = -\frac{b}{a}` },
+  ],
   plots: [
     {
       type: 'timeSeriesContinuous',

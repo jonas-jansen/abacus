@@ -55,6 +55,11 @@ export default defineApplet({
   titel: 'Stabil oder instabil?',
   kurz: 'Die Folge startet genau im Fixpunkt – dann kommen kleine Stöße.',
   model,
+  formeln: [
+    { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n) + {{eps}}{{*}}\xi_n` },
+    { label: 'Start im Fixpunkt', tex: String.raw`y_0 = y^* = 1 - \frac{1}{{{a}}}` },
+    { label: 'Störung ab n = 5', tex: String.raw`\xi_n \sim \mathcal{N}(0, 1)` },
+  ],
   plots: [
     {
       type: 'timeSeriesDiscrete',

@@ -32,6 +32,11 @@ export default defineApplet({
   titel: 'Anfangswertproblem',
   kurz: 'Der Anfangswert legt die Konstante fest – und damit genau eine Lösung.',
   model,
+  formeln: [
+    { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },
+    { label: 'Start', tex: String.raw`x(0) = {{x0}}` },
+    { label: 'Lösung', tex: String.raw`x(t) = \left({{x0}} + \frac{{{b}}}{{{a}}}\right) e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
+  ],
   plots: [
     {
       type: 'timeSeriesContinuous',

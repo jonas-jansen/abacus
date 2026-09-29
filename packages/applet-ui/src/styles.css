@@ -538,6 +538,126 @@
   font-weight: 600;
 }
 
+/* ================================================================== formulas */
+
+/* The model above the plots. Parameters are chips: point, drag sideways, or click to type.
+   Narrow: the toggle sits above the formulas, which scroll sideways if a system is too wide. */
+.ab-model {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 12px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 12px;
+  background: var(--ab-panel);
+}
+.ab-formulas {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px 40px;
+  overflow-x: auto;
+}
+.ab-formula {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.ab-formula-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ab-faint);
+}
+.ab-formula-tex {
+  font-size: 17px;
+  white-space: nowrap;
+  color: var(--ab-text);
+}
+.ab-formula-tex .katex {
+  font-size: 1.12em;
+}
+.ab-formulas [data-param] {
+  display: inline-block;
+  padding: 0 0.14em;
+  margin: 0 0.02em;
+  border-radius: 0.28em;
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+  box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--ab-accent) 45%, transparent);
+  cursor: ew-resize;
+  touch-action: none;
+  transition: background 0.12s, color 0.12s;
+}
+.ab-formulas [data-param][role='button'] {
+  cursor: pointer;
+}
+.ab-formulas [data-param]:hover,
+.ab-formulas [data-param][data-hot],
+.ab-formulas [data-param]:focus-visible {
+  background: var(--ab-accent);
+  color: var(--ab-bg);
+  outline: none;
+  box-shadow: none;
+}
+.ab-seg {
+  display: inline-flex;
+  flex: none;
+  align-self: flex-start;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--ab-bg);
+  box-shadow: inset 0 0 0 1px var(--ab-line);
+}
+.ab-seg button {
+  min-width: 30px;
+  height: 24px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ab-muted) !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
+}
+.ab-seg button[aria-pressed='true'] {
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent) !important;
+  font-weight: 600;
+}
+@media (pointer: coarse) {
+  .ab-seg button {
+    height: 34px;
+    min-width: 40px;
+  }
+}
+
+@container (max-width: 599px) {
+  .ab-model {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 8px 10px 10px;
+  }
+  .ab-model .ab-seg {
+    align-self: flex-end;
+  }
+  .ab-formulas {
+    justify-content: flex-start;
+    gap: 10px 28px;
+  }
+  .ab-formula {
+    align-items: flex-start;
+  }
+  .ab-formula-tex {
+    font-size: 15px;
+  }
+}
+
 /* ================================================================== timeline */
 
 .ab-timeline {

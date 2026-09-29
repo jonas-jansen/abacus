@@ -55,6 +55,11 @@ export default defineApplet({
   titel: 'Epidemie-Modell',
   kurz: 'Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?',
   model,
+  formeln: [
+    { label: 'System', tex: String.raw`\begin{aligned} x_1(n+1) &= x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,(N - x_1(n)) \\ x_2(n+1) &= (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n) \end{aligned}` },
+    { label: 'Bevölkerung', tex: String.raw`N = 100\,000` },
+    { label: 'Start', tex: String.raw`x_2(0) = {{I0}}` },
+  ],
   plots: [
     {
       type: 'timeSeriesDiscrete',
