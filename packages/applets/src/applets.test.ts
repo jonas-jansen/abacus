@@ -204,3 +204,20 @@ describe('Anhang: the numbers are right', () => {
     expect(observe('hauptsatz', { f: 'lin', a: 0, x: 3 }).F.value).toBeCloseTo(1.5, 12)
   })
 })
+
+describe('zoomed detail', () => {
+  it('the bifurcation diagram is recomputed for the visible range of a', () => {
+    const { model } = getApplet('logistic-bifurcation')
+    const r = model.run(defaultParams(model), { detail: { x: [3.55, 3.6], y: [0.5, 0.501], zoom: 1000 }, observables: false })
+    const d = r.series.find((s) => s.id === 'diagramm')!
+    let lo = Infinity
+    let hi = -Infinity
+    for (const a of d.x) [lo, hi] = [Math.min(lo, a), Math.max(hi, a)]
+    expect(lo).toBeGreaterThanOrEqual(3.55)
+    expect(hi).toBeLessThanOrEqual(3.6)
+    // even a slice 0,001 high is filled: most values of a contribute many points
+    // (periodic windows contribute nothing to such a thin slice; the chaotic band does)
+    expect(d.x.length).toBeGreaterThan(12_000)
+    for (const v of d.y) expect(v >= 0.5 && v <= 0.501).toBe(true)
+  })
+})

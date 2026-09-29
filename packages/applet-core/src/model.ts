@@ -99,7 +99,23 @@ export interface RunOptions {
   tol?: number
   /** false skips the observables — sweeps need only the series, and detectors can be costly. */
   observables?: boolean
+  /**
+   * A plot is zoomed in: compute its curves in more detail. `x` is the visible range of the
+   * plot's x axis (whatever that variable is for the model), `zoom` the magnification.
+   */
+  detail?: Detail
 }
+
+export interface Detail {
+  x?: readonly [number, number]
+  /** The visible range of the y axis (for models that can aim their points at it). */
+  y?: readonly [number, number]
+  zoom: number
+}
+
+/** More samples when zoomed, up to a limit that keeps a redraw quick. */
+export const MAX_SAMPLES = 20_000
+export const detailSamples = (base: number, d?: Detail) => Math.min(MAX_SAMPLES, Math.round(base * Math.max(1, d?.zoom ?? 1)))
 
 export interface RunMeta {
   solver?: string

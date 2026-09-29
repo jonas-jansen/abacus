@@ -14,6 +14,9 @@ const GREEK: Record<string, string> = {
   pi: 'π', rho: 'ρ', sigma: 'σ', tau: 'τ', phi: 'φ', omega: 'ω', theta: 'θ',
 }
 
+/** Upright operators and symbols. */
+const SYMBOLS: Record<string, string> = { cdot: '·', times: '×', pm: '±', infty: '∞' }
+
 interface Run {
   text: string
   italic: boolean
@@ -41,7 +44,8 @@ function tokens(src: string, shift: Run['shift'], out: Run[]) {
     if (c === '\\') {
       const m = /^\\([a-zA-Z]+)/.exec(src.slice(i))
       if (m) {
-        out.push({ text: GREEK[m[1]] ?? m[1], italic: m[1] in GREEK && m[1][0] === m[1][0].toLowerCase(), shift })
+        const sym = SYMBOLS[m[1]]
+        out.push(sym ? { text: sym, italic: false, shift } : { text: GREEK[m[1]] ?? m[1], italic: m[1] in GREEK && m[1][0] === m[1][0].toLowerCase(), shift })
         i += m[0].length
         continue
       }

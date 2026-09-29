@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { clamp, formatNumber, makeFrame, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
+import { clamp, formatNumber, makeFrame, type Detail, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
 import {
   axesNode,
   CanvasSurface,
@@ -63,6 +63,8 @@ interface FigureProps<P extends Params> {
   bahnen?: readonly Run[]
   onBahn?: (start: [number, number]) => void
   onBahnenLoeschen?: () => void
+  /** Recompute the model in more detail for a zoomed window (null: nothing to add). */
+  onDetail?: (d: Detail) => Run | null
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -97,6 +99,7 @@ export function Figure<P extends Params>({
   bahnen,
   onBahn,
   onBahnenLoeschen,
+  onDetail,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -130,6 +133,28 @@ export function Figure<P extends Params>({
   // Zoomed or panned: the student's own window, until reset.
   const [zoom, setZoom] = useState<{ x: readonly [number, number]; y: readonly [number, number] } | null>(null)
   useEffect(() => setZoom(null), [logY])
+  // Zoomed in: once the window has settled, the model is asked for more detail in it —
+  // curves sampled in the window, diagrams recomputed for it — and that is what is drawn.
+  const [settled, setSettled] = useState(zoom)
+  useEffect(() => {
+    const id = window.setTimeout(() => setSettled(zoom), 120)
+    return () => window.clearTimeout(id)
+  }, [zoom])
+  const full = useMemo(() => plotDomains(spec, run), [spec, run])
+  const magnification = (z: { x: readonly [number, number]; y: readonly [number, number] }) => {
+    const ly = (v: number) => (spec.yScale === 'log' ? Math.log10(Math.max(v, 1e-300)) : v)
+    const mx = (full.x[1] - full.x[0]) / Math.max(1e-300, z.x[1] - z.x[0])
+    const my = (ly(full.y[1]) - ly(full.y[0])) / Math.max(1e-300, ly(z.y[1]) - ly(z.y[0]))
+    return Math.max(1, mx, my)
+  }
+  const detailRun = useMemo(() => {
+    if (!settled || !onDetail) return null
+    // a phase plane's x axis is a state, not the model's variable: only the magnification counts
+    return onDetail({ x: spec.type === 'phasePlane' ? undefined : settled.x, y: settled.y, zoom: magnification(settled) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settled, onDetail, spec.type, full])
+  const drawn = detailRun ?? run
+
   const frame = useMemo(() => {
     const auto = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
     const d = zoom ? { ...auto, x: zoom.x, y: zoom.y } : auto
@@ -159,10 +184,10 @@ export function Figure<P extends Params>({
         surface.fade(1)
       }
       for (const b of bahnen ?? []) drawBahn(surface, frame, spec, b)
-      drawPlot(surface, frame, spec, run, view)
+      drawPlot(surface, frame, spec, drawn, view)
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, run, view, vergleich, bahnen])
+  }, [hydrated, frame, spec, drawn, view, vergleich, bahnen])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
@@ -209,12 +234,17 @@ export function Figure<P extends Params>({
   const window_ = () => ({ x: frame.xDomain, y: frame.yDomain })
   const yT = (v: number) => (frame.yLog ? Math.log10(v) : v)
   const yTi = (u: number) => (frame.yLog ? 10 ** u : u)
+  const MAX_ZOOM = 1e6
+  const setZoomLimited = (z: { x: readonly [number, number]; y: readonly [number, number] }) => {
+    // no deeper than a million-fold: beyond that, double precision and the samples run out
+    if (magnification(z) <= MAX_ZOOM) setZoom(z)
+  }
   const zoomAt = (px: number, py: number, k: number, kx = k) => {
     const { x, y } = window_()
     const cx = frame.xInvert(px)
     const cy = yT(frame.yInvert(py))
     const [ya, yb] = [yT(y[0]), yT(y[1])]
-    setZoom({ x: [cx - (cx - x[0]) * kx, cx + (x[1] - cx) * kx], y: [yTi(cy - (cy - ya) * k), yTi(cy + (yb - cy) * k)] })
+    setZoomLimited({ x: [cx - (cx - x[0]) * kx, cx + (x[1] - cx) * kx], y: [yTi(cy - (cy - ya) * k), yTi(cy + (yb - cy) * k)] })
   }
   const panBy = (dxPx: number, dyPx: number, from: { x: readonly [number, number]; y: readonly [number, number] }) => {
     const sx = (from.x[1] - from.x[0]) / plot.w
@@ -279,7 +309,7 @@ export function Figure<P extends Params>({
         const cy = (a.y + b.y) / 2 - r.top - plot.y
         const f = p.from
         const x0 = frame.xInvert(p.cx)
-        setZoom({
+        setZoomLimited({
           x: [x0 - (x0 - f.x[0]) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w, x0 + (f.x[1] - x0) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w],
           y: (() => {
             const [ya, yb] = [yT(f.y[0]), yT(f.y[1])]

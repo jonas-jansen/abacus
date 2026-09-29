@@ -28,8 +28,10 @@ const model = iteration({
   step: (y, p) => p.a * y * (1 - y),
   horizon: (p) => p.N,
   series: { id: 'y', label: 'y_n' },
-  extraSeries: ({ map }) => {
-    const { x, y } = sample(map, 0, 1, 201)
+  extraSeries: ({ map, detail }) => {
+    // zoomed in: the graph sampled in the visible range only
+    const [lo, hi] = detail?.x ?? [0, 1]
+    const { x, y } = sample(map, lo, hi, 401)
     return [{ id: 'f', label: 'f(y) = a\\,y\\,(1-y)', kind: 'continuous', x, y, role: 'primary' }]
   },
   observables: ({ x, map, tail }) => {

@@ -198,12 +198,14 @@ export function rosenbrock(f: Rhs, t0: number, y0: ArrayLike<number>, t1: number
     rejected,
     warnings,
     at,
-    sample(count) {
+    sample(count, from = t0, to = tEnd) {
+      const a = Math.max(t0, from)
+      const b = Math.min(tEnd, to)
       const tArr = new Float64Array(count)
       const yArr = Array.from({ length: n }, () => new Float64Array(count))
       const buf = new Float64Array(n)
       for (let j = 0; j < count; j++) {
-        const tj = count === 1 ? t0 : t0 + ((tEnd - t0) * j) / (count - 1)
+        const tj = count === 1 ? a : a + ((b - a) * j) / (count - 1)
         tArr[j] = tj
         at(tj, buf)
         for (let i = 0; i < n; i++) yArr[i][j] = buf[i]

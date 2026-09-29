@@ -36,7 +36,7 @@ const model = closedForm({
   constraintNote: 'a und a + h liegen im Definitionsbereich von f',
   domain: (p) => FUNKTIONEN[p.f].domain,
   curves: { f: { label: 'f(x)', f: (x, p) => FUNKTIONEN[p.f].f(x) } },
-  extraSeries: ({ p }) => {
+  extraSeries: ({ p, detail }) => {
     const F = FUNKTIONEN[p.f]
     const [lo, hi] = F.domain
     const fa = F.f(p.a)
@@ -45,7 +45,10 @@ const model = closedForm({
     // the difference quotient as a function of h, undefined at h = 0
     // only where a + h lies in the domain of f
     // the hole at h = 0 is left visibly open: the limit is where the dashed line f'(a) meets it
-    const g = sample((h) => (Math.abs(h) < 0.04 || p.a + h < lo || p.a + h > hi ? NaN : quotient(p, h)), -H_MAX, H_MAX, 401)
+    const [h0, h1] = detail?.x ? [Math.max(-H_MAX, detail.x[0]), Math.min(H_MAX, detail.x[1])] : [-H_MAX, H_MAX]
+    // the hole at h = 0 stays visibly open at every zoom
+    const hole = Math.min(0.04, (h1 - h0) * 0.01)
+    const g = sample((h) => (Math.abs(h) < hole || p.a + h < lo || p.a + h > hi ? NaN : quotient(p, h)), h0, h1, 401)
     out.push(
       { id: 'g', label: 'D(h)', name: 'Differenzenquotient', kind: 'continuous', x: g.x, y: g.y, role: 'secondary' },
       { id: 'grenze', label: "f'(a)", name: 'Ableitung', kind: 'continuous', x: Float64Array.of(-H_MAX, H_MAX), y: Float64Array.of(F.df(p.a), F.df(p.a)), role: 'reference' },

@@ -30,6 +30,9 @@ export interface Frame {
   fontSize: number
   /** The y axis is logarithmic. */
   yLog?: boolean
+  /** Tick labels are scaled by 10^exp (0: not scaled); the axis shows the factor. */
+  xExp?: number
+  yExp?: number
 }
 
 export interface FrameInput {
@@ -85,17 +88,19 @@ export function makeFrame(input: FrameInput): Frame {
   const yDomain = log ? positiveRange(input.y) : safeRange(input.y)
 
   const yT = log ? logTicks(yDomain, Math.max(2, Math.floor(height / PX_PER_Y_TICK))) : niceTicks(yDomain[0], yDomain[1], Math.max(2, Math.floor(height / PX_PER_Y_TICK)), input.yInteger)
-  const yTickLabels = log ? yT.ticks.map(powerLabel) : yT.ticks.map((v) => formatFixed(v, decimalsOf(yT.step)))
-  const yLabelWidth = Math.max(0, ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
+  const yScaled = log ? { labels: yT.ticks.map(powerLabel), exp: 0 } : scaledLabels(yT.ticks, yT.step)
+  const yTickLabels = yScaled.labels
+  // a fixed minimum width, so the plot does not shift sideways while zooming or dragging
+  const yLabelWidth = Math.max(estimateTextWidth('−0,000', fontSize), ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
 
   const left = Math.ceil(yLabelWidth + TICK + 6 + 4)
   const top = Math.ceil(input.yLabel ? fontSize * 2 : fontSize * 0.8)
   const bottom = Math.ceil(fontSize + TICK + 6 + (input.xLabel ? fontSize * 1.6 : 0) + 2)
 
   const xT = niceTicks(xDomain[0], xDomain[1], Math.max(2, Math.floor((width - left) / PX_PER_X_TICK)), input.xInteger)
-  const xTickLabels = xT.ticks.map((v) => formatFixed(v, decimalsOf(xT.step)))
-  const lastX = xTickLabels[xTickLabels.length - 1] ?? ''
-  const right = Math.ceil(Math.max(10, estimateTextWidth(lastX, fontSize) / 2 + 2))
+  const xScaled = scaledLabels(xT.ticks, xT.step)
+  const xTickLabels = xScaled.labels
+  const right = Math.ceil(Math.max(estimateTextWidth('0,000', fontSize) / 2 + 2, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2 + 2)))
 
   const plot = {
     x: left,
@@ -128,7 +133,22 @@ export function makeFrame(input: FrameInput): Frame {
     yDomain,
     fontSize,
     yLog: log,
+    xExp: xScaled.exp,
+    yExp: yScaled.exp,
   }
+}
+
+/**
+ * Tick labels that stay short: from 10⁴ on, or below 10⁻³, the ticks are written as mantissas
+ * and the common power of ten goes to the axis (·10⁴). Keeps labels narrow and the plot still.
+ */
+function scaledLabels(ticks: number[], step: number): { labels: string[]; exp: number } {
+  const max = Math.max(0, ...ticks.map(Math.abs))
+  const e = max > 0 ? Math.floor(Math.log10(max) + 1e-9) : 0
+  if (e < 4 && !(e <= -3 && max > 0)) return { labels: ticks.map((v) => formatFixed(v, decimalsOf(step))), exp: 0 }
+  const f = 10 ** e
+  const d = decimalsOf(Number((step / f).toPrecision(6)))
+  return { labels: ticks.map((v) => formatFixed(v / f, d)), exp: e }
 }
 
 function positiveRange([a, b]: Range): Range {

@@ -8,30 +8,43 @@ const MAX_PERIOD = 32
 const A_MIN = 2.4
 
 /**
- * The diagram does not depend on the sliders: computed once, on first use. For each a, the
- * values visited after a long transient (from y₀ = 0,5; for a ≤ 4 the attractor is the same
- * for almost every start).
+ * The diagram does not depend on the sliders. For each a, the values visited after a long
+ * transient (from y₀ = 0,5; for a ≤ 4 the attractor is the same for almost every start).
+ *
+ * Zoomed in, it is recomputed for the visible window: for each a it iterates until enough
+ * values have landed in the visible y range (or a budget is used up), so the picture stays
+ * about equally dense at any magnification — a thin slice of the chaotic band included.
  */
-let diagram: { x: Float64Array; y: Float64Array } | null = null
-function bifurcation() {
-  if (diagram) return diagram
-  const count = 1600
-  const transient = 600
-  const keep = 120
-  const x = new Float64Array(count * keep)
-  const y = new Float64Array(count * keep)
-  for (let i = 0; i < count; i++) {
-    const a = (4 * i) / (count - 1)
+const cache = new Map<string, { x: Float64Array; y: Float64Array }>()
+function bifurcation(lo = 0, hi = 4, ylo = -Infinity, yhi = Infinity) {
+  const COUNT = 900 // values of a across the window
+  const TRANSIENT = 600
+  const HITS = 140 // points per a we aim for in the window
+  const BUDGET = 12_000 // iterations per a at most (a few dozen ms in all, only after zooming)
+  const key = `${lo}|${hi}|${ylo}|${yhi}`
+  const hit = cache.get(key)
+  if (hit) return hit
+  const [a0, a1] = [Math.max(0, lo), Math.min(4, hi)]
+  const xs: number[] = []
+  const ys: number[] = []
+  for (let i = 0; i < COUNT; i++) {
+    const a = a0 + ((a1 - a0) * i) / (COUNT - 1)
     let v = 0.5
-    for (let k = 0; k < transient; k++) v = a * v * (1 - v)
-    for (let k = 0; k < keep; k++) {
+    for (let k = 0; k < TRANSIENT; k++) v = a * v * (1 - v)
+    let found = 0
+    for (let k = 0; k < BUDGET && found < HITS; k++) {
       v = a * v * (1 - v)
-      x[i * keep + k] = a
-      y[i * keep + k] = v
+      if (v >= ylo && v <= yhi) {
+        xs.push(a)
+        ys.push(v)
+        found++
+      }
     }
   }
-  diagram = { x, y }
-  return diagram
+  if (cache.size > 6) cache.delete(cache.keys().next().value!)
+  const d = { x: Float64Array.from(xs), y: Float64Array.from(ys) }
+  cache.set(key, d)
+  return d
 }
 
 const model = iteration({
@@ -45,8 +58,8 @@ const model = iteration({
   step: (y, p) => p.a * y * (1 - y),
   horizon: (p) => p.N,
   series: { id: 'y', label: 'y_n' },
-  extraSeries: ({ p }) => {
-    const d = bifurcation()
+  extraSeries: ({ p, detail }) => {
+    const d = detail?.x ? bifurcation(detail.x[0], detail.x[1], detail.y?.[0], detail.y?.[1]) : bifurcation()
     return [
       { id: 'diagramm', label: 'y^*', name: 'Langzeitwerte', kind: 'discrete', x: d.x, y: d.y, role: 'primary', connect: false },
       { id: 'jetzt', label: 'a', name: 'gewählt', kind: 'continuous', x: Float64Array.of(p.a, p.a), y: Float64Array.of(0, 1), role: 'secondary' },

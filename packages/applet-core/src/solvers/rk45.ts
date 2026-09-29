@@ -29,8 +29,8 @@ export interface DenseSolution {
   readonly warnings: string[]
   /** State at time t (clamped to [t0, t1]). */
   at(t: number, out?: Float64Array): Float64Array
-  /** Component i at `count` equally spaced times over [t0, t1]. */
-  sample(count: number): { t: Float64Array; y: Float64Array[] }
+  /** The state at `count` equally spaced times over [from, to] (default [t0, t1]). */
+  sample(count: number, from?: number, to?: number): { t: Float64Array; y: Float64Array[] }
 }
 
 // Butcher tableau
@@ -200,12 +200,14 @@ export function rk45(f: Rhs, t0: number, y0: ArrayLike<number>, t1: number, opts
     rejected,
     warnings,
     at,
-    sample(count) {
+    sample(count, from = t0, to = tEnd) {
+      const a = Math.max(t0, from)
+      const b = Math.min(tEnd, to)
       const tArr = new Float64Array(count)
       const yArr = Array.from({ length: n }, () => new Float64Array(count))
       const buf = new Float64Array(n)
       for (let j = 0; j < count; j++) {
-        const tj = count === 1 ? t0 : t0 + ((tEnd - t0) * j) / (count - 1)
+        const tj = count === 1 ? a : a + ((b - a) * j) / (count - 1)
         tArr[j] = tj
         at(tj, buf)
         for (let i = 0; i < n; i++) yArr[i][j] = buf[i]

@@ -21,10 +21,13 @@ const model = iteration({
   start: (p) => p.x0,
   step: (x) => heron(x),
   horizon: (p) => p.N,
-  extraSeries: ({ p, n, x }) => {
+  extraSeries: ({ p, n, x, detail }) => {
     const L = p.x0 < 0 ? -Math.SQRT2 : Math.SQRT2
     // f with its pole at 0 cut out, so the graph is not joined across it
-    const f = sample((t) => (Math.abs(t) < 0.12 ? NaN : heron(t)), -5, 5, 801)
+    const [lo, hi] = detail?.x ?? [-5, 5]
+    // the pole at 0 is cut out (at least 1 % of the visible width), so the graph is not joined across it
+    const gap = Math.min(0.12, (hi - lo) * 0.01)
+    const f = sample((t) => (Math.abs(t) < gap ? NaN : heron(t)), lo, hi, 801)
     return [
       { id: 'f', label: 'f(x) = \\tfrac12 (x + 2/x)', kind: 'continuous', x: f.x, y: f.y, role: 'primary' },
       // the error; exactly 0 would have no place on a log axis, so it stops at machine precision

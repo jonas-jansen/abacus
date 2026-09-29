@@ -4,7 +4,7 @@
  * function of a context object that already holds the computed arrays.
  */
 
-import { defineModel, type Model, type Observable, type Series, type SeriesRole } from './model'
+import { defineModel, detailSamples, type Detail, type Model, type Observable, type Series, type SeriesRole } from './model'
 import { indices, linspace } from './numeric'
 import type { ParamDefs, ParamsOf } from './params'
 import { createRng, type Rng } from './rng'
@@ -51,6 +51,8 @@ export interface IterationContext<P> {
   map: (x: number) => number
   /** Continue iterating from the start value: drop `transient` steps, return the next `count`. */
   tail: (transient: number, count: number) => Float64Array
+  /** Set when a plot is zoomed in: draw extra curves (graphs, diagrams) in more detail. */
+  detail?: Detail
 }
 
 export interface IterationConfig<D extends ParamDefs> extends Common<D> {
@@ -92,6 +94,7 @@ export function iteration<const D extends ParamDefs>(cfg: IterationConfig<D>): M
         x,
         map: (v) => cfg.step(v, p, 0, createRng(seed)),
         tail: (transient, count) => iterate(transient + count).subarray(transient + 1),
+        detail: opts.detail,
       }
       const s = cfg.series ?? {}
       const orbit: Series = {
@@ -198,6 +201,8 @@ export interface ClosedFormContext<P> {
   series: Record<string, Series>
   /** Evaluate a declared curve anywhere, not just at the samples. */
   curve: (id: string, t: number) => number
+  /** Set when a plot is zoomed in. */
+  detail?: Detail
 }
 
 export interface ClosedFormConfig<D extends ParamDefs> extends Common<D> {
@@ -224,9 +229,12 @@ export function closedForm<const D extends ParamDefs>(cfg: ClosedFormConfig<D>):
     run(p, opts) {
       const [a, b0] = resolve(cfg.domain, p)
       const b = opts.horizon ?? b0
+      // zoomed in: sample only the visible part of the domain, as finely as before overall
+      const w = opts.detail?.x
+      const [ta, tb] = w ? [Math.max(a, w[0]), Math.min(b, w[1])] : [a, b]
       const t = cfg.discrete
         ? indices(Math.max(0, Math.floor(b) - Math.ceil(a)) + 1).map((i) => i + Math.ceil(a))
-        : linspace(a, b, opts.samples ?? cfg.samples ?? 400)
+        : linspace(ta, tb > ta ? tb : ta, opts.samples ?? cfg.samples ?? 400)
       const series: Record<string, Series> = {}
       Object.entries(cfg.curves).forEach(([id, c], i) => {
         const y = new Float64Array(t.length)
@@ -238,6 +246,7 @@ export function closedForm<const D extends ParamDefs>(cfg: ClosedFormConfig<D>):
         domain: [a, b],
         series,
         curve: (id, tq) => cfg.curves[id].f(tq, p),
+        detail: opts.detail,
       }
       return {
         series: [...Object.values(series), ...(cfg.extraSeries?.(ctx) ?? [])],
@@ -308,7 +317,10 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
         const explicit = rk45(f, t0, cfg.start(p), t1, { ...o, maxSteps: AUTO_STIFF_STEPS })
         sol = explicit.warnings.length ? rosenbrock(f, t0, cfg.start(p), t1, o) : explicit
       } else sol = rk45(f, t0, cfg.start(p), t1, o)
-      const { t, y } = sol.sample(opts.samples ?? cfg.samples ?? 400)
+      // zoomed in: a time window sampled as finely as the whole was, or (phase plane) more samples
+      const base = opts.samples ?? cfg.samples ?? 400
+      const w = opts.detail?.x
+      const { t, y } = w ? sol.sample(base, w[0], w[1]) : sol.sample(detailSamples(base, opts.detail))
       const series: Record<string, Series> = {}
       cfg.components.forEach((c, i) => {
         series[c.id] = { id: c.id, label: c.label, name: c.name, kind: 'continuous', x: t, y: y[i], role: roleAt(c, i) }

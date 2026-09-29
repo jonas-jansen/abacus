@@ -320,3 +320,47 @@ describe('fixedPoints noise', () => {
     expect(fps[1].slope).toBe(0)
   })
 })
+
+describe('axis labels with powers of ten', () => {
+  it('large and small numbers become mantissas with a common factor', () => {
+    const f = makeFrame({ width: 600, height: 400, x: [0, 0.0005], y: [0, 100_000] })
+    expect(f.yExp).toBe(5)
+    expect(f.yTickLabels.every((s) => s.length <= 4)).toBe(true)
+    expect(f.xExp).toBe(-4)
+    expect(f.xTickLabels.at(-1)).toBe('5')
+  })
+  it('ordinary ranges stay as they are', () => {
+    const f = makeFrame({ width: 600, height: 400, x: [0, 40], y: [0, 1] })
+    expect(f.xExp).toBe(0)
+    expect(f.yTickLabels).toContain('0,5')
+  })
+  it('the plot keeps its left edge when the labels change length', () => {
+    const a = makeFrame({ width: 600, height: 400, x: [0, 1], y: [0, 1] })
+    const b = makeFrame({ width: 600, height: 400, x: [0, 1], y: [0.545, 0.59] })
+    expect(b.plot.x).toBe(a.plot.x)
+  })
+})
+
+describe('detail when zoomed (RunOptions.detail)', () => {
+  it('closed forms sample only the visible window', () => {
+    const m = iteration({ id: 'd', params: { a: real('a', { min: 0, max: 1, step: 0.1, default: 0.5 }) }, start: () => 1, step: (x, p) => p.a * x, horizon: 3 })
+    expect(m.run(defaultParams(m), { detail: { x: [0, 1], zoom: 4 } }).series[0].y.length).toBe(4) // an orbit is never resampled
+  })
+  it('ODEs sample a time window as finely as the whole', () => {
+    const m = ode({
+      id: 'o',
+      params: { k: real('k', { min: 0, max: 1, step: 0.1, default: 1 }) },
+      components: [{ id: 'y', label: 'y' }],
+      start: () => [1],
+      rhs: (_t, y, p) => [-p.k * y[0]],
+      tEnd: 10,
+      samples: 100,
+    })
+    const s = m.run(defaultParams(m), { detail: { x: [2, 3], zoom: 10 } }).series[0]
+    expect(s.x[0]).toBeCloseTo(2, 12)
+    expect(s.x.at(-1)).toBeCloseTo(3, 12)
+    expect(s.x.length).toBe(100)
+    // a phase plane (no x window) gets more samples instead
+    expect(m.run(defaultParams(m), { detail: { zoom: 10 } }).series[0].x.length).toBe(1000)
+  })
+})

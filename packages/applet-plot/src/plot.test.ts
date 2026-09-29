@@ -46,3 +46,13 @@ describe('plots', () => {
     expect(svg).toContain('−1')
   })
 })
+
+describe('axis factor', () => {
+  it('scaled tick labels come with ·10^k beside the axis label', async () => {
+    const { makeFrame } = await import('@abacus/applet-core')
+    const { axesNode, svgToString } = await import('./index')
+    const svg = svgToString(axesNode(makeFrame({ width: 500, height: 300, x: [0, 80], y: [0, 100_000], yLabel: 'x' }), { y: 'x' }))
+    expect(svg).toContain('·')
+    expect(svg).not.toContain('cdot')
+  })
+})

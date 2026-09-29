@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { decimalsOf, explainChange, formatNumber, roundTo, updateParams, type Run, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { decimalsOf, explainChange, formatNumber, roundTo, updateParams, type Detail, type Run, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
 import { subscribe } from '@abacus/channel'
 import { accessibleName, NumberField, ParamControl } from './controls'
 import { handlesOf, type AppletDef, type PlotEntry } from './define'
@@ -45,6 +45,18 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
     return starts.map((s) => def.model.run(updateParams(def.model, params, { [bahnParam]: s }), opts))
   }, [bahnParam, starts, params, def])
   const MAX_BAHNEN = 12
+
+  // A zoomed figure asks for its window in more detail: the same run, sampled for that window.
+  const detail = useCallback(
+    (d: Detail) => {
+      try {
+        return def.model.run(params, { ...(def.runOptions?.(params) ?? {}), detail: d, observables: false })
+      } catch {
+        return null
+      }
+    },
+    [params, def],
+  )
 
   // Compare: a state held on to, drawn faintly behind the current one.
   const [vergleich, setVergleich] = useState<{ params: P; run: Run } | null>(null)
@@ -241,6 +253,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       bahnen={startParamOf(entry) ? bahnen : undefined}
                       onBahn={startParamOf(entry) ? (s) => setStarts((l) => [...l, s].slice(-MAX_BAHNEN)) : undefined}
                       onBahnenLoeschen={() => setStarts([])}
+                      onDetail={detail}
                     />
                     ),
                   )}

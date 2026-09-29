@@ -1,6 +1,6 @@
 /** Bottom SVG layer (§5.2): grid, axes, ticks, tick labels, axis labels. */
 
-import { TICK, type Frame } from '@abacus/applet-core'
+import { estimateTextWidth, TICK, type Frame } from '@abacus/applet-core'
 import { mathText } from './mathText'
 import type { SvgNode } from './svg'
 
@@ -51,6 +51,18 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
     // Horizontal at the top of the y axis: readable on phones, and the mathematical convention.
     nodes.push(mathText(labels.y, { x: plot.x, y: fontSize * 1.15, 'text-anchor': 'middle', class: 'abacus-axis-label' }))
   }
+  // the common power of ten of scaled tick labels: beside the y label, at the end of the x axis
+  const factor = (e: number) => `\\cdot 10^{${e}}`
+  if (frame.yExp) {
+    const w = estimateTextWidth(plainTex(labels.y ?? ''), fontSize * 1.15)
+    nodes.push(mathText(factor(frame.yExp), { x: plot.x + w / 2 + 6, y: fontSize * 1.15, 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
+  }
+  if (frame.xExp) {
+    nodes.push(mathText(factor(frame.xExp), { x: plot.x + plot.w, y: frame.height - 4, 'text-anchor': 'end', class: 'abacus-tick abacus-factor' }))
+  }
 
   return { tag: 'g', attrs: { 'font-size': fontSize }, children: nodes }
 }
+
+/** Rough plain-text version of a TeX-lite label, for width estimates. */
+const plainTex = (t: string) => t.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}_^]/g, '')

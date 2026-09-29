@@ -17,8 +17,9 @@ const model = iteration({
   start: (p) => p.x0,
   step: (x, p) => x + p.r * (1 - x / p.K) * x,
   horizon: (p) => p.N,
-  extraSeries: ({ p, map }) => {
-    const { x, y } = sample(map, 0, 1.5 * p.K, 241)
+  extraSeries: ({ p, map, detail }) => {
+    const [lo, hi] = detail?.x ?? [0, 1.5 * p.K]
+    const { x, y } = sample(map, lo, hi, 401)
     return [{ id: 'f', label: 'f(x) = x + r\\,(1 - x/K)\\,x', kind: 'continuous', x, y, role: 'primary' }]
   },
   observables: ({ p, x, map, tail }) => {
