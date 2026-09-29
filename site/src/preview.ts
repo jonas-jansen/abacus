@@ -16,7 +16,7 @@ export function previewSvg(def: AnyAppletDef, width = 360, height = 220): string
     children = grid ? sceneSvg(scene3d({ grid, width, height, view: DEFAULT_VIEW, fontSize: 11 })) : []
   } else {
     const d = plotDomains(spec, run)
-    const frame = makeFrame({ width, height, x: d.x, y: d.y, xInteger: d.xInteger })
+    const frame = makeFrame({ width, height, x: d.x, y: d.y, xInteger: d.xInteger, yLog: spec.yScale === 'log' })
     const s = new SvgPathSurface()
     drawPlot(s, frame, spec, run)
     children = [axesNode(frame), { tag: 'g', attrs: { transform: `translate(${frame.plot.x} ${frame.plot.y})` }, children: s.nodes }]

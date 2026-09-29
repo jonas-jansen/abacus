@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { clamp, formatNumber, makeFrame, type Frame, type Mark, type Params, type Point, type Run } from '@abacus/applet-core'
+import { clamp, formatNumber, makeFrame, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
 import {
   axesNode,
   CanvasSurface,
@@ -20,6 +20,7 @@ import {
 } from '@abacus/applet-plot'
 import { handlesOf, type DragHandle, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
+import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
 
 /** Width assumed for the server render; the client re-lays out after measuring. */
@@ -46,6 +47,11 @@ interface FigureProps<P extends Params> {
   hotParam?: string | null
   /** The parameter whose handle is hovered or dragged (null when none). */
   onHandle?: (param: string | null) => void
+  /** Two figures side by side: same height, so their axes line up. */
+  pair?: boolean
+  /** Legend: switch a series off/on everywhere, or point at it. */
+  onToggleSeries?: (id: string) => void
+  onFocusSeries?: (id: string | null) => void
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -59,7 +65,22 @@ function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
  * coordinates and clipping at the axes is free. Marks and the probe live in the top layer,
  * so pointing at things never redraws the data.
  */
-export function Figure<P extends Params>({ entry, params, run, view, onParams, marks, probe = null, onProbe, texOf, hotParam, onHandle }: FigureProps<P>) {
+export function Figure<P extends Params>({
+  entry,
+  params,
+  run,
+  view,
+  onParams,
+  marks,
+  probe = null,
+  onProbe,
+  texOf,
+  hotParam,
+  onHandle,
+  pair,
+  onToggleSeries,
+  onFocusSeries,
+}: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(SSR_WIDTH)
@@ -77,10 +98,12 @@ export function Figure<P extends Params>({ entry, params, run, view, onParams, m
     return () => ro.disconnect()
   }, [])
 
-  const spec = useMemo(() => resolveSpec(entry, params), [entry, params])
+  const [logY, setLogY] = useState(entry.yScale === 'log')
+  const spec = useMemo(() => ({ ...resolveSpec(entry, params), yScale: logY ? 'log' : 'linear' }) as PlotSpec, [entry, params, logY])
   const square = isSquare(spec)
   const figW = square ? Math.min(width, MAX_SQUARE) : width
-  const aspect = spec.aspect ?? (square ? 1 : width < 640 ? 4 / 3 : 16 / 10)
+  // side by side, every figure is as high as it is wide, so both x axes sit at one height
+  const aspect = spec.aspect ?? (square || pair ? 1 : width < 640 ? 4 / 3 : 16 / 10)
   const figH = Math.min(square ? MAX_SQUARE : MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(figW / aspect)))
 
   // While a handle is dragged the axes hold still: an axis that rescales under the pointer
@@ -90,7 +113,7 @@ export function Figure<P extends Params>({ entry, params, run, view, onParams, m
   const frame = useMemo(() => {
     const d = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
     if (!dragging) frozen.current = d
-    return makeFrame({ width: figW, height: figH, x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel })
+    return makeFrame({ width: figW, height: figH, x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' })
   }, [spec, run, figW, figH, dragging])
 
   // Canvas data layer, redrawn on the next animation frame.
@@ -170,6 +193,14 @@ export function Figure<P extends Params>({ entry, params, run, view, onParams, m
 
   return (
     <figure className="ab-figure" ref={outer} data-spot={markGeom.length > 0 || undefined}>
+      <FigureHead
+        title={spec.title}
+        legend={legend}
+        hidden={view.hidden}
+        onToggle={onToggleSeries}
+        onFocus={onFocusSeries}
+        log={entry.logToggle ? { on: logY, set: setLogY, hilfe: entry.logHilfe } : undefined}
+      />
       <div
         className="ab-figure-inner"
         style={{ width: figW, height: figH }}
@@ -223,33 +254,6 @@ export function Figure<P extends Params>({ entry, params, run, view, onParams, m
           </div>
         )}
       </div>
-      {(spec.title || legend.length > 1) && (
-        <figcaption>
-          {spec.title && <span>{spec.title}</span>}
-          {legend.length > 1 &&
-            legend.map((s) => (
-              <span key={s.id} className="ab-legend-item">
-                <svg width="22" height="8" aria-hidden="true">
-                  {s.kind === 'discrete' && s.connect === false ? (
-                    <circle cx="11" cy="4" r="3.5" fill={`var(--abacus-${s.role})`} />
-                  ) : (
-                  <line
-                    x1="1"
-                    y1="4"
-                    x2="21"
-                    y2="4"
-                    stroke={`var(--abacus-${s.role})`}
-                    strokeWidth={roleStyles[s.role].width}
-                    strokeDasharray={roleStyles[s.role].dash.join(' ') || undefined}
-                    strokeLinecap="round"
-                  />
-                  )}
-                </svg>
-                <TeX tex={s.label} />
-              </span>
-            ))}
-        </figcaption>
-      )}
     </figure>
   )
 }
@@ -346,6 +350,118 @@ function Handle({
         />
       )}
     </g>
+  )
+}
+
+const LOG_HILFE =
+  'Auf einer logarithmischen Achse bedeuten gleiche Abstände gleiche Faktoren: von 1 bis 0,1 ist es so weit wie von 0,1 bis 0,01. So sind sehr große und sehr kleine Werte zugleich zu sehen. Eine Gerade heißt: der Wert ändert sich in jedem Schritt um denselben Faktor. Null und negative Werte haben auf dieser Achse keinen Platz.'
+
+/**
+ * The row above a plot: title, legend and axis switch. Every figure has it, so figures side
+ * by side keep their plots at the same height. Legend entries are buttons: pointing at one
+ * lets the others step back, a click switches the series off (and on) in every plot.
+ */
+function FigureHead({
+  title,
+  legend,
+  hidden,
+  onToggle,
+  onFocus,
+  log,
+}: {
+  title?: string
+  legend: Series[]
+  hidden?: ReadonlySet<string>
+  onToggle?: (id: string) => void
+  onFocus?: (id: string | null) => void
+  log?: { on: boolean; set: (on: boolean) => void; hilfe?: string }
+}) {
+  const [help, setHelp] = useState(false)
+  const helpRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!help) return
+    const close = (e: PointerEvent) => {
+      if (!helpRef.current?.contains(e.target as Node)) setHelp(false)
+    }
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setHelp(false)
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', esc)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', esc)
+    }
+  }, [help])
+
+  return (
+    <div className="ab-fighead">
+      {title && <span className="ab-figtitle">{title}</span>}
+      {legend.length > 1 && (
+        <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
+          {legend.map((s) => {
+            const off = hidden?.has(s.id) ?? false
+            return (
+              <button
+                key={s.id}
+                type="button"
+                className="ab-legend-item"
+                aria-pressed={!off}
+                title={off ? 'wieder zeigen' : 'ausblenden'}
+                onClick={() => onToggle?.(s.id)}
+                onPointerEnter={() => !off && onFocus?.(s.id)}
+                onFocus={() => !off && onFocus?.(s.id)}
+                onBlur={() => onFocus?.(null)}
+              >
+                <svg width="22" height="10" aria-hidden="true">
+                  {s.fill ? (
+                    <rect x="4" y="0.5" width="14" height="9" rx="2" fill={`var(--abacus-${s.role})`} fillOpacity="0.25" stroke={`var(--abacus-${s.role})`} />
+                  ) : s.kind === 'discrete' && s.connect === false ? (
+                    <circle cx="11" cy="5" r="3.5" fill={`var(--abacus-${s.role})`} />
+                  ) : (
+                    <line
+                      x1="1"
+                      y1="5"
+                      x2="21"
+                      y2="5"
+                      stroke={`var(--abacus-${s.role})`}
+                      strokeWidth={roleStyles[s.role].width + 0.5}
+                      strokeDasharray={roleStyles[s.role].dash.join(' ') || undefined}
+                      strokeLinecap="round"
+                    />
+                  )}
+                </svg>
+                <TeX tex={s.label} />
+              </button>
+            )
+          })}
+        </div>
+      )}
+      {log && (
+        <div className="ab-axis-switch" ref={helpRef}>
+          <div className="ab-seg" role="group" aria-label="y-Achse">
+            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} title="lineare Achse">
+              linear
+            </button>
+            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} title="logarithmische Achse">
+              log
+            </button>
+          </div>
+          <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
+            ?
+          </button>
+          {help && (
+            <div className="ab-help" role="note">
+              <strong>Logarithmische Achse</strong>
+              <p>{LOG_HILFE}</p>
+              {log.hilfe && (
+                <p>
+                  <MathLabel text={log.hilfe} />
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 

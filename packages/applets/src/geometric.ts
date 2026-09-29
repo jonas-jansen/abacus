@@ -32,6 +32,8 @@ export default defineApplet({
   id: 'geometric',
   titel: 'Geometrische Folge',
   kurz: 'Jeder Wert ist das a-fache des vorigen.',
+  kapitel: 'I',
+  folien: '24–25, 30–31',
   model,
   horizont: 'N',
   formeln: [
@@ -44,6 +46,8 @@ export default defineApplet({
       type: 'timeSeriesDiscrete',
       xLabel: 'n',
       yLabel: 'x_n',
+      logToggle: true,
+      logHilfe: 'Eine geometrische Folge $x_n = a^n x_0$ ist auf dieser Achse eine Gerade: jeder Schritt multipliziert mit $a$. Negative Werte (bei $a < 0$) fehlen.',
       drag: [
         { param: 'x0', axis: 'y' },
         // x₁ = a·x₀: dragging the second point sets the factor

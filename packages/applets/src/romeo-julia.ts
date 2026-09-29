@@ -53,6 +53,8 @@ export default defineApplet({
   id: 'romeo-julia',
   titel: 'Romeo und Julia',
   kurz: 'Zwei Gefühle, die aufeinander reagieren – ein lineares System als Liebesgeschichte.',
+  kapitel: 'IV',
+  folien: '11–21',
   model,
   horizont: 'T',
   formeln: [

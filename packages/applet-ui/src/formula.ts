@@ -5,9 +5,10 @@
  *   'x_{n+1} = x_n {{+b}}'             → "+ b"; with numbers "+ 1" or "− 1": the sign joins the operator
  *   'x_n = {{(a)}}^n\\,{{x0}}'         → parentheses around a negative value, e.g. (−0,5)^n
  *   'x_0 = {{#x0}}'                    → always the value: a start value, where "x₀ = x₀" would say nothing
- *   'y(0) = {{#start}}'                → a point as (y₁; y₂); {{start.0}} is its first coordinate
+ *   'y(0) = {{#start}}'                → a point as a column vector, each entry its own chip; {{start.0}} is one entry
  *   '{{a}}{{*}}x'                      → a product: a x with symbols, 0,8 · x with numbers
  *   '{{stoerung}}'                     → a switch or choice shows its state ("an"); a click changes it
+ *   '{{#z.0}} {{#+z.1}}\\,i'           → modifiers combine: 3 − 2 i, each part draggable
  *
  * Several equations in one formula are separated by `\\`. Each line is split at its first
  * relation (=, ≤, ∼, …), so all lines of all formulas can be aligned at it.
@@ -27,7 +28,7 @@ export interface Formel {
 
 export type FormulaMode = 'symbole' | 'zahlen'
 
-const PLACEHOLDER = /\{\{\s*([+(#]?)\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.([01]))?\s*\)?\s*\}\}/g
+const PLACEHOLDER = /\{\{\s*([+(#]*)\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.([01]))?\s*\)?\s*\}\}/g
 
 /** A number as TeX, German style: 0{,}8 · −1{,}25 · 1{,}2 \cdot 10^{-6}. */
 export function texNumber(v: number, digits = 4): string {
@@ -46,7 +47,7 @@ export function texNumber(v: number, digits = 4): string {
   return (v < 0 ? '-' : '') + grouped + (frac ? `{,}${frac}` : '')
 }
 
-const chip = (id: string, body: string) => `\\htmlData{param=${id}}{${body}}`
+const chip = (id: string, body: string, idx?: number) => `\\htmlData{param=${id}${idx === undefined ? '' : `, idx=${idx}`}}{${body}}`
 
 /** Expands the placeholders of a template for one display mode. Unknown ids are left as they are. */
 export function expandFormula(tex: string, specs: readonly ParamSpec[], params: Params, mode: FormulaMode): string {
@@ -58,21 +59,24 @@ export function expandFormula(tex: string, specs: readonly ParamSpec[], params: 
     if (spec.kind === 'bool') return chip(id, `\\text{${params[id] ? spec.labelOn : spec.labelOff}}`)
     if (spec.kind === 'choice') return chip(id, `\\text{${spec.options.find((o) => o.value === params[id])?.label ?? String(params[id])}}`)
     const symbol = 'latex' in spec && spec.latex ? spec.latex : `\\text{${spec.label}}`
-    if (mode === 'symbole' && mod !== '#') {
-      const sym = index === undefined ? symbol : `${symbol}_{${Number(index) + 1}}`
-      return mod === '+' ? `+ ${chip(id, sym)}` : chip(id, sym)
+    const idx = index === undefined ? undefined : Number(index)
+    const signed = mod.includes('+')
+    if (mode === 'symbole' && !mod.includes('#')) {
+      const sym = idx === undefined ? symbol : `${symbol}_{${idx + 1}}`
+      return signed ? `+ ${chip(id, sym, idx)}` : chip(id, sym, idx)
     }
     const value: ParamValue = params[id]
-    let v: number | null = null
+    let v: number
     if (typeof value === 'number') v = value
     else if (Array.isArray(value)) {
-      if (index !== undefined) v = value[Number(index)]
-      else return chip(id, `(${texNumber(value[0], 3)};\\,${texNumber(value[1], 3)})`)
+      // a point is a column vector; each entry is dragged on its own
+      if (idx === undefined) return `\\begin{pmatrix} ${chip(id, texNumber(value[0], 3), 0)} \\\\ ${chip(id, texNumber(value[1], 3), 1)} \\end{pmatrix}`
+      v = value[idx]
     } else return chip(id, `\\text{${String(value)}}`)
-    if (v === null) return whole
-    if (mod === '+') return v < 0 ? `- ${chip(id, texNumber(-v))}` : `+ ${chip(id, texNumber(v))}`
-    if (mod === '(' && v < 0) return chip(id, `\\left(${texNumber(v)}\\right)`)
-    return chip(id, texNumber(v))
+    const digits = idx === undefined ? 4 : 3
+    if (signed) return v < 0 ? `- ${chip(id, texNumber(-v, digits), idx)}` : `+ ${chip(id, texNumber(v, digits), idx)}`
+    if (mod.includes('(') && v < 0) return chip(id, `\\left(${texNumber(v, digits)}\\right)`, idx)
+    return chip(id, texNumber(v, digits), idx)
   })
 }
 

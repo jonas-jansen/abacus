@@ -17,6 +17,14 @@ interface PlotCommon {
   /** width / height. Default 4:3 narrow, 16:10 wide; phase planes and cobwebs 1:1. */
   aspect?: number
   legend?: boolean
+  /** Scale of the y axis at first. Default linear. */
+  yScale?: 'linear' | 'log'
+  /** Offer a switch between linear and logarithmic y axis (with an explanation). */
+  logToggle?: boolean
+  /** Why a log scale helps in this plot, added to the general explanation. */
+  logHilfe?: string
+  /** y range on the log scale (default: from the data). */
+  yLogRange?: Range
 }
 
 export type PlotSpec =
@@ -31,8 +39,11 @@ export type PlotSpec =
   | (PlotCommon & { type: 'cobweb'; f: string; orbit: string })
   | (PlotCommon & {
       type: 'phasePlane'
-      xSeries: string
-      ySeries: string
+      /** The trajectory; without it only the field and overlays are drawn (vectors, lines). */
+      xSeries?: string
+      ySeries?: string
+      /** Mark the start of the trajectory (default true). */
+      start?: boolean
       /** Direction field of the ODE behind the trajectory (needs `run.field`). */
       field?: boolean
       /** Further series drawn as they are, in plane coordinates (x against y), e.g. vectors. */
@@ -50,12 +61,20 @@ export interface PlotView {
   steps?: number
   /** Visible time for continuous models (timeline); undefined = all. */
   time?: number
+  /** Series switched off in the legend. */
+  hidden?: ReadonlySet<string>
+  /** Series pointed at in the legend: the others step back. */
+  focus?: string | null
 }
+
+/** The series a plot shows: those it selects, minus the ones switched off. */
+export const shown = (run: Run, ids: readonly string[] | undefined, view: PlotView) =>
+  selected(run, ids).filter((s) => !view.hidden?.has(s.id))
 
 export const isSquare = (spec: PlotSpec) => spec.type === 'phasePlane' || spec.type === 'cobweb' || spec.type === 'surface3d'
 
-export function seriesById(run: Run, id: string): Series | undefined {
-  return run.series.find((s) => s.id === id)
+export function seriesById(run: Run, id: string | undefined): Series | undefined {
+  return id === undefined ? undefined : run.series.find((s) => s.id === id)
 }
 
 export function selected(run: Run, ids: readonly string[] | undefined, kind?: Series['kind']): Series[] {
@@ -75,6 +94,23 @@ export interface Domains {
  */
 export function plotDomains(spec: PlotSpec, run: Run): Domains {
   const pick = (d: Domain | undefined, auto: () => Range): Range => (d && d !== 'auto' ? d : auto())
+  if (spec.yScale === 'log' && (spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous' || spec.type === 'functionGraph' || spec.type === 'scatter')) {
+    // on a log axis only positive values have a place; the range comes from them
+    const lin = plotDomains({ ...spec, yScale: 'linear' }, run)
+    let lo = Infinity
+    let hi = -Infinity
+    for (const s of selected(run, spec.series)) {
+      for (let i = 0; i < s.y.length; i++) {
+        const v = s.y[i]
+        if (v > 0 && Number.isFinite(v)) {
+          if (v < lo) lo = v
+          if (v > hi) hi = v
+        }
+      }
+    }
+    const auto: Range = lo <= hi ? [lo / 2, hi * 2] : [0.1, 10]
+    return { ...lin, y: spec.yLogRange ?? auto }
+  }
   switch (spec.type) {
     case 'surface3d':
       return { x: [0, 1], y: [0, 1], xInteger: false }
@@ -152,6 +188,64 @@ function head(s: Surface, frame: Frame, x: number, y: number, role: Series['role
   s.dot(X, Y, 5)
   s.end()
 }
+
+/** The runs of a series between NaN gaps, as [start, end) index pairs. */
+function runs(xs: ArrayLike<number>, ys: ArrayLike<number>, count: number): [number, number][] {
+  const out: [number, number][] = []
+  let start = -1
+  for (let i = 0; i <= count; i++) {
+    const ok = i < count && Number.isFinite(xs[i]) && Number.isFinite(ys[i])
+    if (ok && start < 0) start = i
+    if (!ok && start >= 0) {
+      out.push([start, i])
+      start = -1
+    }
+  }
+  return out
+}
+
+/**
+ * A continuous series as a line; with `fill` its pieces are also filled (translucent), with
+ * `arrow` each piece ends in an arrowhead.
+ */
+function drawLine(s: Surface, frame: Frame, series: Series, count = series.x.length) {
+  const { x, y } = series
+  if (series.fill) {
+    s.begin({ role: series.role, alpha: 0.16 })
+    for (const [a, b] of runs(x, y, count)) {
+      const pts = new Float64Array(2 * (b - a))
+      for (let i = a; i < b; i++) {
+        pts[2 * (i - a)] = frame.xScale(x[i])
+        pts[2 * (i - a) + 1] = frame.yScale(y[i])
+      }
+      s.polygon(pts)
+    }
+    s.end()
+  }
+  s.begin({ role: series.role, ...(series.fill || series.arrow ? { dash: [], width: series.fill ? 1.25 : 2 } : {}) })
+  polyline(s, frame, x, y, count)
+  s.end()
+  if (series.arrow) {
+    s.begin({ role: series.role })
+    for (const [a, b] of runs(x, y, count)) {
+      if (b - a < 2) continue
+      const X1 = frame.xScale(x[b - 1])
+      const Y1 = frame.yScale(y[b - 1])
+      const dx = X1 - frame.xScale(x[b - 2])
+      const dy = Y1 - frame.yScale(y[b - 2])
+      const m = Math.hypot(dx, dy)
+      if (m < 1e-9) continue
+      const [ux, uy] = [dx / m, dy / m]
+      const L = Math.min(11, m * 0.6)
+      const W = L * 0.5
+      s.polygon(Float64Array.of(X1, Y1, X1 - ux * L - uy * W, Y1 - uy * L + ux * W, X1 - ux * L + uy * W, Y1 - uy * L - ux * W))
+    }
+    s.end()
+  }
+}
+
+/** Opacity factor for a series while another one is pointed at in the legend. */
+const dim = (series: Series, view: PlotView) => (view.focus && view.focus !== series.id ? 0.15 : 1)
 
 const timed = (view: PlotView) => view.time !== undefined || view.steps !== undefined
 
@@ -295,18 +389,17 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         if (series.kind === 'discrete') drawCloud(s, frame, series)
       }
       for (const series of selected(run, spec.series)) {
-        if (series.kind !== 'continuous') continue
-        s.begin({ role: series.role })
-        polyline(s, frame, series.x, series.y)
-        s.end()
+        if (series.kind === 'continuous') drawLine(s, frame, series)
       }
       return
     case 'timeSeriesDiscrete':
-      for (const series of selected(run, spec.series)) {
+      for (const series of shown(run, spec.series, view)) {
+        s.fade(dim(series, view))
         const count = visible(series, view)
         drawDiscrete(s, frame, series, count, spec.connect ?? series.connect ?? true)
         if (timed(view) && series.kind === 'discrete' && count <= frame.plot.w) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
+      s.fade(1)
       return
     case 'timeSeriesContinuous':
     case 'functionGraph':
@@ -315,7 +408,8 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         const f = run.slope
         drawField(s, frame, (t, x) => [1, f(t, x)], false)
       }
-      for (const series of selected(run, spec.series)) {
+      for (const series of shown(run, spec.series, view)) {
+        s.fade(dim(series, view))
         if (series.kind === 'discrete') {
           drawDiscrete(s, frame, series, visible(series, view), series.connect ?? true, series.role !== 'data')
           continue
@@ -323,11 +417,10 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         // reference lines and the faint family stay whole; the solution itself runs with the timeline
         const cut = spec.type === 'timeSeriesContinuous' && series.role !== 'reference' && series.role !== 'ghost'
         const count = cut ? visible(series, view) : series.x.length
-        s.begin({ role: series.role })
-        polyline(s, frame, series.x, series.y, count)
-        s.end()
+        drawLine(s, frame, series, count)
         if (cut && view.time !== undefined) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
+      s.fade(1)
       return
     case 'cobweb': {
       const f = seriesById(run, spec.f)
@@ -369,11 +462,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
     }
     case 'phasePlane': {
       if (spec.field && run.field) drawField(s, frame, run.field)
-      for (const o of selected(run, spec.overlay ?? [])) {
-        s.begin({ role: o.role })
-        polyline(s, frame, o.x, o.y)
-        s.end()
-      }
+      for (const o of selected(run, spec.overlay ?? [])) drawLine(s, frame, o)
       const sx = seriesById(run, spec.xSeries)
       const sy = seriesById(run, spec.ySeries)
       if (!sx || !sy) return
@@ -386,9 +475,11 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         polyline(s, frame, sx.y, sy.y, count)
         s.end()
       }
-      s.begin({ role: 'secondary', marker: 'square' })
-      s.dot(frame.xScale(sx.y[0]), frame.yScale(sy.y[0]), 4)
-      s.end()
+      if (spec.start !== false) {
+        s.begin({ role: 'secondary', marker: 'square' })
+        s.dot(frame.xScale(sx.y[0]), frame.yScale(sy.y[0]), 4)
+        s.end()
+      }
       if (timed(view)) head(s, frame, sx.y[count - 1], sy.y[count - 1], 'primary')
       return
     }

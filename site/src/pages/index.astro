@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import { applets } from '@abacus/applets'
+import { kapitel } from '@abacus/applets'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
 import { previewSvg } from '../preview'
@@ -13,19 +13,30 @@ const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.d
   <h1>{kurs.titel}</h1>
 
   <h2 class="section-title">Applets</h2>
-  <div class="gallery">
-    {
-      Object.values(applets).map((a) => (
-        <a class="card" href={url(`/applet/${a.id}`)}>
-          <div class="card-preview" set:html={previewSvg(a)} />
-          <div class="card-body">
-            <strong>{a.titel}</strong>
-            <span>{a.kurz}</span>
-          </div>
-        </a>
-      ))
-    }
-  </div>
+  <nav class="chapter-nav" aria-label="Kapitel">
+    {kapitel().map((k) => <a href={`#kapitel-${k.id}`}>{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</a>)}
+  </nav>
+  {
+    kapitel().map((k) => (
+      <section class="chapter" id={`kapitel-${k.id}`}>
+        <h3 class="chapter-title">
+          <span class="chapter-no">{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</span>
+          {k.titel}
+        </h3>
+        <div class="gallery">
+          {k.applets.map((a) => (
+            <a class="card" href={url(`/applet/${a.id}`)}>
+              <div class="card-preview" set:html={previewSvg(a)} />
+              <div class="card-body">
+                <strong>{a.titel}</strong>
+                <span>{a.kurz}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))
+  }
 
   <h2 class="section-title" id="kurs">Kurs</h2>
   <ol class="course-list">

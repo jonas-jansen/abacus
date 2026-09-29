@@ -74,6 +74,8 @@ export default defineApplet({
   id: 'logistic-bifurcation',
   titel: 'Verzweigungsdiagramm der logistischen Abbildung',
   kurz: 'Von der Ruhe über Zyklen der Länge 2, 4, 8 … ins Chaos.',
+  kapitel: 'I',
+  folien: '37–40',
   model,
   horizont: 'N',
   formeln: [

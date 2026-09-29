@@ -28,6 +28,8 @@ export interface Frame {
   xDomain: Range
   yDomain: Range
   fontSize: number
+  /** The y axis is logarithmic. */
+  yLog?: boolean
 }
 
 export interface FrameInput {
@@ -40,6 +42,8 @@ export interface FrameInput {
   yInteger?: boolean
   xLabel?: string
   yLabel?: string
+  /** Logarithmic y axis: equal distances are equal factors. The domain must be positive. */
+  yLog?: boolean
 }
 
 export const TICK = 4
@@ -77,10 +81,11 @@ export function makeFrame(input: FrameInput): Frame {
   const { width, height } = input
   const fontSize = fontSizeFor(width)
   const xDomain = safeRange(input.x)
-  const yDomain = safeRange(input.y)
+  const log = !!input.yLog
+  const yDomain = log ? positiveRange(input.y) : safeRange(input.y)
 
-  const yT = niceTicks(yDomain[0], yDomain[1], Math.max(2, Math.floor(height / PX_PER_Y_TICK)), input.yInteger)
-  const yTickLabels = yT.ticks.map((v) => formatFixed(v, decimalsOf(yT.step)))
+  const yT = log ? logTicks(yDomain, Math.max(2, Math.floor(height / PX_PER_Y_TICK))) : niceTicks(yDomain[0], yDomain[1], Math.max(2, Math.floor(height / PX_PER_Y_TICK)), input.yInteger)
+  const yTickLabels = log ? yT.ticks.map(powerLabel) : yT.ticks.map((v) => formatFixed(v, decimalsOf(yT.step)))
   const yLabelWidth = Math.max(0, ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
 
   const left = Math.ceil(yLabelWidth + TICK + 6 + 4)
@@ -99,7 +104,10 @@ export function makeFrame(input: FrameInput): Frame {
     h: Math.max(1, height - top - bottom),
   }
   const [x0, x1] = xDomain
-  const [y0, y1] = yDomain
+  // on a log axis, positions are linear in log₁₀ of the value
+  const ty = log ? Math.log10 : (v: number) => v
+  const tyInv = log ? (u: number) => 10 ** u : (u: number) => u
+  const [y0, y1] = [ty(yDomain[0]), ty(yDomain[1])]
   const sx = plot.w / (x1 - x0)
   const sy = plot.h / (y1 - y0)
 
@@ -109,9 +117,9 @@ export function makeFrame(input: FrameInput): Frame {
     margin: { top, right, bottom, left },
     plot,
     xScale: (v) => (v - x0) * sx,
-    yScale: (v) => plot.h - (v - y0) * sy,
+    yScale: (v) => plot.h - (ty(v) - y0) * sy,
     xInvert: (px) => x0 + px / sx,
-    yInvert: (px) => y0 + (plot.h - px) / sy,
+    yInvert: (px) => tyInv(y0 + (plot.h - px) / sy),
     xTicks: xT.ticks,
     yTicks: yT.ticks,
     xTickLabels,
@@ -119,7 +127,33 @@ export function makeFrame(input: FrameInput): Frame {
     xDomain,
     yDomain,
     fontSize,
+    yLog: log,
   }
+}
+
+function positiveRange([a, b]: Range): Range {
+  const hi = Number.isFinite(b) && b > 0 ? b : 1
+  const lo = Number.isFinite(a) && a > 0 && a < hi ? a : hi / 1000
+  return [lo, hi]
+}
+
+const SUP: Record<string, string> = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' }
+
+/** 1, 10, 100 as numbers; everything else as a power: 10⁻³. */
+function powerLabel(v: number): string {
+  const k = Math.round(Math.log10(v))
+  if (k >= 0 && k <= 3) return String(10 ** k)
+  return '10' + [...String(k)].map((c) => SUP[c] ?? c).join('')
+}
+
+/** Powers of ten in the domain, every k-th one if there are too many. */
+function logTicks([lo, hi]: Range, maxCount: number): { ticks: number[]; step: number } {
+  const a = Math.ceil(Math.log10(lo) - 1e-9)
+  const b = Math.floor(Math.log10(hi) + 1e-9)
+  const every = Math.max(1, Math.ceil((b - a + 1) / maxCount))
+  const ticks: number[] = []
+  for (let k = b; k >= a; k -= every) ticks.unshift(10 ** k)
+  return { ticks, step: every }
 }
 
 /** A padded data range for auto-scaling; `null` input gives [0, 1]. */

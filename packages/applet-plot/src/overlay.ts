@@ -5,7 +5,7 @@
  */
 
 import { formatNumber, type Frame, type Mark, type MarkSpace, type Run, type Series } from '@abacus/applet-core'
-import { seriesById, selected, visible, type PlotSpec, type PlotView } from './plots'
+import { seriesById, shown, visible, type PlotSpec, type PlotView } from './plots'
 import type { SvgNode } from './svg'
 
 export function markSpace(spec: PlotSpec): MarkSpace {
@@ -169,7 +169,7 @@ export function probeNodes(frame: Frame, spec: PlotSpec, run: Run, view: PlotVie
     case 'timeSeriesDiscrete':
     case 'timeSeriesContinuous':
     case 'functionGraph': {
-      const series = selected(run, spec.series)
+      const series = shown(run, spec.series, view)
       const discrete = series.length > 0 && series.every((s) => s.kind === 'discrete')
       let at = t
       if (discrete) {

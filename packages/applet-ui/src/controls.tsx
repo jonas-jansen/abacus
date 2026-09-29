@@ -24,6 +24,7 @@ import {
   type PointParam,
   type RealParam,
 } from '@abacus/applet-core'
+import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
 
 type Range = readonly [number, number]
@@ -49,6 +50,7 @@ export function NumberField({
   label,
   className = 'ab-val',
   scrubStep,
+  scrubMin,
 }: {
   value: number
   onCommit: (v: number) => void
@@ -57,6 +59,8 @@ export function NumberField({
   className?: string
   /** Allow changing the value by dragging it (mouse only; touch taps to type). */
   scrubStep?: number
+  /** Dragging stops here (typing may still go further, within the parameter's hard limits). */
+  scrubMin?: number
 }) {
   const [text, setText] = useState(showInput(value))
   const [editing, setEditing] = useState(false)
@@ -100,7 +104,8 @@ export function NumberField({
         if (!d.moved) setScrubbing(true)
         d.moved = true
         const k = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
-        onCommit(d.v + Math.round(dx / SCRUB_PX) * d.step * k)
+        const next = d.v + Math.round(dx / SCRUB_PX) * d.step * k
+        onCommit(scrubMin === undefined ? next : Math.max(scrubMin, next))
       }}
       onPointerUp={(e) => {
         const d = drag.current
@@ -343,7 +348,7 @@ export function Choice({ spec, value, onChange }: { spec: ChoiceParam; value: st
         {spec.options.map((o) => (
           <label key={o.value} data-active={o.value === value || undefined}>
             <input type="radio" name={name} value={o.value} checked={o.value === value} onChange={() => onChange(o.value)} />
-            {o.label}
+            <MathLabel text={o.label} />
           </label>
         ))}
       </div>

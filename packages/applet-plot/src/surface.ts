@@ -27,6 +27,8 @@ export interface Surface {
   /** Filled polygon; pts = [x0, y0, x1, y1, …]. */
   polygon(pts: Float64Array): void
   end(): void
+  /** Multiplies the opacity of everything drawn from now on (1 = normal). */
+  fade(factor: number): void
 }
 
 type Resolved = Required<StrokeStyle>
@@ -88,6 +90,7 @@ function markerPath(sink: PathSink, marker: Marker, x: number, y: number, r: num
 
 export class CanvasSurface implements Surface {
   private style: Resolved = resolveStyle({ role: 'primary' })
+  private factor = 1
   private dots: number[] = []
   private polys: Float64Array[] = []
 
@@ -96,6 +99,9 @@ export class CanvasSurface implements Surface {
     private readonly color: (role: SeriesRole) => string,
   ) {}
 
+  fade(factor: number) {
+    this.factor = factor
+  }
   begin(style: StrokeStyle) {
     this.style = resolveStyle(style)
     this.dots = []
@@ -118,7 +124,7 @@ export class CanvasSurface implements Surface {
     const { ctx, style } = this
     const col = this.color(style.role)
     ctx.save()
-    ctx.globalAlpha = style.alpha
+    ctx.globalAlpha = style.alpha * this.factor
     ctx.strokeStyle = col
     ctx.fillStyle = col
     ctx.lineWidth = style.width
@@ -160,6 +166,10 @@ const r1 = (v: number) => Math.round(c(v) * 10) / 10
 export class SvgPathSurface implements Surface {
   readonly nodes: SvgNode[] = []
   private style: Resolved = resolveStyle({ role: 'primary' })
+  private factor = 1
+  fade(factor: number) {
+    this.factor = factor
+  }
   private d: string[] = []
   private fillD: string[] = []
 
@@ -197,7 +207,7 @@ export class SvgPathSurface implements Surface {
   end() {
     const { style } = this
     const color = `var(${colorVar(style.role)})`
-    const opacity = style.alpha === 1 ? undefined : style.alpha
+    const opacity = style.alpha * this.factor === 1 ? undefined : style.alpha * this.factor
     if (this.d.length) {
       this.nodes.push({
         tag: 'path',

@@ -63,11 +63,18 @@ Axes hold still while dragging, values snap to the slider's precision, and the h
 its slider row light each other up. Iterations and ODEs get a timeline (play, scrub);
 closed forms that describe a motion in time opt in with `zeitleiste: true`.
 
+Every applet names its chapter of the slides (`kapitel: 'I' | 'II' | 'III' | 'IV' | 'Anhang'`,
+`folien: '22–27'`); the gallery and all lists are sorted by it. Plots can offer a lin/log switch
+with an explanation (`logToggle: true`, `logHilfe: '…'`); series can be filled areas
+(`fill`) or vectors (`arrow`). Legends switch series off and highlight them.
+
 Every applet states its model above the plots, as formulas with live parameters:
 `formeln: [{ label: 'Vorschrift', tex: String.raw\`x_{n+1} = {{a}}{{*}}x_n\` }]`.
 `{{a}}` is the parameter (symbol or current value, draggable, linked to slider and handle),
-`{{+b}}` a signed term, `{{(a)}}` parenthesised when negative, `{{*}}` a product sign that
-only appears between numbers. A test renders every applet's formulas in both modes.
+`{{+b}}` a signed term, `{{(a)}}` parenthesised when negative, `{{#x0}}` always the value (start
+values; points become column vectors with draggable entries), `{{*}}` a product sign that only
+appears between numbers. Each formula is a column (model | start | solution); lines align at
+their relation. The step count or time window (`horizont`) lives in the timeline instead. A test renders every applet's formulas in both modes.
 
 Observables can point into the plots: give them `marks` and the readout highlights that
 geometry on hover or click. Labels take `$math$`.

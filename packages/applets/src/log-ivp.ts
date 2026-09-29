@@ -44,6 +44,8 @@ export default defineApplet({
   id: 'log-ivp',
   titel: 'Logistisches Wachstum',
   kurz: 'Wachstum, das an eine Kapazitätsgrenze stößt.',
+  kapitel: 'III',
+  folien: '35–41, 54–60',
   model,
   horizont: 'T',
   formeln: [

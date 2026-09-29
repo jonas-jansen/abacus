@@ -55,11 +55,27 @@ export interface LayoutHint<P = Params> {
   sichtbar?: Readonly<Record<string, (p: P) => boolean>>
 }
 
+/** The chapters of the lecture slides ("Mathematik für Biowissenschaften"). */
+export const KAPITEL = {
+  I: 'Diskrete dynamische Systeme mit einer Variablen',
+  II: 'Diskrete dynamische Systeme mit mehreren Variablen',
+  III: 'Kontinuierliche dynamische Systeme mit einer Variablen',
+  IV: 'Kontinuierliche dynamische Systeme mit mehreren Variablen',
+  Anhang: 'Mathematische Grundlagen',
+} as const
+
+export type Kapitel = keyof typeof KAPITEL
+export const KAPITEL_ORDER: readonly Kapitel[] = ['I', 'II', 'III', 'IV', 'Anhang']
+
 export interface AppletDef<P extends Params = Params> {
   /** Stable, URL-safe, no dots. Used in the URL hash, on the channel and in routes. */
   id: string
   titel: string
   kurz: string
+  /** Chapter of the lecture slides; applets are listed by chapter everywhere. */
+  kapitel: Kapitel
+  /** Where in the slides, e.g. "22–27". */
+  folien?: string
   model: Model<P>
   /**
    * The model as formulas with live parameters, e.g.

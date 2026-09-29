@@ -32,6 +32,8 @@ export default defineApplet({
   id: 'exp-ivp',
   titel: 'Exponentielles Wachstum',
   kurz: 'Die Änderung ist proportional zum Bestand.',
+  kapitel: 'III',
+  folien: '24–31',
   model,
   horizont: 'T',
   formeln: [
@@ -44,6 +46,8 @@ export default defineApplet({
       type: 'timeSeriesContinuous',
       xLabel: 't',
       yLabel: 'N(t)',
+      logToggle: true,
+      logHilfe: 'Wegen $\\ln N(t) = \\ln N_0 + r\\,t$ ist $N(t) = N_0 e^{rt}$ auf dieser Achse eine Gerade mit Steigung $r$.',
       y: [-5, 50],
       field: true,
       drag: [

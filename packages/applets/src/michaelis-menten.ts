@@ -50,6 +50,8 @@ export default defineApplet({
   id: 'michaelis-menten',
   titel: 'Enzymkinetik nach Michaelis und Menten',
   kurz: 'Substrat wird über einen Komplex zu Produkt – vier Stoffe, zwei Erhaltungsgrößen.',
+  kapitel: 'IV',
+  folien: '23–28',
   model,
   horizont: 'T',
   formeln: [

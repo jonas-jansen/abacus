@@ -321,10 +321,124 @@
   font-size: 12.5px;
   color: var(--ab-muted);
 }
+/* The row above each plot: title left; legend and axis switch right. Always there, so
+   figures side by side keep their plots level. */
+.ab-fighead {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px 12px;
+  min-height: 30px;
+  padding: 0 2px 2px;
+}
+.ab-figtitle {
+  margin-right: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ab-muted);
+}
+.ab-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+}
 .ab-legend-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-size: 12.5px;
+  color: var(--ab-muted);
+}
+button.ab-legend-item {
+  height: 26px;
+  padding: 0 8px 0 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  transition: background 0.12s, opacity 0.12s;
+}
+button.ab-legend-item:hover {
+  background: var(--ab-hover);
+  color: var(--ab-text);
+}
+button.ab-legend-item[aria-pressed='false'] {
+  opacity: 0.4;
+}
+button.ab-legend-item[aria-pressed='false'] .katex {
+  text-decoration: line-through;
+}
+.ab-axis-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+/* A small segmented control: linear | log. */
+.ab-seg {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--ab-panel);
+}
+.ab-seg button {
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ab-muted) !important;
+  font-size: 12px !important;
+}
+.ab-seg button[aria-pressed='true'] {
+  background: var(--ab-bg);
+  color: var(--ab-text) !important;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.15);
+}
+@media (pointer: coarse) {
+  .ab-seg button {
+    height: 32px;
+  }
+}
+.ab-help-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ab-panel);
+  color: var(--ab-muted);
+  font-size: 12px !important;
+  font-weight: 700;
+}
+.ab-help-btn:hover,
+.ab-help-btn[aria-expanded='true'] {
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+}
+.ab-help {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(320px, 80vw);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ab-bg);
+  box-shadow: 0 0 0 1px var(--ab-line), 0 12px 32px -10px rgb(16 24 40 / 0.35);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ab-text);
+}
+.ab-help p {
+  margin: 6px 0 0;
+  color: var(--ab-muted);
 }
 .ab-swatch {
   width: 12px;
@@ -540,15 +654,17 @@
 
 /* ================================================================== formulas */
 
-/* The model above the plots: one grid for all equations — label | left side | = | right side —
-   so every relation sits in one column. Parameters are chips: point at them, drag them
-   sideways, click to type. Nothing scrolls: formulas wider than the box are scaled to fit. */
+/* The model above the plots. One column per formula (model | start | solution), titles on
+   top; in a column the lines align at their relation, and lines of different columns share
+   rows. Parameters are chips: point at them, drag them sideways, click to type. Nothing
+   scrolls: formulas wider than the box are scaled to fit. Placement comes from custom
+   properties set per cell: --wc/--wr side by side, --nc/--nr stacked (narrow). */
 .ab-model {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
   margin: 4px 0 12px;
-  padding: 12px 12px 12px 18px;
+  padding: 14px 14px 14px 20px;
   border-radius: 12px;
   background: var(--ab-panel);
 }
@@ -559,27 +675,32 @@
   justify-content: center;
 }
 .ab-eqs {
+  /* in em, so that scaling a wide formula box to fit shrinks the gaps too */
+  --ab-col-gap: 2.8em;
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: var(--ab-wide-cols);
   align-items: baseline;
-  row-gap: 2px;
+  row-gap: 3px;
   width: max-content;
   font-size: 17px;
   line-height: 1.6;
   color: var(--ab-text);
 }
+.ab-eqs > * {
+  grid-column: var(--wc);
+  grid-row: var(--wr);
+}
 .ab-eqs .katex {
   font-size: 1.12em;
 }
-.ab-eqs > [data-gap] {
-  padding-top: 10px;
-}
-.ab-eq-label {
-  padding-right: 20px;
-  font-size: 10.5px;
+.ab-eq-title {
+  align-self: end;
+  justify-self: start;
+  padding-bottom: 2px;
+  font-size: 0.62em;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  line-height: 1;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--ab-faint);
@@ -592,13 +713,18 @@
   justify-self: center;
   padding: 0 0.32em;
 }
-.ab-eq-rhs {
+.ab-eq-rhs,
+.ab-eq-whole {
   justify-self: start;
   white-space: nowrap;
 }
+/* a vector beside several lines: centred on them (baselines cannot be shared across rows) */
+.ab-eqs > .ab-eq-tall {
+  align-self: center;
+}
 
-/* Chips. KaTeX positions the parts of fractions and exponents in their own layers; the chip
-   gets its own, above them, so the whole chip is the target — not just its top edge. */
+/* Chips. KaTeX positions the parts of fractions, exponents and matrices in their own layers;
+   the chip gets its own, above them, so the whole chip is the target. */
 .ab-formulas [data-param] {
   position: relative;
   z-index: 1;
@@ -625,66 +751,118 @@
   box-shadow: none;
 }
 
-.ab-seg {
+/* Symbols ⇄ values: a pill whose knob slides from "a" to "1,5". */
+.ab-values {
   display: inline-flex;
   flex: none;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--ab-bg);
-  box-shadow: inset 0 0 0 1px var(--ab-line);
-}
-.ab-seg button {
-  min-width: 30px;
-  height: 24px;
-  padding: 0 7px;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
   border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--ab-muted) !important;
-  font-size: 12px !important;
+  background: none;
 }
-.ab-seg button[aria-pressed='true'] {
-  background: var(--ab-accent-soft);
-  color: var(--ab-accent) !important;
+.ab-values-label {
+  font-size: 12px;
+  color: var(--ab-muted);
+}
+.ab-values:hover .ab-values-label {
+  color: var(--ab-text);
+}
+.ab-values-track {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  width: 64px;
+  height: 26px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--ab-bg);
+  box-shadow: inset 0 0 0 1px var(--ab-line-strong);
+}
+.ab-values-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  height: 22px;
+  border-radius: 999px;
+  background: var(--ab-accent);
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.25);
+  transition: transform 0.18s ease;
+}
+.ab-values[aria-checked='true'] .ab-values-knob {
+  transform: translateX(100%);
+}
+.ab-values-opt {
+  position: relative;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ab-muted);
+  transition: color 0.18s;
+}
+.ab-values-sym {
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 400;
+}
+.ab-values[aria-checked='false'] .ab-values-sym,
+.ab-values[aria-checked='true'] .ab-values-num {
+  color: var(--ab-bg);
 }
 @media (pointer: coarse) {
-  .ab-seg button {
+  .ab-values-track {
+    width: 76px;
     height: 34px;
-    min-width: 40px;
+  }
+  .ab-values-knob {
+    height: 30px;
   }
 }
 
-/* Narrow: the toggle above, the equations left-aligned below it. */
+/* Stacked columns: set by FormulaBar when side by side would need too much shrinking. */
+.ab-eqs[data-stacked] {
+  grid-template-columns: auto auto auto;
+}
+.ab-eqs[data-stacked] > *,
+.ab-eqs[data-stacked] > .ab-eq-tall {
+  grid-column: var(--nc);
+  grid-row: var(--nr);
+  align-self: baseline;
+}
+.ab-eqs[data-stacked] > .ab-eq-title:not(:first-child) {
+  padding-top: 10px;
+}
+
+/* Narrow: the columns stack, the switch sits above them. */
 @container (max-width: 599px) {
   .ab-model {
     flex-direction: column-reverse;
     align-items: stretch;
-    padding: 8px 10px 12px;
+    gap: 8px;
+    padding: 10px 12px 12px;
   }
-  .ab-model .ab-seg {
+  .ab-values {
     align-self: flex-end;
   }
   .ab-formulas {
     justify-content: flex-start;
   }
-  /* labels on a line of their own, so the equations get the full width */
   .ab-eqs {
     grid-template-columns: auto auto auto;
     font-size: 15px;
   }
-  .ab-eq-label {
-    grid-column: 1 / -1;
-    padding: 6px 0 0;
+  .ab-eqs > *,
+  .ab-eqs > .ab-eq-tall {
+    grid-column: var(--nc);
+    grid-row: var(--nr);
+    align-self: baseline;
   }
-  .ab-eq-label:empty {
-    display: none;
-  }
-  .ab-eqs > .ab-eq-label[data-gap] {
+  .ab-eq-title:not(:first-child) {
     padding-top: 10px;
-  }
-  .ab-eqs > :not(.ab-eq-label)[data-gap] {
-    padding-top: 0;
   }
 }
 
@@ -716,7 +894,11 @@
   box-shadow: 0 2px 6px -2px var(--ab-accent);
   transition: transform 0.12s;
 }
-.ab-play:hover {
+.ab-play:disabled,
+.ab-scrub:disabled {
+  opacity: 0.35;
+}
+.ab-play:hover:not(:disabled) {
   transform: scale(1.06);
 }
 .ab-play:active {
@@ -1062,18 +1244,25 @@
 .ab-choice {
   clear: both;
   display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
   padding: 3px;
   border-radius: 9px;
   background: var(--ab-panel);
 }
+/* many options wrap onto several lines, each option stays in one piece */
 .ab-choice label {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 4px 10px;
   border-radius: 7px;
   text-align: center;
+  white-space: nowrap;
   font-size: 13px;
   color: var(--ab-muted);
   cursor: pointer;
+}
+.ab-choice label:hover {
+  color: var(--ab-text);
 }
 .ab-choice label[data-active] {
   background: var(--ab-bg);

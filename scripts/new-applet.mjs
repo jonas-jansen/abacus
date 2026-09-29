@@ -48,6 +48,8 @@ export default defineApplet({
   id: '${id}',
   titel: 'TODO Titel',
   kurz: 'TODO ein Satz, was man hier sieht.',
+  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
+  folien: 'TODO',
   model,
   plots: [{ type: 'timeSeriesDiscrete', xLabel: 'n', yLabel: 'xₙ' }],
   anzeige: ['verhalten', 'letzter'],
@@ -77,6 +79,8 @@ export default defineApplet({
   id: '${id}',
   titel: 'TODO Titel',
   kurz: 'TODO ein Satz, was man hier sieht.',
+  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
+  folien: 'TODO',
   model,
   plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)' }],
   anzeige: ['endwert'],
@@ -107,6 +111,8 @@ export default defineApplet({
   id: '${id}',
   titel: 'TODO Titel',
   kurz: 'TODO ein Satz, was man hier sieht.',
+  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
+  folien: 'TODO',
   model,
   plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)' }],
   anzeige: ['halbwertszeit'],

@@ -43,6 +43,8 @@ export default defineApplet({
   id: 'linearsystem-phase',
   titel: 'Lineares System in der Ebene',
   kurz: 'Eine Matrix A, zwei Bilder: Zeitverlauf und Phasenporträt.',
+  kapitel: 'IV',
+  folien: '11–21',
   model,
   horizont: 'T',
   formeln: [

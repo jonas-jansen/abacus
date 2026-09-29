@@ -54,6 +54,8 @@ export default defineApplet({
   id: 'logistic-perturbation',
   titel: 'Stabil oder instabil?',
   kurz: 'Die Folge startet genau im Fixpunkt – dann kommen kleine Stöße.',
+  kapitel: 'I',
+  folien: '41, 50–55',
   model,
   horizont: 'N',
   formeln: [

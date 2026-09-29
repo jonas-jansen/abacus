@@ -145,3 +145,62 @@ describe('answer key, new applets (§11.2)', () => {
     expect(observe('linearsystem-discrete', {}).verhalten.value).toBe('geht gegen 0')
   })
 })
+
+describe('horizon at its smallest', () => {
+  it.each(Object.keys(applets).filter((id) => applets[id].horizont))('%s runs with the smallest allowed horizon', (id) => {
+    const def = applets[id]
+    const spec = def.model.params.find((s) => s.id === def.horizont)!
+    const lows = [spec.kind === 'int' || spec.kind === 'real' ? spec.min : 1, (spec as { limits?: { min?: number } }).limits?.min ?? 0]
+    for (const v of lows) {
+      const p = updateParams(def.model, defaultParams(def.model), { [def.horizont!]: v })
+      const run = def.model.run(p)
+      expect(run.series.length).toBeGreaterThan(0)
+      for (const s of run.series) expect(s.x.length).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe('Anhang: the numbers are right', () => {
+  it('ε–N: for 1/n and ε = 0,1 the sequence is in the band from n = 11 on', () => {
+    expect(observe('folgen-grenzwert', { folge: 'inv', eps: 0.1 }).ab.value).toBe(11)
+    expect(observe('folgen-grenzwert', { folge: 'quot', eps: 0.01 }).ab.value).toBe(200) // |2n/(n+1) − 2| = 2/(n+1) < 0,01 ⇔ n > 199
+  })
+
+  it('difference quotient of x² at 1 with h = 0,5 is 2,5; the derivative 2', () => {
+    const o = observe('differenzenquotient', { f: 'x2', a: 1, h: 0.5 })
+    expect(o.quotient.value).toBeCloseTo(2.5, 12)
+    expect(o.ableitung.value).toBe(2)
+  })
+
+  it('Riemann: midpoint error shrinks like 1/n², left points like 1/n', () => {
+    const e = (n: number, regel: string) => observe('riemann', { f: 'inv', a: 1, b: 2, n, regel }).fehler.value as number
+    expect(e(10, 'mitte') / e(20, 'mitte')).toBeCloseTo(4, 1)
+    expect(e(100, 'links') / e(200, 'links')).toBeCloseTo(2, 1)
+    expect(observe('riemann', { f: 'inv', a: 1, b: 2 }).integral.value).toBeCloseTo(Math.LN2, 12)
+  })
+
+  it('linear system x₁ − 2x₂ = 1, 2x₁ + x₂ = 7 has the solution (3, 1); parallel lines none', () => {
+    expect(observe('lgs', {}).loesung.value).toBe('(3; 1)')
+    expect(observe('lgs', { a21: 2, a22: -4, b2: 5 }).art.value).toBe('keine (parallel)')
+    expect(observe('lgs', { a21: 2, a22: -4, b2: 2 }).art.value).toBe('unendlich viele (dieselbe Gerade)')
+  })
+
+  it('eigenvector: (1, 1) is one for [[4, 1], [3, 2]], with λ = 5', () => {
+    const o = observe('eigenvektoren', { v: [1, 1] })
+    expect(o.eigen.value).toBe('ein Eigenvektor')
+    expect(o.faktor.value).toBeCloseTo(5, 12)
+    expect(observe('eigenvektoren', { v: [1, 0] }).eigen.value).toBe('kein Eigenvektor')
+  })
+
+  it('complex product: lengths multiply, angles add', () => {
+    const o = observe('komplexe-zahlen', { op: 'produkt', z: [1, 1], w: [0, 2] })
+    const [bz, bw, be] = o.betrag.value as number[]
+    const [az, aw, ae] = o.winkel.value as number[]
+    expect(be).toBeCloseTo(bz * bw, 12)
+    expect(ae).toBeCloseTo(az + aw, 9)
+  })
+
+  it('fundamental theorem: F(x) for f(t) = t − 1 from 0 to 3 is 1,5', () => {
+    expect(observe('hauptsatz', { f: 'lin', a: 0, x: 3 }).F.value).toBeCloseTo(1.5, 12)
+  })
+})

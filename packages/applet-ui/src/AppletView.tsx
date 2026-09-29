@@ -35,7 +35,8 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   useEffect(() => (gesperrt ? subscribe('applet/unlock', () => setLocked(false), { id: def.id }) : undefined), [gesperrt, def.id])
 
   // The timeline: steps n for iterations, time t for continuous models.
-  const iterative = def.model.kind === 'iteration'
+  // steps for iterations and for sequences given by a formula; time otherwise
+  const iterative = def.model.kind === 'iteration' || run?.series[0]?.kind === 'discrete'
   const timeline = def.zeitleiste ?? def.model.kind !== 'closedForm'
   const clock = run?.series.find((s) => s.kind === (iterative ? 'discrete' : 'continuous'))
   const [tMin, tMax] = clock?.x.length ? [clock.x[0], clock.x[clock.x.length - 1]] : [0, 0]
@@ -44,7 +45,19 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
     if (cursor !== undefined && cursor > tMax) setCursor(undefined)
   }, [cursor, tMax])
   // A stable object, so pointing at things does not redraw the canvas.
-  const view = useMemo(() => (iterative ? { steps: cursor } : { time: cursor }), [iterative, cursor])
+  // Legend: series switched off, and the one pointed at — shared by all figures of the applet.
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set())
+  const [focusSeries, setFocusSeries] = useState<string | null>(null)
+  const toggleSeries = (id: string) =>
+    setHidden((h) => {
+      const next = new Set(h)
+      if (!next.delete(id)) next.add(id)
+      return next
+    })
+  const view = useMemo(
+    () => ({ ...(iterative ? { steps: cursor } : { time: cursor }), hidden, focus: focusSeries }),
+    [iterative, cursor, hidden, focusSeries],
+  )
 
   // the horizon (N, T) lives in the timeline, not among the model's parameters
   const shown = (s: ParamSpec) => s.id !== def.horizont && (def.layout?.sichtbar?.[s.id]?.(params) ?? true)
@@ -174,12 +187,15 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       texOf={texOf}
                       hotParam={handleHot}
                       onHandle={setDragged}
+                      pair={def.plots.length === 2}
+                      onToggleSeries={toggleSeries}
+                      onFocusSeries={setFocusSeries}
                     />
                     ),
                   )}
                 </div>
               )}
-              {timeline && run && clock && tMax > tMin && (
+              {timeline && run && clock && (
                 <Timeline
                   value={cursor}
                   min={tMin}
@@ -419,6 +435,8 @@ export function Timeline({
   const k = value ?? max
   const [playing, setPlaying] = useState(false)
   const span = max - min
+  // a horizon of 0 (typed) leaves nothing to play, but the field to change it stays
+  const empty = !(span > 0)
   const inc = continuous ? span / 100 : 1
   const set = (v: number) => onChange(v >= max - 1e-9 * Math.max(1, Math.abs(max)) ? undefined : Math.max(min, v))
   const step = (v: number) => {
@@ -459,7 +477,7 @@ export function Timeline({
 
   return (
     <div className="ab-timeline" role="group" aria-label={continuous ? 'Zeit' : 'Schritte'} onKeyDown={onKey}>
-      <button type="button" className="ab-play" onClick={() => setPlaying(!playing)} aria-label={playing ? 'anhalten' : 'abspielen'} title={playing ? 'anhalten (Leertaste)' : 'abspielen (Leertaste)'}>
+      <button type="button" className="ab-play" disabled={empty} onClick={() => setPlaying(!playing)} aria-label={playing ? 'anhalten' : 'abspielen'} title={playing ? 'anhalten (Leertaste)' : 'abspielen (Leertaste)'}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           {playing ? Glyph.pause : Glyph.play}
         </svg>
@@ -476,6 +494,7 @@ export function Timeline({
         max={max}
         step={continuous ? 'any' : 1}
         value={k}
+        disabled={empty}
         style={{ '--fill': span ? (k - min) / span : 1 } as CSSProperties}
         onChange={(e) => step(+e.target.value)}
         aria-label={continuous ? 'Zeit t' : 'Schritt n'}
@@ -500,6 +519,7 @@ export function Timeline({
           onInvalid={horizon.onInvalid}
           label={accessibleName(horizon.spec)}
           scrubStep={horizon.spec.kind === 'int' ? Math.max(1, Math.round(horizon.value / 20)) : horizon.spec.step}
+          scrubMin={horizon.spec.min}
         />
       ) : (
         <span className="ab-muted ab-timeline-max">{show(max)}</span>

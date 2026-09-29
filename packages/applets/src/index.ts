@@ -3,8 +3,16 @@
  * Adding an applet must require touching this package only (§3, second rule).
  */
 
-import type { AnyAppletDef } from '@abacus/applet-ui/define'
+import { KAPITEL, KAPITEL_ORDER, type AnyAppletDef, type Kapitel } from '@abacus/applet-ui/define'
 // @new-applet:imports
+import folgenGrenzwert from './folgen-grenzwert'
+import differenzenquotient from './differenzenquotient'
+import lupe from './lupe'
+import komplexeZahlen from './komplexe-zahlen'
+import eigenvektoren from './eigenvektoren'
+import lgs from './lgs'
+import riemann from './riemann'
+import hauptsatz from './hauptsatz'
 import arithmetic from './arithmetic'
 import newtonCooling from './newton-cooling'
 import heron from './heron'
@@ -60,9 +68,26 @@ const list: AnyAppletDef[] = [
   michaelisMenten,
   // 8 numerics
   eulerHeun,
+  // Anhang: mathematical foundations
+  folgenGrenzwert,
+  differenzenquotient,
+  lupe,
+  hauptsatz,
+  riemann,
+  komplexeZahlen,
+  lgs,
+  eigenvektoren,
 ]
 
-export const applets: Readonly<Record<string, AnyAppletDef>> = Object.fromEntries(list.map((a) => [a.id, a]))
+// sorted by chapter of the slides; within a chapter in the order of the list above
+const byChapter = [...list].sort((a, b) => KAPITEL_ORDER.indexOf(a.kapitel) - KAPITEL_ORDER.indexOf(b.kapitel))
+
+export const applets: Readonly<Record<string, AnyAppletDef>> = Object.fromEntries(byChapter.map((a) => [a.id, a]))
+
+/** The applets grouped by chapter, in the order of the slides. Empty chapters are left out. */
+export function kapitel(): { id: Kapitel; titel: string; applets: AnyAppletDef[] }[] {
+  return KAPITEL_ORDER.map((id) => ({ id, titel: KAPITEL[id], applets: byChapter.filter((a) => a.kapitel === id) })).filter((k) => k.applets.length > 0)
+}
 
 export function getApplet(id: string): AnyAppletDef {
   const def = applets[id]

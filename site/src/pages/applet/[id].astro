@@ -19,6 +19,10 @@ const seiten = (await getCollection('seiten', (s) => s.data.applet === id && (im
 <Seite titel={def.titel} kurz={def.kurz} aktiv="applets">
   <div class="explore-head">
     <div>
+      <p class="eyebrow chapter-badge">
+        <a href={url(`/#kapitel-${def.kapitel}`)}>{def.kapitel === 'Anhang' ? 'Anhang' : `Kapitel ${def.kapitel}`}</a>
+        {def.folien && <span> · Folien {def.folien}</span>}
+      </p>
       <h1>{def.titel}</h1>
       <p class="lead">{def.kurz}</p>
     </div>

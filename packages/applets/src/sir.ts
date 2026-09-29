@@ -54,17 +54,21 @@ export default defineApplet({
   id: 'sir',
   titel: 'Epidemie-Modell',
   kurz: 'Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?',
+  kapitel: 'II',
+  folien: '40–58',
   model,
   horizont: 'T',
   formeln: [
     { label: 'System', tex: String.raw`x_1(n+1) = x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,\bigl(100\,000 - x_1(n)\bigr) \\ x_2(n+1) = (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n)` },
-    { label: 'Start', tex: String.raw`x_2(0) = {{#I0}} \\ x_1(0) = 100\,000 - x_2(0)` },
+    { label: 'Start', tex: String.raw`x_1(0) = 100\,000 - x_2(0) \\ x_2(0) = {{#I0}}` },
   ],
   plots: [
     {
       type: 'timeSeriesDiscrete',
       xLabel: 'n',
       yLabel: 'x_1, x_2',
+      logToggle: true,
+      logHilfe: 'Am Anfang wächst die Zahl der Infizierten in jedem Schritt um denselben Faktor – auf dieser Achse eine Gerade. Wo sie abknickt, gehen die Gesunden zur Neige.',
       y: [0, N * 1.02],
       drag: [{ param: 'I0', axis: 'y', at: (p) => [0, p.I0], set: (_x, y) => ({ I0: Math.round(Math.max(0, y)) }) }],
     },

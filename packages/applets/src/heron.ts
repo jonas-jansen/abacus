@@ -27,7 +27,8 @@ const model = iteration({
     const f = sample((t) => (Math.abs(t) < 0.12 ? NaN : heron(t)), -5, 5, 801)
     return [
       { id: 'f', label: 'f(x) = \\tfrac12 (x + 2/x)', kind: 'continuous', x: f.x, y: f.y, role: 'primary' },
-      { id: 'stellen', label: 'd_n', kind: 'discrete', x: n, y: x.map((v) => digits(v, L)), role: 'tertiary' },
+      // the error; exactly 0 would have no place on a log axis, so it stops at machine precision
+      { id: 'fehler', label: '|x_n - x^*|', kind: 'discrete', x: n, y: x.map((v) => Math.max(Math.abs(v - L), Number.EPSILON * Math.SQRT2)), role: 'tertiary' },
     ]
   },
   observables: ({ p, x }) => {
@@ -39,7 +40,9 @@ const model = iteration({
     const d = [...x].map((v) => digits(v, L))
     return {
       grenzwert: zahl('Grenzwert', L, { digits: 10, marks: [{ kind: 'value', v: L }] }),
-      stellen: liste('richtige Stellen je Schritt', d, { marks: d.map((v, item) => ({ kind: 'point', x: item, y: v, in: 'time', item })) }),
+      stellen: liste('richtige Stellen je Schritt', d, {
+        marks: [...x].map((v, item) => ({ kind: 'point', x: item, y: Math.max(Math.abs(v - L), Number.EPSILON * Math.SQRT2), in: 'time', item })),
+      }),
       fehler: zahl('Fehler $|x_N - x^*|$', Math.abs(x[x.length - 1] - L), { digits: 3 }),
     }
   },
@@ -49,6 +52,8 @@ export default defineApplet({
   id: 'heron',
   titel: 'Heron-Verfahren für √2',
   kurz: 'Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich.',
+  kapitel: 'I',
+  folien: '10–12, 58–64',
   model,
   horizont: 'N',
   formeln: [
@@ -57,7 +62,18 @@ export default defineApplet({
   ],
   plots: [
     { type: 'cobweb', f: 'f', orbit: 'x', xLabel: 'x', yLabel: 'f(x)', x: [-5, 5], y: [-5, 5], drag: { param: 'x0', axis: 'x' } },
-    { type: 'timeSeriesDiscrete', series: ['stellen'], xLabel: 'n', yLabel: 'd_n', y: [0, 17], title: 'richtige Stellen' },
+    {
+      type: 'timeSeriesDiscrete',
+      series: ['fehler'],
+      title: 'Fehler',
+      xLabel: 'n',
+      yLabel: '|x_n - x^*|',
+      yScale: 'log',
+      yLogRange: [1e-17, 10],
+      logToggle: true,
+      logHilfe:
+        'Hier heißt jede Zehnerpotenz weiter unten: eine richtige Nachkommastelle mehr. Die Punkte fallen immer steiler – die Zahl der richtigen Stellen verdoppelt sich ungefähr in jedem Schritt. Bei $10^{-16}$ ist die Rechengenauigkeit des Computers erreicht.',
+    },
   ],
   anzeige: ['grenzwert', 'stellen', 'fehler'],
 })
