@@ -14,7 +14,7 @@ const model = iterationN({
     gamma: real('Genesungsrate', { latex: '\\gamma', min: 0, max: 1, step: 0.01, default: 0.1 }),
     alpha: real('Erneuerungsrate', { latex: '\\alpha', min: 0, max: 1, step: 0.01, default: 0.1 }),
     I0: real('anfangs Infizierte', { latex: 'x_2(0)', min: 0, max: 1000, step: 1, default: 1, limits: { min: 0, max: N, reason: 'Es gibt nur 100 000 Menschen.' } }),
-    T: schritte('Schritte', { latex: 'N', default: 80, max: 300 }),
+    T: schritte('Schritte', { latex: 'n_{\\max}', default: 80, max: 300 }),
   },
   normalize: (p) => (p.alpha + p.gamma > 1 ? { ...p, gamma: 1 - p.alpha } : p),
   constraintNote: 'α + γ ≤ 1',
@@ -55,10 +55,10 @@ export default defineApplet({
   titel: 'Epidemie-Modell',
   kurz: 'Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?',
   model,
+  horizont: 'T',
   formeln: [
-    { label: 'System', tex: String.raw`\begin{aligned} x_1(n+1) &= x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,(N - x_1(n)) \\ x_2(n+1) &= (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n) \end{aligned}` },
-    { label: 'Bevölkerung', tex: String.raw`N = 100\,000` },
-    { label: 'Start', tex: String.raw`x_2(0) = {{I0}}, \ x_1(0) = N - x_2(0), \quad n = 0, \dots, {{T}}` },
+    { label: 'System', tex: String.raw`x_1(n+1) = x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,\bigl(100\,000 - x_1(n)\bigr) \\ x_2(n+1) = (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n)` },
+    { label: 'Start', tex: String.raw`x_2(0) = {{#I0}} \\ x_1(0) = 100\,000 - x_2(0)` },
   ],
   plots: [
     {

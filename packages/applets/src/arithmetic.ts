@@ -32,9 +32,10 @@ export default defineApplet({
   titel: 'Arithmetische Folge',
   kurz: 'Jeder Schritt addiert denselben Betrag.',
   model,
+  horizont: 'N',
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = x_n {{+b}}` },
-    { label: 'Start', tex: String.raw`x_0 = {{x0}}, \quad n = 0, \dots, {{N}}` },
+    { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
     { label: 'Lösung', tex: String.raw`x_n = {{x0}} {{+b}}{{*}}n` },
   ],
   plots: [

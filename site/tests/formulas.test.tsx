@@ -32,9 +32,11 @@ describe('formulas', () => {
     const seen = new Set<string>()
     for (const p of variants) {
       const formeln = typeof def.formeln === 'function' ? def.formeln(p) : (def.formeln ?? [])
-      for (const f of formeln) for (const m of f.tex.matchAll(/\{\{\s*[+(]?\s*([A-Za-z_]\w*)/g)) seen.add(m[1])
+      for (const f of formeln) for (const m of f.tex.matchAll(/\{\{\s*[+(#]?\s*([A-Za-z_]\w*)/g)) seen.add(m[1])
     }
-    const missing = def.model.params.map((s) => s.id).filter((pid) => !seen.has(pid))
+    // the horizon (N, T) is set in the timeline, not in the formulas
+    const missing = def.model.params.map((s) => s.id).filter((pid) => pid !== def.horizont && !seen.has(pid))
+    if (def.horizont) expect(seen.has(def.horizont), 'the horizon belongs to the timeline').toBe(false)
     expect(missing).toEqual([])
   })
 

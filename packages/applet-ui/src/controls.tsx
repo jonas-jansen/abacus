@@ -42,7 +42,7 @@ function showInput(v: number): string {
 /** Dragging a value sideways changes it: one step per 4 px, ×10 with Shift, ×0,1 with Alt. */
 const SCRUB_PX = 4
 
-function NumberField({
+export function NumberField({
   value,
   onCommit,
   onInvalid,
@@ -61,7 +61,7 @@ function NumberField({
   const [text, setText] = useState(showInput(value))
   const [editing, setEditing] = useState(false)
   const [scrubbing, setScrubbing] = useState(false)
-  const drag = useRef<{ x: number; v: number; moved: boolean } | null>(null)
+  const drag = useRef<{ x: number; v: number; moved: boolean; step: number } | null>(null)
   useEffect(() => {
     if (!editing) setText(showInput(value))
   }, [value, editing])
@@ -89,7 +89,8 @@ function NumberField({
         if (!scrubStep || e.pointerType !== 'mouse' || e.button !== 0 || document.activeElement === e.currentTarget) return
         e.preventDefault() // no focus, no text selection: this may become a drag
         e.currentTarget.setPointerCapture(e.pointerId)
-        drag.current = { x: e.clientX, v: value, moved: false }
+        // the step is fixed for the whole drag, even if it depends on the value
+        drag.current = { x: e.clientX, v: value, moved: false, step: scrubStep }
       }}
       onPointerMove={(e) => {
         const d = drag.current
@@ -99,7 +100,7 @@ function NumberField({
         if (!d.moved) setScrubbing(true)
         d.moved = true
         const k = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
-        onCommit(d.v + Math.round(dx / SCRUB_PX) * scrubStep * k)
+        onCommit(d.v + Math.round(dx / SCRUB_PX) * d.step * k)
       }}
       onPointerUp={(e) => {
         const d = drag.current

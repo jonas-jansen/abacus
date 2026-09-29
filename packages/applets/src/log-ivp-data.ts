@@ -64,9 +64,9 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N\left(1 - \frac{N}{{{K}}}\right)` },
-    { label: 'Start', tex: String.raw`N(0) = {{N0}}` },
+    { label: 'Start', tex: String.raw`N(0) = {{#N0}}` },
     { label: 'Lösung', tex: String.raw`N(t) = \frac{{{N0}}{{*}}{{K}}{{*}}e^{{{r}}\,t}}{{{K}} + {{N0}}\,(e^{{{r}}\,t} - 1)}` },
-    { label: 'Abweichungen', tex: String.raw`N(t_i) - N_i \quad {{abweichungen}}` },
+    { label: 'Abweichung', tex: String.raw`d_i = N(t_i) - N_i \quad {{abweichungen}}` },
   ],
   plots: [
     {

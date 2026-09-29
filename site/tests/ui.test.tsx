@@ -148,18 +148,28 @@ describe('applet container', () => {
     }
   })
 
-  it('typing beyond the slider range stretches the slider; a hard limit explains itself', () => {
+  it('typing beyond the slider range stretches the slider', () => {
     const a = mount(<AppletView def={getApplet('logistic-cobweb')} />)
-    const field = a.querySelector('input[aria-label="Schritte N"]') as HTMLInputElement
+    const field = a.querySelector('input[aria-label="Wachstumsrate a"]') as HTMLInputElement
+    type(field, '7')
+    act(() => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
+    expect(field.value).toBe('7')
+    expect(a.textContent).toContain('Regler erweitert bis 7')
+    expect(a.querySelector('.ab-feedback')).toBeNull()
+  })
+
+  it('the step count sits in the timeline; a hard limit explains itself there', () => {
+    const a = mount(<AppletView def={getApplet('logistic-cobweb')} />)
+    expect(a.querySelector('.ab-panel input[aria-label="Schritte N"]')).toBeNull()
+    const field = a.querySelector('.ab-timeline input[aria-label="Schritte N"]') as HTMLInputElement
     type(field, '5000')
     act(() => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     expect(field.value).toBe('5000')
-    expect(a.textContent).toContain('Regler erweitert bis 5000')
     expect(a.querySelector('.ab-feedback')).toBeNull()
     type(field, '1e9')
     act(() => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     expect(field.value).toBe('1\u202f000\u202f000')
-    expect(a.querySelector('.ab-feedback')?.textContent).toContain('Million')
+    expect(a.querySelector('.ab-timeline .ab-feedback')?.textContent).toContain('Million')
   })
 
   it('a million steps render without trouble', () => {

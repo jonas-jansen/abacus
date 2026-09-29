@@ -540,15 +540,15 @@
 
 /* ================================================================== formulas */
 
-/* The model above the plots. Parameters are chips: point, drag sideways, or click to type.
-   Nothing scrolls: a formula wider than the box is scaled down to fit (FormulaBar).
-   Narrow: the toggle sits above the formulas. */
+/* The model above the plots: one grid for all equations — label | left side | = | right side —
+   so every relation sits in one column. Parameters are chips: point at them, drag them
+   sideways, click to type. Nothing scrolls: formulas wider than the box are scaled to fit. */
 .ab-model {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin: 4px 0 12px;
-  padding: 10px 12px 10px 16px;
+  padding: 12px 12px 12px 18px;
   border-radius: 12px;
   background: var(--ab-panel);
 }
@@ -556,39 +556,52 @@
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  align-items: flex-end;
-  gap: 8px 40px;
-  padding: 6px 0;
 }
-.ab-formula {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-.ab-formula-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ab-faint);
-}
-.ab-formula {
-  max-width: 100%;
-}
-.ab-formula-tex {
-  display: block;
+.ab-eqs {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  align-items: baseline;
+  row-gap: 2px;
+  width: max-content;
   font-size: 17px;
-  line-height: 1.5;
-  white-space: nowrap;
+  line-height: 1.6;
   color: var(--ab-text);
 }
-.ab-formula-tex .katex {
+.ab-eqs .katex {
   font-size: 1.12em;
 }
+.ab-eqs > [data-gap] {
+  padding-top: 10px;
+}
+.ab-eq-label {
+  padding-right: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ab-faint);
+}
+.ab-eq-lhs {
+  justify-self: end;
+  white-space: nowrap;
+}
+.ab-eq-rel {
+  justify-self: center;
+  padding: 0 0.32em;
+}
+.ab-eq-rhs {
+  justify-self: start;
+  white-space: nowrap;
+}
+
+/* Chips. KaTeX positions the parts of fractions and exponents in their own layers; the chip
+   gets its own, above them, so the whole chip is the target — not just its top edge. */
 .ab-formulas [data-param] {
+  position: relative;
+  z-index: 1;
   display: inline-block;
   padding: 0 0.14em;
   margin: 0 0.02em;
@@ -611,10 +624,10 @@
   outline: none;
   box-shadow: none;
 }
+
 .ab-seg {
   display: inline-flex;
   flex: none;
-  align-self: flex-start;
   padding: 2px;
   border-radius: 8px;
   background: var(--ab-bg);
@@ -629,7 +642,6 @@
   background: transparent;
   color: var(--ab-muted) !important;
   font-size: 12px !important;
-  font-variant-numeric: tabular-nums;
 }
 .ab-seg button[aria-pressed='true'] {
   background: var(--ab-accent-soft);
@@ -643,24 +655,36 @@
   }
 }
 
+/* Narrow: the toggle above, the equations left-aligned below it. */
 @container (max-width: 599px) {
   .ab-model {
     flex-direction: column-reverse;
     align-items: stretch;
-    padding: 8px 10px 10px;
+    padding: 8px 10px 12px;
   }
   .ab-model .ab-seg {
     align-self: flex-end;
   }
   .ab-formulas {
     justify-content: flex-start;
-    gap: 10px 28px;
   }
-  .ab-formula {
-    align-items: flex-start;
-  }
-  .ab-formula-tex {
+  /* labels on a line of their own, so the equations get the full width */
+  .ab-eqs {
+    grid-template-columns: auto auto auto;
     font-size: 15px;
+  }
+  .ab-eq-label {
+    grid-column: 1 / -1;
+    padding: 6px 0 0;
+  }
+  .ab-eq-label:empty {
+    display: none;
+  }
+  .ab-eqs > .ab-eq-label[data-gap] {
+    padding-top: 10px;
+  }
+  .ab-eqs > :not(.ab-eq-label)[data-gap] {
+    padding-top: 0;
   }
 }
 
@@ -668,6 +692,7 @@
 
 .ab-timeline {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
   max-width: 640px;
@@ -717,7 +742,6 @@
 }
 .ab-timeline-n {
   flex: none;
-  min-width: 6.5em;
   margin-left: 6px;
   text-align: right;
   font-weight: 600;
@@ -725,6 +749,32 @@
 }
 .ab-timeline-n .ab-muted {
   font-weight: 400;
+}
+/* The horizon (N or T), editable where it is shown: n = 12 / [40]. A chip, like the
+   parameters in the formulas: blue and soft means "live – drag or type". */
+.ab-timeline .ab-horizon {
+  flex: none;
+  min-width: 3ch;
+  height: 24px;
+  margin: 0 0 0 2px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+  font-size: 13px;
+  text-align: center;
+}
+.ab-timeline .ab-horizon:hover {
+  background: var(--ab-accent);
+  color: var(--ab-bg);
+}
+.ab-timeline-max {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.ab-timeline-feedback {
+  flex: 1 0 100%;
+  margin: 4px 8px 2px;
 }
 
 /* ================================================================== parameter rows */
@@ -908,7 +958,8 @@
   cursor: pointer;
 }
 .ab-scrub {
-  flex: 1 1 auto;
+  flex: 1 1 60px;
+  width: auto;
   min-width: 60px;
 }
 .ab-range:focus-visible,

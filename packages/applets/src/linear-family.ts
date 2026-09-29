@@ -43,7 +43,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },
-    { label: 'alle Lösungen', tex: String.raw`x(t) = {{C}}{{*}}e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
+    { label: 'Lösungen', tex: String.raw`x(t) = {{C}}{{*}}e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
     { label: 'Gleichgewicht', tex: String.raw`x^* = -\frac{{{b}}}{{{a}}}` },
   ],
   plots: [

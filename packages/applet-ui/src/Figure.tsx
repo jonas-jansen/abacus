@@ -353,5 +353,6 @@ function Handle({
 function legendEntries(spec: PlotSpec, run: Run) {
   if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'phasePlane' || spec.type === 'surface3d') return []
   const ids = spec.series
-  return ids ? run.series.filter((s) => ids.includes(s.id)) : run.series
+  // annotations (brackets, arrows) explain themselves where they are drawn
+  return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation')
 }

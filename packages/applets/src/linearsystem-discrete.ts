@@ -46,9 +46,10 @@ export default defineApplet({
   titel: 'Lineare Abbildung in der Ebene',
   kurz: 'Immer wieder mit derselben Matrix multiplizieren: Spirale, Sprung oder Gerade.',
   model,
+  horizont: 'N',
   formeln: [
     { label: 'System', tex: String.raw`x(n+1) = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} x(n)` },
-    { label: 'Start', tex: String.raw`x(0) = {{start}}, \quad n = 0, \dots, {{N}}` },
+    { label: 'Start', tex: String.raw`x(0) = {{#start}}` },
   ],
   plots: [
     {

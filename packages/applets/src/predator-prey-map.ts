@@ -76,9 +76,9 @@ export default defineApplet({
   kurz: 'Wo wächst die Beute, wo schrumpft sie? Eine Fläche über der Ebene zeigt es.',
   model,
   formeln: [
-    { label: 'Update-Funktion', tex: String.raw`\begin{aligned} f_1(y_1, y_2) &= (1 + {{r}})\,y_1 - {{r}}{{*}}y_1^2 - {{gamma}}{{*}}y_1 y_2 \\ f_2(y_1, y_2) &= {{gamma}}{{*}}y_1 y_2 \end{aligned}` },
     { label: 'Fläche', tex: String.raw`{{teil}}` },
-    { label: 'Punkt', tex: String.raw`(y_1, y_2) = {{y}}` },
+    { label: 'Update', tex: String.raw`f_1(y_1, y_2) = (1 + {{r}})\,y_1 - {{r}}{{*}}y_1^2 - {{gamma}}{{*}}y_1 y_2 \\ f_2(y_1, y_2) = {{gamma}}{{*}}y_1 y_2` },
+    { label: 'Punkt', tex: String.raw`(y_1, y_2) = {{#y}}` },
   ],
   plots: [{ type: 'surface3d', grid: 'f', xLabel: 'y_1', yLabel: 'y_2', drag: { param: 'y', axis: 'xy' } }],
   layout: { main: ['teil', 'r', 'gamma', 'y'] },

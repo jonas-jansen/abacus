@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { decimalsOf, explainChange, formatNumber, roundTo, type Observable, type Params, type ParamSpec, type ParamValue } from '@abacus/applet-core'
+import { decimalsOf, explainChange, formatNumber, roundTo, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
 import { subscribe } from '@abacus/channel'
-import { ParamControl } from './controls'
+import { accessibleName, NumberField, ParamControl } from './controls'
 import { handlesOf, type AppletDef } from './define'
 import { Figure } from './Figure'
 import { Figure3D, type Spec3D } from './Figure3D'
@@ -46,9 +46,11 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   // A stable object, so pointing at things does not redraw the canvas.
   const view = useMemo(() => (iterative ? { steps: cursor } : { time: cursor }), [iterative, cursor])
 
-  const shown = (s: ParamSpec) => def.layout?.sichtbar?.[s.id]?.(params) ?? true
+  // the horizon (N, T) lives in the timeline, not among the model's parameters
+  const shown = (s: ParamSpec) => s.id !== def.horizont && (def.layout?.sichtbar?.[s.id]?.(params) ?? true)
   const specs = def.model.params.filter(shown)
   const all = def.model.params
+  const horizonSpec = def.horizont ? all.find((s) => s.id === def.horizont) : undefined
   const main = def.layout?.main ?? (all.length <= 4 ? all.map((s) => s.id) : all.slice(0, 3).map((s) => s.id))
   const primary = specs.filter((s) => main.includes(s.id))
   const more = specs.filter((s) => !main.includes(s.id))
@@ -177,7 +179,26 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                   )}
                 </div>
               )}
-              {timeline && run && clock && tMax > tMin && <Timeline value={cursor} min={tMin} max={tMax} continuous={!iterative} onChange={setCursor} />}
+              {timeline && run && clock && tMax > tMin && (
+                <Timeline
+                  value={cursor}
+                  min={tMin}
+                  max={tMax}
+                  continuous={!iterative}
+                  onChange={setCursor}
+                  horizon={
+                    horizonSpec && (horizonSpec.kind === 'real' || horizonSpec.kind === 'int')
+                      ? {
+                          spec: horizonSpec,
+                          value: params[horizonSpec.id] as number,
+                          onChange: (v) => change(horizonSpec.id, v),
+                          message: hints[horizonSpec.id],
+                          onInvalid: (m) => setHints((h) => ({ ...h, [horizonSpec.id]: m })),
+                        }
+                      : undefined
+                  }
+                />
+              )}
               {run?.meta.warnings?.map((w) => (
                 <p key={w} className="ab-note">
                   {w}
@@ -378,6 +399,7 @@ export function Timeline({
   max,
   continuous = false,
   onChange,
+  horizon,
 }: {
   /** undefined: at the end, everything shown */
   value: number | undefined
@@ -385,6 +407,14 @@ export function Timeline({
   max: number
   continuous?: boolean
   onChange: (v: number | undefined) => void
+  /** The parameter behind `max` (N or T): editable right here, where it is shown. */
+  horizon?: {
+    spec: RealParam | IntParam
+    value: number
+    onChange: (v: number) => void
+    message?: string
+    onInvalid?: (m: string) => void
+  }
 }) {
   const k = value ?? max
   const [playing, setPlaying] = useState(false)
@@ -460,8 +490,25 @@ export function Timeline({
         <span>
           {sym} = {show(k)}
         </span>
-        <span className="ab-muted"> / {show(max)}</span>
+        <span className="ab-muted"> / </span>
       </output>
+      {horizon ? (
+        <NumberField
+          className="ab-val ab-horizon"
+          value={horizon.value}
+          onCommit={horizon.onChange}
+          onInvalid={horizon.onInvalid}
+          label={accessibleName(horizon.spec)}
+          scrubStep={horizon.spec.kind === 'int' ? Math.max(1, Math.round(horizon.value / 20)) : horizon.spec.step}
+        />
+      ) : (
+        <span className="ab-muted ab-timeline-max">{show(max)}</span>
+      )}
+      {horizon?.message && (
+        <p className="ab-feedback ab-timeline-feedback" role="status">
+          {horizon.message}
+        </p>
+      )}
     </div>
   )
 }

@@ -34,7 +34,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },
-    { label: 'Start', tex: String.raw`x(0) = {{x0}}` },
+    { label: 'Start', tex: String.raw`x(0) = {{#x0}}` },
     { label: 'Lösung', tex: String.raw`x(t) = \left({{x0}} + \frac{{{b}}}{{{a}}}\right) e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
   ],
   plots: [

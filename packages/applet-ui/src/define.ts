@@ -77,6 +77,11 @@ export interface AppletDef<P extends Params = Params> {
    * forms — set it when a closed form is a motion in time.
    */
   zeitleiste?: boolean
+  /**
+   * The parameter that sets how far the timeline runs (steps N, time window T). It is set in
+   * the timeline itself ("n = 12 / 40", the 40 editable), not among the model's parameters.
+   */
+  horizont?: string
   /** Open the timeline at the start instead of showing everything. */
   schritte?: boolean
   runOptions?: (p: P) => Partial<RunOptions>
@@ -94,7 +99,7 @@ export function defineApplet<P extends Params>(def: AppletDef<P>): AppletDef<P> 
       if (!ids.has(h.param)) throw new Error(`Applet "${def.id}": drag handle refers to unknown parameter "${h.param}".`)
     }
   }
-  for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.sichtbar ?? {})]) {
+  for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.sichtbar ?? {}), ...(def.horizont ? [def.horizont] : [])]) {
     if (!ids.has(id)) throw new Error(`Applet "${def.id}": layout.main refers to unknown parameter "${id}".`)
   }
   return def

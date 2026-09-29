@@ -4,9 +4,13 @@
  *   'x_{n+1} = {{a}}\\,x_n'            → a live symbol a (or its value, with numbers shown)
  *   'x_{n+1} = x_n {{+b}}'             → "+ b"; with numbers "+ 1" or "− 1": the sign joins the operator
  *   'x_n = {{(a)}}^n\\,{{x0}}'         → parentheses around a negative value, e.g. (−0,5)^n
- *   'y(0) = {{start}}'                 → a point as (y₁; y₂); {{start.0}} is its first coordinate
+ *   'x_0 = {{#x0}}'                    → always the value: a start value, where "x₀ = x₀" would say nothing
+ *   'y(0) = {{#start}}'                → a point as (y₁; y₂); {{start.0}} is its first coordinate
  *   '{{a}}{{*}}x'                      → a product: a x with symbols, 0,8 · x with numbers
  *   '{{stoerung}}'                     → a switch or choice shows its state ("an"); a click changes it
+ *
+ * Several equations in one formula are separated by `\\`. Each line is split at its first
+ * relation (=, ≤, ∼, …), so all lines of all formulas can be aligned at it.
  *
  * Each placeholder becomes `\htmlData{param=<id>}{…}`, which KaTeX renders as a span with
  * `data-param`: the component makes those spans draggable, focusable and linked.
@@ -15,14 +19,15 @@
 import { type ParamSpec, type ParamValue, type Params } from '@abacus/applet-core'
 
 export interface Formel {
-  /** Short caption above the formula, e.g. "Vorschrift", "Lösung". */
+  /** Short caption at the left of the first line, e.g. "Vorschrift", "Start". */
   label?: string
+  /** TeX; lines separated by `\\`. */
   tex: string
 }
 
 export type FormulaMode = 'symbole' | 'zahlen'
 
-const PLACEHOLDER = /\{\{\s*([+(]?)\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.([01]))?\s*\)?\s*\}\}/g
+const PLACEHOLDER = /\{\{\s*([+(#]?)\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.([01]))?\s*\)?\s*\}\}/g
 
 /** A number as TeX, German style: 0{,}8 · −1{,}25 · 1{,}2 \cdot 10^{-6}. */
 export function texNumber(v: number, digits = 4): string {
@@ -53,7 +58,7 @@ export function expandFormula(tex: string, specs: readonly ParamSpec[], params: 
     if (spec.kind === 'bool') return chip(id, `\\text{${params[id] ? spec.labelOn : spec.labelOff}}`)
     if (spec.kind === 'choice') return chip(id, `\\text{${spec.options.find((o) => o.value === params[id])?.label ?? String(params[id])}}`)
     const symbol = 'latex' in spec && spec.latex ? spec.latex : `\\text{${spec.label}}`
-    if (mode === 'symbole') {
+    if (mode === 'symbole' && mod !== '#') {
       const sym = index === undefined ? symbol : `${symbol}_{${Number(index) + 1}}`
       return mod === '+' ? `+ ${chip(id, sym)}` : chip(id, sym)
     }
@@ -69,4 +74,66 @@ export function expandFormula(tex: string, specs: readonly ParamSpec[], params: 
     if (mod === '(' && v < 0) return chip(id, `\\left(${texNumber(v)}\\right)`)
     return chip(id, texNumber(v))
   })
+}
+
+/** Top-level pieces of TeX, cut where `at` matches outside braces and environments (matrices). */
+function splitTop(tex: string, at: (tex: string, i: number) => number): { parts: string[]; cuts: string[] } {
+  const parts: string[] = []
+  const cuts: string[] = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < tex.length; i++) {
+    const c = tex[i]
+    if (c === '\\' && (tex[i + 1] === '{' || tex[i + 1] === '}')) {
+      i++ // an escaped brace does not nest
+      continue
+    }
+    if (tex.startsWith('\\begin{', i)) depth++
+    else if (tex.startsWith('\\end{', i)) depth--
+    if (c === '{') depth++
+    else if (c === '}') depth--
+    else if (depth === 0) {
+      const len = at(tex, i)
+      if (len > 0) {
+        parts.push(tex.slice(start, i))
+        cuts.push(tex.slice(i, i + len))
+        start = i + len
+        i += len - 1
+      }
+    }
+  }
+  parts.push(tex.slice(start))
+  return { parts, cuts }
+}
+
+/** The lines of a formula (separated by `\\` outside braces). */
+export function formulaLines(tex: string): string[] {
+  return splitTop(tex, (t, i) => (t.startsWith('\\\\', i) ? 2 : 0))
+    .parts.map((l) => l.trim())
+    .filter(Boolean)
+}
+
+const RELATIONS = ['\\approx', '\\sim', '\\leq', '\\geq', '\\le', '\\ge', '=', '<', '>']
+
+export interface FormulaLine {
+  lhs: string
+  /** The first relation, e.g. `=`; empty when the line has none. */
+  rel: string
+  rhs: string
+}
+
+/** A line split at its first top-level relation, for alignment in a column. */
+export function splitRelation(line: string): FormulaLine {
+  let found = false
+  const { parts, cuts } = splitTop(line, (t, i) => {
+    if (found) return 0
+    // a backslash command that merely starts like a relation (\left, \leftarrow) is not one
+    const r = RELATIONS.find((rel) => t.startsWith(rel, i) && !(rel.startsWith('\\') && /[A-Za-z]/.test(t[i + rel.length] ?? '')))
+    if (!r) return 0
+    // "\\" line breaks and "\," spaces are not relations; "=" inside "\ne" etc. never occurs here
+    found = true
+    return r.length
+  })
+  if (!cuts.length) return { lhs: '', rel: '', rhs: line.trim() }
+  return { lhs: parts[0].trim(), rel: cuts[0], rhs: parts.slice(1).join('').trim() }
 }

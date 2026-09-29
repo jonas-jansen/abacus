@@ -180,7 +180,7 @@ export function probeNodes(frame: Frame, spec: PlotSpec, run: Run, view: PlotVie
       nodes.push({ tag: 'line', attrs: { x1: X(at), y1: plot.y, x2: X(at), y2: plot.y + plot.h, class: 'ab-probe-line' } })
       rows.push({ tex: discrete ? 'n' : spec.xLabel ?? 't', value: discrete ? String(at) : tnum(at) })
       for (const s of series) {
-        if (s.role === 'reference' || s.role === 'ghost') continue
+        if (s.role === 'reference' || s.role === 'ghost' || s.role === 'annotation') continue
         let x = at
         let y: number
         if (s.kind === 'discrete') {

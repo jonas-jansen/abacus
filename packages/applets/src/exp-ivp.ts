@@ -33,9 +33,10 @@ export default defineApplet({
   titel: 'Exponentielles Wachstum',
   kurz: 'Die Änderung ist proportional zum Bestand.',
   model,
+  horizont: 'T',
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N` },
-    { label: 'Start', tex: String.raw`N(0) = {{N0}}, \quad 0 \le t \le {{T}}` },
+    { label: 'Start', tex: String.raw`N(0) = {{#N0}}` },
     { label: 'Lösung', tex: String.raw`N(t) = {{N0}}{{*}}e^{{{r}}\,t}` },
   ],
   plots: [

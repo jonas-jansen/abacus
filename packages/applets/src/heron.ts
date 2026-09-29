@@ -50,10 +50,10 @@ export default defineApplet({
   titel: 'Heron-Verfahren für √2',
   kurz: 'Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich.',
   model,
+  horizont: 'N',
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = \frac12\left(x_n + \frac{2}{x_n}\right)` },
-    { label: 'Start', tex: String.raw`x_0 = {{x0}}, \quad n = 0, \dots, {{N}}` },
-    { label: 'Fixpunkte', tex: String.raw`x^* = \pm\sqrt{2}` },
+    { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
   ],
   plots: [
     { type: 'cobweb', f: 'f', orbit: 'x', xLabel: 'x', yLabel: 'f(x)', x: [-5, 5], y: [-5, 5], drag: { param: 'x0', axis: 'x' } },

@@ -1,7 +1,7 @@
 import katex from 'katex'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { formatNumber, type ParamSpec, type Params } from '@abacus/applet-core'
-import { expandFormula, type Formel, type FormulaMode } from './formula'
+import { expandFormula, formulaLines, splitRelation, type Formel, type FormulaMode } from './formula'
 
 const SCRUB_PX = 5
 
@@ -47,9 +47,20 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
   const root = useRef<HTMLDivElement>(null)
   const drag = useRef<{ id: string; x: number; v: number; moved: boolean } | null>(null)
 
-  const html = useMemo(() => formeln.map((f) => render(expandFormula(f.tex, specs, params, mode))), [formeln, specs, params, mode])
+  // One row per equation, all in one grid: label | left side | relation | right side. So every
+  // "=" of every formula sits in one column, and start values line up with the equations.
+  const rows = useMemo(() => {
+    const tex = (t: string) => (t ? render(expandFormula(t, specs, params, mode)) : '')
+    return formeln.flatMap((f, group) =>
+      formulaLines(f.tex).map((line, i) => {
+        const { lhs, rel, rhs } = splitRelation(line)
+        return { key: `${group}.${i}`, label: i === 0 ? f.label : undefined, gap: i === 0 && group > 0, lhs: tex(lhs), rel: rel ? render(rel) : '', rhs: tex(rhs) }
+      }),
+    )
+  }, [formeln, specs, params, mode])
+  const grid = useRef<HTMLDivElement>(null)
 
-  // Fit: a formula wider than the box is set smaller rather than scrolled or cut off.
+  // Fit: formulas wider than the box are set smaller rather than scrolled or cut off.
   const [width, setWidth] = useState(0)
   useEffect(() => {
     const el = root.current
@@ -59,17 +70,15 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
     return () => ro.disconnect()
   }, [])
   useLayoutEffect(() => {
-    const box = root.current
-    if (!box || !width) return
-    box.querySelectorAll<HTMLElement>('.ab-formula-tex').forEach((el) => {
-      el.style.fontSize = ''
-      const natural = el.scrollWidth
-      if (natural > width) {
-        const base = parseFloat(getComputedStyle(el).fontSize)
-        el.style.fontSize = `${Math.max(9, (base * width) / natural - 0.2)}px`
-      }
-    })
-  }, [html, width])
+    const el = grid.current
+    if (!el || !width) return
+    el.style.fontSize = ''
+    const natural = el.scrollWidth
+    if (natural > width) {
+      const base = parseFloat(getComputedStyle(el).fontSize)
+      el.style.fontSize = `${Math.max(9, (base * width) / natural - 0.2)}px`
+    }
+  }, [rows, width])
 
   // KaTeX output is plain HTML: make the parameter spans reachable by keyboard and screen readers.
   useEffect(() => {
@@ -159,12 +168,18 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
         onBlur={() => onHot(null)}
         onKeyDown={key}
       >
-        {formeln.map((f, i) => (
-          <div key={i} className="ab-formula">
-            {f.label && <span className="ab-formula-label">{f.label}</span>}
-            <span className="ab-formula-tex" dangerouslySetInnerHTML={{ __html: html[i] }} />
-          </div>
-        ))}
+        <div className="ab-eqs" ref={grid}>
+          {rows.map((r) => (
+            <Fragment key={r.key}>
+              <span className="ab-eq-label" data-gap={r.gap || undefined}>
+                {r.label}
+              </span>
+              <span className="ab-eq-lhs" data-gap={r.gap || undefined} dangerouslySetInnerHTML={{ __html: r.lhs }} />
+              <span className="ab-eq-rel" data-gap={r.gap || undefined} dangerouslySetInnerHTML={{ __html: r.rel }} />
+              <span className="ab-eq-rhs" data-gap={r.gap || undefined} dangerouslySetInnerHTML={{ __html: r.rhs }} />
+            </Fragment>
+          ))}
+        </div>
       </div>
       <div className="ab-seg" role="group" aria-label="Formeln zeigen">
         <button type="button" aria-pressed={mode === 'symbole'} onClick={() => setMode('symbole')} title="Formeln mit Symbolen">

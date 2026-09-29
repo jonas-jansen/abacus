@@ -54,9 +54,8 @@ export default defineApplet({
   formeln: (p) => [
     { label: 'Form', tex: String.raw`{{form}}` },
     p.form === 'linear'
-      ? { label: 'Update-Funktion', tex: String.raw`f(x) = {{a}}{{*}}x {{+b}}` }
-      : { label: 'Update-Funktion', tex: String.raw`f(x) = x {{+r}}\left(1 - \frac{x}{{{K}}}\right) x` },
-    { label: 'Fixpunkt', tex: String.raw`f(x^*) = x^*` },
+      ? { label: 'Update', tex: String.raw`f(x) = {{a}}{{*}}x {{+b}}` }
+      : { label: 'Update', tex: String.raw`f(x) = x {{+r}}\left(1 - \frac{x}{{{K}}}\right) x` },
   ],
   plots: [
     {

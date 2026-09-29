@@ -8,6 +8,8 @@ import { bool, defineModel, int, liste, zahl, type Observable, type Series } fro
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const T_END = 10
+/** Height of the step-width bracket, below all curves. */
+const BAR = 278.8
 const T0 = 315
 const f = (t: number, T: number) => -0.6 * (T - (293.5 - 1.35 * t))
 const exact = (t: number) => 19.25 * Math.exp(-0.6 * t) - 1.35 * t + 295.75
@@ -55,6 +57,16 @@ const model = defineModel({
       const t = Float64Array.from({ length: 401 }, (_, i) => (i * T_END) / 400)
       series.push({ id: 'exakt', label: 'T(t)', kind: 'continuous', x: t, y: t.map(exact), role: 'reference' })
     }
+    // the step width as a bracket along the bottom: |——| from t = 0 to t = h
+    const h = T_END / p.m
+    series.push({
+      id: 'schritt',
+      label: 'h',
+      kind: 'continuous',
+      x: Float64Array.of(0, 0, NaN, 0, h, NaN, h, h),
+      y: Float64Array.of(BAR - 0.9, BAR + 0.9, NaN, BAR, BAR, NaN, BAR - 0.9, BAR + 0.9),
+      role: 'annotation',
+    })
     const methods: [Method, boolean, string, Series['role']][] = [
       ['euler', p.euler, '\\text{Euler}', 'secondary'],
       ['heun', p.heun, '\\text{Heun}', 'primary'],
@@ -93,8 +105,8 @@ export default defineApplet({
   kurz: 'Zwei Näherungsverfahren gegen die exakte Lösung: Wie schnell wird der Fehler kleiner?',
   model,
   formeln: [
-    { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr), \quad T(0) = 315` },
-    { label: 'exakte Lösung', tex: String.raw`T(t) = 19{,}25\,e^{-0{,}6\,t} - 1{,}35\,t + 295{,}75 \quad {{exakt}}` },
+    { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr)` },
+    { label: 'Exakt', tex: String.raw`T(t) = 19{,}25\,e^{-0{,}6\,t} - 1{,}35\,t + 295{,}75 \quad {{exakt}}` },
     { label: 'Schrittweite', tex: String.raw`h = \frac{10}{{{m}}}` },
     { label: 'Euler', tex: String.raw`T_{n+1} = T_n + h\,f(t_n, T_n) \quad {{euler}}` },
     { label: 'Heun', tex: String.raw`T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr) \quad {{heun}}` },
@@ -107,7 +119,8 @@ export default defineApplet({
       x: [-0.25, 10.25],
       y: [277, 318],
       // the first grid point sits at t = h: pull it to change the step width
-      drag: [{ param: 'm', axis: 'x', at: (p) => [T_END / p.m, exact(T_END / p.m)], set: (x) => ({ m: Math.max(1, Math.round(T_END / Math.max(x, 0.01))) }) }],
+      // the bracket's right end: pull it to change the step width, away from the data
+      drag: [{ param: 'm', label: 'h', axis: 'x', at: (p) => [T_END / p.m, BAR], set: (x) => ({ m: Math.max(1, Math.round(T_END / Math.max(x, 0.01))) }) }],
     },
   ],
   layout: { main: ['m', 'euler', 'heun', 'exakt'] },
