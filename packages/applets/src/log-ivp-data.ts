@@ -22,9 +22,9 @@ const model = closedForm({
     abweichungen: bool('Abweichungen', { labelOn: 'zeigen', labelOff: 'verbergen', default: true }),
   },
   domain: [0, 36],
-  curves: { N: { label: 'N(t)', role: 'primary', f: (t, p) => N(t, p.r, p.K, p.N0) } },
+  curves: { N: { label: 'N(t)', name: 'Modell', role: 'primary', f: (t, p) => N(t, p.r, p.K, p.N0) } },
   extraSeries: ({ p }) => {
-    const out: Series[] = [{ id: 'daten', label: '\\text{Messwerte}', kind: 'discrete', x: TD, y: DATA, role: 'data', connect: false }]
+    const out: Series[] = [{ id: 'daten', label: 'N_i', name: 'Messwerte', kind: 'discrete', x: TD, y: DATA, role: 'data', connect: false }]
     if (p.abweichungen) {
       // vertical segments data → curve, separated by NaN
       const x = new Float64Array(TD.length * 3)
@@ -33,7 +33,7 @@ const model = closedForm({
         x.set([t, t, NaN], 3 * i)
         y.set([DATA[i], N(t, p.r, p.K, p.N0), NaN], 3 * i)
       })
-      out.unshift({ id: 'res', label: '\\text{Abweichung}', kind: 'continuous', x, y, role: 'ghost' })
+      out.unshift({ id: 'res', label: 'd_i', name: 'Abweichungen', kind: 'continuous', x, y, role: 'ghost' })
     }
     return out
   },

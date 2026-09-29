@@ -18,8 +18,8 @@ const model = closedForm({
   domain: (p) => [0, p.T],
   slope: (_t, x, p) => p.r * x * (1 - x / p.K),
   curves: {
-    x: { label: 'x(t)', f: (t, p) => logistic(t, p.r, p.K, p.x0) },
-    K: { label: 'K', role: 'reference', f: (_t, p) => p.K },
+    x: { label: 'x(t)', name: 'Population', f: (t, p) => logistic(t, p.r, p.K, p.x0) },
+    K: { label: 'K', name: 'Kapazität', role: 'reference', f: (_t, p) => p.K },
   },
   observables: ({ p }) => {
     // The inflection point sits at x = K/2, reached at t* = ln((K − x₀)/x₀) / r — if that is a time > 0.

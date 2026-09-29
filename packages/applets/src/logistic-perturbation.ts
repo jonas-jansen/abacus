@@ -24,12 +24,12 @@ const model = iteration({
   },
   horizon: (p) => p.N,
   seed: (p) => p.seed,
-  series: { id: 'y', label: 'y_n' },
+  series: { id: 'y', label: 'y_n', name: 'mit Störung' },
   extraSeries: ({ p, n }) => {
     const y = 1 - 1 / p.a
     const f = sample((v) => p.a * v * (1 - v), 0, 1, 201)
     return [
-      { id: 'fix', label: 'y^*', kind: 'continuous', x: Float64Array.of(0, n.length - 1), y: Float64Array.of(y, y), role: 'reference' },
+      { id: 'fix', label: 'y^*', name: 'Fixpunkt', kind: 'continuous', x: Float64Array.of(0, n.length - 1), y: Float64Array.of(y, y), role: 'reference' },
       { id: 'f', label: 'f(y)', kind: 'continuous', x: f.x, y: f.y, role: 'primary' },
     ]
   },

@@ -62,7 +62,7 @@ const model = closedForm({
     return [
       { id: 'aussen', label: '\\text{außerhalb}', kind: 'discrete', x: n, y: out, role: 'secondary', connect: false },
       band,
-      { id: 'L', label: 'L', kind: 'continuous', x: Float64Array.of(0, p.N + 1), y: Float64Array.of(L, L), role: 'reference' },
+      { id: 'L', label: 'L', name: 'Grenzwert', kind: 'continuous', x: Float64Array.of(0, p.N + 1), y: Float64Array.of(L, L), role: 'reference' },
     ]
   },
   observables: ({ p, series }) => {

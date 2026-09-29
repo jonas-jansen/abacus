@@ -48,8 +48,8 @@ const model = iteration({
   extraSeries: ({ p }) => {
     const d = bifurcation()
     return [
-      { id: 'diagramm', label: 'y^*', kind: 'discrete', x: d.x, y: d.y, role: 'primary', connect: false },
-      { id: 'jetzt', label: 'a', kind: 'continuous', x: Float64Array.of(p.a, p.a), y: Float64Array.of(0, 1), role: 'secondary' },
+      { id: 'diagramm', label: 'y^*', name: 'Langzeitwerte', kind: 'discrete', x: d.x, y: d.y, role: 'primary', connect: false },
+      { id: 'jetzt', label: 'a', name: 'gewählt', kind: 'continuous', x: Float64Array.of(p.a, p.a), y: Float64Array.of(0, 1), role: 'secondary' },
     ]
   },
   observables: ({ p, x, tail }) => {

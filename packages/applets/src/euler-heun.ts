@@ -55,7 +55,7 @@ const model = defineModel({
     const series: Series[] = []
     if (p.exakt) {
       const t = Float64Array.from({ length: 401 }, (_, i) => (i * T_END) / 400)
-      series.push({ id: 'exakt', label: 'T(t)', kind: 'continuous', x: t, y: t.map(exact), role: 'reference' })
+      series.push({ id: 'exakt', label: 'T(t)', name: 'exakte Lösung', kind: 'continuous', x: t, y: t.map(exact), role: 'reference' })
     }
     // the step width as a bracket along the bottom: |——| from t = 0 to t = h
     const h = T_END / p.m
@@ -68,13 +68,13 @@ const model = defineModel({
       role: 'annotation',
     })
     const methods: [Method, boolean, string, Series['role']][] = [
-      ['euler', p.euler, '\\text{Euler}', 'secondary'],
-      ['heun', p.heun, '\\text{Heun}', 'primary'],
+      ['euler', p.euler, 'Euler', 'secondary'],
+      ['heun', p.heun, 'Heun', 'primary'],
     ]
     for (const [id, on, label, role] of methods) {
       if (!on) continue
       const { t, T } = solve(id, p.m)
-      series.push({ id, label, kind: 'discrete', x: t, y: T, role })
+      series.push({ id, label: 'T_n', name: label, kind: 'discrete', x: t, y: T, role })
     }
     const observables: Record<string, Observable> = {}
     if (opts.observables !== false) {

@@ -12,7 +12,7 @@ const model = closedForm({
     T: real('Zeitfenster', { latex: 'T', min: 1, max: 30, step: 0.5, default: 10, limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   domain: (p) => [0, p.T],
-  curves: { N: { label: 'N(t)', f: (t, p) => p.N0 * Math.exp(p.r * t) } },
+  curves: { N: { label: 'N(t)', name: 'Population', f: (t, p) => p.N0 * Math.exp(p.r * t) } },
   slope: (_t, x, p) => p.r * x,
   observables: ({ p }) => {
     const td = p.r === 0 ? null : Math.LN2 / Math.abs(p.r)

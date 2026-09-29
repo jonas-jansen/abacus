@@ -25,7 +25,7 @@ const model = defineModel({
     ),
     r: real('Wachstumsrate der Beute', { latex: 'r', min: 0, max: 4, step: 0.01, default: 2.5 }),
     gamma: real('Jagderfolg', { latex: '\\gamma', min: 0, max: 2.5, step: 0.01, default: 1 }),
-    y: point('Zustand', { latex: '(y_1, y_2)', xBounds: [0, 1.5], yBounds: [0, 1.5], default: [0.6, 0.4] }),
+    y: point('Zustand', { latex: '\\mathbf{y}', xBounds: [0, 1.5], yBounds: [0, 1.5], default: [0.6, 0.4] }),
   },
   run(p: P, opts) {
     const prey = p.teil === 'beute'
@@ -79,7 +79,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Update-Funktion', tex: String.raw`f_1(y_1, y_2) = (1 + {{r}})\,y_1 - {{r}}{{*}}y_1^2 - {{gamma}}{{*}}y_1 y_2 \\ f_2(y_1, y_2) = {{gamma}}{{*}}y_1 y_2` },
-    { label: 'Punkt', tex: String.raw`y = {{#y}}` },
+    { label: 'Punkt', tex: String.raw`\mathbf{y} = {{#y}}` },
     { label: 'Fläche', tex: String.raw`{{teil}}` },
   ],
   plots: [{ type: 'surface3d', grid: 'f', xLabel: 'y_1', yLabel: 'y_2', drag: { param: 'y', axis: 'xy' } }],

@@ -27,7 +27,7 @@ const model = closedForm({
   domain: (p) => FUNKTIONEN[p.f].domain,
   curves: {
     f: { label: 'f(t)', f: (t, p) => FUNKTIONEN[p.f].f(t) },
-    F: { label: 'F(x)', role: 'secondary', f: (t, p) => Fa(p, t) },
+    F: { label: 'F(x)', name: 'Flächenfunktion', role: 'secondary', f: (t, p) => Fa(p, t) },
   },
   extraSeries: ({ p }) => {
     const F = FUNKTIONEN[p.f]

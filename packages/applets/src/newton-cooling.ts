@@ -16,9 +16,9 @@ const model = iteration({
   start: (p) => p.T0,
   step: (T, p) => T - p.alpha * (T - p.Tu),
   horizon: (p) => p.N,
-  series: { id: 'T', label: 'T_n' },
+  series: { id: 'T', label: 'T_n', name: 'Temperatur' },
   extraSeries: ({ p, n }) => [
-    { id: 'Tu', label: 'T^u', kind: 'continuous', x: Float64Array.of(0, n.length - 1), y: Float64Array.of(p.Tu, p.Tu), role: 'reference' },
+    { id: 'Tu', label: 'T^u', name: 'Raumtemperatur', kind: 'continuous', x: Float64Array.of(0, n.length - 1), y: Float64Array.of(p.Tu, p.Tu), role: 'reference' },
   ],
   observables: ({ p, x }) => {
     const q = 1 - p.alpha

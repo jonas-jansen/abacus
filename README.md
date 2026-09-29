@@ -63,6 +63,10 @@ Axes hold still while dragging, values snap to the slider's precision, and the h
 its slider row light each other up. Iterations and ODEs get a timeline (play, scrub);
 closed forms that describe a motion in time opt in with `zeitleiste: true`.
 
+Conventions: vectors are bold everywhere (`\\mathbf{y}(0)`, `A\\mathbf{v}`) — in formulas,
+parameter symbols, handle labels and legends. Series with a meaning carry it as `name`
+(`{ id: 'beute', label: 'y_1', name: 'Beute' }`); legends show "y₁ Beute".
+
 Every applet names its chapter of the slides (`kapitel: 'I' | 'II' | 'III' | 'IV' | 'Anhang'`,
 `folien: '22–27'`); the gallery and all lists are sorted by it. Plots can offer a lin/log switch
 with an explanation (`logToggle: true`, `logHilfe: '…'`); series can be filled areas

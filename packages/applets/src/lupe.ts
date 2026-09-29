@@ -29,7 +29,7 @@ const model = closedForm({
   samples: 400,
   curves: {
     f: { label: 'f(x)', f: (x, p) => FUNKTIONEN[p.f].f(x) },
-    t: { label: 't(x)', role: 'reference', f: (x, p) => FUNKTIONEN[p.f].f(p.a) + FUNKTIONEN[p.f].df(p.a) * (x - p.a) },
+    t: { label: 't(x)', name: 'Tangente', role: 'reference', f: (x, p) => FUNKTIONEN[p.f].f(p.a) + FUNKTIONEN[p.f].df(p.a) * (x - p.a) },
   },
   observables: ({ p }) => {
     const F = FUNKTIONEN[p.f]

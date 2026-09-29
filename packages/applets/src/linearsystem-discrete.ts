@@ -14,7 +14,7 @@ const model = iterationN({
     b: entry('oben rechts', 'a_{12}', 0.25),
     c: entry('unten links', 'a_{21}', -0.5),
     d: entry('unten rechts', 'a_{22}', 0),
-    start: point('Anfangswert', { latex: 'x_0', xBounds: [-2, 2], yBounds: [-2, 2], default: [1, 0] }),
+    start: point('Anfangswert', { latex: '\\mathbf{x}_0', xBounds: [-2, 2], yBounds: [-2, 2], default: [1, 0] }),
     N: schritte('Schritte', { latex: 'N', default: 25, max: 100 }),
   },
   components: [
@@ -26,8 +26,8 @@ const model = iterationN({
   horizon: (p) => p.N,
   // the columns of A, i.e. where the unit vectors go, as arrows from the origin
   extraSeries: ({ p }) => [
-    { id: 'Ae1', label: 'A e_1', kind: 'continuous', x: Float64Array.of(0, p.a), y: Float64Array.of(0, p.c), role: 'tertiary' },
-    { id: 'Ae2', label: 'A e_2', kind: 'continuous', x: Float64Array.of(0, p.b), y: Float64Array.of(0, p.d), role: 'tertiary' },
+    { id: 'Ae1', label: 'A\\mathbf{e}_1', kind: 'continuous', x: Float64Array.of(0, p.a), y: Float64Array.of(0, p.c), role: 'tertiary' },
+    { id: 'Ae2', label: 'A\\mathbf{e}_2', kind: 'continuous', x: Float64Array.of(0, p.b), y: Float64Array.of(0, p.d), role: 'tertiary' },
   ],
   observables: ({ p }) => {
     const e = eigen(p.a, p.b, p.c, p.d)
@@ -50,8 +50,8 @@ export default defineApplet({
   model,
   horizont: 'N',
   formeln: [
-    { label: 'System', tex: String.raw`x(n+1) = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} x(n)` },
-    { label: 'Start', tex: String.raw`x(0) = {{#start}}` },
+    { label: 'System', tex: String.raw`\mathbf{x}(n+1) = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} \mathbf{x}(n)` },
+    { label: 'Start', tex: String.raw`\mathbf{x}(0) = {{#start}}` },
   ],
   plots: [
     {
@@ -66,8 +66,8 @@ export default defineApplet({
       drag: [
         { param: 'start', axis: 'xy' },
         // the first column of A is the image of (1, 0), the second that of (0, 1)
-        { param: 'a', also: ['c'], label: 'A e_1', axis: 'xy', at: (p) => [p.a, p.c], set: (x, y) => ({ a: x, c: y }) },
-        { param: 'b', also: ['d'], label: 'A e_2', axis: 'xy', at: (p) => [p.b, p.d], set: (x, y) => ({ b: x, d: y }) },
+        { param: 'a', also: ['c'], label: 'A\\mathbf{e}_1', axis: 'xy', at: (p) => [p.a, p.c], set: (x, y) => ({ a: x, c: y }) },
+        { param: 'b', also: ['d'], label: 'A\\mathbf{e}_2', axis: 'xy', at: (p) => [p.b, p.d], set: (x, y) => ({ b: x, d: y }) },
       ],
     },
     { type: 'timeSeriesDiscrete', series: ['x1', 'x2'], xLabel: 'n', yLabel: 'x_n', y: [-2, 2] },

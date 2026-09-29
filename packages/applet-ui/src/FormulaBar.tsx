@@ -49,7 +49,9 @@ function stepOf(spec: ParamSpec | undefined, idx?: number): number | null {
 interface Cell {
   key: string
   cls: string
-  html: string
+  /** Content with symbols and with values; both are laid out, one is shown. */
+  sym: string
+  num: string
   /** Grid placement "column|row", wide (columns side by side) and narrow (stacked). */
   wide: string
   narrow: string
@@ -58,11 +60,12 @@ interface Cell {
 /**
  * The model as formulas, with its parameters live: point at a parameter to see it light up
  * in the controls and the plot, drag it sideways to change it, click it to type a value.
- * A switch puts the current values in place of the symbols.
+ * The last column switches between symbols and values.
  *
  * Layout: each formula is a column (model, start, solution …) with its title on top. Inside
  * a column the lines align at their relation; lines of different columns share rows, so
- * S′ = … and S(0) = … stand side by side. Narrow boxes stack the columns.
+ * S′ = … and S(0) = … stand side by side. Every cell holds both versions — symbols and
+ * values — on top of each other, so switching never changes a column's width.
  */
 export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusParam, hot }: FormulaBarProps) {
   const [mode, setMode] = useState<FormulaMode>('symbole')
@@ -71,13 +74,15 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
   const drag = useRef<{ id: string; idx?: number; x: number; v: number; moved: boolean } | null>(null)
 
   const { cells, columns } = useMemo(() => {
-    const tex = (t: string) => (t ? render(expandFormula(t, specs, params, mode)) : '')
+    const both = (t: string) =>
+      t ? { sym: render(expandFormula(t, specs, params, 'symbole')), num: render(expandFormula(t, specs, params, 'zahlen')) } : { sym: '', num: '' }
     const out: Cell[] = []
-    let narrowRow = 1
+    // narrow: the switch comes first (rows 1–2), then the formulas one below the other
+    let narrowRow = 3
     const rows = Math.max(1, ...formeln.map((f) => formulaLines(f.tex).length))
     formeln.forEach((f, c) => {
       const col = 4 * c + 1 // three sub-columns per formula, then a gap column
-      if (f.label) out.push({ key: `${c}t`, cls: 'ab-eq-title', html: f.label, wide: `${col} / span 3|1`, narrow: `1 / -1|${narrowRow++}` })
+      if (f.label) out.push({ key: `${c}t`, cls: 'ab-eq-title', sym: f.label, num: f.label, wide: `${col} / span 3|1`, narrow: `1 / -1|${narrowRow++}` })
       const lines = formulaLines(f.tex)
       lines.forEach((line, i) => {
         const { lhs, rel, rhs } = splitRelation(line)
@@ -87,17 +92,18 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
         const wr = tall ? `2 / span ${rows}` : String(i + 2)
         const nr = narrowRow++
         if (!rel) {
-          out.push({ key: `${c}.${i}`, cls: 'ab-eq-whole', html: tex(rhs), wide: `${col} / span 3|${wr}`, narrow: `1 / -1|${nr}` })
+          out.push({ key: `${c}.${i}`, cls: 'ab-eq-whole', ...both(rhs), wide: `${col} / span 3|${wr}`, narrow: `1 / -1|${nr}` })
           return
         }
         const t = tall ? ' ab-eq-tall' : ''
-        out.push({ key: `${c}.${i}l`, cls: 'ab-eq-lhs' + t, html: tex(lhs), wide: `${col}|${wr}`, narrow: `1|${nr}` })
-        out.push({ key: `${c}.${i}r`, cls: 'ab-eq-rel' + t, html: render(rel), wide: `${col + 1}|${wr}`, narrow: `2|${nr}` })
-        out.push({ key: `${c}.${i}s`, cls: 'ab-eq-rhs' + t, html: tex(rhs), wide: `${col + 2}|${wr}`, narrow: `3|${nr}` })
+        const r = render(rel)
+        out.push({ key: `${c}.${i}l`, cls: 'ab-eq-lhs' + t, ...both(lhs), wide: `${col}|${wr}`, narrow: `1|${nr}` })
+        out.push({ key: `${c}.${i}r`, cls: 'ab-eq-rel' + t, sym: r, num: r, wide: `${col + 1}|${wr}`, narrow: `2|${nr}` })
+        out.push({ key: `${c}.${i}s`, cls: 'ab-eq-rhs' + t, ...both(rhs), wide: `${col + 2}|${wr}`, narrow: `3|${nr}` })
       })
     })
     return { cells: out, columns: formeln.length }
-  }, [formeln, specs, params, mode])
+  }, [formeln, specs, params])
 
   // Fit: formulas wider than the box are set smaller rather than scrolled or cut off.
   const [width, setWidth] = useState(0)
@@ -216,7 +222,9 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
   }
 
   const values = mode === 'zahlen'
-  const wideCols = Array.from({ length: columns }, () => 'auto auto auto').join(' var(--ab-col-gap) ')
+  // the formula columns, then the switch's column
+  const wideCols = Array.from({ length: columns + 1 }, () => 'auto auto auto').join(' var(--ab-col-gap) ')
+  const switchCol = 4 * columns + 1
 
   return (
     <div className="ab-model">
@@ -232,36 +240,48 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
         onBlur={() => onHot(null)}
         onKeyDown={key}
       >
-        <div className="ab-eqs" ref={grid} style={{ '--ab-wide-cols': wideCols } as CSSProperties}>
+        <div className="ab-eqs" ref={grid} data-mode={mode} style={{ '--ab-wide-cols': wideCols } as CSSProperties}>
           {cells.map((c) => {
             const [wc, wr] = c.wide.split('|')
             const [nc, nr] = c.narrow.split('|')
             const style = { '--wc': wc, '--wr': wr, '--nc': nc, '--nr': nr } as CSSProperties
-            return c.cls.startsWith('ab-eq-title') ? (
+            if (c.cls.startsWith('ab-eq-title'))
+              return (
+                <span key={c.key} className={c.cls} style={style}>
+                  {c.sym}
+                </span>
+              )
+            return (
               <span key={c.key} className={c.cls} style={style}>
-                {c.html}
+                <span className="ab-dual">
+                  <span data-v="symbole" aria-hidden={values || undefined} dangerouslySetInnerHTML={{ __html: c.sym }} />
+                  <span data-v="zahlen" aria-hidden={!values || undefined} dangerouslySetInnerHTML={{ __html: c.num }} />
+                </span>
               </span>
-            ) : (
-              <span key={c.key} className={c.cls} style={style} dangerouslySetInnerHTML={{ __html: c.html }} />
             )
           })}
+          <span className="ab-eq-title ab-values-title" style={{ '--wc': `${switchCol} / span 3`, '--wr': 1, '--nc': '1 / -1', '--nr': 1 } as CSSProperties}>
+            Parameter / Werte
+          </span>
+          <span className="ab-values-cell" style={{ '--wc': `${switchCol} / span 3`, '--wr': 2, '--nc': '1 / -1', '--nr': 2 } as CSSProperties}>
+            <button
+              type="button"
+              className="ab-values"
+              role="switch"
+              aria-checked={values}
+              aria-label="Werte statt Symbole zeigen"
+              onClick={() => setMode(values ? 'symbole' : 'zahlen')}
+              title={values ? 'wieder die Symbole zeigen' : 'die aktuellen Werte einsetzen'}
+            >
+              <span className="ab-values-track" aria-hidden="true">
+                <span className="ab-values-knob" />
+                <span className="ab-values-opt ab-values-sym">a</span>
+                <span className="ab-values-opt ab-values-num">1,5</span>
+              </span>
+            </button>
+          </span>
         </div>
       </div>
-      <button
-        type="button"
-        className="ab-values"
-        role="switch"
-        aria-checked={values}
-        onClick={() => setMode(values ? 'symbole' : 'zahlen')}
-        title={values ? 'wieder Symbole zeigen' : 'die aktuellen Werte in die Formeln einsetzen'}
-      >
-        <span className="ab-values-track" aria-hidden="true">
-          <span className="ab-values-knob" />
-          <span className="ab-values-opt ab-values-sym">a</span>
-          <span className="ab-values-opt ab-values-num">1,5</span>
-        </span>
-        <span className="ab-values-label">Werte einsetzen</span>
-      </button>
     </div>
   )
 }

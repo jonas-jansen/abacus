@@ -360,6 +360,11 @@ button.ab-legend-item {
   background: transparent;
   transition: background 0.12s, opacity 0.12s;
 }
+.ab-legend-name {
+  margin-left: -2px;
+  font-size: 12px;
+  color: var(--ab-muted);
+}
 button.ab-legend-item:hover {
   background: var(--ab-hover);
   color: var(--ab-text);
@@ -718,6 +723,33 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   justify-self: start;
   white-space: nowrap;
 }
+/* Both versions of a cell — symbols and values — share one grid area, so the column is as
+   wide as the wider one and never jumps; the hidden one fades out. */
+.ab-dual {
+  display: inline-grid;
+}
+.ab-dual > * {
+  grid-area: 1 / 1;
+  transition: opacity 0.18s ease, visibility 0.18s;
+}
+.ab-eq-lhs .ab-dual > * {
+  justify-self: end;
+}
+.ab-eq-rhs .ab-dual > *,
+.ab-eq-whole .ab-dual > * {
+  justify-self: start;
+}
+.ab-eqs[data-mode='symbole'] [data-v='zahlen'],
+.ab-eqs[data-mode='zahlen'] [data-v='symbole'] {
+  opacity: 0;
+  visibility: hidden;
+}
+/* the switch between them: the last column, aligned like the others */
+.ab-values-cell {
+  justify-self: start;
+  align-self: center;
+}
+
 /* a vector beside several lines: centred on them (baselines cannot be shared across rows) */
 .ab-eqs > .ab-eq-tall {
   align-self: center;
@@ -760,13 +792,6 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   padding: 0;
   border: 0;
   background: none;
-}
-.ab-values-label {
-  font-size: 12px;
-  color: var(--ab-muted);
-}
-.ab-values:hover .ab-values-label {
-  color: var(--ab-text);
 }
 .ab-values-track {
   position: relative;
@@ -840,13 +865,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 /* Narrow: the columns stack, the switch sits above them. */
 @container (max-width: 599px) {
   .ab-model {
-    flex-direction: column-reverse;
-    align-items: stretch;
-    gap: 8px;
     padding: 10px 12px 12px;
-  }
-  .ab-values {
-    align-self: flex-end;
   }
   .ab-formulas {
     justify-content: flex-start;

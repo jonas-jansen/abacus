@@ -18,10 +18,10 @@ const model = ode({
     T: real('Zeitfenster', { latex: 'T', min: 5, max: 200, step: 1, default: 50, unit: 's', limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   components: [
-    { id: 'S', label: 'S', role: 'primary' },
-    { id: 'E', label: 'E', role: 'reference' },
-    { id: 'C', label: 'C', role: 'tertiary' },
-    { id: 'P', label: 'P', role: 'secondary' },
+    { id: 'S', label: 'S', name: 'Substrat', role: 'primary' },
+    { id: 'E', label: 'E', name: 'Enzym', role: 'reference' },
+    { id: 'C', label: 'C', name: 'Komplex', role: 'tertiary' },
+    { id: 'P', label: 'P', name: 'Produkt', role: 'secondary' },
   ],
   start: (p) => [p.S0, p.E0, 0, 0],
   rhs: (_t, [S, E, C], p) => {

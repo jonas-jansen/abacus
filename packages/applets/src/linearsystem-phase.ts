@@ -16,7 +16,7 @@ const model = ode({
     b: entry('oben rechts', 'a_{12}', 1),
     c: entry('unten links', 'a_{21}', -1),
     d: entry('unten rechts', 'a_{22}', -0.5),
-    start: point('Anfangswert', { latex: 'y(0)', xBounds: [-4, 4], yBounds: [-4, 4], default: [3, 0] }),
+    start: point('Anfangswert', { latex: '\\mathbf{y}(0)', xBounds: [-4, 4], yBounds: [-4, 4], default: [3, 0] }),
     T: real('Zeitfenster', { latex: 'T', min: 1, max: 40, step: 1, default: 15, limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   components: [
@@ -48,8 +48,8 @@ export default defineApplet({
   model,
   horizont: 'T',
   formeln: [
-    { label: 'System', tex: String.raw`y' = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} y` },
-    { label: 'Start', tex: String.raw`y(0) = {{#start}}` },
+    { label: 'System', tex: String.raw`\mathbf{y}' = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} \mathbf{y}` },
+    { label: 'Start', tex: String.raw`\mathbf{y}(0) = {{#start}}` },
   ],
   plots: [
     { type: 'phasePlane', xSeries: 'y1', ySeries: 'y2', xLabel: 'y_1', yLabel: 'y_2', x: [-4, 4], y: [-4, 4], field: true, drag: { param: 'start', axis: 'xy' } },

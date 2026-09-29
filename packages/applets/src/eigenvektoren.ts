@@ -39,7 +39,7 @@ const model = closedForm({
     b: entry('oben rechts', 'a_{12}', 1),
     c: entry('unten links', 'a_{21}', 3),
     d: entry('unten rechts', 'a_{22}', 2),
-    v: point('Vektor', { latex: 'v', xBounds: [-3, 3], yBounds: [-3, 3], default: [-1, 1.5] }),
+    v: point('Vektor', { latex: '\\mathbf{v}', xBounds: [-3, 3], yBounds: [-3, 3], default: [-1, 1.5] }),
   },
   domain: [0, 1],
   curves: {},
@@ -55,19 +55,19 @@ const model = closedForm({
       fill: true,
     },
     // the columns stay in the background: v and A v are the actors
-    arrow('s1', 'A e_1', [p.a, p.c], 'ghost'),
-    arrow('s2', 'A e_2', [p.b, p.d], 'ghost'),
-    arrow('v', 'v', p.v, 'primary'),
-    arrow('Av', 'A v', Av(p), 'secondary'),
+    arrow('s1', 'A\\mathbf{e}_1', [p.a, p.c], 'ghost'),
+    arrow('s2', 'A\\mathbf{e}_2', [p.b, p.d], 'ghost'),
+    arrow('v', '\\mathbf{v}', p.v, 'primary'),
+    arrow('Av', 'A\\mathbf{v}', Av(p), 'secondary'),
   ],
   observables: ({ p }) => {
     const w = winkel(p)
     const n = Math.hypot(...p.v)
     const parallel = w !== null && (w < 1 || w > 179)
     return {
-      winkel: zahl('Winkel zwischen $v$ und $A v$ (Grad)', w, { digits: 3, note: 'v = 0 oder A v = 0' }),
-      faktor: zahl('Streckung $|A v| / |v|$', n === 0 ? null : Math.hypot(...Av(p)) / n, { digits: 3 }),
-      eigen: klasse('$v$ ist', parallel ? 'ein Eigenvektor' : 'kein Eigenvektor'),
+      winkel: zahl('Winkel zwischen $\\mathbf{v}$ und $A\\mathbf{v}$ (Grad)', w, { digits: 3, note: 'v = 0 oder A v = 0' }),
+      faktor: zahl('Streckung $|A\\mathbf{v}| / |\\mathbf{v}|$', n === 0 ? null : Math.hypot(...Av(p)) / n, { digits: 3 }),
+      eigen: klasse('$\\mathbf{v}$ ist', parallel ? 'ein Eigenvektor' : 'kein Eigenvektor'),
       eigenwerte: eigenReadout(p.a, p.b, p.c, p.d),
       det: zahl('Determinante $\\det A$', p.a * p.d - p.b * p.c),
     }
@@ -83,8 +83,8 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Matrix', tex: String.raw`A = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix}` },
-    { label: 'Vektor', tex: String.raw`v = {{#v}}` },
-    { label: 'Eigenvektor', tex: String.raw`A\,v = \lambda\,v` },
+    { label: 'Vektor', tex: String.raw`\mathbf{v} = {{#v}}` },
+    { label: 'Eigenvektor', tex: String.raw`A\mathbf{v} = \lambda\mathbf{v}` },
   ],
   plots: [
     {
@@ -96,8 +96,8 @@ export default defineApplet({
       y: [-6, 6],
       drag: [
         { param: 'v', axis: 'xy' },
-        { param: 'a', also: ['c'], label: 'A e_1', axis: 'xy', at: (p) => [p.a, p.c], set: (x, y) => ({ a: x, c: y }) },
-        { param: 'b', also: ['d'], label: 'A e_2', axis: 'xy', at: (p) => [p.b, p.d], set: (x, y) => ({ b: x, d: y }) },
+        { param: 'a', also: ['c'], label: 'A\\mathbf{e}_1', axis: 'xy', at: (p) => [p.a, p.c], set: (x, y) => ({ a: x, c: y }) },
+        { param: 'b', also: ['d'], label: 'A\\mathbf{e}_2', axis: 'xy', at: (p) => [p.b, p.d], set: (x, y) => ({ b: x, d: y }) },
       ],
     },
   ],

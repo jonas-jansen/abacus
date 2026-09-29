@@ -19,8 +19,8 @@ const model = iterationN({
   normalize: (p) => (p.alpha + p.gamma > 1 ? { ...p, gamma: 1 - p.alpha } : p),
   constraintNote: 'α + γ ≤ 1',
   components: [
-    { id: 'S', label: 'x_1', role: 'primary' },
-    { id: 'I', label: 'x_2', role: 'secondary' },
+    { id: 'S', label: 'x_1', name: 'Gesunde', role: 'primary' },
+    { id: 'I', label: 'x_2', name: 'Infizierte', role: 'secondary' },
   ],
   start: (p) => [N - p.I0, p.I0],
   step: ([s, i], p) => [s - p.beta * s * i + p.alpha * (N - s), (1 - p.gamma - p.alpha) * i + p.beta * s * i],

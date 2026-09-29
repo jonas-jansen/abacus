@@ -20,6 +20,8 @@ const resolve = <T, P>(v: Resolvable<T, P>, p: P): T => (typeof v === 'function'
 export interface Component {
   id: string
   label: string
+  /** What it stands for ("Beute"), for legends. */
+  name?: string
   role?: SeriesRole
 }
 
@@ -95,6 +97,7 @@ export function iteration<const D extends ParamDefs>(cfg: IterationConfig<D>): M
       const orbit: Series = {
         id: s.id ?? 'x',
         label: s.label ?? 'x_n',
+        name: s.name,
         kind: 'discrete',
         x: n,
         y: x,
@@ -163,6 +166,7 @@ export function iterationN<const D extends ParamDefs>(cfg: IterationNConfig<D>):
       const series: Series[] = cfg.components.map((c, i) => ({
         id: c.id,
         label: c.label,
+        name: c.name,
         kind: 'discrete',
         x: n,
         y: x[i],
@@ -182,6 +186,8 @@ export function iterationN<const D extends ParamDefs>(cfg: IterationNConfig<D>):
 
 export interface Curve<P> {
   label: string
+  /** What it stands for, for legends. */
+  name?: string
   role?: SeriesRole
   f: (t: number, p: P) => number
 }
@@ -225,7 +231,7 @@ export function closedForm<const D extends ParamDefs>(cfg: ClosedFormConfig<D>):
       Object.entries(cfg.curves).forEach(([id, c], i) => {
         const y = new Float64Array(t.length)
         for (let j = 0; j < t.length; j++) y[j] = c.f(t[j], p)
-        series[id] = { id, label: c.label, kind: cfg.discrete ? 'discrete' : 'continuous', x: t, y, role: roleAt(c, i) }
+        series[id] = { id, label: c.label, name: c.name, kind: cfg.discrete ? 'discrete' : 'continuous', x: t, y, role: roleAt(c, i) }
       })
       const ctx: ClosedFormContext<ParamsOf<D>> = {
         p,
@@ -305,7 +311,7 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
       const { t, y } = sol.sample(opts.samples ?? cfg.samples ?? 400)
       const series: Record<string, Series> = {}
       cfg.components.forEach((c, i) => {
-        series[c.id] = { id: c.id, label: c.label, kind: 'continuous', x: t, y: y[i], role: roleAt(c, i) }
+        series[c.id] = { id: c.id, label: c.label, name: c.name, kind: 'continuous', x: t, y: y[i], role: roleAt(c, i) }
       })
       const ctx: OdeContext<ParamsOf<D>> = { p, sol, series }
       return {

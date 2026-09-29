@@ -47,8 +47,8 @@ const model = closedForm({
     // the hole at h = 0 is left visibly open: the limit is where the dashed line f'(a) meets it
     const g = sample((h) => (Math.abs(h) < 0.04 || p.a + h < lo || p.a + h > hi ? NaN : quotient(p, h)), -H_MAX, H_MAX, 401)
     out.push(
-      { id: 'g', label: 'D(h)', kind: 'continuous', x: g.x, y: g.y, role: 'secondary' },
-      { id: 'grenze', label: "f'(a)", kind: 'continuous', x: Float64Array.of(-H_MAX, H_MAX), y: Float64Array.of(F.df(p.a), F.df(p.a)), role: 'reference' },
+      { id: 'g', label: 'D(h)', name: 'Differenzenquotient', kind: 'continuous', x: g.x, y: g.y, role: 'secondary' },
+      { id: 'grenze', label: "f'(a)", name: 'Ableitung', kind: 'continuous', x: Float64Array.of(-H_MAX, H_MAX), y: Float64Array.of(F.df(p.a), F.df(p.a)), role: 'reference' },
     )
     return out
   },

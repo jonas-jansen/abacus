@@ -395,7 +395,7 @@ function FigureHead({
   return (
     <div className="ab-fighead">
       {title && <span className="ab-figtitle">{title}</span>}
-      {legend.length > 1 && (
+      {(legend.length > 1 || legend.some((s) => s.name)) && (
         <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
           {legend.map((s) => {
             const off = hidden?.has(s.id) ?? false
@@ -430,6 +430,7 @@ function FigureHead({
                   )}
                 </svg>
                 <TeX tex={s.label} />
+                {s.name && <span className="ab-legend-name">{s.name}</span>}
               </button>
             )
           })}

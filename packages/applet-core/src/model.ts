@@ -22,6 +22,8 @@ export interface Series {
   id: string
   /** TeX, e.g. `x_n`, `y_1(t)`; typeset in legends. */
   label: string
+  /** What the quantity stands for, e.g. "Beute": shown next to the symbol in legends. */
+  name?: string
   kind: 'discrete' | 'continuous'
   x: Float64Array
   y: Float64Array

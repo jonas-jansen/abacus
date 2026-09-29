@@ -14,12 +14,12 @@ const model = iterationN({
   params: {
     r: real('Wachstumsrate der Beute', { latex: 'r', min: 0, max: 4, step: 0.01, default: 3.1 }),
     gamma: real('Jagderfolg', { latex: '\\gamma', min: 0, max: 2.5, step: 0.01, default: 2.1 }),
-    start: point('Start', { latex: 'y(0)', xBounds: [0, 1.2], yBounds: [0, 1.2], default: [0.8, 0.2] }),
+    start: point('Start', { latex: '\\mathbf{y}(0)', xBounds: [0, 1.2], yBounds: [0, 1.2], default: [0.8, 0.2] }),
     N: schritte('Schritte', { latex: 'N', default: 40, max: 200 }),
   },
   components: [
-    { id: 'beute', label: 'y_1', role: 'primary' },
-    { id: 'raeuber', label: 'y_2', role: 'secondary' },
+    { id: 'beute', label: 'y_1', name: 'Beute', role: 'primary' },
+    { id: 'raeuber', label: 'y_2', name: 'Räuber', role: 'secondary' },
   ],
   start: (p) => p.start,
   step: ([y1, y2], p) => [preyNext(y1, y2, p.r, p.gamma), predNext(y1, y2, p.gamma)],
@@ -53,7 +53,7 @@ export default defineApplet({
   horizont: 'N',
   formeln: [
     { label: 'System', tex: String.raw`y_1(n+1) = (1 + {{r}})\,y_1(n) - {{r}}{{*}}y_1(n)^2 - {{gamma}}{{*}}y_1(n)\,y_2(n) \\ y_2(n+1) = {{gamma}}{{*}}y_1(n)\,y_2(n)` },
-    { label: 'Start', tex: String.raw`y(0) = {{#start}}` },
+    { label: 'Start', tex: String.raw`\mathbf{y}(0) = {{#start}}` },
   ],
   plots: [
     { type: 'timeSeriesDiscrete', xLabel: 'n', yLabel: 'y_1, y_2', y: [-0.05, 1.6] },

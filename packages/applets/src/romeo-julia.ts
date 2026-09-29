@@ -29,8 +29,8 @@ const model = ode({
     T: real('Zeitfenster', { latex: 'T', min: 1, max: 80, step: 1, default: 36, limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   components: [
-    { id: 'R', label: 'R(t)', role: 'primary' },
-    { id: 'J', label: 'J(t)', role: 'secondary' },
+    { id: 'R', label: 'R(t)', name: 'Romeos Gefühle', role: 'primary' },
+    { id: 'J', label: 'J(t)', name: 'Julias Gefühle', role: 'secondary' },
   ],
   start: (p) => p.start,
   rhs: (_t, y, p) => [p.a * y[0] + p.b * y[1], p.c * y[0] + p.d * y[1]],
