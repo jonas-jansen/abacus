@@ -677,7 +677,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .ab-eqs {
   /* in em, so that scaling a wide formula box to fit shrinks the gaps too */
@@ -686,7 +686,8 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   grid-template-columns: var(--ab-wide-cols);
   align-items: baseline;
   row-gap: 3px;
-  width: max-content;
+  /* full width: the formulas start at the left, the switch sits at the right edge */
+  width: 100%;
   font-size: 17px;
   line-height: 1.6;
   color: var(--ab-text);
@@ -744,10 +745,57 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   opacity: 0;
   visibility: hidden;
 }
-/* the switch between them: the last column, aligned like the others */
+/* the switch between them: the last column, at the right edge, centred under its title */
+.ab-values-title,
 .ab-values-cell {
-  justify-self: start;
+  justify-self: center;
+}
+.ab-values-cell {
   align-self: center;
+}
+
+/* A start vector beside a system: its entries sit in the rows of the equations, and the
+   brackets are drawn across those rows. */
+.ab-eq-bracket {
+  position: relative;
+  align-self: stretch;
+  justify-self: stretch;
+  margin: 0.1em 0;
+  pointer-events: none;
+}
+.ab-eq-bracket::before,
+.ab-eq-bracket::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.38em;
+  border: 0.085em solid currentColor;
+}
+.ab-eq-bracket::before {
+  left: 0;
+  border-right: 0;
+  border-radius: 100% 0 0 100% / 50% 0 0 50%;
+}
+.ab-eq-bracket::after {
+  right: 0;
+  border-left: 0;
+  border-radius: 0 100% 100% 0 / 0 50% 50% 0;
+}
+.ab-eqs > .ab-eq-entry {
+  justify-self: center;
+  padding: 0 0.6em;
+}
+.ab-eqs > .ab-eq-vecflat {
+  display: none;
+}
+.ab-eqs[data-stacked] > .ab-eq-vecflat {
+  display: block;
+  align-self: center;
+}
+.ab-eqs[data-stacked] > .ab-eq-entry,
+.ab-eqs[data-stacked] > .ab-eq-bracket {
+  display: none;
 }
 
 /* a vector beside several lines: centred on them (baselines cannot be shared across rows) */
@@ -797,19 +845,19 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   position: relative;
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
-  width: 64px;
-  height: 26px;
-  padding: 2px;
+  width: 88px;
+  height: 34px;
+  padding: 3px;
   border-radius: 999px;
   background: var(--ab-bg);
   box-shadow: inset 0 0 0 1px var(--ab-line-strong);
 }
 .ab-values-knob {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: calc(50% - 2px);
-  height: 22px;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: 28px;
   border-radius: 999px;
   background: var(--ab-accent);
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.25);
@@ -822,7 +870,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   position: relative;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--ab-muted);
@@ -830,7 +878,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 }
 .ab-values-sym {
   font-family: KaTeX_Math, 'Times New Roman', serif;
-  font-size: 15px;
+  font-size: 18px;
   font-style: italic;
   font-weight: 400;
 }
@@ -840,11 +888,11 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 }
 @media (pointer: coarse) {
   .ab-values-track {
-    width: 76px;
-    height: 34px;
+    width: 96px;
+    height: 40px;
   }
   .ab-values-knob {
-    height: 30px;
+    height: 34px;
   }
 }
 
@@ -861,14 +909,27 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .ab-eqs[data-stacked] > .ab-eq-title:not(:first-child) {
   padding-top: 10px;
 }
+.ab-eqs[data-stacked] > .ab-values-title,
+.ab-eqs[data-stacked] > .ab-values-cell {
+  justify-self: end;
+}
 
 /* Narrow: the columns stack, the switch sits above them. */
 @container (max-width: 599px) {
   .ab-model {
     padding: 10px 12px 12px;
   }
-  .ab-formulas {
-    justify-content: flex-start;
+  .ab-eqs > .ab-values-title,
+  .ab-eqs > .ab-values-cell {
+    justify-self: end;
+  }
+  .ab-eqs > .ab-eq-vecflat {
+    display: block;
+    align-self: center;
+  }
+  .ab-eqs > .ab-eq-entry,
+  .ab-eqs > .ab-eq-bracket {
+    display: none;
   }
   .ab-eqs {
     grid-template-columns: auto auto auto;

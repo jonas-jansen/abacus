@@ -86,20 +86,34 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
       const lines = formulaLines(f.tex)
       lines.forEach((line, i) => {
         const { lhs, rel, rhs } = splitRelation(line)
-        // a single vector next to a system of several lines stands centred beside all of them
-        const vectorId = /\{\{\s*#\s*([A-Za-z_]\w*)\s*\}\}/.exec(line)?.[1]
-        const tall = lines.length === 1 && rows > 1 && specs.some((s) => s.kind === 'point' && s.id === vectorId)
-        const wr = tall ? `2 / span ${rows}` : String(i + 2)
+        // A start vector next to a system of several lines: its entries get rows of their own,
+        // level with the equations, inside brackets drawn across those rows.
+        const vectorId = /^\{\{\s*#\s*([A-Za-z_]\w*)\s*\}\}$/.exec(rhs)?.[1]
+        if (lines.length === 1 && rows >= 2 && rel && specs.some((s) => s.kind === 'point' && s.id === vectorId)) {
+          const nr = narrowRow
+          narrowRow += 2
+          const span = (col: number, ncol: number) => ({ wide: `${col}|2 / span 2`, narrow: `${ncol}|${nr} / span 2` })
+          const r = render(rel)
+          out.push({ key: `${c}.vl`, cls: 'ab-eq-lhs ab-eq-tall', ...both(lhs), ...span(col, 1) })
+          out.push({ key: `${c}.vr`, cls: 'ab-eq-rel ab-eq-tall', sym: r, num: r, ...span(col + 1, 2) })
+          out.push({ key: `${c}.vb`, cls: 'ab-eq-bracket', sym: '', num: '', ...span(col + 2, 3) })
+          for (const k of [0, 1]) {
+            out.push({ key: `${c}.v${k}`, cls: 'ab-eq-rhs ab-eq-entry', ...both(`{{#${vectorId}.${k}}}`), wide: `${col + 2}|${2 + k}`, narrow: `3|${nr + k}` })
+          }
+          // stacked, there are no equations beside it: the vector goes back to one compact cell
+          out.push({ key: `${c}.vf`, cls: 'ab-eq-rhs ab-eq-vecflat', ...both(rhs), wide: `${col + 2}|2`, narrow: `3|${nr} / span 2` })
+          return
+        }
+        const wr = String(i + 2)
         const nr = narrowRow++
         if (!rel) {
           out.push({ key: `${c}.${i}`, cls: 'ab-eq-whole', ...both(rhs), wide: `${col} / span 3|${wr}`, narrow: `1 / -1|${nr}` })
           return
         }
-        const t = tall ? ' ab-eq-tall' : ''
         const r = render(rel)
-        out.push({ key: `${c}.${i}l`, cls: 'ab-eq-lhs' + t, ...both(lhs), wide: `${col}|${wr}`, narrow: `1|${nr}` })
-        out.push({ key: `${c}.${i}r`, cls: 'ab-eq-rel' + t, sym: r, num: r, wide: `${col + 1}|${wr}`, narrow: `2|${nr}` })
-        out.push({ key: `${c}.${i}s`, cls: 'ab-eq-rhs' + t, ...both(rhs), wide: `${col + 2}|${wr}`, narrow: `3|${nr}` })
+        out.push({ key: `${c}.${i}l`, cls: 'ab-eq-lhs', ...both(lhs), wide: `${col}|${wr}`, narrow: `1|${nr}` })
+        out.push({ key: `${c}.${i}r`, cls: 'ab-eq-rel', sym: r, num: r, wide: `${col + 1}|${wr}`, narrow: `2|${nr}` })
+        out.push({ key: `${c}.${i}s`, cls: 'ab-eq-rhs', ...both(rhs), wide: `${col + 2}|${wr}`, narrow: `3|${nr}` })
       })
     })
     return { cells: out, columns: formeln.length }
@@ -222,8 +236,8 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
   }
 
   const values = mode === 'zahlen'
-  // the formula columns, then the switch's column
-  const wideCols = Array.from({ length: columns + 1 }, () => 'auto auto auto').join(' var(--ab-col-gap) ')
+  // the formula columns from the left, a flexible gap, the switch's column at the right edge
+  const wideCols = Array.from({ length: columns }, () => 'auto auto auto').join(' var(--ab-col-gap) ') + ' minmax(var(--ab-col-gap), 1fr) auto'
   const switchCol = 4 * columns + 1
 
   return (
@@ -245,6 +259,7 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
             const [wc, wr] = c.wide.split('|')
             const [nc, nr] = c.narrow.split('|')
             const style = { '--wc': wc, '--wr': wr, '--nc': nc, '--nr': nr } as CSSProperties
+            if (c.cls === 'ab-eq-bracket') return <span key={c.key} className={c.cls} style={style} aria-hidden="true" />
             if (c.cls.startsWith('ab-eq-title'))
               return (
                 <span key={c.key} className={c.cls} style={style}>
@@ -260,10 +275,10 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
               </span>
             )
           })}
-          <span className="ab-eq-title ab-values-title" style={{ '--wc': `${switchCol} / span 3`, '--wr': 1, '--nc': '1 / -1', '--nr': 1 } as CSSProperties}>
+          <span className="ab-eq-title ab-values-title" style={{ '--wc': switchCol, '--wr': 1, '--nc': '1 / -1', '--nr': 1 } as CSSProperties}>
             Parameter / Werte
           </span>
-          <span className="ab-values-cell" style={{ '--wc': `${switchCol} / span 3`, '--wr': 2, '--nc': '1 / -1', '--nr': 2 } as CSSProperties}>
+          <span className="ab-values-cell" style={{ '--wc': switchCol, '--wr': 2, '--nc': '1 / -1', '--nr': 2 } as CSSProperties}>
             <button
               type="button"
               className="ab-values"
