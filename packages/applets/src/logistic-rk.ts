@@ -53,8 +53,8 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = x_n {{+r}}\left(1 - \frac{x_n}{{{K}}}\right) x_n` },
-    { label: 'Start', tex: String.raw`x_0 = {{x0}}` },
-    { label: 'Steigung im Fixpunkt', tex: String.raw`f'(K) = 1 - {{r}}` },
+    { label: 'Start', tex: String.raw`x_0 = {{x0}}, \quad n = 0, \dots, {{N}}` },
+    { label: 'Steigung im Fixpunkt', tex: String.raw`f'({{K}}) = 1 - {{r}}` },
   ],
   plots: [
     { type: 'timeSeriesDiscrete', series: ['x'], xLabel: 'n', yLabel: 'x_n', y: (p) => [0, 1.5 * p.K], drag: { param: 'x0', axis: 'y' } },

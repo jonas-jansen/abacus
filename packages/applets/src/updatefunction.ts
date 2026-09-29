@@ -52,6 +52,7 @@ export default defineApplet({
   kurz: 'Erst die Funktion, dann die Folge: Nullstellen, Fixpunkte, Steigung.',
   model,
   formeln: (p) => [
+    { label: 'Form', tex: String.raw`{{form}}` },
     p.form === 'linear'
       ? { label: 'Update-Funktion', tex: String.raw`f(x) = {{a}}{{*}}x {{+b}}` }
       : { label: 'Update-Funktion', tex: String.raw`f(x) = x {{+r}}\left(1 - \frac{x}{{{K}}}\right) x` },

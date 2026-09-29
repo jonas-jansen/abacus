@@ -1,4 +1,4 @@
-# abacus – interactive applets for sequences and dynamical systems
+# abacus – interactive applets for Mathematik für Biowissenschaften
 
 Implementation of [applet-library-spec.md](applet-library-spec.md).
 

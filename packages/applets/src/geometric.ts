@@ -35,7 +35,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = {{a}}{{*}}x_n` },
-    { label: 'Start', tex: String.raw`x_0 = {{x0}}` },
+    { label: 'Start', tex: String.raw`x_0 = {{x0}}, \quad n = 0, \dots, {{N}}` },
     { label: 'Lösung', tex: String.raw`x_n = {{(a)}}^{n}{{*}}{{x0}}` },
   ],
   plots: [

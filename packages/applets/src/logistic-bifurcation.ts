@@ -77,7 +77,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n)` },
-    { label: 'Start', tex: String.raw`y_0 = {{y0}}` },
+    { label: 'Start', tex: String.raw`y_0 = {{y0}}, \quad n = 0, \dots, {{N}}` },
   ],
   plots: [
     {

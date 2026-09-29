@@ -57,8 +57,8 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n) + {{eps}}{{*}}\xi_n` },
-    { label: 'Start im Fixpunkt', tex: String.raw`y_0 = y^* = 1 - \frac{1}{{{a}}}` },
-    { label: 'Störung ab n = 5', tex: String.raw`\xi_n \sim \mathcal{N}(0, 1)` },
+    { label: 'Start im Fixpunkt', tex: String.raw`y_0 = y^* = 1 - \frac{1}{{{a}}}, \quad n = 0, \dots, {{N}}` },
+    { label: 'Störung ab n = 5', tex: String.raw`\xi_n \sim \mathcal{N}(0, 1) \quad {{stoerung}}, \ \text{Zufallsfolge } {{seed}}` },
   ],
   plots: [
     {

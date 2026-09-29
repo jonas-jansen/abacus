@@ -94,9 +94,10 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr), \quad T(0) = 315` },
+    { label: 'exakte Lösung', tex: String.raw`T(t) = 19{,}25\,e^{-0{,}6\,t} - 1{,}35\,t + 295{,}75 \quad {{exakt}}` },
     { label: 'Schrittweite', tex: String.raw`h = \frac{10}{{{m}}}` },
-    { label: 'Euler', tex: String.raw`T_{n+1} = T_n + h\,f(t_n, T_n)` },
-    { label: 'Heun', tex: String.raw`T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr)` },
+    { label: 'Euler', tex: String.raw`T_{n+1} = T_n + h\,f(t_n, T_n) \quad {{euler}}` },
+    { label: 'Heun', tex: String.raw`T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr) \quad {{heun}}` },
   ],
   plots: [
     {

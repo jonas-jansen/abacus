@@ -42,7 +42,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`T_{n+1} = T_n + {{alpha}}\,({{Tu}} - T_n)` },
-    { label: 'Start', tex: String.raw`T_0 = {{T0}}` },
+    { label: 'Start', tex: String.raw`T_0 = {{T0}}, \quad n = 0, \dots, {{N}}` },
     { label: 'Lösung', tex: String.raw`T_n = ({{T0}} - {{Tu}})\,(1 - {{alpha}})^n + {{Tu}}` },
   ],
   plots: [

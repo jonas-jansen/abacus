@@ -47,7 +47,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{r}}{{*}}x\left(1 - \frac{x}{{{K}}}\right)` },
-    { label: 'Start', tex: String.raw`x(0) = {{x0}}` },
+    { label: 'Start', tex: String.raw`x(0) = {{x0}}, \quad 0 \le t \le {{T}}` },
     { label: 'Lösung', tex: String.raw`x(t) = \frac{{{K}}{{*}}{{x0}}}{{{x0}} + ({{K}} - {{x0}})\,e^{-{{r}}\,t}}` },
   ],
   plots: [

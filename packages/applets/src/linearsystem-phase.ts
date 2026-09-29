@@ -46,7 +46,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'System', tex: String.raw`y' = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} y` },
-    { label: 'Start', tex: String.raw`y(0) = {{start}}` },
+    { label: 'Start', tex: String.raw`y(0) = {{start}}, \quad 0 \le t \le {{T}}` },
   ],
   plots: [
     { type: 'phasePlane', xSeries: 'y1', ySeries: 'y2', xLabel: 'y_1', yLabel: 'y_2', x: [-4, 4], y: [-4, 4], field: true, drag: { param: 'start', axis: 'xy' } },

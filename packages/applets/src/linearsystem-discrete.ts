@@ -48,7 +48,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'System', tex: String.raw`x(n+1) = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} x(n)` },
-    { label: 'Start', tex: String.raw`x(0) = {{start}}` },
+    { label: 'Start', tex: String.raw`x(0) = {{start}}, \quad n = 0, \dots, {{N}}` },
   ],
   plots: [
     {

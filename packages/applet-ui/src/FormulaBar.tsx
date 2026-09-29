@@ -1,5 +1,5 @@
 import katex from 'katex'
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { formatNumber, type ParamSpec, type Params } from '@abacus/applet-core'
 import { expandFormula, type Formel, type FormulaMode } from './formula'
 
@@ -10,7 +10,7 @@ interface FormulaBarProps {
   specs: readonly ParamSpec[]
   params: Params
   /** Change one parameter (validated and explained like a slider change). */
-  onChange: (id: string, value: number) => void
+  onChange: (id: string, value: unknown) => void
   /** Pointing at a parameter in the formula: its slider row and handles light up. */
   onHot: (id: string | null) => void
   /** Click on a parameter: go to its input field. */
@@ -19,8 +19,9 @@ interface FormulaBarProps {
   hot?: string | null
 }
 
+// display style: full-size fractions, but inline layout (no centred block per formula)
 const render = (tex: string) =>
-  katex.renderToString(tex, {
+  katex.renderToString(`\\displaystyle ${tex}`, {
     displayMode: false,
     throwOnError: false,
     strict: false,
@@ -48,6 +49,28 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
 
   const html = useMemo(() => formeln.map((f) => render(expandFormula(f.tex, specs, params, mode))), [formeln, specs, params, mode])
 
+  // Fit: a formula wider than the box is set smaller rather than scrolled or cut off.
+  const [width, setWidth] = useState(0)
+  useEffect(() => {
+    const el = root.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setWidth(Math.round(e.contentRect.width)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  useLayoutEffect(() => {
+    const box = root.current
+    if (!box || !width) return
+    box.querySelectorAll<HTMLElement>('.ab-formula-tex').forEach((el) => {
+      el.style.fontSize = ''
+      const natural = el.scrollWidth
+      if (natural > width) {
+        const base = parseFloat(getComputedStyle(el).fontSize)
+        el.style.fontSize = `${Math.max(9, (base * width) / natural - 0.2)}px`
+      }
+    })
+  }, [html, width])
+
   // KaTeX output is plain HTML: make the parameter spans reachable by keyboard and screen readers.
   useEffect(() => {
     root.current?.querySelectorAll<HTMLElement>('[data-param]').forEach((el) => {
@@ -58,7 +81,10 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
       el.setAttribute('role', stepOf(spec) === null ? 'button' : 'slider')
       el.setAttribute('aria-label', spec.label)
       if (typeof v === 'number') el.setAttribute('aria-valuenow', String(v))
-      el.title = `${spec.label} = ${typeof v === 'number' ? formatNumber(v, 6) : String(v)} – ziehen zum Ändern, klicken zum Eintippen`
+      el.title =
+        spec.kind === 'bool' || spec.kind === 'choice'
+          ? `${spec.label} – klicken zum Umschalten`
+          : `${spec.label} = ${typeof v === 'number' ? formatNumber(v, 6) : String(v)} – ziehen zum Ändern, klicken zum Eintippen`
       el.toggleAttribute('data-hot', spec.id === hot)
     })
   })
@@ -92,14 +118,23 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
     const d = drag.current
     drag.current = null
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
-    if (d && !d.moved) onFocusParam(d.id)
+    if (d && !d.moved) activate(d.id)
+  }
+  // A click: switches flip, choices move to the next option, numbers go to their input field.
+  const activate = (id: string) => {
+    const spec = specOf(id)
+    if (spec?.kind === 'bool') onChange(id, !params[id])
+    else if (spec?.kind === 'choice') {
+      const i = spec.options.findIndex((o) => o.value === params[id])
+      onChange(id, spec.options[(i + 1) % spec.options.length].value)
+    } else onFocusParam(id)
   }
   const key = (e: KeyboardEvent<HTMLDivElement>) => {
     const id = target(e)?.dataset.param
     if (!id) return
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      onFocusParam(id)
+      activate(id)
       return
     }
     const dir = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0

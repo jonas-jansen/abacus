@@ -50,7 +50,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'System', tex: String.raw`\begin{aligned} y_1(n+1) &= (1 + {{r}})\,y_1(n) - {{r}}{{*}}y_1(n)^2 - {{gamma}}{{*}}y_1(n)\,y_2(n) \\ y_2(n+1) &= {{gamma}}{{*}}y_1(n)\,y_2(n) \end{aligned}` },
-    { label: 'Start', tex: String.raw`y(0) = {{start}}` },
+    { label: 'Start', tex: String.raw`y(0) = {{start}}, \quad n = 0, \dots, {{N}}` },
   ],
   plots: [
     { type: 'timeSeriesDiscrete', xLabel: 'n', yLabel: 'y_1, y_2', y: [-0.05, 1.6] },

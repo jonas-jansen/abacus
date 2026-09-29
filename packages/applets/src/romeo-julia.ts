@@ -56,7 +56,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'System', tex: String.raw`\begin{aligned} R' &= {{a}}{{*}}R {{+b}}{{*}}J \\ J' &= {{c}}{{*}}R {{+d}}{{*}}J \end{aligned}` },
-    { label: 'Start', tex: String.raw`(R, J)(0) = {{start}}` },
+    { label: 'Start', tex: String.raw`(R, J)(0) = {{start}}, \quad 0 \le t \le {{T}}` },
   ],
   plots: [
     { type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'R, J', y: [-2, 2] },

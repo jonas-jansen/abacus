@@ -54,7 +54,7 @@ export default defineApplet({
   formeln: [
     { label: 'Substrat, Enzym', tex: String.raw`\begin{aligned} S' &= -{{k1}}{{*}}S E + {{k2}}{{*}}C \\ E' &= -{{k1}}{{*}}S E + ({{k2}} + {{k3}})\,C \end{aligned}` },
     { label: 'Komplex, Produkt', tex: String.raw`\begin{aligned} C' &= {{k1}}{{*}}S E - ({{k2}} + {{k3}})\,C \\ P' &= {{k3}}{{*}}C \end{aligned}` },
-    { label: 'Start', tex: String.raw`\begin{aligned} S(0) &= {{S0}},\ E(0) = {{E0}} \\ C(0) &= P(0) = 0 \end{aligned}` },
+    { label: 'Start', tex: String.raw`\begin{aligned} S(0) &= {{S0}},\ E(0) = {{E0}} \\ C(0) &= P(0) = 0, \quad 0 \le t \le {{T}} \end{aligned}` },
   ],
   plots: [
     {

@@ -24,6 +24,20 @@ describe('formulas', () => {
     }
   })
 
+  it.each(Object.keys(applets))('%s: every parameter can be changed in the formulas', (id) => {
+    const def = applets[id]
+    const p0 = defaultParams(def.model)
+    // formulas may depend on a choice (e.g. linear or quadratic): look at every option
+    const variants = [p0, ...def.model.params.flatMap((s) => (s.kind === 'choice' ? s.options.map((o) => ({ ...p0, [s.id]: o.value })) : []))]
+    const seen = new Set<string>()
+    for (const p of variants) {
+      const formeln = typeof def.formeln === 'function' ? def.formeln(p) : (def.formeln ?? [])
+      for (const f of formeln) for (const m of f.tex.matchAll(/\{\{\s*[+(]?\s*([A-Za-z_]\w*)/g)) seen.add(m[1])
+    }
+    const missing = def.model.params.map((s) => s.id).filter((pid) => !seen.has(pid))
+    expect(missing).toEqual([])
+  })
+
   it('writes numbers the German way, with signs joining the operator', () => {
     expect(texNumber(0.8)).toBe('0{,}8')
     expect(texNumber(-1.25)).toBe('-1{,}25')

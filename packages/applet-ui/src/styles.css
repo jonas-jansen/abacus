@@ -541,7 +541,8 @@
 /* ================================================================== formulas */
 
 /* The model above the plots. Parameters are chips: point, drag sideways, or click to type.
-   Narrow: the toggle sits above the formulas, which scroll sideways if a system is too wide. */
+   Nothing scrolls: a formula wider than the box is scaled down to fit (FormulaBar).
+   Narrow: the toggle sits above the formulas. */
 .ab-model {
   display: flex;
   align-items: center;
@@ -559,7 +560,7 @@
   justify-content: center;
   align-items: flex-end;
   gap: 8px 40px;
-  overflow-x: auto;
+  padding: 6px 0;
 }
 .ab-formula {
   display: flex;
@@ -574,8 +575,13 @@
   text-transform: uppercase;
   color: var(--ab-faint);
 }
+.ab-formula {
+  max-width: 100%;
+}
 .ab-formula-tex {
+  display: block;
   font-size: 17px;
+  line-height: 1.5;
   white-space: nowrap;
   color: var(--ab-text);
 }

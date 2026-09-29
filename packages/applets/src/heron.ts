@@ -52,7 +52,7 @@ export default defineApplet({
   model,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = \frac12\left(x_n + \frac{2}{x_n}\right)` },
-    { label: 'Start', tex: String.raw`x_0 = {{x0}}` },
+    { label: 'Start', tex: String.raw`x_0 = {{x0}}, \quad n = 0, \dots, {{N}}` },
     { label: 'Fixpunkte', tex: String.raw`x^* = \pm\sqrt{2}` },
   ],
   plots: [
