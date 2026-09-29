@@ -63,6 +63,11 @@ Axes hold still while dragging, values snap to the slider's precision, and the h
 its slider row light each other up. Iterations and ODEs get a timeline (play, scrub);
 closed forms that describe a motion in time opt in with `zeitleiste: true`.
 
+For students, every applet offers: undo/redo (⌘Z, ⇧⌘Z), "vergleichen" (hold the current
+state, drawn faintly, with the earlier readouts beside the current ones), zoom and pan in plots
+(Strg/⌘ + wheel or two fingers, Shift + drag, double-click resets). Phase planes with
+`bahnen: true` add a trajectory per click; `nullclines: true` draws y₁′ = 0 and y₂′ = 0 (ODEs).
+
 Conventions: vectors are bold everywhere (`\\mathbf{y}(0)`, `A\\mathbf{v}`) — in formulas,
 parameter symbols, handle labels and legends. Series with a meaning carry it as `name`
 (`{ id: 'beute', label: 'y_1', name: 'Beute' }`); legends show "y₁ Beute".

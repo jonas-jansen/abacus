@@ -63,6 +63,7 @@ export default defineApplet({
       yLabel: 'x_2',
       x: [-2, 2],
       y: [-2, 2],
+      bahnen: true,
       drag: [
         { param: 'start', axis: 'xy' },
         // the first column of A is the image of (1, 0), the second that of (0, 1)

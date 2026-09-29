@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { decimalsOf, explainChange, formatNumber, roundTo, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
+import { decimalsOf, explainChange, formatNumber, roundTo, updateParams, type Run, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
 import { subscribe } from '@abacus/channel'
 import { accessibleName, NumberField, ParamControl } from './controls'
-import { handlesOf, type AppletDef } from './define'
+import { handlesOf, type AppletDef, type PlotEntry } from './define'
 import { Figure } from './Figure'
 import { Figure3D, type Spec3D } from './Figure3D'
 import { FormulaBar } from './FormulaBar'
 import { MathLabel } from './MathLabel'
 import { useAppletState } from './useAppletState'
+import { useHistory } from './useHistory'
 
 export interface AppletViewProps<P extends Params> {
   def: AppletDef<P>
@@ -31,6 +32,50 @@ interface Spot {
 
 export function AppletView<P extends Params>({ def, zustand, gesperrt = false, sperrText, kopf = true, vollbildHref }: AppletViewProps<P>) {
   const { params, setParams, reset, run, error } = useAppletState(def, zustand)
+  const history = useHistory(params, (p) => setParams(p))
+
+  // Phase portrait: further trajectories, one per clicked start (the same model, another start).
+  const [starts, setStarts] = useState<readonly [number, number][]>([])
+  const startParamOf = (entry: PlotEntry<P>) =>
+    entry.type === 'phasePlane' && entry.bahnen ? handlesOf(entry).find((h) => def.model.params.find((s) => s.id === h.param)?.kind === 'point')?.param : undefined
+  const bahnParam = def.plots.map(startParamOf).find(Boolean)
+  const bahnen = useMemo(() => {
+    if (!bahnParam || !starts.length) return []
+    const opts = { ...(def.runOptions?.(params) ?? {}), observables: false }
+    return starts.map((s) => def.model.run(updateParams(def.model, params, { [bahnParam]: s }), opts))
+  }, [bahnParam, starts, params, def])
+  const MAX_BAHNEN = 12
+
+  // Compare: a state held on to, drawn faintly behind the current one.
+  const [vergleich, setVergleich] = useState<{ params: P; run: Run } | null>(null)
+  const vergleichText = useMemo(() => {
+    if (!vergleich) return ''
+    // what differs from now, in symbols: "festgehalten: $a$ = 2,8"
+    const diff = def.model.params
+      .filter((s) => s.id !== def.horizont && JSON.stringify(vergleich.params[s.id]) !== JSON.stringify(params[s.id]))
+      .slice(0, 2)
+      .map((s) => {
+        const v = vergleich.params[s.id]
+        const text = typeof v === 'number' ? formatNumber(v, 3) : Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join('; ')})` : String(v)
+        return 'latex' in s && s.latex ? `$${s.latex}$ = ${text}` : `${s.label} = ${text}`
+      })
+    return diff.length ? `festgehalten: ${diff.join(', ')}` : 'festgehalten'
+  }, [vergleich, params, def])
+  // ⌘Z / Ctrl-Z anywhere in the applet — except in text fields, which keep their own undo
+  const onKey = (e: KeyboardEvent<HTMLElement>) => {
+    const t = e.target as HTMLElement
+    if (t.tagName === 'INPUT' && (t as HTMLInputElement).type === 'text') return
+    if (t.tagName === 'TEXTAREA') return
+    const mod = e.metaKey || e.ctrlKey
+    if (mod && e.key.toLowerCase() === 'z') {
+      e.preventDefault()
+      if (e.shiftKey) history.redo()
+      else history.undo()
+    } else if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+      e.preventDefault()
+      history.redo()
+    }
+  }
   const [locked, setLocked] = useState(gesperrt)
   useEffect(() => (gesperrt ? subscribe('applet/unlock', () => setLocked(false), { id: def.id }) : undefined), [gesperrt, def.id])
 
@@ -128,7 +173,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   }
 
   return (
-    <section className="ab-applet" aria-label={def.titel} data-applet={def.id} ref={rootRef}>
+    <section className="ab-applet" aria-label={def.titel} data-applet={def.id} ref={rootRef} onKeyDown={onKey}>
       {kopf && (
         <header className="ab-head">
           <div>
@@ -190,6 +235,12 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       pair={def.plots.length === 2}
                       onToggleSeries={toggleSeries}
                       onFocusSeries={setFocusSeries}
+                      vergleich={vergleich ? { run: vergleich.run, text: vergleichText } : null}
+                      onVergleichLoesen={() => setVergleich(null)}
+                      onVergleichen={i === 0 && !vergleich ? () => setVergleich({ params, run }) : undefined}
+                      bahnen={startParamOf(entry) ? bahnen : undefined}
+                      onBahn={startParamOf(entry) ? (s) => setStarts((l) => [...l, s].slice(-MAX_BAHNEN)) : undefined}
+                      onBahnenLoeschen={() => setStarts([])}
                     />
                     ),
                   )}
@@ -229,10 +280,24 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
             <div className="ab-section-head">
               <h3>Parameter</h3>
               <span className="ab-head-tools">
-                <CopyLink />
-                <button type="button" className="ab-textbtn" onClick={reset} title="alle Parameter auf den Ausgangszustand">
-                  alle zurücksetzen
-                </button>
+                <span className="ab-undo" role="group" aria-label="Verlauf">
+                  <button type="button" className="ab-tool" onClick={history.undo} disabled={!history.canUndo} title="rückgängig (⌘Z / Strg+Z)" aria-label="rückgängig">
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M6 4 2.5 7.5 6 11M3 7.5h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button type="button" className="ab-tool" onClick={history.redo} disabled={!history.canRedo} title="wiederholen (⇧⌘Z / Strg+Y)" aria-label="wiederholen">
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a3.5 3.5 0 0 0 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <CopyLink />
+                  <button type="button" className="ab-tool" onClick={reset} title="alle Parameter zurücksetzen" aria-label="alle Parameter zurücksetzen">
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M3.5 8a4.5 4.5 0 1 0 1.5-3.4M3.5 2.5v2.7h2.7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </span>
               </span>
             </div>
             <div className="ab-controls">{primary.map(control)}</div>
@@ -257,6 +322,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                     <Readout
                       key={id}
                       o={o}
+                      vorher={vergleich?.run.observables[id]}
                       active={spot?.id === id ? (spot.item ?? 'all') : null}
                       pinned={pinned?.id === id}
                       onSpot={(item) => setHover(item === null ? null : { id, item })}
@@ -290,14 +356,27 @@ const valueText = (o: Observable, v: number) => (o.kind === 'index' ? String(v) 
  * One measurement. Values are chips; when the observable has marks, pointing at the row
  * (or a single chip) highlights them in the plots, and a click keeps them highlighted.
  */
+/** The chips of a readout: one per value. */
+function valuesOf(o: Observable, perItem = false): { text: string; item?: number }[] {
+  const v = o.value
+  if (v === null) return []
+  if (o.format) return [{ text: o.format(v) }]
+  if (Array.isArray(v)) return v.map((x, item) => ({ text: valueText(o, x), item: perItem ? item : undefined }))
+  if (typeof v === 'number') return [{ text: valueText(o, v) }]
+  return [{ text: String(v) }]
+}
+
 function Readout({
   o,
+  vorher,
   active,
   pinned,
   onSpot,
   onPin,
 }: {
   o: Observable
+  /** The same readout in the held comparison, if there is one. */
+  vorher?: Observable
   active: number | 'all' | null
   pinned: boolean
   onSpot: (item: number | undefined | null) => void
@@ -307,13 +386,10 @@ function Readout({
   const missing = v === null || (Array.isArray(v) && v.length === 0)
   const linked = !!o.marks?.length
   const perItem = linked && o.marks!.some((m) => m.item !== undefined)
-
-  let values: { text: string; item?: number }[]
-  if (v === null) values = []
-  else if (o.format) values = [{ text: o.format(v) }]
-  else if (Array.isArray(v)) values = v.map((x, item) => ({ text: valueText(o, x), item: perItem ? item : undefined }))
-  else if (typeof v === 'number') values = [{ text: valueText(o, v) }]
-  else values = [{ text: String(v) }]
+  const values = valuesOf(o, perItem)
+  // the earlier value, when comparing and it differs
+  const before = vorher ? valuesOf(vorher).map((x) => x.text).join(', ') || '—' : null
+  const changed = before !== null && before !== (values.map((x) => x.text).join(', ') || '—')
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -369,6 +445,7 @@ function Readout({
           ))
         )}
         {missing && o.note && <span className="ab-stat-note">{o.note}</span>}
+        {changed && <span className="ab-stat-before">vorher {before}</span>}
       </dd>
     </div>
   )
@@ -391,8 +468,14 @@ function CopyLink() {
     }
   }
   return (
-    <button type="button" className="ab-textbtn ab-copy" onClick={copy} title="Link zu genau diesem Zustand kopieren" data-done={done || undefined}>
-      {done ? 'kopiert ✓' : 'Link kopieren'}
+    <button type="button" className="ab-tool ab-copy" onClick={copy} title="Link zu genau diesem Zustand kopieren" aria-label="Link kopieren" data-done={done || undefined}>
+      {done ? (
+        <span className="ab-copy-done">kopiert ✓</span>
+      ) : (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      )}
     </button>
   )
 }

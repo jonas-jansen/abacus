@@ -3,6 +3,8 @@ import { clamp, formatNumber, makeFrame, type Frame, type Mark, type Params, typ
 import {
   axesNode,
   CanvasSurface,
+  drawBahn,
+  nullclineSeries,
   colorVar,
   drawPlot,
   fallbackColors,
@@ -52,6 +54,15 @@ interface FigureProps<P extends Params> {
   /** Legend: switch a series off/on everywhere, or point at it. */
   onToggleSeries?: (id: string) => void
   onFocusSeries?: (id: string | null) => void
+  /** A held state to compare with: drawn faintly behind the current one. */
+  vergleich?: { run: Run; text: string } | null
+  onVergleichLoesen?: () => void
+  /** Offer to hold the current state for comparison (shown on one figure only). */
+  onVergleichen?: () => void
+  /** Phase portrait: further trajectories, and what a click on empty space does. */
+  bahnen?: readonly Run[]
+  onBahn?: (start: [number, number]) => void
+  onBahnenLoeschen?: () => void
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -80,6 +91,12 @@ export function Figure<P extends Params>({
   pair,
   onToggleSeries,
   onFocusSeries,
+  vergleich,
+  onVergleichLoesen,
+  onVergleichen,
+  bahnen,
+  onBahn,
+  onBahnenLoeschen,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -110,11 +127,15 @@ export function Figure<P extends Params>({
   // would make the handle run away. They catch up when the handle is let go.
   const frozen = useRef<ReturnType<typeof plotDomains> | null>(null)
   const [dragging, setDragging] = useState(false)
+  // Zoomed or panned: the student's own window, until reset.
+  const [zoom, setZoom] = useState<{ x: readonly [number, number]; y: readonly [number, number] } | null>(null)
+  useEffect(() => setZoom(null), [logY])
   const frame = useMemo(() => {
-    const d = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
+    const auto = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
+    const d = zoom ? { ...auto, x: zoom.x, y: zoom.y } : auto
     if (!dragging) frozen.current = d
     return makeFrame({ width: figW, height: figH, x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' })
-  }, [spec, run, figW, figH, dragging])
+  }, [spec, run, figW, figH, dragging, zoom])
 
   // Canvas data layer, redrawn on the next animation frame.
   useEffect(() => {
@@ -130,10 +151,18 @@ export function Figure<P extends Params>({
       ctx.clearRect(0, 0, frame.plot.w, frame.plot.h)
       const css = getComputedStyle(cv)
       const color = (role: keyof typeof fallbackColors) => css.getPropertyValue(colorVar(role)).trim() || fallbackColors[role]
-      drawPlot(new CanvasSurface(ctx, color), frame, spec, run, view)
+      const surface = new CanvasSurface(ctx, color)
+      if (vergleich) {
+        // the held state first, faint and complete (no timeline cut), then the current one
+        surface.fade(0.28)
+        drawPlot(surface, frame, spec, vergleich.run, { hidden: view.hidden, ghost: true })
+        surface.fade(1)
+      }
+      for (const b of bahnen ?? []) drawBahn(surface, frame, spec, b)
+      drawPlot(surface, frame, spec, run, view)
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, run, view])
+  }, [hydrated, frame, spec, run, view, vergleich, bahnen])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
@@ -175,6 +204,111 @@ export function Figure<P extends Params>({
     setSource(false)
     onProbe?.(null)
   }
+  // Zoom and pan. The y axis may be logarithmic: then the window moves in log₁₀.
+  const zoomable = spec.type !== 'surface3d'
+  const window_ = () => ({ x: frame.xDomain, y: frame.yDomain })
+  const yT = (v: number) => (frame.yLog ? Math.log10(v) : v)
+  const yTi = (u: number) => (frame.yLog ? 10 ** u : u)
+  const zoomAt = (px: number, py: number, k: number, kx = k) => {
+    const { x, y } = window_()
+    const cx = frame.xInvert(px)
+    const cy = yT(frame.yInvert(py))
+    const [ya, yb] = [yT(y[0]), yT(y[1])]
+    setZoom({ x: [cx - (cx - x[0]) * kx, cx + (x[1] - cx) * kx], y: [yTi(cy - (cy - ya) * k), yTi(cy + (yb - cy) * k)] })
+  }
+  const panBy = (dxPx: number, dyPx: number, from: { x: readonly [number, number]; y: readonly [number, number] }) => {
+    const sx = (from.x[1] - from.x[0]) / plot.w
+    const [ya, yb] = [yT(from.y[0]), yT(from.y[1])]
+    const sy = (yb - ya) / plot.h
+    setZoom({ x: [from.x[0] - dxPx * sx, from.x[1] - dxPx * sx], y: [yTi(ya + dyPx * sy), yTi(yb + dyPx * sy)] })
+  }
+  const inner = useRef<HTMLDivElement>(null)
+  // wheel with Ctrl/⌘ (also a trackpad pinch) zooms; a plain wheel still scrolls the page
+  useEffect(() => {
+    const el = inner.current
+    if (!el || !zoomable) return
+    const wheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return
+      e.preventDefault()
+      const r = el.getBoundingClientRect()
+      zoomAt(e.clientX - r.left - plot.x, e.clientY - r.top - plot.y, Math.exp(Math.max(-0.5, Math.min(0.5, e.deltaY * 0.01))))
+    }
+    el.addEventListener('wheel', wheel, { passive: false })
+    return () => el.removeEventListener('wheel', wheel)
+  })
+  // Shift + drag pans; two fingers pinch and pan
+  const pan = useRef<{ x: number; y: number; from: { x: readonly [number, number]; y: readonly [number, number] } } | null>(null)
+  const touches = useRef(new Map<number, { x: number; y: number }>())
+  const pinch = useRef<{ d: number; cx: number; cy: number; from: { x: readonly [number, number]; y: readonly [number, number] } } | null>(null)
+
+  // A click (not a drag, not on a handle) on empty plot space starts a new trajectory there.
+  const press = useRef<{ x: number; y: number } | null>(null)
+  const down = (e: ReactPointerEvent<HTMLDivElement>) => {
+    pointer(e)
+    const onHandle = (e.target as Element).closest('.ab-handle')
+    press.current = onBahn && !onHandle ? { x: e.clientX, y: e.clientY } : null
+    if (!zoomable || onHandle) return
+    if (e.pointerType === 'touch') {
+      touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (touches.current.size === 2) {
+        const [a, b] = [...touches.current.values()]
+        const r = e.currentTarget.getBoundingClientRect()
+        pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), cx: (a.x + b.x) / 2 - r.left - plot.x, cy: (a.y + b.y) / 2 - r.top - plot.y, from: window_() }
+        press.current = null
+      }
+    } else if (e.shiftKey) {
+      e.currentTarget.setPointerCapture(e.pointerId)
+      pan.current = { x: e.clientX, y: e.clientY, from: window_() }
+      press.current = null
+    }
+  }
+  const moveZoom = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (pan.current) {
+      panBy(e.clientX - pan.current.x, e.clientY - pan.current.y, pan.current.from)
+      return true
+    }
+    if (e.pointerType === 'touch' && touches.current.has(e.pointerId)) {
+      touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      const p = pinch.current
+      if (p && touches.current.size === 2) {
+        const [a, b] = [...touches.current.values()]
+        const r = e.currentTarget.getBoundingClientRect()
+        const k = p.d / Math.max(1, Math.hypot(a.x - b.x, a.y - b.y))
+        // zoom about the first centre, then follow the fingers
+        const cx = (a.x + b.x) / 2 - r.left - plot.x
+        const cy = (a.y + b.y) / 2 - r.top - plot.y
+        const f = p.from
+        const x0 = frame.xInvert(p.cx)
+        setZoom({
+          x: [x0 - (x0 - f.x[0]) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w, x0 + (f.x[1] - x0) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w],
+          y: (() => {
+            const [ya, yb] = [yT(f.y[0]), yT(f.y[1])]
+            const y0 = yT(frame.yInvert(p.cy))
+            const shift = ((cy - p.cy) * (yb - ya) * k) / plot.h
+            return [yTi(y0 - (y0 - ya) * k + shift), yTi(y0 + (yb - y0) * k + shift)] as const
+          })(),
+        })
+        return true
+      }
+    }
+    return false
+  }
+  const endZoom = (e: ReactPointerEvent<HTMLDivElement>) => {
+    pan.current = null
+    touches.current.delete(e.pointerId)
+    if (touches.current.size < 2) pinch.current = null
+  }
+  const up = (e: ReactPointerEvent<HTMLDivElement>) => {
+    endZoom(e)
+    const p = press.current
+    press.current = null
+    if (!p || !onBahn || Math.hypot(e.clientX - p.x, e.clientY - p.y) > 4) return
+    const r = e.currentTarget.getBoundingClientRect()
+    const px = e.clientX - r.left - plot.x
+    const py = e.clientY - r.top - plot.y
+    if (px < 0 || py < 0 || px > plot.w || py > plot.h) return
+    onBahn([frame.xInvert(px), frame.yInvert(py)])
+  }
 
   const positions = hydrated ? handles.map((h) => handlePosition(h, frame, params)) : []
   let tip: { x: number; y: number; rows: ProbeRow[] } | null = null
@@ -200,15 +334,27 @@ export function Figure<P extends Params>({
         onToggle={onToggleSeries}
         onFocus={onFocusSeries}
         log={entry.logToggle ? { on: logY, set: setLogY, hilfe: entry.logHilfe } : undefined}
+        vergleich={vergleich ? { text: vergleich.text, loesen: onVergleichLoesen } : undefined}
+        onVergleichen={onVergleichen}
+        bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
+        zoomReset={zoom ? () => setZoom(null) : undefined}
       />
       <div
         className="ab-figure-inner"
-        style={{ width: figW, height: figH }}
         role="img"
         aria-label={spec.title ?? [spec.yLabel, spec.xLabel].filter(Boolean).join(' über ')}
-        onPointerMove={pointer}
-        onPointerDown={pointer}
+        ref={inner}
+        onPointerMove={(e) => {
+          if (!moveZoom(e)) pointer(e)
+        }}
+        onPointerDown={down}
+        onPointerUp={up}
+        onPointerCancel={endZoom}
         onPointerLeave={leave}
+        // in a phase portrait a double click would also add two trajectories; there the pill resets
+        onDoubleClick={() => !onBahn && setZoom(null)}
+        title={zoomable ? `zoomen: Strg/⌘ + Mausrad oder zwei Finger, verschieben: Umschalt + ziehen${onBahn ? '' : ', zurück: Doppelklick'}` : undefined}
+        style={{ width: figW, height: figH, cursor: onBahn ? 'crosshair' : undefined, touchAction: zoomable ? 'pan-x pan-y' : undefined }}
       >
         <svg width={figW} height={figH} className="ab-layer" aria-hidden="true">
           {renderSvg(axesNode(frame, { x: spec.xLabel, y: spec.yLabel }))}
@@ -368,6 +514,10 @@ function FigureHead({
   onToggle,
   onFocus,
   log,
+  vergleich,
+  onVergleichen,
+  bahnen,
+  zoomReset,
 }: {
   title?: string
   legend: Series[]
@@ -375,6 +525,10 @@ function FigureHead({
   onToggle?: (id: string) => void
   onFocus?: (id: string | null) => void
   log?: { on: boolean; set: (on: boolean) => void; hilfe?: string }
+  vergleich?: { text: string; loesen?: () => void }
+  onVergleichen?: () => void
+  bahnen?: { n: number; loeschen?: () => void }
+  zoomReset?: () => void
 }) {
   const [help, setHelp] = useState(false)
   const helpRef = useRef<HTMLDivElement>(null)
@@ -395,6 +549,38 @@ function FigureHead({
   return (
     <div className="ab-fighead">
       {title && <span className="ab-figtitle">{title}</span>}
+      {onVergleichen && (
+        <button type="button" className="ab-pill" onClick={onVergleichen} title="den jetzigen Zustand festhalten – dann etwas ändern und vergleichen">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+            <path d="M5.5 2.5h5l-1 4 2.5 2.5h-9L5.5 6.5zM8 9v4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
+          </svg>
+          vergleichen
+        </button>
+      )}
+      {zoomReset && (
+        <button type="button" className="ab-pill" onClick={zoomReset} title="zurück zum ganzen Bild (Doppelklick)">
+          Ausschnitt zurücksetzen
+        </button>
+      )}
+      {bahnen &&
+        (bahnen.n > 0 ? (
+          <button type="button" className="ab-pill" onClick={bahnen.loeschen} title="die zusätzlichen Bahnen entfernen">
+            {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
+          </button>
+        ) : (
+          <span className="ab-fig-hint">klicken: weitere Bahn</span>
+        ))}
+      {vergleich && (
+        <button type="button" className="ab-legend-item ab-legend-ghost" onClick={vergleich.loesen} title="Vergleich lösen">
+          <svg width="22" height="10" aria-hidden="true">
+            <line x1="1" y1="5" x2="21" y2="5" stroke="var(--ab-muted)" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
+          </svg>
+          <MathLabel text={vergleich.text} />
+          <span className="ab-legend-x" aria-hidden="true">
+            ×
+          </span>
+        </button>
+      )}
       {(legend.length > 1 || legend.some((s) => s.name)) && (
         <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
           {legend.map((s) => {
@@ -468,7 +654,8 @@ function FigureHead({
 
 /** Series shown in a plot that deserve a legend entry (time series and function graphs). */
 function legendEntries(spec: PlotSpec, run: Run) {
-  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'phasePlane' || spec.type === 'surface3d') return []
+  if (spec.type === 'phasePlane') return nullclineSeries(spec)
+  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'surface3d') return []
   const ids = spec.series
   // annotations (brackets, arrows) explain themselves where they are drawn
   return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation')

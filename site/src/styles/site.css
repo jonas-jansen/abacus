@@ -125,6 +125,39 @@ h1 {
 
 /* ------------------------------------------------------------------ gallery */
 
+.gallery-search {
+  position: relative;
+  max-width: 460px;
+  margin: 0 0 14px;
+}
+.gallery-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ab-faint);
+  pointer-events: none;
+}
+.gallery-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--ab-bg);
+  box-shadow: inset 0 0 0 1px var(--ab-line);
+  color: var(--ab-text);
+  font: inherit;
+  font-size: 15px;
+}
+.gallery-search input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--ab-accent), 0 0 0 4px var(--ab-accent-soft);
+}
+.card[hidden],
+.chapter[hidden] {
+  display: none;
+}
 .chapter-nav {
   display: flex;
   flex-wrap: wrap;
@@ -537,4 +570,8 @@ details.box[open] > summary::after {
 .box-tip {
   background: transparent;
   padding: 8px 16px;
+}
+
+.muted {
+  color: var(--ab-muted);
 }

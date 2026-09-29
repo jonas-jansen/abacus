@@ -65,6 +65,7 @@ export default defineApplet({
       yLabel: 'y_2',
       x: [0, 1.5],
       y: [0, 1.5],
+      bahnen: true,
       drag: [
         { param: 'start', axis: 'xy' },
         // the coexistence point (1/γ, r (1 − 1/γ)/γ): put it somewhere, and γ and r follow

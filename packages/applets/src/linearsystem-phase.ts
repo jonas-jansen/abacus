@@ -52,7 +52,7 @@ export default defineApplet({
     { label: 'Start', tex: String.raw`\mathbf{y}(0) = {{#start}}` },
   ],
   plots: [
-    { type: 'phasePlane', xSeries: 'y1', ySeries: 'y2', xLabel: 'y_1', yLabel: 'y_2', x: [-4, 4], y: [-4, 4], field: true, drag: { param: 'start', axis: 'xy' } },
+    { type: 'phasePlane', xSeries: 'y1', ySeries: 'y2', xLabel: 'y_1', yLabel: 'y_2', x: [-4, 4], y: [-4, 4], field: true, bahnen: true, nullclines: true, drag: { param: 'start', axis: 'xy' } },
     { type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'y(t)', y: [-6, 6] },
   ],
   layout: { main: ['a', 'b', 'c', 'd'] },

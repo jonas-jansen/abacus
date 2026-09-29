@@ -44,6 +44,10 @@ export type PlotSpec =
       ySeries?: string
       /** Mark the start of the trajectory (default true). */
       start?: boolean
+      /** A click on empty space adds a trajectory from there (phase portrait). */
+      bahnen?: boolean
+      /** Draw the nullclines y₁′ = 0 and y₂′ = 0 (needs `run.field`). */
+      nullclines?: boolean
       /** Direction field of the ODE behind the trajectory (needs `run.field`). */
       field?: boolean
       /** Further series drawn as they are, in plane coordinates (x against y), e.g. vectors. */
@@ -65,6 +69,8 @@ export interface PlotView {
   hidden?: ReadonlySet<string>
   /** Series pointed at in the legend: the others step back. */
   focus?: string | null
+  /** Drawing a held comparison: no fields or other background, only the data. */
+  ghost?: boolean
 }
 
 /** The series a plot shows: those it selects, minus the ones switched off. */
@@ -342,6 +348,89 @@ function drawField(s: Surface, frame: Frame, field: NonNullable<Run['field']>, a
   s.end()
 }
 
+/** Legend entries for the nullclines of a phase plane: y₁′ = 0 and y₂′ = 0. */
+export function nullclineSeries(spec: PlotSpec): Series[] {
+  if (spec.type !== 'phasePlane' || !spec.nullclines) return []
+  const empty = new Float64Array()
+  const name = (l: string | undefined, i: number) => `${l ?? `y_${i}`}' = 0`
+  return [
+    { id: '_null1', label: name(spec.xLabel, 1), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'tertiary' },
+    { id: '_null2', label: name(spec.yLabel, 2), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'secondary' },
+  ]
+}
+
+/**
+ * Nullclines by marching squares: where the first (second) component of the field vanishes,
+ * the flow runs vertically (horizontally). Where they cross is an equilibrium.
+ */
+function drawNullclines(s: Surface, frame: Frame, field: NonNullable<Run['field']>, view: PlotView) {
+  const N = 60
+  const [x0, x1] = frame.xDomain
+  const [y0, y1] = frame.yDomain
+  const xs = Array.from({ length: N + 1 }, (_, i) => x0 + ((x1 - x0) * i) / N)
+  const ys = Array.from({ length: N + 1 }, (_, j) => y0 + ((y1 - y0) * j) / N)
+  const F = xs.map((x) => ys.map((y) => field(x, y)))
+  const X = frame.xScale
+  const Y = frame.yScale
+  ;([0, 1] as const).forEach((k) => {
+    if (view.hidden?.has(k === 0 ? '_null1' : '_null2')) return
+    s.begin({ role: k === 0 ? 'tertiary' : 'secondary', width: 2 })
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        const c = [F[i][j][k], F[i + 1][j][k], F[i + 1][j + 1][k], F[i][j + 1][k]]
+        const px = [xs[i], xs[i + 1], xs[i + 1], xs[i]]
+        const py = [ys[j], ys[j], ys[j + 1], ys[j + 1]]
+        const cuts: [number, number][] = []
+        for (let e = 0; e < 4; e++) {
+          const a = e
+          const b = (e + 1) % 4
+          if (c[a] === 0 || Math.sign(c[a]) === Math.sign(c[b])) continue
+          const t = c[a] / (c[a] - c[b])
+          cuts.push([px[a] + t * (px[b] - px[a]), py[a] + t * (py[b] - py[a])])
+        }
+        for (let m = 0; m + 1 < cuts.length; m += 2) {
+          s.moveTo(X(cuts[m][0]), Y(cuts[m][1]))
+          s.lineTo(X(cuts[m + 1][0]), Y(cuts[m + 1][1]))
+        }
+      }
+    }
+    s.end()
+  })
+}
+
+/**
+ * A further trajectory of a phase portrait: faint, with its start and an arrow showing the
+ * direction of motion.
+ */
+export function drawBahn(s: Surface, frame: Frame, spec: PlotSpec, run: Run) {
+  if (spec.type !== 'phasePlane') return
+  const sx = seriesById(run, spec.xSeries)
+  const sy = seriesById(run, spec.ySeries)
+  if (!sx || !sy || sx.y.length === 0) return
+  s.fade(0.6)
+  if (sx.kind === 'discrete') drawDiscrete(s, frame, { ...sx, x: sx.y, y: sy.y }, sx.y.length, sx.y.length <= 400, false)
+  else {
+    s.begin({ role: 'primary', width: 1.5, dash: [] })
+    polyline(s, frame, sx.y, sy.y)
+    s.end()
+    // an arrowhead a third of the way along
+    const k = Math.max(1, Math.floor(sx.y.length / 3))
+    const [ax, ay] = [frame.xScale(sx.y[k]), frame.yScale(sy.y[k])]
+    const [dx, dy] = [ax - frame.xScale(sx.y[k - 1]), ay - frame.yScale(sy.y[k - 1])]
+    const m = Math.hypot(dx, dy)
+    if (m > 1e-9 && Number.isFinite(ax) && Number.isFinite(ay)) {
+      const [ux, uy] = [dx / m, dy / m]
+      s.begin({ role: 'primary' })
+      s.polygon(Float64Array.of(ax + ux * 5, ay + uy * 5, ax - ux * 4 - uy * 4, ay - uy * 4 + ux * 4, ax - ux * 4 + uy * 4, ay - uy * 4 - ux * 4))
+      s.end()
+    }
+  }
+  s.begin({ role: 'primary', marker: 'circle' })
+  s.dot(frame.xScale(sx.y[0]), frame.yScale(sy.y[0]), 3)
+  s.end()
+  s.fade(1)
+}
+
 const MAX_STAIRS = 4000
 /** The cobweb fades from old steps to recent ones, so the direction of time is visible. */
 const FADE_BANDS = 16
@@ -403,8 +492,8 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
       return
     case 'timeSeriesContinuous':
     case 'functionGraph':
-      if (spec.type === 'functionGraph' && spec.diagonal) diagonal(s, frame)
-      if (spec.type === 'timeSeriesContinuous' && spec.field && run.slope) {
+      if (spec.type === 'functionGraph' && spec.diagonal && !view.ghost) diagonal(s, frame)
+      if (spec.type === 'timeSeriesContinuous' && spec.field && run.slope && !view.ghost) {
         const f = run.slope
         drawField(s, frame, (t, x) => [1, f(t, x)], false)
       }
@@ -461,7 +550,8 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
       return
     }
     case 'phasePlane': {
-      if (spec.field && run.field) drawField(s, frame, run.field)
+      if (spec.field && run.field && !view.ghost) drawField(s, frame, run.field)
+      if (spec.nullclines && run.field && !view.ghost) drawNullclines(s, frame, run.field, view)
       for (const o of selected(run, spec.overlay ?? [])) drawLine(s, frame, o)
       const sx = seriesById(run, spec.xSeries)
       const sy = seriesById(run, spec.ySeries)

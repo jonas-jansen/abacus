@@ -63,7 +63,7 @@ export default defineApplet({
   ],
   plots: [
     { type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'R, J', y: [-2, 2] },
-    { type: 'phasePlane', xSeries: 'R', ySeries: 'J', xLabel: 'R', yLabel: 'J', x: [-2, 2], y: [-2, 2], field: true, drag: { param: 'start', axis: 'xy' } },
+    { type: 'phasePlane', xSeries: 'R', ySeries: 'J', xLabel: 'R', yLabel: 'J', x: [-2, 2], y: [-2, 2], field: true, bahnen: true, nullclines: true, drag: { param: 'start', axis: 'xy' } },
   ],
   layout: { main: ['a', 'b', 'c', 'd'] },
   anzeige: ['typ', 'geschichte', 'eigenwerte'],

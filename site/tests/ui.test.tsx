@@ -192,3 +192,44 @@ describe('applet container', () => {
     expect(Number(range.max)).toBeCloseTo(0.61)
   })
 })
+
+describe('comfort', () => {
+  const commit = (field: HTMLInputElement, value: string) => {
+    type(field, value)
+    act(() => field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
+  }
+
+  it('undo and redo step through settled states', () => {
+    vi.useFakeTimers()
+    try {
+      const a = mount(<AppletView def={getApplet('geometric')} />)
+      const field = () => a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement
+      commit(field(), '0,5')
+      act(() => vi.advanceTimersByTime(500))
+      commit(field(), '1,2')
+      act(() => vi.advanceTimersByTime(500))
+      click(a.querySelector('button[aria-label="rückgängig"]'))
+      expect(field().value).toBe('0,5')
+      click(a.querySelector('button[aria-label="rückgängig"]'))
+      expect(field().value).toBe('0,8')
+      click(a.querySelector('button[aria-label="wiederholen"]'))
+      expect(field().value).toBe('0,5')
+      // ⌘Z on the applet does the same
+      act(() => a.querySelector('.ab-applet')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true })))
+      expect(field().value).toBe('0,8')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('comparing keeps the old state and shows what changed', () => {
+    const a = mount(<AppletView def={getApplet('geometric')} />)
+    click(button(a, 'vergleichen'))
+    type(a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement, '1,1')
+    act(() => (a.querySelector('input[aria-label="Faktor a"]') as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
+    expect(a.textContent).toContain('festgehalten')
+    expect(a.querySelector('.ab-stat-before')?.textContent).toContain('vorher')
+    click(a.querySelector('.ab-legend-ghost'))
+    expect(a.textContent).not.toContain('festgehalten')
+  })
+})
