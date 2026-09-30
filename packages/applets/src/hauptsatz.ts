@@ -37,15 +37,16 @@ const model = closedForm({
     const x = Float64Array.from([s.x[0], ...s.x, s.x[s.x.length - 1]])
     // integrating from right to left (x < a) turns the signs around
     const sign = p.x >= p.a ? 1 : -1
-    const up: Series = { id: 'plus', label: '\\text{zählt positiv}', kind: 'continuous', x, y: part((v) => (sign * v > 0 ? v : 0)), role: 'tertiary', fill: true }
-    const down: Series = { id: 'minus', label: '\\text{zählt negativ}', kind: 'continuous', x, y: part((v) => (sign * v < 0 ? v : 0)), role: 'secondary', fill: true }
+    const up: Series = { id: 'plus', label: '+', name: 'zählt positiv', kind: 'continuous', x, y: part((v) => (sign * v > 0 ? v : 0)), role: 'tertiary', fill: true }
+    const down: Series = { id: 'minus', label: '-', name: 'zählt negativ', kind: 'continuous', x, y: part((v) => (sign * v < 0 ? v : 0)), role: 'secondary', fill: true }
     // the tangent to F at x, slope f(x)
     const [lo, hi] = F.domain
     const Fx = Fa(p, p.x)
     const m = F.f(p.x)
     const tangente: Series = {
       id: 'tangente',
-      label: '\\text{Tangente}',
+      label: 't(x)',
+      name: 'Tangente',
       kind: 'continuous',
       x: Float64Array.of(lo, hi),
       y: Float64Array.of(Fx + m * (lo - p.x), Fx + m * (hi - p.x)),
@@ -71,7 +72,7 @@ export default defineApplet({
   folien: '106–110',
   model,
   formeln: [
-    { label: 'Funktion', tex: String.raw`f(t) = {{f}}` },
+    { label: 'Funktion', tex: String.raw`f(x) = {{f}}` },
     { label: 'Flächenfunktion', tex: String.raw`F({{x}}) = \int_{{{a}}}^{{{x}}} f(t)\,dt` },
     { label: 'Hauptsatz', tex: String.raw`F'(x) = f(x)` },
   ],

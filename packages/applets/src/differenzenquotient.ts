@@ -40,8 +40,8 @@ const model = closedForm({
     const F = FUNKTIONEN[p.f]
     const [lo, hi] = F.domain
     const fa = F.f(p.a)
-    const out: Series[] = [{ id: 'tangente', label: '\\text{Tangente}', kind: 'continuous', ...line(p.a, fa, F.df(p.a), lo, hi), role: 'reference' }]
-    if (p.h !== 0) out.push({ id: 'sekante', label: '\\text{Sekante}', kind: 'continuous', ...line(p.a, fa, quotient(p, p.h), lo, hi), role: 'secondary' })
+    const out: Series[] = [{ id: 'tangente', label: 't(x)', name: 'Tangente', kind: 'continuous', ...line(p.a, fa, F.df(p.a), lo, hi), role: 'reference' }]
+    if (p.h !== 0) out.push({ id: 'sekante', label: 's(x)', name: 'Sekante', kind: 'continuous', ...line(p.a, fa, quotient(p, p.h), lo, hi), role: 'secondary' })
     // the difference quotient as a function of h, undefined at h = 0
     // only where a + h lies in the domain of f
     // the hole at h = 0 is left visibly open: the limit is where the dashed line f'(a) meets it

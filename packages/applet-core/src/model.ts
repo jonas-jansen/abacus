@@ -34,6 +34,8 @@ export interface Series {
   fill?: boolean
   /** Continuous series: an arrowhead at the end of each piece (vectors). */
   arrow?: boolean
+  /** Dash pattern, when it differs from the role's (e.g. solid where the role is dashed). */
+  dash?: readonly number[]
 }
 
 /**

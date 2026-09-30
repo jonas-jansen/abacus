@@ -63,7 +63,7 @@ const model = closedForm({
       x.set([l, l, l + dx, l + dx, NaN], 5 * i)
       y.set([0, h, h, 0, NaN], 5 * i)
     }
-    const r: Series = { id: 'rechtecke', label: '\\text{Rechtecke}', kind: 'continuous', x, y, role: 'tertiary', fill: true }
+    const r: Series = { id: 'rechtecke', label: '\\textstyle\\sum f(\\xi_i)\\,\\Delta x', name: 'Rechtecke', kind: 'continuous', x, y, role: 'tertiary', fill: true }
     return [r]
   },
   observables: ({ p }) => {

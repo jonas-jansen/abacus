@@ -273,7 +273,7 @@ function drawLine(s: Surface, frame: Frame, series: Series, count = series.x.len
     }
     s.end()
   }
-  s.begin({ role: series.role, ...(series.fill || series.arrow ? { dash: [], width: series.fill ? 1.25 : 2 } : {}) })
+  s.begin({ role: series.role, ...(series.fill || series.arrow ? { dash: [], width: series.fill ? 1.25 : 2 } : {}), ...(series.dash ? { dash: series.dash } : {}) })
   polyline(s, frame, x, y, count)
   s.end()
   if (series.arrow) {
@@ -403,8 +403,8 @@ export function nullclineSeries(spec: PlotSpec): Series[] {
   const empty = new Float64Array()
   const name = (l: string | undefined, i: number) => `${l ?? `y_${i}`}' = 0`
   return [
-    { id: '_null1', label: name(spec.xLabel, 1), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'tertiary' },
-    { id: '_null2', label: name(spec.yLabel, 2), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'secondary' },
+    { id: '_null1', label: name(spec.xLabel, 1), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'tertiary', dash: [] },
+    { id: '_null2', label: name(spec.yLabel, 2), name: 'Nullkline', kind: 'continuous', x: empty, y: empty, role: 'secondary', dash: [] },
   ]
 }
 
@@ -423,7 +423,8 @@ function drawNullclines(s: Surface, frame: Frame, field: NonNullable<Run['field'
   const Y = frame.yScale
   ;([0, 1] as const).forEach((k) => {
     if (view.hidden?.has(k === 0 ? '_null1' : '_null2')) return
-    s.begin({ role: k === 0 ? 'tertiary' : 'secondary', width: 2 })
+    // solid: the curve is many short pieces, and a dash pattern would restart on each
+    s.begin({ role: k === 0 ? 'tertiary' : 'secondary', width: 2, dash: [] })
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < N; j++) {
         const c = [F[i][j][k], F[i + 1][j][k], F[i + 1][j + 1][k], F[i][j + 1][k]]

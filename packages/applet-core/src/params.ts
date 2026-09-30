@@ -165,7 +165,10 @@ export function parseNumber(raw: unknown): number | undefined {
   if (typeof raw === 'number') return Number.isFinite(raw) ? raw : undefined
   if (typeof raw !== 'string') return undefined
   // Thousands separators (spaces, narrow spaces, apostrophes) are ignored: "1 000 000".
-  const s = raw.trim().replace(/[\s  ']/g, '').replace(/−/g, '-').replace(',', '.')
+  let s = raw.trim().replace(/[\s  ']/g, '').replace(/−/g, '-').replace(',', '.')
+  // powers of ten as they are shown: 5·10⁻⁶, 5*10^-6, 5×10^(-6)
+  const SUP: Record<string, string> = { '⁻': '-', '⁺': '+', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
+  s = s.replace(/[·*×]10(?:\^\(?([-+]?\d+)\)?|([⁻⁺]?[⁰¹²³⁴⁵⁶⁷⁸⁹]+))$/, (_m, caret: string | undefined, sup: string | undefined) => `e${caret ?? [...sup!].map((c) => SUP[c]).join('')}`)
   if (s === '' || !/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(s)) return undefined
   const v = Number(s)
   return Number.isFinite(v) ? v : undefined

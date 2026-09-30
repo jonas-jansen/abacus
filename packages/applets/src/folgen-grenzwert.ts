@@ -52,7 +52,8 @@ const model = closedForm({
     const out = y.map((v) => (Math.abs(v - L) >= p.eps ? v : NaN))
     const band: Series = {
       id: 'band',
-      label: '\\varepsilon\\text{-Band}',
+      label: 'L \\pm \\varepsilon',
+      name: 'Band',
       kind: 'continuous',
       x: Float64Array.of(0, p.N + 1, p.N + 1, 0),
       y: Float64Array.of(L - p.eps, L - p.eps, L + p.eps, L + p.eps),
@@ -60,7 +61,7 @@ const model = closedForm({
       fill: true,
     }
     return [
-      { id: 'aussen', label: '\\text{außerhalb}', kind: 'discrete', x: n, y: out, role: 'secondary', connect: false },
+      { id: 'aussen', label: 'x_n', name: 'außerhalb', kind: 'discrete', x: n, y: out, role: 'secondary', connect: false },
       band,
       { id: 'L', label: 'L', name: 'Grenzwert', kind: 'continuous', x: Float64Array.of(0, p.N + 1), y: Float64Array.of(L, L), role: 'reference' },
     ]

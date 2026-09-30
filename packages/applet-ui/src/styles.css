@@ -590,6 +590,13 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .ab-handle-label[data-flip] {
   transform: translate(calc(-100% - 12px), calc(-100% - 6px));
 }
+/* at the top edge the label would meet the axis label: below the handle instead */
+.ab-handle-label[data-below] {
+  transform: translate(12px, 6px);
+}
+.ab-handle-label[data-flip][data-below] {
+  transform: translate(calc(-100% - 12px), 6px);
+}
 .ab-param-wrap {
   margin: -6px -8px;
   padding: 6px 8px;
@@ -1040,7 +1047,8 @@ html[data-werte='aus'] .ab-probe-step {
 
 /* Stacked columns: set by FormulaBar when side by side would need too much shrinking. */
 .ab-eqs[data-stacked] {
-  grid-template-columns: auto auto auto;
+  /* the spare width goes to the right-hand sides, not between the parts of an equation */
+  grid-template-columns: auto auto 1fr;
 }
 .ab-eqs[data-stacked] > *,
 .ab-eqs[data-stacked] > .ab-eq-tall {

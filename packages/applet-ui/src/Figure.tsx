@@ -11,6 +11,7 @@ import {
   isSquare,
   markNodes,
   panFloors,
+  selected,
   plotDomains,
   timeEnd,
   probeFromPointer,
@@ -369,6 +370,22 @@ export function Figure<P extends Params>({
   }
 
   const positions = hydrated ? handles.map((h) => handlePosition(h, frame, params)) : []
+  // Arrows name themselves at the tip, unless a handle (with its own label) sits there.
+  const arrowLabels = (() => {
+    if (spec.type === 'surface3d') return []
+    const out: { id: string; label: string; role: Series['role']; x: number; y: number }[] = []
+    for (const s of selected(drawn, 'series' in spec ? spec.series : undefined)) {
+      if (!s.arrow || s.role === 'ghost' || !s.label || view.hidden?.has(s.id)) continue
+      const k = s.x.length - 1
+      const x = frame.plot.x + frame.xScale(s.x[k])
+      const y = frame.plot.y + frame.yScale(s.y[k])
+      if (!Number.isFinite(x) || !Number.isFinite(y) || x < frame.plot.x || x > frame.plot.x + frame.plot.w || y < frame.plot.y || y > frame.plot.y + frame.plot.h) continue
+      if (positions.some((p) => p && Math.hypot(p[0] - x, p[1] - y) < 8)) continue
+      out.push({ id: s.id, label: s.label, role: s.role, x, y })
+    }
+    return out
+  })()
+
   let tip: { x: number; y: number; rows: ProbeRow[] } | null = null
   const at = active && positions[active.i]
   if (active && at) {
@@ -447,12 +464,19 @@ export function Figure<P extends Params>({
           if (!pos || !tex || active?.i === i) return null
           // the name of what can be dragged, beside it; to the left near the right edge
           const flip = pos[0] > figW - 60
+          // the label (about 26 px above the handle) would reach the axis label over the plot
+          const below = pos[1] < plot.y + 28
           return (
-            <span key={i} className="ab-handle-label" data-flip={flip || undefined} style={{ left: pos[0], top: pos[1] }} aria-hidden="true">
+            <span key={i} className="ab-handle-label" data-flip={flip || undefined} data-below={below || undefined} style={{ left: pos[0], top: pos[1] }} aria-hidden="true">
               <TeX tex={tex} />
             </span>
           )
         })}
+        {arrowLabels.map((a) => (
+          <span key={a.id} className="ab-handle-label ab-arrow-label" data-flip={a.x > figW - 60 || undefined} data-below={a.y < plot.y + 28 || undefined} style={{ left: a.x, top: a.y, color: `var(--abacus-${a.role})` }} aria-hidden="true">
+            <TeX tex={a.label} />
+          </span>
+        ))}
         {tip && (
           <div className="ab-tip" data-kind={active ? 'handle' : 'probe'} data-below={tip.y < 72 || undefined} style={{ left: clamp(tip.x, 60, figW - 60), top: tip.y }} aria-hidden="true">
             {tip.rows.map((r, i) => (
@@ -675,7 +699,7 @@ function FigureHead({
                       y2="5"
                       stroke={`var(--abacus-${s.role})`}
                       strokeWidth={roleStyles[s.role].width + 0.5}
-                      strokeDasharray={roleStyles[s.role].dash.join(' ') || undefined}
+                      strokeDasharray={(s.dash ?? roleStyles[s.role].dash).join(' ') || undefined}
                       strokeLinecap="round"
                     />
                   )}

@@ -283,6 +283,11 @@ describe('misc', () => {
   it('parses German numbers', () => {
     expect(parseNumber('3,45')).toBe(3.45)
     expect(parseNumber('−2')).toBe(-2)
+    // powers of ten as the fields show them
+    expect(parseNumber('5·10⁻⁶')).toBe(5e-6)
+    expect(parseNumber('2,5 · 10¹²')).toBe(2.5e12)
+    expect(parseNumber('3*10^-2')).toBeCloseTo(0.03, 15)
+    expect(parseNumber(formatNumber(1.234e-7, 8))).toBeCloseTo(1.234e-7, 20)
     expect(parseNumber('1e-3')).toBe(0.001)
     expect(parseNumber('3,4,5')).toBeUndefined()
     expect(parseNumber('1\u202f000\u202f000')).toBe(1e6)

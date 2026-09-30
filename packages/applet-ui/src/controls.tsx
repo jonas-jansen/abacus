@@ -31,12 +31,10 @@ type Range = readonly [number, number]
 
 const show = (v: number) => formatNumber(v, 8)
 
-/** What an input field shows: always something the parser reads back (no "·10⁶"). */
+/** What an input field shows: as everywhere else (5·10⁻⁶), and the parser reads it back. */
 function showInput(v: number): string {
   if (!Number.isFinite(v)) return String(v)
-  const abs = Math.abs(v)
-  if (Number.isInteger(v) && abs < 1e15) return formatNumber(v, 16)
-  if (abs !== 0 && (abs < 1e-4 || abs >= 1e9)) return v.toExponential(4).replace(/\.?0+e/, 'e').replace('e+', 'e').replace('.', ',').replace('-', '−')
+  if (Number.isInteger(v) && Math.abs(v) < 1e15) return formatNumber(v, 16)
   return formatNumber(v, 8)
 }
 
