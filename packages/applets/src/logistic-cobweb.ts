@@ -1,18 +1,7 @@
 // MATLAB: app_updatefunction_logistica (+ app_logistic_a) — y_{n+1} = a·y_n·(1 − y_n) as a cobweb.
 // Build order #3: the first new plot type, draggable x₀, StepControl.
 
-import {
-  behaviour,
-  detectPeriod,
-  fixedPoints,
-  index,
-  schritte,
-  iteration,
-  klasse,
-  liste,
-  real,
-  sample,
-} from '@abacus/applet-core'
+import { detectPeriod, fixedPoints, index, iteration, liste, real, sample, schritte, verhalten } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const MAX_PERIOD = 16
@@ -38,7 +27,6 @@ const model = iteration({
     const fps = fixedPoints(map, 0, 1)
     const cycle = tail(2000, 64)
     const periode = detectPeriod(cycle, { maxPeriod: MAX_PERIOD })
-    const v = behaviour(x)
     return {
       fixpunkte: liste(
         'Fixpunkte $y^*$',
@@ -55,7 +43,7 @@ const model = iteration({
         // the values the orbit cycles through
         marks: periode === null ? [] : [...cycle.slice(-periode)].map((c) => ({ kind: 'value', v: c })),
       }),
-      verhalten: klasse('Verhalten', v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      verhalten: verhalten('Verhalten', x),
     }
   },
 })

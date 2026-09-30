@@ -1,6 +1,6 @@
 // MATLAB: app_geometric — x_{n+1} = a·x_n. Build order #1: the whole pipeline on a trivial iteration.
 
-import { behaviour, iteration, klasse, real, schritte, zahl } from '@abacus/applet-core'
+import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = iteration({
@@ -15,11 +15,10 @@ const model = iteration({
   horizon: (p) => p.N,
   series: { label: 'x_n' },
   observables: ({ p, x }) => {
-    const v = behaviour(x)
     // x_n = aⁿ·x₀: the limit follows from a alone, however many steps are drawn.
     const L = p.x0 === 0 || Math.abs(p.a) < 1 ? 0 : p.a === 1 ? p.x0 : null
     return {
-      verhalten: klasse('Verhalten', v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      verhalten: verhalten('Verhalten', x),
       grenzwert: zahl('Grenzwert', L, {
         note: p.a === -1 ? 'springt zwischen zwei Werten' : 'wächst über alle Grenzen',
         marks: L === null ? [] : [{ kind: 'value', v: L }],

@@ -33,6 +33,12 @@ describe('answer key (§11.2)', () => {
   it('behaviour is judged by the approach, not by a numerically settled tail', () => {
     expect(observe('logistic-cobweb', { a: 2.8, N: 5000 }).verhalten.value).toBe('oszillierend')
     expect(observe('logistic-cobweb', { a: 1.8, N: 5000 }).verhalten.value).toBe('monoton')
+    // shown with whether it converges; a lasting 2-cycle does not
+    const show = (o: { value: unknown; format?: (v: never) => string }) => o.format!(o.value as never)
+    expect(show(observe('logistic-cobweb', { a: 2.8, N: 200 }).verhalten)).toBe('oszillierend konvergent')
+    expect(show(observe('logistic-cobweb', { a: 1.8, N: 200 }).verhalten)).toBe('monoton konvergent')
+    expect(show(observe('logistic-bifurcation', { a: 3.2, N: 200 }).verhalten)).toBe('oszillierend')
+    expect(show(observe('geometric', { a: 1.2 }).verhalten)).toBe('monoton')
   })
 
   it('geometric: constant at a = 1, oscillating for negative a', () => {

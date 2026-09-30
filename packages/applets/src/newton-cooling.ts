@@ -2,7 +2,7 @@
 // of the distance to the room temperature. Monotone for α < 1, oscillating for 1 < α < 2,
 // divergent for α > 2 — the factor 1 − α decides.
 
-import { behaviour, iteration, klasse, real, schritte, zahl } from '@abacus/applet-core'
+import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = iteration({
@@ -23,14 +23,13 @@ const model = iteration({
   observables: ({ p, x }) => {
     const q = 1 - p.alpha
     const L = p.T0 === p.Tu || Math.abs(q) < 1 ? p.Tu : q === 1 ? p.T0 : null
-    const v = behaviour(x)
     return {
       faktor: zahl('Faktor $1 - \\alpha$', q),
       grenzwert: zahl('Grenzwert', L, {
         note: q === -1 ? 'springt zwischen zwei Werten' : 'Abstand wächst',
         marks: L === null ? [] : [{ kind: 'value', v: L }],
       }),
-      verhalten: klasse('Verhalten', v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      verhalten: verhalten('Verhalten', x),
     }
   },
 })

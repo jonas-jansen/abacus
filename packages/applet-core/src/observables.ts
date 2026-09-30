@@ -110,6 +110,39 @@ export function behaviour(xs: ArrayLike<number>, { divergeAt = 1e8, window = 20 
   return null
 }
 
+/**
+ * Whether a sequence settles down: it has come to rest numerically, or its last steps shrink
+ * steadily (by a factor clearly below 1). A lasting cycle, whose steps stay the same, does not.
+ */
+export function settles(xs: ArrayLike<number>, window = 10): boolean {
+  const m = xs.length
+  if (m < 3) return false
+  const last = xs[m - 1]
+  if (!Number.isFinite(last)) return false
+  const scale = 1e-9 * (1 + Math.abs(last))
+  const d = (i: number) => Math.abs(xs[i] - xs[i - 1])
+  if (d(m - 1) <= scale) return true
+  const from = Math.max(1, m - window)
+  for (let i = from + 1; i < m; i++) if (!(d(i) < d(i - 1))) return false
+  return d(m - 1) / d(m - 2) < 0.999
+}
+
+const VERHALTEN_TEXT: Record<Verhalten, string> = { monoton: 'monoton', oszillierend: 'oszillierend', divergent: 'divergent' }
+
+/**
+ * The "Verhalten" readout of a sequence. Its value is the class of `behaviour` (what quizzes
+ * check); what it shows adds "konvergent" when the sequence settles.
+ */
+export function verhalten(label: string, xs: ArrayLike<number>, extra: Extra = {}): Observable {
+  const v = behaviour(xs)
+  const konvergent = v !== null && v !== 'divergent' && settles(xs)
+  return klasse(label, v, {
+    ...(v === null ? { note: 'kein einfaches Muster' } : {}),
+    format: (value) => (typeof value === 'string' && value in VERHALTEN_TEXT ? VERHALTEN_TEXT[value as Verhalten] + (konvergent ? ' konvergent' : '') : String(value ?? '—')),
+    ...extra,
+  })
+}
+
 export interface FixedPoint {
   x: number
   /** f'(x*) — the fixed point is attracting iff |slope| < 1. */

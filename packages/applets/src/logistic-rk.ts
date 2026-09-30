@@ -1,7 +1,7 @@
 // MATLAB: app_logistic_rK — x_{n+1} = x_n + r (1 − x_n/K) x_n. K is always a fixed point with
 // f′(K) = 1 − r, so monotone approach ends at r = 1 and convergence at r = 2 — for every K.
 
-import { behaviour, detectPeriod, fixedPoints, index, iteration, klasse, liste, real, sample, schritte } from '@abacus/applet-core'
+import { detectPeriod, fixedPoints, index, iteration, liste, real, sample, schritte, verhalten } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const MAX_PERIOD = 16
@@ -26,7 +26,6 @@ const model = iteration({
     const fps = fixedPoints(map, -0.01 * p.K, 1.5 * p.K)
     const periode = detectPeriod(tail(2000, 64), { maxPeriod: MAX_PERIOD })
     const cycle = tail(2000, 64)
-    const v = behaviour(x)
     return {
       fixpunkte: liste(
         'Fixpunkte $x^*$',
@@ -42,7 +41,7 @@ const model = iteration({
         note: periode === null ? `keine Periode ≤ ${MAX_PERIOD} gefunden` : undefined,
         marks: periode === null ? [] : [...cycle.slice(-periode)].map((c) => ({ kind: 'value', v: c })),
       }),
-      verhalten: klasse('Verhalten', v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      verhalten: verhalten('Verhalten', x),
     }
   },
 })

@@ -1,7 +1,7 @@
 // MATLAB: app_logistic_a — y_{n+1} = a y_n (1 − y_n) for a from 0 to 4, with the bifurcation
 // diagram: where the sequence ends up, for every a at once. The current a is a line through it.
 
-import { behaviour, detectPeriod, index, iteration, klasse, real, schritte } from '@abacus/applet-core'
+import { detectPeriod, index, iteration, real, schritte, verhalten } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const MAX_PERIOD = 32
@@ -68,7 +68,6 @@ const model = iteration({
   observables: ({ p, x, tail }) => {
     const cycle = tail(4000, 128)
     const periode = detectPeriod(cycle, { maxPeriod: MAX_PERIOD })
-    const v = behaviour(x)
     const values = periode === null ? [] : [...cycle.slice(-periode)]
     return {
       periode: index('Periode', periode, {
@@ -78,7 +77,7 @@ const model = iteration({
           { kind: 'point', x: p.a, y: c, in: 'phase' } as const,
         ]),
       }),
-      verhalten: klasse('Verhalten', v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      verhalten: verhalten('Verhalten', x),
     }
   },
 })
