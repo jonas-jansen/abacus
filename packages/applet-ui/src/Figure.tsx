@@ -165,7 +165,7 @@ export function Figure<P extends Params>({
       ctx.clearRect(0, 0, frame.plot.w, frame.plot.h)
       const css = getComputedStyle(cv)
       const color = (role: keyof typeof fallbackColors) => css.getPropertyValue(colorVar(role)).trim() || fallbackColors[role]
-      const surface = new CanvasSurface(ctx, color)
+      const surface = new CanvasSurface(ctx, color, css.getPropertyValue('--ab-bg').trim() || '#ffffff')
       if (vergleich) {
         // the held state first, faint and complete (no timeline cut), then the current one
         drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true })
@@ -206,6 +206,14 @@ export function Figure<P extends Params>({
   const X = (v: number) => frame.plot.x + frame.xScale(v)
 
   const legend = legendEntries(spec, run)
+  const farbskala = useMemo(() => {
+    if (spec.type !== 'heatmap') return undefined
+    const g = run.grids?.find((q) => q.id === spec.grid)
+    if (!g) return undefined
+    let [lo, hi] = spec.zRange ?? [Infinity, -Infinity]
+    if (!spec.zRange) for (const v of g.z) if (Number.isFinite(v)) (lo = Math.min(lo, v)), (hi = Math.max(hi, v))
+    return { label: spec.zLabel ?? g.label, lo, hi }
+  }, [spec, run])
   const { plot } = frame
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
 
@@ -294,6 +302,7 @@ export function Figure<P extends Params>({
         onVergleichen={onVergleichen}
         bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
         zoomReset={zoom ? () => setZoom(null) : undefined}
+        farbskala={farbskala}
       />
       <div
         className="ab-figure-inner"

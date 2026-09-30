@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
-import { decimalsOf, explainChange, formatNumber, roundTo, updateParams, type Detail, type Run, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
+import { decimalsOf, defaultParams, explainChange, formatNumber, roundTo, updateParams, type Detail, type Run, type IntParam, type Observable, type Params, type ParamSpec, type ParamValue, type RealParam } from '@abacus/applet-core'
 import { subscribe } from '@abacus/channel'
 import { accessibleName, NumberField, ParamControl } from './controls'
 import { handlesOf, type AppletDef, type PlotEntry } from './define'
@@ -318,6 +318,18 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                 </span>
               </span>
             </div>
+            {def.szenarien && def.szenarien.length > 0 && (
+              <div className="ab-szenarien" role="group" aria-label="Szenarien">
+                {def.szenarien.map((s) => {
+                  const active = Object.entries(s.params).every(([id, v]) => JSON.stringify(params[id]) === JSON.stringify(v))
+                  return (
+                    <button key={s.label} type="button" className="ab-pill ab-szenario" aria-pressed={active} data-tip={s.text} onClick={() => setParams({ ...defaultParams(def.model), ...s.params })}>
+                      <MathLabel text={s.label} />
+                    </button>
+                  )
+                })}
+              </div>
+            )}
             <div className="ab-controls">{primary.map(control)}</div>
             {more.length > 0 && (
               <details className="ab-more">

@@ -29,6 +29,20 @@ export interface Surface {
   end(): void
   /** Multiplies the opacity of everything drawn from now on (1 = normal). */
   fade(factor: number): void
+  /**
+   * An image of cols × rows cells over the rectangle (x, y, w, h), row 0 at the top. Values
+   * 0…1 run from the background through the primary to the secondary colour; NaN is empty.
+   */
+  raster(x: number, y: number, w: number, h: number, cols: number, rows: number, values: Float32Array): void
+}
+
+/** The colour scale of rasters: stops at 0, ½ and 1 as [r, g, b]. */
+export function rasterColor(v: number, stops: readonly (readonly [number, number, number])[]): [number, number, number] {
+  const t = Math.max(0, Math.min(1, v)) * (stops.length - 1)
+  const i = Math.min(stops.length - 2, Math.floor(t))
+  const f = t - i
+  const [a, b] = [stops[i], stops[i + 1]]
+  return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]
 }
 
 type Resolved = Required<StrokeStyle>
@@ -97,8 +111,49 @@ export class CanvasSurface implements Surface {
   constructor(
     private readonly ctx: CanvasRenderingContext2D,
     private readonly color: (role: SeriesRole) => string,
+    /** The page colour behind the plot: where a raster starts. */
+    private readonly background = '#ffffff',
   ) {}
 
+  /** Colours as [r, g, b], parsed once through a 1×1 canvas (any CSS colour works). */
+  private rgb(css: string): [number, number, number] {
+    const cached = this.rgbCache.get(css)
+    if (cached) return cached
+    const c = document.createElement('canvas')
+    c.width = c.height = 1
+    const x = c.getContext('2d')!
+    x.fillStyle = css
+    x.fillRect(0, 0, 1, 1)
+    const d = x.getImageData(0, 0, 1, 1).data
+    const out: [number, number, number] = [d[0], d[1], d[2]]
+    this.rgbCache.set(css, out)
+    return out
+  }
+  private rgbCache = new Map<string, [number, number, number]>()
+  raster(x: number, y: number, w: number, h: number, cols: number, rows: number, values: Float32Array) {
+    if (cols < 1 || rows < 1) return
+    const stops = [this.rgb(this.background), this.rgb(this.color('primary')), this.rgb(this.color('secondary'))]
+    const off = document.createElement('canvas')
+    off.width = cols
+    off.height = rows
+    const octx = off.getContext('2d')!
+    const img = octx.createImageData(cols, rows)
+    for (let k = 0; k < cols * rows; k++) {
+      const v = values[k]
+      if (Number.isNaN(v)) continue
+      const [r, g, b] = rasterColor(v, stops)
+      img.data[4 * k] = r
+      img.data[4 * k + 1] = g
+      img.data[4 * k + 2] = b
+      img.data[4 * k + 3] = Math.round(255 * this.factor)
+    }
+    octx.putImageData(img, 0, 0)
+    const { ctx } = this
+    ctx.save()
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(off, x, y, w, h)
+    ctx.restore()
+  }
   fade(factor: number) {
     this.factor = factor
   }
@@ -167,6 +222,26 @@ export class SvgPathSurface implements Surface {
   readonly nodes: SvgNode[] = []
   private style: Resolved = resolveStyle({ role: 'primary' })
   private factor = 1
+  raster(x: number, y: number, w: number, h: number, cols: number, rows: number, values: Float32Array) {
+    // first paint only: the cells in eight shades, one path each
+    const LEVELS = 8
+    const paths: string[][] = Array.from({ length: LEVELS }, () => [])
+    const [cw, ch] = [w / cols, h / rows]
+    for (let r = 0; r < rows; r++) {
+      for (let q = 0; q < cols; q++) {
+        const v = values[r * cols + q]
+        if (Number.isNaN(v)) continue
+        const lvl = Math.min(LEVELS - 1, Math.floor(v * LEVELS))
+        paths[lvl].push(`M${r1(x + q * cw)} ${r1(y + r * ch)}h${r1(cw + 0.3)}v${r1(ch + 0.3)}h${r1(-cw - 0.3)}Z`)
+      }
+    }
+    paths.forEach((d, lvl) => {
+      if (!d.length) return
+      const t = (lvl + 0.5) / LEVELS
+      const fill = t < 0.5 ? `color-mix(in srgb, var(--abacus-primary) ${Math.round(t * 200)}%, var(--ab-bg))` : `color-mix(in srgb, var(--abacus-secondary) ${Math.round((t - 0.5) * 200)}%, var(--abacus-primary))`
+      this.nodes.push({ tag: 'path', attrs: { d: d.join(''), style: `fill: ${fill}` } })
+    })
+  }
   fade(factor: number) {
     this.factor = factor
   }

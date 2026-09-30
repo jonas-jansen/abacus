@@ -57,6 +57,17 @@ export type PlotSpec =
   | (PlotCommon & { type: 'scatter'; series?: readonly string[] })
   /** z = f(x, y) from `run.grids`, rotatable. Drawn by its own renderer (surface3d.ts). */
   | (PlotCommon & { type: 'surface3d'; grid: string; zLabel?: string })
+  /**
+   * Values at the current step as bars: one per series (age classes, compartments), or one
+   * per row of a grid over time (cells of a ring: grid x = step, y = cell). The axis covers
+   * all steps, so it holds still while the timeline plays.
+   */
+  | (PlotCommon & { type: 'bars'; series?: readonly string[]; grid?: string; share?: boolean })
+  /**
+   * A grid over time as colours: x = step or time, y = e.g. the cell, colour = the value.
+   * The timeline uncovers it column by column.
+   */
+  | (PlotCommon & { type: 'heatmap'; grid: string; zLabel?: string; zRange?: Range })
 
 export type PlotType = PlotSpec['type']
 
@@ -120,6 +131,22 @@ export function plotDomains(spec: PlotSpec, run: Run): Domains {
   switch (spec.type) {
     case 'surface3d':
       return { x: [0, 1], y: [0, 1], xInteger: false }
+    case 'bars': {
+      const b = barValues(spec, run)
+      let hi = 0
+      for (const col of b.columns) for (const v of col) if (Number.isFinite(v) && v > hi) hi = v
+      return { x: pick(spec.x, () => [0.4, b.count + 0.6]), y: pick(spec.y, () => [0, hi > 0 ? hi * 1.05 : 1]), xInteger: true }
+    }
+    case 'heatmap': {
+      const g = run.grids?.find((q) => q.id === spec.grid)
+      if (!g || !g.x.length || !g.y.length) return { x: [0, 1], y: [0, 1], xInteger: false }
+      const half = (a: Float64Array) => (a.length > 1 ? (a[a.length - 1] - a[0]) / (a.length - 1) / 2 : 0.5)
+      return {
+        x: pick(spec.x, () => [g.x[0] - half(g.x), g.x[g.x.length - 1] + half(g.x)]),
+        y: pick(spec.y, () => [g.y[0] - half(g.y), g.y[g.y.length - 1] + half(g.y)]),
+        xInteger: false,
+      }
+    }
     case 'scatter':
     case 'timeSeriesDiscrete':
     case 'timeSeriesContinuous':
@@ -149,6 +176,38 @@ export function plotDomains(spec: PlotSpec, run: Run): Domains {
   }
 }
 
+/**
+ * What a bar plot shows over the steps: `columns[k]` are the bar heights at step k.
+ * From series: bar i is series i. From a grid over time: bar j is row j (e.g. cell j).
+ */
+export function barValues(spec: Extract<PlotSpec, { type: 'bars' }>, run: Run): { count: number; columns: number[][]; roles: Series['role'][] } {
+  let columns: number[][] = []
+  let roles: Series['role'][] = []
+  const g = spec.grid ? run.grids?.find((q) => q.id === spec.grid) : undefined
+  if (g) {
+    const [nx, ny] = [g.x.length, g.y.length]
+    columns = Array.from({ length: nx }, (_, i) => Array.from({ length: ny }, (__, j) => g.z[j * nx + i]))
+    roles = Array.from({ length: ny }, () => 'primary' as const)
+  } else {
+    const ss = selected(run, spec.series)
+    const steps = Math.max(0, ...ss.map((s) => s.y.length))
+    columns = Array.from({ length: steps }, (_, k) => ss.map((s) => s.y[Math.min(k, s.y.length - 1)]))
+    roles = ss.map((s) => s.role)
+  }
+  if (spec.share) {
+    columns = columns.map((col) => {
+      const sum = col.reduce((a, v) => a + (Number.isFinite(v) ? v : 0), 0)
+      return col.map((v) => (sum > 0 ? v / sum : 0))
+    })
+  }
+  return { count: roles.length, columns, roles }
+}
+
+/** The step a plot over steps shows: the timeline's, or the last. */
+function stepOf(view: PlotView, steps: number): number {
+  return Math.max(0, Math.min(steps - 1, view.steps ?? steps - 1))
+}
+
 const isTime = (spec: PlotSpec) => spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous'
 
 /**
@@ -157,6 +216,7 @@ const isTime = (spec: PlotSpec) => spec.type === 'timeSeriesDiscrete' || spec.ty
  * Everything else stays free.
  */
 export function panFloors(spec: PlotSpec, run: Run, d: Domains): { x: number; y: number } {
+  if (spec.type === 'bars') return { x: -Infinity, y: 0 }
   const nonneg = (arrays: (ArrayLike<number> | undefined)[]) =>
     arrays.length > 0 &&
     arrays.every((a) => {
@@ -525,6 +585,43 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
   switch (spec.type) {
     case 'surface3d':
       return
+    case 'bars': {
+      const b = barValues(spec, run)
+      if (!b.columns.length) return
+      const col = b.columns[stepOf(view, b.columns.length)]
+      const y0 = frame.yScale(Math.max(frame.yDomain[0], 0))
+      const w = Math.max(1, Math.abs(frame.xScale(1) - frame.xScale(0)) * 0.7)
+      col.forEach((v, i) => {
+        if (!Number.isFinite(v)) return
+        const cx = frame.xScale(i + 1)
+        const y = frame.yScale(v)
+        s.begin({ role: b.roles[i], alpha: 0.85 })
+        s.polygon(Float64Array.of(cx - w / 2, y0, cx + w / 2, y0, cx + w / 2, y, cx - w / 2, y))
+        s.end()
+      })
+      return
+    }
+    case 'heatmap': {
+      const g = run.grids?.find((q) => q.id === spec.grid)
+      if (!g || !g.x.length || !g.y.length) return
+      const [nx, ny] = [g.x.length, g.y.length]
+      let [lo, hi] = spec.zRange ?? [Infinity, -Infinity]
+      if (!spec.zRange) for (const v of g.z) if (Number.isFinite(v)) (lo = Math.min(lo, v)), (hi = Math.max(hi, v))
+      const span = hi > lo ? hi - lo : 1
+      // the timeline uncovers the columns
+      const shown = view.steps !== undefined ? Math.min(nx, view.steps + 1) : view.time !== undefined ? g.x.filter((x) => x <= view.time!).length : nx
+      const values = new Float32Array(nx * ny)
+      for (let j = 0; j < ny; j++) {
+        // row 0 of the image is the top: the largest y
+        const row = ny - 1 - j
+        for (let i = 0; i < nx; i++) values[row * nx + i] = i < shown ? Math.max(0, Math.min(1, (g.z[j * nx + i] - lo) / span)) : NaN
+      }
+      const d = plotDomains(spec, run)
+      const [x0, x1] = [frame.xScale(d.x[0]), frame.xScale(d.x[1])]
+      const [yTop, yBottom] = [frame.yScale(d.y[1]), frame.yScale(d.y[0])]
+      s.raster(x0, yTop, x1 - x0, yBottom - yTop, nx, ny, values)
+      return
+    }
     case 'scatter':
       for (const series of selected(run, spec.series)) {
         if (series.kind === 'discrete') drawCloud(s, frame, series)

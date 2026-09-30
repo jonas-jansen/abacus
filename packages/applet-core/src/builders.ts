@@ -4,7 +4,7 @@
  * function of a context object that already holds the computed arrays.
  */
 
-import { defineModel, detailSamples, extendedEnd, MAX_SAMPLES, MAX_ZOOM_OUT, type Detail, type Model, type Observable, type Series, type SeriesRole } from './model'
+import { defineModel, detailSamples, extendedEnd, MAX_SAMPLES, MAX_ZOOM_OUT, type Detail, type Grid, type Model, type Observable, type Series, type SeriesRole } from './model'
 import { indices, linspace } from './numeric'
 import type { ParamDefs, ParamsOf } from './params'
 import { createRng, type Rng } from './rng'
@@ -72,6 +72,8 @@ export interface IterationConfig<D extends ParamDefs> extends Common<D> {
   series?: Partial<Component>
   /** Additional series, e.g. the graph of f for a cobweb. */
   extraSeries?: (ctx: IterationContext<ParamsOf<D>>) => Series[]
+  /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
+  grids?: (ctx: IterationContext<ParamsOf<D>>) => Grid[]
   observables?: (ctx: IterationContext<ParamsOf<D>>) => ObservableMap
 }
 
@@ -115,6 +117,7 @@ export function iteration<const D extends ParamDefs>(cfg: IterationConfig<D>): M
       }
       return {
         series: [orbit, ...(cfg.extraSeries?.(ctx) ?? [])],
+        grids: cfg.grids?.(ctx),
         observables: opts.observables === false ? {} : (cfg.observables?.(ctx) ?? {}),
         meta: { steps: N },
       }
@@ -140,6 +143,8 @@ export interface IterationNConfig<D extends ParamDefs> extends Common<D> {
   horizon: Resolvable<number, ParamsOf<D>>
   seed?: Resolvable<number, ParamsOf<D>>
   extraSeries?: (ctx: IterationNContext<ParamsOf<D>>) => Series[]
+  /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
+  grids?: (ctx: IterationNContext<ParamsOf<D>>) => Grid[]
   observables?: (ctx: IterationNContext<ParamsOf<D>>) => ObservableMap
 }
 
@@ -185,6 +190,7 @@ export function iterationN<const D extends ParamDefs>(cfg: IterationNConfig<D>):
       }))
       return {
         series: [...series, ...(cfg.extraSeries?.(ctx) ?? [])],
+        grids: cfg.grids?.(ctx),
         observables: opts.observables === false ? {} : (cfg.observables?.(ctx) ?? {}),
         meta: { steps: N },
       }
@@ -224,6 +230,8 @@ export interface ClosedFormConfig<D extends ParamDefs> extends Common<D> {
   /** When the curves solve x' = f(t, x): f, for a slope field behind them. */
   slope?: (t: number, x: number, p: ParamsOf<D>) => number
   extraSeries?: (ctx: ClosedFormContext<ParamsOf<D>>) => Series[]
+  /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
+  grids?: (ctx: ClosedFormContext<ParamsOf<D>>) => Grid[]
   observables?: (ctx: ClosedFormContext<ParamsOf<D>>) => ObservableMap
 }
 
@@ -261,6 +269,7 @@ export function closedForm<const D extends ParamDefs>(cfg: ClosedFormConfig<D>):
       }
       return {
         series: [...Object.values(series), ...(cfg.extraSeries?.(ctx) ?? [])],
+        grids: cfg.grids?.(ctx),
         observables: opts.observables === false ? {} : (cfg.observables?.(ctx) ?? {}),
         meta: {},
         slope: cfg.slope && ((tt: number, x: number) => cfg.slope!(tt, x, p)),
@@ -306,6 +315,8 @@ export interface OdeConfig<D extends ParamDefs> extends Common<D> {
   /** Relative tolerance. Default 1e-6. */
   tol?: number
   extraSeries?: (ctx: OdeContext<ParamsOf<D>>) => Series[]
+  /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
+  grids?: (ctx: OdeContext<ParamsOf<D>>) => Grid[]
   observables?: (ctx: OdeContext<ParamsOf<D>>) => ObservableMap
 }
 
@@ -340,6 +351,7 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
       const ctx: OdeContext<ParamsOf<D>> = { p, sol, series }
       return {
         series: [...Object.values(series), ...(cfg.extraSeries?.(ctx) ?? [])],
+        grids: cfg.grids?.(ctx),
         observables: opts.observables === false ? {} : (cfg.observables?.(ctx) ?? {}),
         meta: { solver: sol.solver, steps: sol.steps, warnings: sol.warnings.length ? sol.warnings : undefined },
         field: planarField(cfg.components.length, (y) => cfg.rhs(t0, y, p)),

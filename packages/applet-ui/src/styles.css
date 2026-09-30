@@ -734,6 +734,38 @@ html[data-werte='aus'] .ab-probe-step {
   stroke-width: 1;
 }
 
+/* The colour scale of a heat map, in the figure head */
+.ab-farbskala {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ab-muted);
+}
+.ab-farbskala-bar {
+  width: 72px;
+  height: 9px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--ab-bg), var(--abacus-primary), var(--abacus-secondary));
+  box-shadow: inset 0 0 0 1px var(--ab-line);
+}
+.ab-farbskala-zahl {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scenarios from the slides: chips above the parameters; the one in effect is filled. */
+.ab-szenarien {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 14px;
+}
+.ab-szenario[aria-pressed='true'] {
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ab-accent) 40%, transparent);
+}
+
 /* ================================================================== hints */
 
 /* The card of tip.ts: one per page, fixed, above everything. Keys as caps, a few icons. */

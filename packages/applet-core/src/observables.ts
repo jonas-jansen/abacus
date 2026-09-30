@@ -143,6 +143,35 @@ export function verhalten(label: string, xs: ArrayLike<number>, extra: Extra = {
   })
 }
 
+/**
+ * The period of an oscillation sampled at times t: the mean time between upward crossings of
+ * the middle level, over the last part of the run (after the start has died away). Null when
+ * it does not oscillate, or when the intervals differ by more than `tol` (relative) — then it
+ * is not (yet) periodic. Also returns the crossing times, e.g. to mark the beats.
+ */
+export function periodOf(t: ArrayLike<number>, y: ArrayLike<number>, { from = 0.3, tol = 0.03 } = {}): { period: number; crossings: number[] } | null {
+  const n = Math.min(t.length, y.length)
+  const start = Math.floor(n * from)
+  if (n - start < 8) return null
+  let lo = Infinity
+  let hi = -Infinity
+  for (let i = start; i < n; i++) {
+    if (y[i] < lo) lo = y[i]
+    if (y[i] > hi) hi = y[i]
+  }
+  if (!(hi - lo > 1e-9 * (1 + Math.abs(hi)))) return null
+  const mid = (lo + hi) / 2
+  const crossings: number[] = []
+  for (let i = start + 1; i < n; i++) {
+    if (y[i - 1] < mid && y[i] >= mid) crossings.push(t[i - 1] + ((mid - y[i - 1]) / (y[i] - y[i - 1])) * (t[i] - t[i - 1]))
+  }
+  if (crossings.length < 3) return null
+  const gaps = crossings.slice(1).map((c, i) => c - crossings[i])
+  const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length
+  if (gaps.some((g) => Math.abs(g - mean) > tol * mean)) return null
+  return { period: mean, crossings }
+}
+
 export interface FixedPoint {
   x: number
   /** f'(x*) — the fixed point is attracting iff |slope| < 1. */

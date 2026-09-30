@@ -1,7 +1,7 @@
 /** The row above a figure: title, compare, zoom reset, trajectories, legend and lin/log switch. */
 
 import { useEffect, useRef, useState } from 'react'
-import { type Run, type Series } from '@abacus/applet-core'
+import { formatNumber, type Run, type Series } from '@abacus/applet-core'
 import { nullclineSeries, roleStyles, type PlotSpec } from '@abacus/applet-plot'
 import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
@@ -25,6 +25,7 @@ export function FigureHead({
   onVergleichen,
   bahnen,
   zoomReset,
+  farbskala,
 }: {
   title?: string
   legend: Series[]
@@ -36,6 +37,8 @@ export function FigureHead({
   onVergleichen?: () => void
   bahnen?: { n: number; loeschen?: () => void }
   zoomReset?: () => void
+  /** A heat map's colour scale: what the colour means, from lo to hi. */
+  farbskala?: { label: string; lo: number; hi: number }
 }) {
   const [help, setHelp] = useState(false)
   const helpRef = useRef<HTMLDivElement>(null)
@@ -87,6 +90,14 @@ export function FigureHead({
             ×
           </span>
         </button>
+      )}
+      {farbskala && (
+        <span className="ab-farbskala">
+          <TeX tex={farbskala.label} />
+          <span className="ab-farbskala-zahl">{formatNumber(farbskala.lo, 3)}</span>
+          <span className="ab-farbskala-bar" aria-hidden="true" />
+          <span className="ab-farbskala-zahl">{formatNumber(farbskala.hi, 3)}</span>
+        </span>
       )}
       {(legend.length > 1 || legend.some((s) => s.name)) && (
         <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
@@ -162,7 +173,8 @@ export function FigureHead({
 /** Series shown in a plot that deserve a legend entry (time series and function graphs). */
 export function legendEntries(spec: PlotSpec, run: Run) {
   if (spec.type === 'phasePlane') return nullclineSeries(spec)
-  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'surface3d') return []
+  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'surface3d' || spec.type === 'heatmap') return []
+  if (spec.type === 'bars' && spec.grid) return []
   const ids = spec.series
   // annotations (brackets, arrows) explain themselves where they are drawn
   return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation')

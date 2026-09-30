@@ -101,6 +101,18 @@ export interface AppletDef<P extends Params = Params> {
   /** Open the timeline at the start instead of showing everything. */
   schritte?: boolean
   runOptions?: (p: P) => Partial<RunOptions>
+  /**
+   * Named settings from the slides, one click each (e.g. "Szenario A" of the SIR model):
+   * the defaults with these values. Shown as chips above the parameters.
+   */
+  szenarien?: readonly Szenario<P>[]
+}
+
+export interface Szenario<P = Params> {
+  label: string
+  /** One line on what it shows, as the chip's hint. */
+  text?: string
+  params: Partial<P>
 }
 
 export type AnyAppletDef = AppletDef<any>
@@ -114,6 +126,9 @@ export function defineApplet<P extends Params>(def: AppletDef<P>): AppletDef<P> 
     for (const h of handlesOf(plot)) {
       if (!ids.has(h.param)) throw new Error(`Applet "${def.id}": drag handle refers to unknown parameter "${h.param}".`)
     }
+  }
+  for (const s of def.szenarien ?? []) {
+    for (const id of Object.keys(s.params)) if (!ids.has(id)) throw new Error(`Applet "${def.id}": Szenario "${s.label}" sets unknown parameter "${id}".`)
   }
   for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.sichtbar ?? {}), ...(def.horizont ? [def.horizont] : [])]) {
     if (!ids.has(id)) throw new Error(`Applet "${def.id}": layout.main refers to unknown parameter "${id}".`)

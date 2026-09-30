@@ -12,7 +12,10 @@ export function markSpace(spec: PlotSpec): MarkSpace {
   switch (spec.type) {
     case 'timeSeriesDiscrete':
     case 'timeSeriesContinuous':
+    case 'heatmap':
       return 'time'
+    case 'bars':
+      return 'map'
     case 'cobweb':
     case 'functionGraph':
       return 'map'
@@ -165,7 +168,14 @@ export function probeNodes(frame: Frame, spec: PlotSpec, run: Run, view: PlotVie
   switch (spec.type) {
     case 'scatter':
     case 'surface3d':
+    case 'bars':
       return EMPTY
+    case 'heatmap': {
+      // the column pointed at, lined up with the other plots over time
+      const at = Math.round(t)
+      if (!inside(at, frame.xDomain)) return EMPTY
+      return { nodes: [{ tag: 'line', attrs: { x1: X(at), y1: plot.y, x2: X(at), y2: plot.y + plot.h, class: 'ab-probe-line' } }], rows: [], anchor: null }
+    }
     case 'timeSeriesDiscrete':
     case 'timeSeriesContinuous':
     case 'functionGraph': {
@@ -249,7 +259,9 @@ export function probeFromPointer(frame: Frame, spec: PlotSpec, run: Run, view: P
   switch (spec.type) {
     case 'scatter':
     case 'surface3d':
+    case 'bars':
       return null
+    case 'heatmap':
     case 'timeSeriesDiscrete':
     case 'timeSeriesContinuous':
     case 'functionGraph':

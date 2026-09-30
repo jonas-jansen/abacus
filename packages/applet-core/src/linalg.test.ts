@@ -49,3 +49,14 @@ describe('equilibria of planar systems', () => {
     expect(eq.map((e) => e.stable)).toEqual([true, false])
   })
 })
+
+describe('period of an oscillation', () => {
+  it('finds the period of a sine and of a spike train, and none for a damped decay', async () => {
+    const { periodOf } = await import('./observables')
+    const t = Float64Array.from({ length: 4001 }, (_, i) => i * 0.01)
+    expect(periodOf(t, t.map((v) => Math.sin((2 * Math.PI * v) / 3.7)))!.period).toBeCloseTo(3.7, 3)
+    expect(periodOf(t, t.map((v) => Math.exp(-v)))).toBeNull()
+    const spikes = t.map((v) => ((v % 5) < 0.4 ? 100 : -80))
+    expect(periodOf(t, spikes)!.period).toBeCloseTo(5, 1)
+  })
+})
