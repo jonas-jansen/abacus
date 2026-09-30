@@ -3,7 +3,7 @@
 // digits roughly doubles per step (the slides' example g(x) = e^{−5x} − x from x₀ = 0,05);
 // far away it may jump to another root, cycle (x³ − 2x + 2 from 0) or run off (arctan).
 
-import { bisect, choice, detectPeriod, iteration, klasse, liste, real, sample, schritte, zahl } from '@abacus/applet-core'
+import { bisect, choice, detectPeriod, iteration, klasse, liste, real, sample, schritte, zahl, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 interface G {
@@ -68,20 +68,52 @@ const model = iteration({
     const f = G_FUNKTIONEN[p.g]
     const [lo, hi] = detail?.x ?? [f.x[0] - (f.x[1] - f.x[0]) * 0.5, f.x[1] + (f.x[1] - f.x[0]) * 0.5]
     const graph = sample(f.g, lo, hi, 801)
-    // the tangent steps: from (x_n, 0) up to the graph, along the tangent down to (x_{n+1}, 0)
-    const tx: number[] = []
-    const ty: number[] = []
-    for (let k = 0; k + 1 < x.length; k++) {
-      if (!Number.isFinite(x[k + 1])) break
-      tx.push(x[k], x[k], x[k + 1], NaN)
-      ty.push(0, f.g(x[k]), 0, NaN)
+    // The construction, step by step (the timeline shows one at a time): step k starts at
+    // x_{k−1} on the axis, goes up to the graph, follows the tangent there down to its zero
+    // x_k. Earlier steps stay as a faint trail; the tangent itself is drawn for the current
+    // step only, across the whole window.
+    const lot = { x: [] as number[], y: [] as number[], k: [] as number[], l: [] as (string | undefined)[] }
+    const spur = { x: [] as number[], y: [] as number[], k: [] as number[] }
+    const tangente = { x: [] as number[], y: [] as number[], k: [] as number[] }
+    const beruehr = { x: [] as number[], y: [] as number[], k: [] as number[] }
+    for (let k = 1; k < x.length; k++) {
+      const [a, b] = [x[k - 1], x[k]]
+      if (!Number.isFinite(a) || !Number.isFinite(b)) break
+      const [ga, dga] = [f.g(a), f.dg(a)]
+      lot.x.push(a, a), lot.y.push(0, ga), lot.k.push(k, k), lot.l.push(`x_{${k - 1}}`, undefined)
+      spur.x.push(a, b), spur.y.push(ga, 0), spur.k.push(k, k)
+      tangente.x.push(lo, hi), tangente.y.push(ga + dga * (lo - a), ga + dga * (hi - a)), tangente.k.push(k, k)
+      beruehr.x.push(a), beruehr.y.push(ga), beruehr.k.push(k)
     }
-    if (!tx.length) tx.push(NaN), ty.push(NaN)
+    const stepped = (id: string, label: string, q: { x: number[]; y: number[]; k: number[] }, role: 'primary' | 'secondary' | 'reference', extra: Partial<Series> = {}): Series => ({
+      id,
+      label,
+      kind: 'continuous',
+      x: Float64Array.from(q.x.length ? q.x : [NaN]),
+      y: Float64Array.from(q.y.length ? q.y : [NaN]),
+      schritt: Float64Array.from(q.k.length ? q.k : [0]),
+      role,
+      legend: false,
+      ...extra,
+    })
     const r = nearestRoot(p.g, x[x.length - 1])
     return [
       { id: 'graph', label: 'g(x)', kind: 'continuous', x: graph.x, y: graph.y, role: 'primary' },
-      { id: 'tangenten', label: 'x_n', name: 'Tangentenschritte', kind: 'continuous', x: Float64Array.from(tx), y: Float64Array.from(ty), role: 'secondary' },
-      { id: 'punkte', label: 'x_n', kind: 'discrete', x: x.map((v) => v), y: x.map(() => 0), role: 'secondary', connect: false, legend: false },
+      stepped('lot', 'g(x_n)', lot, 'reference', { labels: lot.l }),
+      stepped('spur', 'x_n', spur, 'secondary'),
+      stepped('tangente', 't(x)', tangente, 'secondary', { name: 'Tangente', legend: true, schrittModus: 'aktuell', dash: [] }),
+      stepped('beruehr', 'g(x_n)', beruehr, 'primary', { kind: 'discrete', schrittModus: 'aktuell' }),
+      {
+        id: 'punkte',
+        label: 'x_n',
+        kind: 'discrete',
+        x: x.map((v) => v),
+        y: x.map(() => 0),
+        schritt: Float64Array.from(x, (_, k) => k),
+        labels: [...x].map((_, k) => (k === 0 ? undefined : `x_{${k}}`)),
+        role: 'secondary',
+        legend: false,
+      },
       // the error on a log axis; exactly 0 would have no place there
       { id: 'fehler', label: '|x_n - x^*|', kind: 'discrete', x: n, y: x.map((v) => Math.max(Math.abs(v - r), Number.EPSILON * Math.max(1, Math.abs(r)))), role: 'tertiary' },
     ]
@@ -120,6 +152,8 @@ export default defineApplet({
   folien: '57–64',
   model,
   horizont: 'N',
+  // one step at a time: the timeline opens at the start
+  schritte: true,
   formeln: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = x_n - \frac{g(x_n)}{g'(x_n)}` },
     { label: 'Funktion', tex: String.raw`g(x) = {{g}}` },
@@ -128,7 +162,7 @@ export default defineApplet({
   plots: [
     {
       type: 'functionGraph',
-      series: ['graph', 'tangenten', 'punkte'],
+      series: ['graph', 'lot', 'spur', 'tangente', 'beruehr', 'punkte'],
       xLabel: 'x',
       yLabel: 'g(x)',
       x: (p) => G_FUNKTIONEN[p.g].x,

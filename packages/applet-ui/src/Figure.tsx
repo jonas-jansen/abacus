@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { clamp, formatNumber, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
-import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
+import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
@@ -259,6 +259,14 @@ export function Figure<P extends Params>({
   }
 
   const positions = hydrated ? handles.map((h) => handlePosition(h, frame, params)) : []
+  // Constructions that unfold step by step name the points of the current step.
+  const pointLabels = stepLabels(spec, drawn, view)
+    .map((l) => ({ ...l, x: frame.plot.x + frame.xScale(l.x), y: frame.plot.y + frame.yScale(l.y) }))
+    .filter((l) => Number.isFinite(l.x) && Number.isFinite(l.y) && l.x >= frame.plot.x && l.x <= frame.plot.x + frame.plot.w && l.y >= frame.plot.y - 1 && l.y <= frame.plot.y + frame.plot.h + 1)
+    .filter((l) => !positions.some((p) => p && Math.hypot(p[0] - l.x, p[1] - l.y) < 8))
+    // two labels close together: the left one goes to the left of its point
+    .map((l, _, all) => ({ ...l, left: all.some((o) => o !== l && o.x >= l.x && o.x - l.x < 40 && Math.abs(o.y - l.y) < 24) }))
+
   // Arrows name themselves at the tip, unless a handle (with its own label) sits there.
   const arrowLabels = (() => {
     if (spec.type === 'surface3d') return []
@@ -362,6 +370,11 @@ export function Figure<P extends Params>({
             </span>
           )
         })}
+        {pointLabels.map((a, i) => (
+          <span key={`p${i}`} className="ab-handle-label ab-arrow-label" data-flip={a.left || a.x > figW - 60 || undefined} data-below={a.y < plot.y + 28 || undefined} style={{ left: a.x, top: a.y, color: `var(--abacus-${a.role})` }} aria-hidden="true">
+            <TeX tex={a.tex} />
+          </span>
+        ))}
         {arrowLabels.map((a) => (
           <span key={a.id} className="ab-handle-label ab-arrow-label" data-flip={a.x > figW - 60 || undefined} data-below={a.y < plot.y + 28 || undefined} style={{ left: a.x, top: a.y, color: `var(--abacus-${a.role})` }} aria-hidden="true">
             <TeX tex={a.label} />

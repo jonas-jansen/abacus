@@ -38,6 +38,15 @@ export interface Series {
   dash?: readonly number[]
   /** false: not listed in the legend (e.g. the points of a path that is listed already). */
   legend?: boolean
+  /**
+   * A construction that unfolds with the timeline: the step each point belongs to
+   * (nondecreasing). At step k the plot shows the steps before k faintly ('spur') or not at
+   * all ('aktuell'), step k itself in full, and nothing later.
+   */
+  schritt?: Float64Array
+  schrittModus?: 'spur' | 'aktuell'
+  /** TeX labels of points, shown next to the points of the current step (e.g. x_3). */
+  labels?: readonly (string | undefined)[]
 }
 
 /**

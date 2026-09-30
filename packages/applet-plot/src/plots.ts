@@ -4,6 +4,7 @@
  */
 
 import { extent, padRange, valueRange, type Frame, type Range, type Run, type Series } from '@abacus/applet-core'
+import { roleStyles } from './palette'
 import type { Surface } from './surface'
 
 export type Domain = Range | 'auto'
@@ -574,6 +575,68 @@ function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, c
   s.end()
 }
 
+/** The step a stepped series shows: the timeline's, or its last. */
+export function currentStep(series: Series, view: PlotView): number {
+  const k = series.schritt!
+  const last = k.length ? k[k.length - 1] : 0
+  return view.steps === undefined ? last : Math.min(view.steps, last)
+}
+
+/**
+ * A series with `schritt`: earlier steps faint (or hidden), the current one in full and a
+ * little stronger, later ones not yet.
+ */
+function drawStepped(s: Surface, frame: Frame, series: Series, view: PlotView, fade: number) {
+  const k = series.schritt!
+  const cur = currentStep(series, view)
+  const part = (keep: (step: number) => boolean) => {
+    const x: number[] = []
+    const y: number[] = []
+    let prev = NaN
+    for (let i = 0; i < series.x.length; i++) {
+      if (!keep(k[i])) continue
+      if (!Number.isNaN(prev) && k[i] !== prev) x.push(NaN), y.push(NaN)
+      x.push(series.x[i])
+      y.push(series.y[i])
+      prev = k[i]
+    }
+    return { x: Float64Array.from(x), y: Float64Array.from(y) }
+  }
+  const draw = (p: { x: Float64Array; y: Float64Array }, strong: boolean) => {
+    if (!p.x.length) return
+    if (series.kind === 'discrete') {
+      s.begin({ role: series.role })
+      dots(s, frame, p.x, p.y, p.x.length, strong ? 5 : 3.5)
+      s.end()
+      return
+    }
+    s.begin({ role: series.role, width: strong ? roleStyles[series.role].width + 0.75 : undefined, ...(series.dash ? { dash: series.dash } : {}) })
+    polyline(s, frame, p.x, p.y)
+    s.end()
+  }
+  if ((series.schrittModus ?? 'spur') === 'spur') {
+    s.fade(fade * 0.35)
+    draw(part((step) => step < cur), false)
+  }
+  s.fade(fade)
+  draw(part((step) => step === cur), true)
+}
+
+/** Labels of the current step's points, in data coordinates. */
+export function stepLabels(spec: PlotSpec, run: Run, view: PlotView): { x: number; y: number; tex: string; role: Series['role'] }[] {
+  if (!('series' in spec)) return []
+  const out: { x: number; y: number; tex: string; role: Series['role'] }[] = []
+  for (const series of shown(run, spec.series, view)) {
+    if (!series.labels) continue
+    const cur = series.schritt ? currentStep(series, view) : NaN
+    series.labels.forEach((tex, i) => {
+      if (!tex || (series.schritt && series.schritt[i] !== cur)) return
+      out.push({ x: series.x[i], y: series.y[i], tex, role: series.role })
+    })
+  }
+  return out
+}
+
 function diagonal(s: Surface, frame: Frame) {
   const [a, b] = frame.xDomain
   s.begin({ role: 'reference' })
@@ -649,6 +712,10 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
       }
       for (const series of shown(run, spec.series, view)) {
         s.fade(dim(series, view))
+        if (series.schritt) {
+          drawStepped(s, frame, series, view, dim(series, view))
+          continue
+        }
         if (series.kind === 'discrete') {
           drawDiscrete(s, frame, series, visible(series, view), series.connect ?? true, series.role !== 'data')
           continue
