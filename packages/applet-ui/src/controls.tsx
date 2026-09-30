@@ -88,7 +88,7 @@ export function NumberField({
       value={text}
       size={Math.max(2, text.length)}
       data-scrub={scrubStep ? (scrubbing ? 'active' : 'ready') : undefined}
-      title={scrubStep ? 'ziehen zum Ändern, klicken zum Eintippen' : undefined}
+      data-tip={scrubStep ? '{Ziehen} | ziehen zum Ändern\nKlick | eintippen' : undefined}
       onPointerDown={(e) => {
         if (!scrubStep || e.pointerType !== 'mouse' || e.button !== 0 || document.activeElement === e.currentTarget) return
         e.preventDefault() // no focus, no text selection: this may become a drag
@@ -277,7 +277,7 @@ export function Slider({ spec, value, onChange, message, onInvalid }: SliderProp
         <ParamLabel spec={spec} htmlFor={id} />
         <span className="ab-tools">
           {changed && (
-            <button type="button" className="ab-tool" onClick={() => onChange(spec.default)} title={`zurück auf ${show(spec.default)}`} aria-label={`${name} zurücksetzen`}>
+            <button type="button" className="ab-tool" onClick={() => onChange(spec.default)} data-tip={`zurück auf ${show(spec.default)}`} aria-label={`${name} zurücksetzen`}>
               {Icon.reset}
             </button>
           )}
@@ -287,7 +287,7 @@ export function Slider({ spec, value, onChange, message, onInvalid }: SliderProp
               className="ab-tool"
               onClick={zoom}
               aria-pressed={zoomed}
-              title="Feinmodus: Bereich um den Wert auf ein Zehntel verengen"
+              data-tip="Feinmodus: Bereich um den Wert auf ein Zehntel verengen"
               aria-label={`Feinmodus für ${name}`}
             >
               {Icon.zoom}

@@ -2,6 +2,7 @@
 import '@abacus/applet-ui/styles.css'
 import '@abacus/quiz/styles.css'
 import '../styles/site.css'
+import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT } from '@abacus/applet-ui/settings'
 import { kurs, url } from '../config'
 
 interface Props {
@@ -20,6 +21,7 @@ const { titel, kurz, breite = 'breit', aktiv } = Astro.props
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titel} · {kurs.titel}</title>
     {kurz && <meta name="description" content={kurz} />}
+    <script is:inline set:html={EINSTELLUNGEN_SCRIPT} />
   </head>
   <body>
     <header class="topbar">
@@ -35,10 +37,36 @@ const { titel, kurz, breite = 'breit', aktiv } = Astro.props
           <a href={url('/#kurs')} aria-current={aktiv === 'kurs' ? 'page' : undefined}>Kurs</a>
           <a href={url('/notizbuch')} aria-current={aktiv === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
         </nav>
+        <button class="settings-btn" type="button" popovertarget="einstellungen" aria-label="Einstellungen">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" />
+          </svg>
+        </button>
+        <div id="einstellungen" class="settings" popover>
+          <div class="settings-title">Anzeige</div>
+          {Object.entries(EINSTELLUNGEN).map(([name, e]) => (
+            <label class="settings-row">
+              <span>
+                <span class="settings-label">{e.label}</span>
+                <span class="settings-text">{e.text}</span>
+              </span>
+              <input type="checkbox" role="switch" data-einstellung={name} checked />
+            </label>
+          ))}
+          <p class="settings-foot">Für den Unterricht mit Beamer: beide aus. Gilt für diesen Browser.</p>
+        </div>
       </div>
     </header>
     <main class:list={['main', breite]}>
       <slot />
     </main>
+    <script>
+      import { einstellung, setEinstellung, type Einstellung } from '@abacus/applet-ui/settings'
+      for (const box of document.querySelectorAll<HTMLInputElement>('input[data-einstellung]')) {
+        const name = box.dataset.einstellung as Einstellung
+        box.checked = einstellung(name) !== 'aus'
+        box.addEventListener('change', () => setEinstellung(name, box.checked ? 'an' : 'aus'))
+      }
+    </script>
   </body>
 </html>

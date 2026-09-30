@@ -25,6 +25,10 @@ import { renderSvg } from './svgReact'
 import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
 
+/** The hint over a zoomable plot (markup of tip.ts: keys | what they do). */
+const ZOOM_TIP = '{Mod} + {Rad} | zoomen\n{Finger} | zoomen mit zwei Fingern\n{Shift} + {Ziehen} | verschieben'
+const ZOOM_KNOWN = 'abacus:zoom-bekannt'
+
 /** Width assumed for the server render; the client re-lays out after measuring. */
 const SSR_WIDTH = 640
 const MIN_HEIGHT = 240
@@ -133,6 +137,16 @@ export function Figure<P extends Params>({
   // Zoomed or panned: the student's own window, until reset.
   const [zoom, setZoom] = useState<{ x: readonly [number, number]; y: readonly [number, number] } | null>(null)
   useEffect(() => setZoom(null), [logY])
+  // Whoever has zoomed once knows how; the hint stays away for the rest of the visit.
+  const [zoomKnown, setZoomKnown] = useState(false)
+  useEffect(() => {
+    try {
+      if (zoom) sessionStorage.setItem(ZOOM_KNOWN, '1')
+      setZoomKnown(!!zoom || sessionStorage.getItem(ZOOM_KNOWN) === '1')
+    } catch {
+      if (zoom) setZoomKnown(true)
+    }
+  }, [zoom])
   // Zoomed in: once the window has settled, the model is asked for more detail in it —
   // curves sampled in the window, diagrams recomputed for it — and that is what is drawn.
   const [settled, setSettled] = useState(zoom)
@@ -383,7 +397,8 @@ export function Figure<P extends Params>({
         onPointerLeave={leave}
         // in a phase portrait a double click would also add two trajectories; there the pill resets
         onDoubleClick={() => !onBahn && setZoom(null)}
-        title={zoomable ? `zoomen: Strg/⌘ + Mausrad oder zwei Finger, verschieben: Umschalt + ziehen${onBahn ? '' : ', zurück: Doppelklick'}` : undefined}
+        data-tip={zoomable && !zoomKnown ? ZOOM_TIP + (onBahn ? '' : '\n{Doppelklick} | zurück zum ganzen Bild') : undefined}
+        data-tip-at="pointer"
         style={{ width: figW, height: figH, cursor: onBahn ? 'crosshair' : undefined, touchAction: zoomable ? 'pan-x pan-y' : undefined }}
       >
         <svg width={figW} height={figH} className="ab-layer" aria-hidden="true">
@@ -419,7 +434,7 @@ export function Figure<P extends Params>({
           )
         })}
         {tip && (
-          <div className="ab-tip" data-below={tip.y < 72 || undefined} style={{ left: clamp(tip.x, 60, figW - 60), top: tip.y }} aria-hidden="true">
+          <div className="ab-tip" data-kind={active ? 'handle' : 'probe'} data-below={tip.y < 72 || undefined} style={{ left: clamp(tip.x, 60, figW - 60), top: tip.y }} aria-hidden="true">
             {tip.rows.map((r, i) => (
               <span key={i} className="ab-tip-row">
                 <TeX tex={r.tex} />
@@ -580,7 +595,7 @@ function FigureHead({
     <div className="ab-fighead">
       {title && <span className="ab-figtitle">{title}</span>}
       {onVergleichen && (
-        <button type="button" className="ab-pill" onClick={onVergleichen} title="den jetzigen Zustand festhalten – dann etwas ändern und vergleichen">
+        <button type="button" className="ab-pill" onClick={onVergleichen} data-tip="den jetzigen Zustand festhalten – dann etwas ändern und vergleichen">
           <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
             <path d="M5.5 2.5h5l-1 4 2.5 2.5h-9L5.5 6.5zM8 9v4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
           </svg>
@@ -588,20 +603,20 @@ function FigureHead({
         </button>
       )}
       {zoomReset && (
-        <button type="button" className="ab-pill" onClick={zoomReset} title="zurück zum ganzen Bild (Doppelklick)">
+        <button type="button" className="ab-pill" onClick={zoomReset} data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}>
           Ausschnitt zurücksetzen
         </button>
       )}
       {bahnen &&
         (bahnen.n > 0 ? (
-          <button type="button" className="ab-pill" onClick={bahnen.loeschen} title="die zusätzlichen Bahnen entfernen">
+          <button type="button" className="ab-pill" onClick={bahnen.loeschen} data-tip="die zusätzlichen Bahnen entfernen">
             {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
           </button>
         ) : (
           <span className="ab-fig-hint">klicken: weitere Bahn</span>
         ))}
       {vergleich && (
-        <button type="button" className="ab-legend-item ab-legend-ghost" onClick={vergleich.loesen} title="Vergleich lösen">
+        <button type="button" className="ab-legend-item ab-legend-ghost" onClick={vergleich.loesen} data-tip="Vergleich lösen">
           <svg width="22" height="10" aria-hidden="true">
             <line x1="1" y1="5" x2="21" y2="5" stroke="var(--ab-muted)" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
           </svg>
@@ -621,7 +636,7 @@ function FigureHead({
                 type="button"
                 className="ab-legend-item"
                 aria-pressed={!off}
-                title={off ? 'wieder zeigen' : 'ausblenden'}
+                data-tip={off ? 'wieder zeigen' : 'ausblenden'}
                 onClick={() => onToggle?.(s.id)}
                 onPointerEnter={() => !off && onFocus?.(s.id)}
                 onFocus={() => !off && onFocus?.(s.id)}
@@ -655,10 +670,10 @@ function FigureHead({
       {log && (
         <div className="ab-axis-switch" ref={helpRef}>
           <div className="ab-seg" role="group" aria-label="y-Achse">
-            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} title="lineare Achse">
+            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
               linear
             </button>
-            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} title="logarithmische Achse">
+            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
               log
             </button>
           </div>

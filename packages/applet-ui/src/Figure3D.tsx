@@ -170,6 +170,8 @@ export function Figure3D({
         onPointerUp={up}
         onPointerCancel={up}
         onDoubleClick={() => setView(DEFAULT_VIEW)}
+        data-tip={'{Ziehen} | drehen\n{Doppelklick} | zurück zur ersten Ansicht'}
+        data-tip-at="pointer"
       >
         {hydrated ? (
           <canvas ref={canvas} className="ab-data" style={{ position: 'absolute', inset: 0, width: size, height: h }} aria-hidden="true" />

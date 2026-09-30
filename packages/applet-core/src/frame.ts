@@ -50,6 +50,8 @@ export interface FrameInput {
 }
 
 export const TICK = 4
+/** How far the axes run past the plot, into their arrowheads. */
+export const AXIS_OVERHANG = 12
 export const PX_PER_X_TICK = 60
 export const PX_PER_Y_TICK = 40
 
@@ -57,6 +59,13 @@ export const PX_PER_Y_TICK = 40
 export const fontSizeFor = (width: number) => (width < 400 ? 11 : 12)
 
 export const estimateTextWidth = (text: string, fontSize: number) => text.length * fontSize * 0.6
+
+/** Rough width of a TeX-lite axis label (drawn at 1,15 × the tick size). */
+export const labelWidth = (tex: string, fontSize: number) =>
+  estimateTextWidth(tex.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}_^]/g, ''), fontSize * 1.15)
+
+/** The ·10^k factor beside an axis label. */
+export const FACTOR_WIDTH = (fontSize: number) => estimateTextWidth('·10−00', fontSize)
 
 /** Ticks on a 1–2–5 ladder, at most about `maxCount` of them. */
 export function niceTicks(lo: number, hi: number, maxCount: number, integer = false): { ticks: number[]; step: number } {
@@ -94,13 +103,16 @@ export function makeFrame(input: FrameInput): Frame {
   const yLabelWidth = Math.max(estimateTextWidth('−0,000', fontSize), ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
 
   const left = Math.ceil(yLabelWidth + TICK + 6 + 4)
-  const top = Math.ceil(input.yLabel ? fontSize * 2 : fontSize * 0.8)
-  const bottom = Math.ceil(fontSize + TICK + 6 + (input.xLabel ? fontSize * 1.6 : 0) + 2)
+  // room above the plot for the y arrow and the label beside its tip
+  const top = Math.ceil(AXIS_OVERHANG + (input.yLabel ? fontSize * 1.2 : 4))
+  const bottom = Math.ceil(fontSize + TICK + 6 + 2)
 
   const xT = niceTicks(xDomain[0], xDomain[1], Math.max(2, Math.floor((width - left) / PX_PER_X_TICK)), input.xInteger)
   const xScaled = scaledLabels(xT.ticks, xT.step)
   const xTickLabels = xScaled.labels
-  const right = Math.ceil(Math.max(estimateTextWidth('0,000', fontSize) / 2 + 2, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2 + 2)))
+  // the x variable (and its factor) sits right of the arrow tip
+  const tail = AXIS_OVERHANG + (input.xLabel ? 5 + labelWidth(input.xLabel, fontSize) : 4) + (xScaled.exp ? 6 + FACTOR_WIDTH(fontSize) : 0) + 2
+  const right = Math.ceil(Math.max(tail, estimateTextWidth('0,000', fontSize) / 2 + 2, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2 + 2)))
 
   const plot = {
     x: left,

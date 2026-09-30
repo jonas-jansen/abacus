@@ -1,6 +1,6 @@
 /** Bottom SVG layer (§5.2): grid, axes, ticks, tick labels, axis labels. */
 
-import { estimateTextWidth, TICK, type Frame } from '@abacus/applet-core'
+import { AXIS_OVERHANG, labelWidth, TICK, type Frame } from '@abacus/applet-core'
 import { mathText } from './mathText'
 import type { SvgNode } from './svg'
 
@@ -24,8 +24,13 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
   if (x0 < 0 && x1 > 0) nodes.push(line(X(0), plot.y, X(0), bottom, 'abacus-zero'))
   if (y0 < 0 && y1 > 0) nodes.push(line(plot.x, Y(0), plot.x + plot.w, Y(0), 'abacus-zero'))
 
-  nodes.push(line(plot.x, bottom, plot.x + plot.w, bottom, 'abacus-axis'))
-  nodes.push(line(plot.x, plot.y, plot.x, bottom, 'abacus-axis'))
+  // Both axes run a little past the plot and end in a stealth arrow, as in the slides.
+  const tipX = plot.x + plot.w + AXIS_OVERHANG
+  const tipY = plot.y - AXIS_OVERHANG
+  nodes.push(line(plot.x, bottom, tipX - 5, bottom, 'abacus-axis'))
+  nodes.push(line(plot.x, bottom, plot.x, tipY + 5, 'abacus-axis'))
+  nodes.push({ tag: 'path', attrs: { d: `M${tipX} ${bottom}l-10 -4l2.8 4l-2.8 4z`, class: 'abacus-axis-arrow' } })
+  nodes.push({ tag: 'path', attrs: { d: `M${plot.x} ${tipY}l-4 10l4 -2.8l4 2.8z`, class: 'abacus-axis-arrow' } })
 
   frame.xTicks.forEach((t, i) => {
     nodes.push(line(X(t), bottom, X(t), bottom + TICK, 'abacus-axis'))
@@ -44,25 +49,24 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
     })
   })
 
-  if (labels.x) {
-    nodes.push(mathText(labels.x, { x: plot.x + plot.w / 2, y: frame.height - 4, 'text-anchor': 'middle', class: 'abacus-axis-label' }))
-  }
-  if (labels.y) {
-    // Horizontal at the top of the y axis: readable on phones, and the mathematical convention.
-    nodes.push(mathText(labels.y, { x: plot.x, y: fontSize * 1.15, 'text-anchor': 'middle', class: 'abacus-axis-label' }))
-  }
-  // the common power of ten of scaled tick labels: beside the y label, at the end of the x axis
+  // The variables at the arrow tips: y to the right of the upper tip, x under the right tip.
   const factor = (e: number) => `\\cdot 10^{${e}}`
+  const yLabelY = tipY + fontSize * 0.35
+  if (labels.y) {
+    nodes.push(mathText(labels.y, { x: plot.x + 9, y: yLabelY, 'text-anchor': 'start', class: 'abacus-axis-label' }))
+  }
   if (frame.yExp) {
-    const w = estimateTextWidth(plainTex(labels.y ?? ''), fontSize * 1.15)
-    nodes.push(mathText(factor(frame.yExp), { x: plot.x + w / 2 + 6, y: fontSize * 1.15, 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
+    const w = labelWidth(labels.y ?? '', fontSize)
+    nodes.push(mathText(factor(frame.yExp), { x: plot.x + 9 + w + 8, y: yLabelY, 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
+  }
+  const xLabelX = tipX + 5
+  if (labels.x) {
+    nodes.push(mathText(labels.x, { x: xLabelX, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-axis-label' }))
   }
   if (frame.xExp) {
-    nodes.push(mathText(factor(frame.xExp), { x: plot.x + plot.w, y: frame.height - 4, 'text-anchor': 'end', class: 'abacus-tick abacus-factor' }))
+    const w = labels.x ? labelWidth(labels.x, fontSize) + 6 : 0
+    nodes.push(mathText(factor(frame.xExp), { x: xLabelX + w, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
   }
 
   return { tag: 'g', attrs: { 'font-size': fontSize }, children: nodes }
 }
-
-/** Rough plain-text version of a TeX-lite label, for width estimates. */
-const plainTex = (t: string) => t.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}_^]/g, '')

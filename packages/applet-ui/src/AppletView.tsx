@@ -8,6 +8,7 @@ import { Figure3D, type Spec3D } from './Figure3D'
 import { FormulaBar } from './FormulaBar'
 import { MathLabel } from './MathLabel'
 import { useAppletState } from './useAppletState'
+import { installTips } from './tip'
 import { useHistory } from './useHistory'
 
 export interface AppletViewProps<P extends Params> {
@@ -98,6 +99,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   const clock = run?.series.find((s) => s.kind === (iterative ? 'discrete' : 'continuous'))
   const [tMin, tMax] = clock?.x.length ? [clock.x[0], clock.x[clock.x.length - 1]] : [0, 0]
   const [cursor, setCursor] = useState<number | undefined>(def.schritte ? 0 : undefined)
+  useEffect(installTips, [])
   useEffect(() => {
     if (cursor !== undefined && cursor > tMax) setCursor(undefined)
   }, [cursor, tMax])
@@ -193,7 +195,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
             <p className="ab-sub">{def.kurz}</p>
           </div>
           {vollbildHref && (
-            <a className="ab-icon" href={vollbildHref} title="Applet auf eigener Seite öffnen" aria-label="Applet auf eigener Seite öffnen">
+            <a className="ab-icon" href={vollbildHref} data-tip="Applet auf eigener Seite öffnen" aria-label="Applet auf eigener Seite öffnen">
               <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
                 <path d="M12 3h5v5M17 3l-6 6M8 17H3v-5M3 17l6-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
@@ -294,18 +296,18 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
               <h3>Parameter</h3>
               <span className="ab-head-tools">
                 <span className="ab-undo" role="group" aria-label="Verlauf">
-                  <button type="button" className="ab-tool" onClick={history.undo} disabled={!history.canUndo} title="rückgängig (⌘Z / Strg+Z)" aria-label="rückgängig">
+                  <button type="button" className="ab-tool" onClick={history.undo} disabled={!history.canUndo} data-tip="{Mod} + {Z} | rückgängig" aria-label="rückgängig">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M6 4 2.5 7.5 6 11M3 7.5h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
-                  <button type="button" className="ab-tool" onClick={history.redo} disabled={!history.canRedo} title="wiederholen (⇧⌘Z / Strg+Y)" aria-label="wiederholen">
+                  <button type="button" className="ab-tool" onClick={history.redo} disabled={!history.canRedo} data-tip="{Redo} | wiederholen" aria-label="wiederholen">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a3.5 3.5 0 0 0 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                   <CopyLink />
-                  <button type="button" className="ab-tool" onClick={reset} title="alle Parameter zurücksetzen" aria-label="alle Parameter zurücksetzen">
+                  <button type="button" className="ab-tool" onClick={reset} data-tip="alle Parameter zurücksetzen" aria-label="alle Parameter zurücksetzen">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M3.5 8a4.5 4.5 0 1 0 1.5-3.4M3.5 2.5v2.7h2.7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -481,7 +483,7 @@ function CopyLink() {
     }
   }
   return (
-    <button type="button" className="ab-tool ab-copy" onClick={copy} title="Link zu genau diesem Zustand kopieren" aria-label="Link kopieren" data-done={done || undefined}>
+    <button type="button" className="ab-tool ab-copy" onClick={copy} data-tip="Link zu genau diesem Zustand kopieren" aria-label="Link kopieren" data-done={done || undefined}>
       {done ? (
         <span className="ab-copy-done">kopiert ✓</span>
       ) : (
@@ -573,7 +575,7 @@ export function Timeline({
 
   return (
     <div className="ab-timeline" role="group" aria-label={continuous ? 'Zeit' : 'Schritte'} onKeyDown={onKey}>
-      <button type="button" className="ab-play" disabled={empty} onClick={() => setPlaying(!playing)} aria-label={playing ? 'anhalten' : 'abspielen'} title={playing ? 'anhalten (Leertaste)' : 'abspielen (Leertaste)'}>
+      <button type="button" className="ab-play" disabled={empty} onClick={() => setPlaying(!playing)} aria-label={playing ? 'anhalten' : 'abspielen'} data-tip={playing ? '{Leer} | anhalten' : '{Leer} | abspielen'}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           {playing ? Glyph.pause : Glyph.play}
         </svg>

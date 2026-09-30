@@ -286,7 +286,7 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
               aria-checked={values}
               aria-label="Werte statt Symbole zeigen"
               onClick={() => setMode(values ? 'symbole' : 'zahlen')}
-              title={values ? 'wieder die Symbole zeigen' : 'die aktuellen Werte einsetzen'}
+              data-tip={values ? 'wieder die Symbole zeigen' : 'die aktuellen Werte einsetzen'}
             >
               <span className="ab-values-track" aria-hidden="true">
                 <span className="ab-values-knob" />

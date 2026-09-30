@@ -518,6 +518,9 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .abacus-axis {
   stroke: var(--abacus-axis);
 }
+.abacus-axis-arrow {
+  fill: var(--abacus-axis);
+}
 .abacus-tick {
   fill: var(--abacus-tick);
   font-variant-numeric: tabular-nums;
@@ -702,6 +705,87 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 }
 .ab-tip-val {
   font-weight: 600;
+}
+
+/* The values that follow the pointer can be switched off (page setting "Werte");
+   while a handle is dragged its value still shows. */
+html[data-werte='aus'] .ab-tip[data-kind='probe'],
+html[data-werte='aus'] .ab-probe-line,
+html[data-werte='aus'] .ab-probe-dot,
+html[data-werte='aus'] .ab-probe-step {
+  display: none;
+}
+
+/* ================================================================== hints */
+
+/* The card of tip.ts: one per page, fixed, above everything. Keys as caps, a few icons. */
+.ab-tipcard {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(300px, calc(100vw - 16px));
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: rgb(22 25 31 / 0.94);
+  color: #f3f4f6;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  font: 500 12.5px/1.4 var(--ab-font);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.18), 0 1px 3px rgb(0 0 0 / 0.2);
+  pointer-events: none;
+  animation: ab-tipcard-in 0.14s ease-out;
+}
+.ab-tipcard[hidden] {
+  display: none;
+}
+.ab-tipcard[data-rows] {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 9px 12px;
+}
+.ab-tipcard-keys {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  white-space: nowrap;
+}
+.ab-tipcard-what {
+  color: rgb(243 244 246 / 0.82);
+}
+.ab-tipcard kbd {
+  min-width: 20px;
+  padding: 1px 5px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.1);
+  font: 600 11.5px/16px var(--ab-font);
+  text-align: center;
+}
+.ab-tipcard-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 19px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.1);
+}
+.ab-tipcard-plus {
+  opacity: 0.5;
+  font-size: 11px;
+}
+@keyframes ab-tipcard-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-tipcard {
+    animation: none;
+  }
 }
 
 /* ================================================================== formulas */
@@ -1226,6 +1310,9 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   margin: 2px 0 0;
   font-size: 12px;
   color: var(--ab-faint);
+}
+html[data-hinweise='aus'] .ab-hint {
+  display: none;
 }
 
 /* Slider: range ends sit below the track and show with the tools. */
