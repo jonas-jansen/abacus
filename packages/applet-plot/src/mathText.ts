@@ -44,7 +44,8 @@ function tokens(src: string, shift: Run['shift'], out: Run[]) {
     if (src.startsWith('\\text{', i)) {
       // \text{Anteil}: a word, upright
       const end = src.indexOf('}', i + 6)
-      out.push({ text: src.slice(i + 6, end < 0 ? undefined : end), italic: false, shift })
+      // spaces inside \text are kept (SVG would collapse them)
+      out.push({ text: src.slice(i + 6, end < 0 ? undefined : end).replace(/ /g, '\u00a0'), italic: false, shift })
       i = end < 0 ? src.length : end + 1
       continue
     }

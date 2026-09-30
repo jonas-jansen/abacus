@@ -1,3 +1,6 @@
+> **Historical:** the original specification the library was built from. Where it and the code
+> differ, the code and [docs/applets.md](docs/applets.md) are current.
+
 # Interactive Applet Library — Design Specification
 
 **Project.** A TypeScript library for building interactive mathematical applets, and a

@@ -45,6 +45,8 @@ describe('formulas', () => {
     expect(texNumber(-1.25)).toBe('-1{,}25')
     expect(texNumber(1.2e-6)).toBe('1{,}2 \\cdot 10^{-6}')
     expect(texNumber(12500)).toBe('12\\,500')
+    expect(texNumber(100000)).toBe('100\\,000')
+    expect(texNumber(1.4e11)).toBe('1{,}4 \\cdot 10^{11}')
     const specs = applets.arithmetic.model.params
     const p = { ...defaultParams(applets.arithmetic.model), b: -2 }
     expect(expandFormula('x_n {{+b}}', specs, p, 'zahlen')).toBe('x_n - \\htmlData{param=b}{2}')

@@ -314,6 +314,8 @@ export interface OdeConfig<D extends ParamDefs> extends Common<D> {
   samples?: number
   /** Relative tolerance. Default 1e-6. */
   tol?: number
+  /** Largest step, e.g. shorter than a brief stimulus that the solver must not step over. */
+  hmax?: Resolvable<number, ParamsOf<D>>
   extraSeries?: (ctx: OdeContext<ParamsOf<D>>) => Series[]
   /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
   grids?: (ctx: OdeContext<ParamsOf<D>>) => Grid[]
@@ -333,7 +335,7 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
       const t1 = extendedEnd(t0, opts.horizon ?? resolve(cfg.tEnd, p), opts.detail)
       const tol = opts.tol ?? cfg.tol ?? 1e-6
       const f = (t: number, y: Float64Array) => cfg.rhs(t, y, p)
-      const o = { rtol: tol, atol: tol * 1e-3 }
+      const o = { rtol: tol, atol: tol * 1e-3, ...(cfg.hmax === undefined ? {} : { hmax: resolve(cfg.hmax, p) }) }
       let sol: DenseSolution
       if (cfg.stiff === true) sol = rosenbrock(f, t0, cfg.start(p), t1, o)
       else if (cfg.stiff === 'auto') {

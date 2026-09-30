@@ -232,6 +232,7 @@ export class SvgPathSurface implements Surface {
         const v = values[r * cols + q]
         if (Number.isNaN(v)) continue
         const lvl = Math.min(LEVELS - 1, Math.floor(v * LEVELS))
+        if (lvl === 0) continue // the lowest shade is the background itself
         paths[lvl].push(`M${r1(x + q * cw)} ${r1(y + r * ch)}h${r1(cw + 0.3)}v${r1(ch + 0.3)}h${r1(-cw - 0.3)}Z`)
       }
     }

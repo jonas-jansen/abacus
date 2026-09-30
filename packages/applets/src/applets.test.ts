@@ -227,3 +227,89 @@ describe('zoomed detail', () => {
     for (const v of d.y) expect(v >= 0.5 && v <= 0.501).toBe(true)
   })
 })
+
+describe('answer key of the new applets (values from the slides)', () => {
+  const szenario = (id: string, label: string) => {
+    const def = getApplet(id)
+    const s = def.szenarien!.find((x) => x.label === label)!
+    return def.model.run({ ...defaultParams(def.model), ...s.params } as never).observables
+  }
+
+  it('Newton (I 64): from x₀ = 0,05 the digits double, x* = 0,265344933048…; the cycle and the runaway', () => {
+    const o = szenario('newton', 'Folie 64')
+    expect(o.nullstelle.value).toBeCloseTo(0.26534493304844, 12)
+    expect((o.stellen.value as number[]).slice(0, 5)).toEqual([0, 1, 2, 4, 8])
+    expect(szenario('newton', 'Zyklus').verhalten.value).toBe('Zyklus der Länge 2')
+    expect(szenario('newton', 'läuft davon').verhalten.value).toBe('läuft davon')
+  })
+
+  it('discrete vs. continuous logistic (III 43–47): similar, 2-cycle, and the cycle from its start', () => {
+    expect(szenario('logistic-vergleich', 'Folie 43').periode.value).toBe(1)
+    expect(szenario('logistic-vergleich', 'Folie 45').periode.value).toBe(2)
+    expect(szenario('logistic-vergleich', 'Folie 46').periode.value).toBe(2)
+    expect(szenario('logistic-vergleich', 'Folie 44').periode.value).toBeNull()
+  })
+
+  it('Leslie (II 29–37): ρ = 3/∛50 < 1, dies out; b₃ = 20 grows', () => {
+    expect(szenario('leslie', 'Folie 29').rho.value).toBeCloseTo(3 / Math.cbrt(50), 9)
+    expect(szenario('leslie', 'Folie 29').zukunft.value).toBe('stirbt aus')
+    expect(szenario('leslie', 'wächst').zukunft.value).toBe('wächst')
+  })
+
+  it('cancer model (II 20–24): N is conserved, the stationary state sums to N', () => {
+    const o = szenario('krebs', 'Folie 20')
+    expect(o.summe.value).toBeCloseTo(100_000, 6)
+    const st = o.stationaer.value as number[]
+    expect(st.reduce((a, b) => a + b, 0)).toBeCloseTo(100_000, 6)
+    expect(st[1] / st[0]).toBeCloseTo(0.003 / 0.6, 12)
+  })
+
+  it('SIR (II 47–55): scenario A disease-free and stable, B endemic and stable', () => {
+    const a = szenario('sir-stabilitaet', 'Szenario A')
+    expect(a.R.value).toBeCloseTo(0.6, 12)
+    expect(a.a.value).toMatch(/^stabil/)
+    const b = szenario('sir-stabilitaet', 'Szenario B')
+    expect(b.R.value).toBeCloseTo(3.8, 12)
+    expect(b.a.value).toMatch(/^instabil/)
+    expect(b.b.value).toMatch(/^stabil/)
+  })
+
+  it('cardiac map (II 63–64): period 38 for b = 0,26, irregular for b = 0,18, rest for b = 0,6', () => {
+    expect(szenario('aktionspotential', 'spontan, b = 0,26').periode.value).toBe(38)
+    expect(szenario('aktionspotential', 'EADs, b = 0,18').art.value).toBe('unregelmäßig: EADs')
+    expect(szenario('aktionspotential', 'aus der Ruhe').art.value).toBe('Ruhe')
+  })
+
+  it('ring of cells (II 68–72): the timing of the second stimulus decides on re-entry', () => {
+    expect(szenario('zellring', 'eine Welle').erregung.value).toBe('erlischt')
+    expect(szenario('zellring', 'Szenario I').erregung.value).toBe('erlischt')
+    expect(szenario('zellring', 'Szenario II').erregung.value).toBe('erlischt')
+    expect(szenario('zellring', 'Szenario III').erregung.value).toBe('kreist weiter (Reentry)')
+  })
+
+  it('bioreactor (IV 27–28): the culture holds at (8,15, 0,92); a strong flow washes it out', () => {
+    const o = szenario('bioreaktor', 'Folie 27')
+    const [b, n] = o.gleichgewicht.value as number[]
+    expect(n).toBeCloseTo((0.1 * 12) / 1.3, 9)
+    expect(b).toBeCloseTo((5 - n) / 0.5, 9)
+    expect(szenario('bioreaktor', 'Auswaschen').kultur.value).toBe('wird ausgewaschen')
+  })
+
+  it('pendulum (IV 5–7): stable spiral below, saddle above; small swings take 2π√(l/g)', () => {
+    const o = szenario('pendel', 'kleine Auslenkung')
+    expect(o.unten.value).toBe('stabiler Strudel')
+    expect(o.oben.value).toBe('Sattel')
+    expect(o.periode.value as number).toBeCloseTo(2 * Math.PI * Math.sqrt(1 / 9.81), 1)
+    expect(szenario('pendel', 'ohne Dämpfung').unten.value).toBe('Zentrum')
+  })
+
+  it('cardiac cell (IV 30, 32): pacemaker with period ≈ 0,56 s, muscle cell in step with the stimulus', () => {
+    const s = szenario('herzzelle', 'Schrittmacherzelle')
+    expect(s.art.value).toBe('feuert von selbst')
+    expect(s.periode.value as number).toBeCloseTo(0.564, 2)
+    const m = szenario('herzzelle', 'Muskelzelle')
+    expect(m.art.value).toBe('folgt den Reizen')
+    expect(m.periode.value as number).toBeCloseTo(0.7, 2)
+    expect(szenario('herzzelle', 'Muskelzelle ohne Reiz').art.value).toBe('ruht')
+  })
+})

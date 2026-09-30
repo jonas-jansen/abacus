@@ -321,7 +321,8 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
             {def.szenarien && def.szenarien.length > 0 && (
               <div className="ab-szenarien" role="group" aria-label="Szenarien">
                 {def.szenarien.map((s) => {
-                  const active = Object.entries(s.params).every(([id, v]) => JSON.stringify(params[id]) === JSON.stringify(v))
+                  const target: Record<string, unknown> = { ...defaultParams(def.model), ...s.params }
+                  const active = Object.entries(target).every(([id, v]) => id === def.horizont || JSON.stringify(params[id]) === JSON.stringify(v))
                   return (
                     <button key={s.label} type="button" className="ab-pill ab-szenario" aria-pressed={active} data-tip={s.text} onClick={() => setParams({ ...defaultParams(def.model), ...s.params })}>
                       <MathLabel text={s.label} />

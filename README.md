@@ -43,53 +43,14 @@ node scripts/shoot.mjs <dir> /applet/<id> [--width 390] [--dark]   # screenshots
 
 ## Adding things
 
-**An applet:** `pnpm new-applet newton-cooling --kind closedForm` creates
-`packages/applets/src/newton-cooling.ts`, registers it, and it is live at `/applet/newton-cooling`.
-An applet is a model (`iteration`, `iterationN`, `closedForm`, `ode`) plus plots and the
-observables to display.
+**An applet:** `pnpm new-applet <id> --kind iteration|closedForm|ode` creates a complete
+applet in `packages/applets/src/<id>.ts` and registers it; it is live at `/applet/<id>`.
+The guide – models, parameters, formula syntax, plot types, handles, readouts, scenarios and
+the checks every applet passes – is **[docs/applets.md](docs/applets.md)**.
 
-Parameter `min`/`max` is only the slider's suggested range – students may type any value, and
-the slider stretches. Restrict only where the applet would break, and say why:
-`real('Kapazität K', { min: 1, max: 100, step: 1, default: 50, limits: { min: 1e-6, reason: 'K steht im Nenner …' } })`.
-Iteration counts: `schritte('Schritte N', { default: 25, max: 80 })` (typed up to 10⁶).
-`scale: 'log'` for parameters spanning orders of magnitude. Couplings (`normalize`) are
-explained automatically via `constraintNote`.
-
-Everything with a place in the picture should be draggable there. A plot's `drag` takes one
-or more handles: `{ param: 'x0', axis: 'y' }` drags a value directly; `at` and `set` let a
-handle stand for a derived quantity, e.g. the last point of a sequence setting its slope:
-`{ param: 'b', axis: 'y', at: (p) => [p.N, p.x0 + p.b * p.N], set: (_x, y, p) => ({ b: (y - p.x0) / p.N }) }`.
-Axes hold still while dragging, values snap to the slider's precision, and the handle and
-its slider row light each other up. Iterations and ODEs get a timeline (play, scrub);
-closed forms that describe a motion in time opt in with `zeitleiste: true`.
-
-For students, every applet offers: undo/redo (⌘Z, ⇧⌘Z), "vergleichen" (hold the current
-state, drawn faintly, with the earlier readouts beside the current ones), zoom and pan in plots
-(Strg/⌘ + wheel or two fingers, Shift + drag, double-click resets). Phase planes with
-`bahnen: true` add a trajectory per click; `nullclines: true` draws y₁′ = 0 and y₂′ = 0 (ODEs).
-
-Conventions: vectors are bold everywhere (`\\mathbf{y}(0)`, `A\\mathbf{v}`) — in formulas,
-parameter symbols, handle labels and legends. Series with a meaning carry it as `name`
-(`{ id: 'beute', label: 'y_1', name: 'Beute' }`); legends show "y₁ Beute".
-
-Every applet names its chapter of the slides (`kapitel: 'I' | 'II' | 'III' | 'IV' | 'Anhang'`,
-`folien: '22–27'`); the gallery and all lists are sorted by it. Plots can offer a lin/log switch
-with an explanation (`logToggle: true`, `logHilfe: '…'`); series can be filled areas
-(`fill`) or vectors (`arrow`). Legends switch series off and highlight them.
-
-Every applet states its model above the plots, as formulas with live parameters:
-`formeln: [{ label: 'Vorschrift', tex: String.raw\`x_{n+1} = {{a}}{{*}}x_n\` }]`.
-`{{a}}` is the parameter (symbol or current value, draggable, linked to slider and handle),
-`{{+b}}` a signed term, `{{(a)}}` parenthesised when negative, `{{#x0}}` always the value (start
-values; points become column vectors with draggable entries), `{{*}}` a product sign that only
-appears between numbers. Each formula is a column (model | start | solution); lines align at
-their relation. The step count or time window (`horizont`) lives in the timeline instead. A test renders every applet's formulas in both modes.
-
-Observables can point into the plots: give them `marks` and the readout highlights that
-geometry on hover or click. Labels take `$math$`.
-`liste('Fixpunkte $y^*$', xs, { marks: xs.map((v, item) => ({ kind: 'value', v, item })) })` –
-`item` ties a mark to one chip. Kinds: `value` (a state value), `time`, `point`, `line`
-(through a point with a slope; `in: 'time' | 'map' | 'phase'` says which plot).
+For students, every applet offers undo/redo, "vergleichen" (hold a state, drawn faintly),
+zoom and pan (curves continue past N and T), shareable links, scenario chips from the slides,
+and hint cards that can be switched off for teaching (settings in the top bar).
 
 **A quiz:** add a `defineQuiz({...})` to a file in `packages/quizzes/src/`. Types: `vorhersage`,
 `finde` (`ziel` + `toleranz`, or a `pruefer`), `erzeuge` (predicate on the applet's live state),
@@ -104,6 +65,6 @@ additional applets. Links like `[a = 3,2](#logistic-cobweb.a=3.2)` set the apple
 
 ## Not yet
 
-Web Worker for heavy runs; nullclines; `<Skizze>`; `<Daten>` (table view); course pages for the
+Web Worker for heavy runs; `<Skizze>`; `<Daten>` (table view); course pages for the
 new applets; MATLAB golden fixtures (§12). The answer key (§11.2) is verified in
 `packages/applets/src/applets.test.ts`.

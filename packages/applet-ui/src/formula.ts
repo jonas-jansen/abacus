@@ -36,7 +36,8 @@ export function texNumber(v: number, digits = 4): string {
   if (v === 0) return '0'
   const abs = Math.abs(v)
   const comma = (s: string) => s.replace('.', '{,}')
-  if (abs >= 1e5 || abs < 1e-3) {
+  // whole numbers such as a population of 100 000 are written out; others as powers of ten
+  if ((abs >= 1e5 && !(Number.isInteger(v) && abs < 1e7)) || abs < 1e-3) {
     const [m, e] = v.toExponential(digits - 1).split('e')
     return `${comma(String(Number(m)))} \\cdot 10^{${Number(e)}}`
   }

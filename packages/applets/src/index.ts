@@ -25,6 +25,9 @@ import predatorPrey from './predator-prey'
 import predatorPreyMap from './predator-prey-map'
 import sir from './sir'
 import leslie from './leslie'
+import krebs from './krebs'
+import aktionspotential from './aktionspotential'
+import zellring from './zellring'
 import sirStabilitaet from './sir-stabilitaet'
 import linearsystemDiscrete from './linearsystem-discrete'
 import expIvp from './exp-ivp'
@@ -35,6 +38,7 @@ import romeoJulia from './romeo-julia'
 import pendel from './pendel'
 import michaelisMenten from './michaelis-menten'
 import bioreaktor from './bioreaktor'
+import herzzelle from './herzzelle'
 import eulerHeun from './euler-heun'
 import geometric from './geometric'
 import linearsystemPhase from './linearsystem-phase'
@@ -62,6 +66,9 @@ const list: AnyAppletDef[] = [
   predatorPreyMap,
   sir,
   sirStabilitaet,
+  krebs,
+  aktionspotential,
+  zellring,
   leslie,
   linearsystemDiscrete,
   // 5 scalar ODEs
@@ -78,6 +85,7 @@ const list: AnyAppletDef[] = [
   // 7 nonlinear ODE systems
   michaelisMenten,
   bioreaktor,
+  herzzelle,
   // 8 numerics
   eulerHeun,
   // Anhang: mathematical foundations
