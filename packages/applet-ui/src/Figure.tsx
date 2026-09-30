@@ -29,7 +29,6 @@ import { TeX } from './TeX'
 
 /** The hint over a zoomable plot (markup of tip.ts: keys | what they do). */
 const ZOOM_TIP = '{Mod} + {Rad} | zoomen\n{Finger} | zoomen mit zwei Fingern\n{Shift} + {Ziehen} | verschieben'
-const ZOOM_KNOWN = 'abacus:zoom-bekannt'
 
 /** Width assumed for the server render; the client re-lays out after measuring. */
 const SSR_WIDTH = 640
@@ -61,7 +60,8 @@ interface FigureProps<P extends Params> {
   onToggleSeries?: (id: string) => void
   onFocusSeries?: (id: string | null) => void
   /** A held state to compare with: drawn faintly behind the current one. */
-  vergleich?: { run: Run; text: string } | null
+  /** The held state; `detail` gives its run for a zoomed window, like `onDetail` for the current one. */
+  vergleich?: { run: Run; text: string; detail?: (d: Detail) => Run | null } | null
   onVergleichLoesen?: () => void
   /** Offer to hold the current state for comparison (shown on one figure only). */
   onVergleichen?: () => void
@@ -139,16 +139,6 @@ export function Figure<P extends Params>({
   // Zoomed or panned: the student's own window, until reset.
   const [zoom, setZoom] = useState<{ x: readonly [number, number]; y: readonly [number, number] } | null>(null)
   useEffect(() => setZoom(null), [logY])
-  // Whoever has zoomed once knows how; the hint stays away for the rest of the visit.
-  const [zoomKnown, setZoomKnown] = useState(false)
-  useEffect(() => {
-    try {
-      if (zoom) sessionStorage.setItem(ZOOM_KNOWN, '1')
-      setZoomKnown(!!zoom || sessionStorage.getItem(ZOOM_KNOWN) === '1')
-    } catch {
-      if (zoom) setZoomKnown(true)
-    }
-  }, [zoom])
   // Zoomed in: once the window has settled, the model is asked for more detail in it —
   // curves sampled in the window, diagrams recomputed for it — and that is what is drawn.
   const [settled, setSettled] = useState(zoom)
@@ -163,14 +153,19 @@ export function Figure<P extends Params>({
     const my = (ly(full.y[1]) - ly(full.y[0])) / Math.max(1e-300, ly(z.y[1]) - ly(z.y[0]))
     return Math.max(1, mx, my)
   }
-  const detailRun = useMemo(() => {
-    if (!settled || !onDetail) return null
+  const detailWanted = useMemo((): Detail | null => {
+    if (!settled) return null
     // a phase plane's x axis is a state, not the model's variable: only the magnification counts
     const time = spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous'
-    return onDetail({ x: spec.type === 'phasePlane' ? undefined : settled.x, time: time ? settled.x : undefined, y: settled.y, zoom: magnification(settled) })
+    return { x: spec.type === 'phasePlane' ? undefined : settled.x, time: time ? settled.x : undefined, y: settled.y, zoom: magnification(settled) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settled, onDetail, spec.type, full])
+  }, [settled, spec.type, full])
+  const detailRun = useMemo(() => (detailWanted && onDetail ? onDetail(detailWanted) : null), [detailWanted, onDetail])
   const drawn = detailRun ?? run
+  // the held state follows the zoom too
+  const vergleichDetail = vergleich?.detail
+  const ghostRun = useMemo(() => (detailWanted && vergleichDetail ? vergleichDetail(detailWanted) : null), [detailWanted, vergleichDetail])
+  const ghost = vergleich ? (ghostRun ?? vergleich.run) : null
 
   const frame = useMemo(() => {
     const auto = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
@@ -196,15 +191,14 @@ export function Figure<P extends Params>({
       const surface = new CanvasSurface(ctx, color)
       if (vergleich) {
         // the held state first, faint and complete (no timeline cut), then the current one
-        surface.fade(0.28)
-        drawPlot(surface, frame, spec, vergleich.run, { hidden: view.hidden, ghost: true })
+        drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true })
         surface.fade(1)
       }
       for (const b of bahnen ?? []) drawBahn(surface, frame, spec, b)
       drawPlot(surface, frame, spec, drawn, view)
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, drawn, view, vergleich, bahnen])
+  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
@@ -417,7 +411,7 @@ export function Figure<P extends Params>({
         onPointerLeave={leave}
         // in a phase portrait a double click would also add two trajectories; there the pill resets
         onDoubleClick={() => !onBahn && setZoom(null)}
-        data-tip={zoomable && !zoomKnown ? ZOOM_TIP + (onBahn ? '' : '\n{Doppelklick} | zurück zum ganzen Bild') : undefined}
+        data-tip={zoomable ? ZOOM_TIP + (onBahn ? '' : '\n{Doppelklick} | zurück zum ganzen Bild') : undefined}
         data-tip-at="pointer"
         style={{ width: figW, height: figH, cursor: onBahn ? 'crosshair' : undefined, touchAction: zoomable ? 'pan-x pan-y' : undefined }}
       >

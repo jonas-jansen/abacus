@@ -48,19 +48,22 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   const MAX_BAHNEN = 12
 
   // A zoomed figure asks for its window in more detail: the same run, sampled for that window.
-  const detail = useCallback(
-    (d: Detail) => {
+  const detailFor = useCallback(
+    (at: P, d: Detail) => {
       try {
-        return def.model.run(params, { ...(def.runOptions?.(params) ?? {}), detail: d, observables: false })
+        return def.model.run(at, { ...(def.runOptions?.(at) ?? {}), detail: d, observables: false })
       } catch {
         return null
       }
     },
-    [params, def],
+    [def],
   )
+  const detail = useCallback((d: Detail) => detailFor(params, d), [detailFor, params])
 
   // Compare: a state held on to, drawn faintly behind the current one.
   const [vergleich, setVergleich] = useState<{ params: P; run: Run } | null>(null)
+  // the held state, zoomed the same way (stable, so pointing at things does not recompute it)
+  const vergleichDetail = useCallback((d: Detail) => (vergleich ? detailFor(vergleich.params, d) : null), [vergleich, detailFor])
   const vergleichText = useMemo(() => {
     if (!vergleich) return ''
     // what differs from now, in symbols: "festgehalten: $a$ = 2,8"
@@ -249,7 +252,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       pair={def.plots.length === 2}
                       onToggleSeries={toggleSeries}
                       onFocusSeries={setFocusSeries}
-                      vergleich={vergleich ? { run: vergleich.run, text: vergleichText } : null}
+                      vergleich={vergleich ? { run: vergleich.run, text: vergleichText, detail: vergleichDetail } : null}
                       onVergleichLoesen={() => setVergleich(null)}
                       onVergleichen={i === 0 && !vergleich ? () => setVergleich({ params, run }) : undefined}
                       bahnen={startParamOf(entry) ? bahnen : undefined}

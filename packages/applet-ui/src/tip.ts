@@ -7,8 +7,9 @@
  *   - `keys | text` makes a row with the keys on the left;
  *   - `{Mod}`, `{Shift}`, `{Z}`, `{Rad}` … become key caps or small icons (see KEYS).
  *
- * `data-tip-at="pointer"` puts the card under the pointer (for the plot area), shows it only
- * once per visit and hides it as soon as the pointer moves on. All of it is off when the page
+ * `data-tip-at="pointer"` puts the card under the pointer (for the plot area): it shows
+ * whenever the pointer rests there and hides as soon as it moves on — until the plot is
+ * actually used (a click, the wheel, a key); then it stays away until the pointer leaves. All of it is off when the page
  * setting "Hinweise" is off (html[data-hinweise="aus"]), e.g. while teaching with a projector.
  */
 
@@ -111,7 +112,7 @@ export function installTips(): void {
   let timer = 0
   let shownAt: [number, number] | null = null
   let last: [number, number] = [0, 0]
-  // pointer-anchored hints appear once per visit
+  // pointer-anchored hints that were put to use: quiet until the pointer leaves
   const spent = new WeakSet<HTMLElement>()
 
   const hide = () => {
@@ -147,7 +148,6 @@ export function installTips(): void {
     card.hidden = false
     place(el)
     shownAt = [...last]
-    if (el.dataset.tipAt === 'pointer') spent.add(el)
   }
 
   const arm = (el: HTMLElement, delay = DELAY) => {
@@ -167,11 +167,13 @@ export function installTips(): void {
     if (el && !spent.has(el)) arm(el)
   })
   document.addEventListener('pointermove', (e) => {
+    // browsers also send moves without movement (after the page under the pointer changed)
+    if (e.clientX === last[0] && e.clientY === last[1]) return
     last = [e.clientX, e.clientY]
     if (!target || target.dataset.tipAt !== 'pointer') return
     if (shownAt) {
       if (Math.hypot(last[0] - shownAt[0], last[1] - shownAt[1]) > 12) hide()
-    } else if (!spent.has(target)) arm(target) // wait for the pointer to rest
+    } else if (!spent.has(target)) arm(target) // every move restarts the wait for a rest
   })
   document.addEventListener('pointerout', (e) => {
     if (!target || (e.relatedTarget instanceof Node && target.contains(e.relatedTarget))) return

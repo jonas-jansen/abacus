@@ -37,6 +37,7 @@ describe('settings', () => {
 
   it('are on by default, stored, and mirrored on <html>', () => {
     expect(einstellung('hinweise')).toBe('an')
+    expect(einstellung('werte')).toBe('aus') // values under the pointer: only on request
     setEinstellung('hinweise', 'aus')
     expect(document.documentElement.dataset.hinweise).toBe('aus')
     delete document.documentElement.dataset.hinweise

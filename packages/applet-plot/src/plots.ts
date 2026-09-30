@@ -296,7 +296,11 @@ function drawLine(s: Surface, frame: Frame, series: Series, count = series.x.len
 }
 
 /** Opacity factor for a series while another one is pointed at in the legend. */
-const dim = (series: Series, view: PlotView) => (view.focus && view.focus !== series.id ? 0.15 : 1)
+/** How strongly a held state (vergleichen) is drawn under the current one. */
+export const GHOST_FADE = 0.28
+const base = (view: PlotView) => (view.ghost ? GHOST_FADE : 1)
+/** Series other than the one pointed at in the legend step back — on top of the ghost's fade. */
+const dim = (series: Series, view: PlotView) => base(view) * (view.focus && view.focus !== series.id ? 0.15 : 1)
 
 const timed = (view: PlotView) => view.time !== undefined || view.steps !== undefined
 
@@ -515,6 +519,7 @@ function diagonal(s: Surface, frame: Frame) {
 }
 
 export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, view: PlotView = {}): void {
+  s.fade(base(view))
   switch (spec.type) {
     case 'surface3d':
       return
@@ -533,7 +538,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         drawDiscrete(s, frame, series, count, spec.connect ?? series.connect ?? true)
         if (timed(view) && series.kind === 'discrete' && count <= frame.plot.w) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
-      s.fade(1)
+      s.fade(base(view))
       return
     case 'timeSeriesContinuous':
     case 'functionGraph':
@@ -554,7 +559,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         drawLine(s, frame, series, count)
         if (cut && view.time !== undefined) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
-      s.fade(1)
+      s.fade(base(view))
       return
     case 'cobweb': {
       const f = seriesById(run, spec.f)
