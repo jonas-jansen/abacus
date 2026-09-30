@@ -14,6 +14,8 @@ import {
   int,
   iterateTail,
   iteration,
+  MAX_ZOOM_OUT,
+  schritte,
   makeFrame,
   niceTicks,
   parseNumber,
@@ -356,11 +358,44 @@ describe('detail when zoomed (RunOptions.detail)', () => {
       tEnd: 10,
       samples: 100,
     })
-    const s = m.run(defaultParams(m), { detail: { x: [2, 3], zoom: 10 } }).series[0]
+    const s = m.run(defaultParams(m), { detail: { time: [2, 3], zoom: 10 } }).series[0]
     expect(s.x[0]).toBeCloseTo(2, 12)
     expect(s.x.at(-1)).toBeCloseTo(3, 12)
     expect(s.x.length).toBe(100)
     // a phase plane (no x window) gets more samples instead
     expect(m.run(defaultParams(m), { detail: { zoom: 10 } }).series[0].x.length).toBe(1000)
+  })
+
+  it('runs past the end when the visible time reaches beyond it, but not without end', () => {
+    const m = ode({
+      id: 'o',
+      params: { k: real('k', { min: 0, max: 1, step: 0.1, default: 1 }) },
+      components: [{ id: 'y', label: 'y' }],
+      start: () => [1],
+      rhs: (_t, y, p) => [-p.k * y[0]],
+      tEnd: 10,
+    })
+    const s = m.run(defaultParams(m), { detail: { time: [0, 30], zoom: 1 }, observables: false }).series[0]
+    expect(s.x.at(-1)).toBeCloseTo(30, 9)
+    expect(s.y.at(-1)).toBeCloseTo(Math.exp(-30), 9)
+    const far = m.run(defaultParams(m), { detail: { time: [0, 1e9], zoom: 1 }, observables: false }).series[0]
+    expect(far.x.at(-1)).toBeCloseTo(10 * MAX_ZOOM_OUT, 6)
+  })
+
+  it('iterations go on with the same values, sequences too', () => {
+    const m = iteration({
+      id: 'i',
+      params: { N: schritte('N', { default: 10 }) },
+      start: () => 1,
+      step: (x) => x / 2,
+      horizon: (p) => p.N,
+    })
+    const base = m.run(defaultParams(m), {}).series[0]
+    const more = m.run(defaultParams(m), { detail: { time: [0, 25], zoom: 1 }, observables: false }).series[0]
+    expect(base.x.length).toBe(11)
+    expect(more.x.length).toBe(26)
+    expect([...more.y.subarray(0, 11)]).toEqual([...base.y])
+    // a window of something else than time changes nothing
+    expect(m.run(defaultParams(m), { detail: { x: [0, 25], zoom: 1 } }).series[0].x.length).toBe(11)
   })
 })

@@ -2,7 +2,7 @@
 // line; the solutions are the common points. Exactly one if the lines cross (det A ≠ 0), none
 // if they are parallel, infinitely many if they are the same line.
 
-import { closedForm, klasse, real, zahl, type Series } from '@abacus/applet-core'
+import { closedForm, klasse, MAX_ZOOM_OUT, real, zahl, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const EPS = 1e-9
@@ -11,8 +11,8 @@ const coef = (label: string, latex: string, def: number) => real(label, { latex,
 
 type P = { a11: number; a12: number; b1: number; a21: number; a22: number; b2: number }
 
-/** The segment of a·x + b·y = c inside the square ±L (empty if a = b = 0). */
-function segment(a: number, b: number, c: number, L = 3 * R): { x: Float64Array; y: Float64Array } {
+/** The segment of a·x + b·y = c inside the square ±L (empty if a = b = 0); long enough for zooming out. */
+function segment(a: number, b: number, c: number, L = MAX_ZOOM_OUT * 2 * R): { x: Float64Array; y: Float64Array } {
   const n = Math.hypot(a, b)
   if (n < EPS) return { x: new Float64Array(), y: new Float64Array() }
   // foot of the perpendicular from the origin, and the direction of the line

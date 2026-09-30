@@ -4,7 +4,7 @@
  * function of a context object that already holds the computed arrays.
  */
 
-import { defineModel, detailSamples, type Detail, type Model, type Observable, type Series, type SeriesRole } from './model'
+import { defineModel, detailSamples, extendedEnd, MAX_SAMPLES, MAX_ZOOM_OUT, type Detail, type Model, type Observable, type Series, type SeriesRole } from './model'
 import { indices, linspace } from './numeric'
 import type { ParamDefs, ParamsOf } from './params'
 import { createRng, type Rng } from './rng'
@@ -37,6 +37,12 @@ interface Common<D extends ParamDefs> {
 }
 
 type ObservableMap = Record<string, Observable>
+
+/** Steps of an iteration: N, or more when a zoomed plot shows time beyond N. */
+function stepsFor(horizon: number, d?: Detail): number {
+  const N = Math.max(0, Math.floor(horizon))
+  return Math.max(N, Math.min(MAX_SAMPLES, Math.ceil(extendedEnd(0, N, d))))
+}
 
 // ---------------------------------------------------------------------------------------
 // Scalar iteration  x_{n+1} = step(x_n)
@@ -77,7 +83,8 @@ export function iteration<const D extends ParamDefs>(cfg: IterationConfig<D>): M
     normalize: cfg.normalize,
     constraintNote: cfg.constraintNote,
     run(p, opts) {
-      const N = Math.max(0, Math.floor(opts.horizon ?? resolve(cfg.horizon, p)))
+      // zoomed out or panned past the end, the drawing run goes on (the same values, then more)
+      const N = stepsFor(opts.horizon ?? resolve(cfg.horizon, p), opts.detail)
       const seed = opts.seed ?? (cfg.seed === undefined ? 1 : resolve(cfg.seed, p))
       const iterate = (count: number) => {
         const rng = createRng(seed)
@@ -145,7 +152,8 @@ export function iterationN<const D extends ParamDefs>(cfg: IterationNConfig<D>):
     normalize: cfg.normalize,
     constraintNote: cfg.constraintNote,
     run(p, opts) {
-      const N = Math.max(0, Math.floor(opts.horizon ?? resolve(cfg.horizon, p)))
+      // zoomed out or panned past the end, the drawing run goes on (the same values, then more)
+      const N = stepsFor(opts.horizon ?? resolve(cfg.horizon, p), opts.detail)
       const seed = opts.seed ?? (cfg.seed === undefined ? 1 : resolve(cfg.seed, p))
       const iterate = (count: number) => {
         const rng = createRng(seed)
@@ -229,11 +237,14 @@ export function closedForm<const D extends ParamDefs>(cfg: ClosedFormConfig<D>):
     run(p, opts) {
       const [a, b0] = resolve(cfg.domain, p)
       const b = opts.horizon ?? b0
-      // zoomed in: sample only the visible part of the domain, as finely as before overall
-      const w = opts.detail?.x
-      const [ta, tb] = w ? [Math.max(a, w[0]), Math.min(b, w[1])] : [a, b]
+      // zoomed: sample the visible window, as finely as the whole was. The curves are formulas,
+      // so they go on beyond the domain (up to MAX_ZOOM_OUT of it), zoomed out or panned.
+      const w = opts.detail?.x ?? opts.detail?.time
+      const reach = MAX_ZOOM_OUT * Math.max(b - a, 1)
+      const [ta, tb] = w ? [Math.max(a - reach, w[0]), Math.min(b + reach, w[1])] : [a, b]
+      const bEnd = cfg.discrete && w ? Math.max(b, Math.min(Math.floor(w[1]), a + reach, a + MAX_SAMPLES)) : b
       const t = cfg.discrete
-        ? indices(Math.max(0, Math.floor(b) - Math.ceil(a)) + 1).map((i) => i + Math.ceil(a))
+        ? indices(Math.max(0, Math.floor(bEnd) - Math.ceil(a)) + 1).map((i) => i + Math.ceil(a))
         : linspace(ta, tb > ta ? tb : ta, opts.samples ?? cfg.samples ?? 400)
       const series: Record<string, Series> = {}
       Object.entries(cfg.curves).forEach(([id, c], i) => {
@@ -307,7 +318,8 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
     constraintNote: cfg.constraintNote,
     run(p, opts) {
       const t0 = cfg.t0 ?? 0
-      const t1 = opts.horizon ?? resolve(cfg.tEnd, p)
+      // zoomed out or panned past the end, the drawing run integrates on
+      const t1 = extendedEnd(t0, opts.horizon ?? resolve(cfg.tEnd, p), opts.detail)
       const tol = opts.tol ?? cfg.tol ?? 1e-6
       const f = (t: number, y: Float64Array) => cfg.rhs(t, y, p)
       const o = { rtol: tol, atol: tol * 1e-3 }
@@ -319,7 +331,7 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
       } else sol = rk45(f, t0, cfg.start(p), t1, o)
       // zoomed in: a time window sampled as finely as the whole was, or (phase plane) more samples
       const base = opts.samples ?? cfg.samples ?? 400
-      const w = opts.detail?.x
+      const w = opts.detail?.time
       const { t, y } = w ? sol.sample(base, w[0], w[1]) : sol.sample(detailSamples(base, opts.detail))
       const series: Record<string, Series> = {}
       cfg.components.forEach((c, i) => {

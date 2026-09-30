@@ -716,6 +716,17 @@ html[data-werte='aus'] .ab-probe-step {
   display: none;
 }
 
+/* Past the end of the model's span (zoomed out, panned right): the curves go on, veiled. */
+.ab-span-end rect {
+  fill: var(--ab-bg);
+  opacity: 0.45;
+}
+.ab-span-end line {
+  stroke: var(--ab-muted);
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+}
+
 /* ================================================================== hints */
 
 /* The card of tip.ts: one per page, fixed, above everything. Keys as caps, a few icons. */
@@ -734,7 +745,7 @@ html[data-werte='aus'] .ab-probe-step {
   animation: ab-tipcard-in 0.14s ease-out;
 }
 .ab-tipcard[hidden] {
-  display: none;
+  display: none !important;
 }
 .ab-tipcard[data-rows] {
   display: grid;

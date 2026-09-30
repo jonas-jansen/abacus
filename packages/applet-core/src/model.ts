@@ -108,6 +108,11 @@ export interface RunOptions {
 
 export interface Detail {
   x?: readonly [number, number]
+  /**
+   * The visible range of time (t or n), from plots over time. Beyond the end of the model's
+   * span the drawing run continues — zoomed out or panned to the right, curves go on.
+   */
+  time?: readonly [number, number]
   /** The visible range of the y axis (for models that can aim their points at it). */
   y?: readonly [number, number]
   zoom: number
@@ -115,6 +120,16 @@ export interface Detail {
 
 /** More samples when zoomed, up to a limit that keeps a redraw quick. */
 export const MAX_SAMPLES = 20_000
+/** Zooming out goes to at most this many times the full view, and runs continue as far. */
+export const MAX_ZOOM_OUT = 20
+
+/** Where a drawing run ends when the visible time reaches past the model's end. */
+export function extendedEnd(start: number, end: number, d?: Detail): number {
+  const want = d?.time?.[1]
+  if (want === undefined || !(want > end)) return end
+  return Math.min(want, start + MAX_ZOOM_OUT * Math.max(end - start, 1))
+}
+
 export const detailSamples = (base: number, d?: Detail) => Math.min(MAX_SAMPLES, Math.round(base * Math.max(1, d?.zoom ?? 1)))
 
 export interface RunMeta {

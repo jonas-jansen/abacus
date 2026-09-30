@@ -148,8 +148,51 @@ export function plotDomains(spec: PlotSpec, run: Run): Domains {
   }
 }
 
+const isTime = (spec: PlotSpec) => spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous'
+
+/**
+ * How far down zooming and panning may go on each axis. Time does not run before the start,
+ * and a quantity that is never negative (populations, concentrations) needs no room below 0.
+ * Everything else stays free.
+ */
+export function panFloors(spec: PlotSpec, run: Run, d: Domains): { x: number; y: number } {
+  const nonneg = (arrays: (ArrayLike<number> | undefined)[]) =>
+    arrays.length > 0 &&
+    arrays.every((a) => {
+      if (!a) return false
+      for (let i = 0; i < a.length; i++) if (a[i] < 0) return false
+      return true
+    })
+  const floor = (lo: number, ok: boolean) => (ok ? Math.min(lo, 0) : -Infinity)
+  const log = spec.yScale === 'log'
+  if (isTime(spec)) {
+    const ss = selected(run, spec.series).filter((s) => s.role !== 'annotation')
+    return { x: d.x[0], y: log ? -Infinity : floor(d.y[0], nonneg(ss.map((s) => s.y))) }
+  }
+  if (spec.type === 'phasePlane') {
+    return {
+      x: floor(d.x[0], nonneg([seriesById(run, spec.xSeries)?.y])),
+      y: floor(d.y[0], nonneg([seriesById(run, spec.ySeries)?.y])),
+    }
+  }
+  return { x: -Infinity, y: -Infinity }
+}
+
+/** Where the model's own span ends on a plot over time (to mark it when zoomed beyond). */
+export function timeEnd(spec: PlotSpec, run: Run): number | null {
+  if (!isTime(spec)) return null
+  let end = -Infinity
+  for (const s of selected(run, spec.series)) if (s.x.length && s.role !== 'reference') end = Math.max(end, s.x[s.x.length - 1])
+  return Number.isFinite(end) ? end : null
+}
+
 function polyline(s: Surface, frame: Frame, xs: ArrayLike<number>, ys: ArrayLike<number>, count = xs.length) {
   let pen = false
+  // A sampled curve that leaves the plot far above and comes back far below within one step
+  // went through a pole (1/x at 0): no line across it. Two-point lines are left alone.
+  const h = frame.plot.h
+  const dense = count > 20
+  let last = 0
   for (let i = 0; i < count; i++) {
     const X = frame.xScale(xs[i])
     const Y = frame.yScale(ys[i])
@@ -157,6 +200,8 @@ function polyline(s: Surface, frame: Frame, xs: ArrayLike<number>, ys: ArrayLike
       pen = false
       continue
     }
+    if (pen && dense && ((last < -h && Y > 2 * h) || (last > 2 * h && Y < -h))) pen = false
+    last = Y
     if (pen) s.lineTo(X, Y)
     else s.moveTo(X, Y)
     pen = true

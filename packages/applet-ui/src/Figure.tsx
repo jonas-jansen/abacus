@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { clamp, formatNumber, makeFrame, type Detail, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
+import { clamp, formatNumber, makeFrame, MAX_ZOOM_OUT, type Detail, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
 import {
   axesNode,
   CanvasSurface,
@@ -10,7 +10,9 @@ import {
   fallbackColors,
   isSquare,
   markNodes,
+  panFloors,
   plotDomains,
+  timeEnd,
   probeFromPointer,
   probeNodes,
   roleStyles,
@@ -164,7 +166,8 @@ export function Figure<P extends Params>({
   const detailRun = useMemo(() => {
     if (!settled || !onDetail) return null
     // a phase plane's x axis is a state, not the model's variable: only the magnification counts
-    return onDetail({ x: spec.type === 'phasePlane' ? undefined : settled.x, y: settled.y, zoom: magnification(settled) })
+    const time = spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous'
+    return onDetail({ x: spec.type === 'phasePlane' ? undefined : settled.x, time: time ? settled.x : undefined, y: settled.y, zoom: magnification(settled) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settled, onDetail, spec.type, full])
   const drawn = detailRun ?? run
@@ -212,7 +215,8 @@ export function Figure<P extends Params>({
   }, [hydrated, frame, spec, run, view])
 
   const markGeom = useMemo(() => (marks?.length ? markNodes(frame, spec, marks) : []), [frame, spec, marks])
-  const probeGeom = useMemo(() => (probe === null ? null : probeNodes(frame, spec, run, view, probe)), [frame, spec, run, view, probe])
+  // the probe reads what is drawn — zoomed out that includes the continuation past the end
+  const probeGeom = useMemo(() => (probe === null ? null : probeNodes(frame, spec, drawn, view, probe)), [frame, spec, drawn, view, probe])
 
   // The figure under the pointer shows the tooltip; the others only show where the step is.
   const [source, setSource] = useState(false)
@@ -225,6 +229,11 @@ export function Figure<P extends Params>({
     onHandle?.(state ? handles[i].param : null)
   }
 
+  // Zoomed beyond the model's span: the continuation is drawn behind a veil, from the end on.
+  const end = zoom && detailRun ? timeEnd(spec, run) : null
+  const spanEnd = end !== null && end > frame.xDomain[0] && end < frame.xDomain[1] ? end : null
+  const X = (v: number) => frame.plot.x + frame.xScale(v)
+
   const legend = legendEntries(spec, run)
   const { plot } = frame
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
@@ -235,7 +244,7 @@ export function Figure<P extends Params>({
     const px = e.clientX - r.left - plot.x
     const py = e.clientY - r.top - plot.y
     const off = px < -6 || py < -6 || px > plot.w + 6 || py > plot.h + 6
-    const t = handleState === 'drag' || off ? null : probeFromPointer(frame, spec, run, view, px, py)
+    const t = handleState === 'drag' || off ? null : probeFromPointer(frame, spec, drawn, view, px, py)
     setSource(t !== null)
     onProbe(t)
   }
@@ -249,9 +258,19 @@ export function Figure<P extends Params>({
   const yT = (v: number) => (frame.yLog ? Math.log10(v) : v)
   const yTi = (u: number) => (frame.yLog ? 10 ** u : u)
   const MAX_ZOOM = 1e6
-  const setZoomLimited = (z: { x: readonly [number, number]; y: readonly [number, number] }) => {
-    // no deeper than a million-fold: beyond that, double precision and the samples run out
-    if (magnification(z) <= MAX_ZOOM) setZoom(z)
+  type Win = { x: readonly [number, number]; y: readonly [number, number] }
+  // no window before the start of time or below 0 for what is never negative: pushed back up
+  const floors = useMemo(() => panFloors(spec, run, full), [spec, run, full])
+  const floored = (z: Win): Win => {
+    const fit = (r: readonly [number, number], lo: number) => (r[0] >= lo ? r : ([lo, lo + r[1] - r[0]] as const))
+    return { x: fit(z.x, floors.x), y: frame.yLog ? z.y : fit(z.y, floors.y) }
+  }
+  const setZoomLimited = (z: Win) => {
+    // no deeper than a million-fold: beyond that, double precision and the samples run out;
+    // and no further out than MAX_ZOOM_OUT times the whole picture
+    const ly = (v: number) => (frame.yLog ? Math.log10(Math.max(v, 1e-300)) : v)
+    const out = Math.max((z.x[1] - z.x[0]) / (full.x[1] - full.x[0]), (ly(z.y[1]) - ly(z.y[0])) / (ly(full.y[1]) - ly(full.y[0])))
+    if (magnification(z) <= MAX_ZOOM && !(out > MAX_ZOOM_OUT)) setZoom(floored(z))
   }
   const zoomAt = (px: number, py: number, k: number, kx = k) => {
     const { x, y } = window_()
@@ -264,7 +283,7 @@ export function Figure<P extends Params>({
     const sx = (from.x[1] - from.x[0]) / plot.w
     const [ya, yb] = [yT(from.y[0]), yT(from.y[1])]
     const sy = (yb - ya) / plot.h
-    setZoom({ x: [from.x[0] - dxPx * sx, from.x[1] - dxPx * sx], y: [yTi(ya + dyPx * sy), yTi(yb + dyPx * sy)] })
+    setZoom(floored({ x: [from.x[0] - dxPx * sx, from.x[1] - dxPx * sx], y: [yTi(ya + dyPx * sy), yTi(yb + dyPx * sy)] }))
   }
   const inner = useRef<HTMLDivElement>(null)
   // wheel with Ctrl/⌘ (also a trackpad pinch) zooms; a plain wheel still scrolls the page
@@ -301,6 +320,7 @@ export function Figure<P extends Params>({
         press.current = null
       }
     } else if (e.shiftKey) {
+      e.preventDefault() // Shift + press would otherwise select text on the page
       e.currentTarget.setPointerCapture(e.pointerId)
       pan.current = { x: e.clientX, y: e.clientY, from: window_() }
       press.current = null
@@ -412,6 +432,12 @@ export function Figure<P extends Params>({
           </svg>
         )}
         <svg width={figW} height={figH} className="ab-layer ab-top" aria-hidden="true">
+          {spanEnd !== null && (
+            <g className="ab-span-end">
+              <rect x={X(spanEnd)} y={plot.y} width={plot.x + plot.w - X(spanEnd)} height={plot.h} />
+              <line x1={X(spanEnd)} y1={plot.y} x2={X(spanEnd)} y2={plot.y + plot.h} />
+            </g>
+          )}
           {markGeom.map((n, i) => renderSvg(n, i))}
           {probeGeom?.nodes.map((n, i) => renderSvg(n, 1000 + i))}
           {handles.map((h, i) => {
