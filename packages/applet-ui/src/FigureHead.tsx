@@ -177,5 +177,5 @@ export function legendEntries(spec: PlotSpec, run: Run) {
   if (spec.type === 'bars' && spec.grid) return []
   const ids = spec.series
   // annotations (brackets, arrows) explain themselves where they are drawn
-  return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation')
+  return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation' && s.legend !== false)
 }

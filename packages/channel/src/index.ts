@@ -15,7 +15,7 @@ export type Status = 'richtig' | 'nah' | 'falsch' | 'gespeichert'
 export interface ObservableSnapshot {
   label: string
   kind: 'zahl' | 'index' | 'klasse' | 'liste'
-  value: number | string | readonly number[] | null
+  value: number | string | readonly number[] | readonly string[] | null
   note?: string
 }
 

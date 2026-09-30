@@ -391,7 +391,7 @@ function valuesOf(o: Observable, perItem = false): { text: string; item?: number
   const v = o.value
   if (v === null) return []
   if (o.format) return [{ text: o.format(v) }]
-  if (Array.isArray(v)) return v.map((x, item) => ({ text: valueText(o, x), item: perItem ? item : undefined }))
+  if (Array.isArray(v)) return (v as readonly (number | string)[]).map((x, item) => ({ text: typeof x === 'string' ? x : valueText(o, x), item: perItem ? item : undefined }))
   if (typeof v === 'number') return [{ text: valueText(o, v) }]
   return [{ text: String(v) }]
 }

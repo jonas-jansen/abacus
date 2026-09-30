@@ -32,7 +32,7 @@ export const klasse = (label: string, value: string | null, extra: Extra = {}): 
   ...extra,
 })
 
-export const liste = (label: string, value: readonly number[] | string | null, extra: Extra = {}): Observable => ({
+export const liste = (label: string, value: readonly number[] | readonly string[] | string | null, extra: Extra = {}): Observable => ({
   kind: 'liste',
   label,
   value: value as ObservableValue,

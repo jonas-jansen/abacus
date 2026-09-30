@@ -36,6 +36,8 @@ export interface Series {
   arrow?: boolean
   /** Dash pattern, when it differs from the role's (e.g. solid where the role is dashed). */
   dash?: readonly number[]
+  /** false: not listed in the legend (e.g. the points of a path that is listed already). */
+  legend?: boolean
 }
 
 /**
@@ -74,7 +76,7 @@ export type Mark =
   | { kind: 'line'; x: number; y: number; slope: number; in: MarkSpace; item?: number }
 
 /** `liste` observables carry an array; everything else a scalar. `null` = not detected. */
-export type ObservableValue = number | string | readonly number[] | null
+export type ObservableValue = number | string | readonly number[] | readonly string[] | null
 
 export interface Observable {
   value: ObservableValue

@@ -279,7 +279,8 @@ function dots(s: Surface, frame: Frame, xs: ArrayLike<number>, ys: ArrayLike<num
 
 /** How many samples of a series the timeline shows. Continuous series are cut at `view.time`. */
 export function visible(s: Series, view: PlotView): number {
-  if (s.kind === 'discrete') return view.steps !== undefined ? Math.min(s.x.length, view.steps + 1) : s.x.length
+  if (s.kind === 'discrete' && view.steps !== undefined) return Math.min(s.x.length, view.steps + 1)
+  // over continuous time: everything up to the time shown (points of an approximation, too)
   if (view.time === undefined) return s.x.length
   let lo = 0
   let hi = s.x.length

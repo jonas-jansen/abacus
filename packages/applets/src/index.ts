@@ -16,6 +16,7 @@ import hauptsatz from './hauptsatz'
 import arithmetic from './arithmetic'
 import newtonCooling from './newton-cooling'
 import heron from './heron'
+import newton from './newton'
 import updatefunction from './updatefunction'
 import logisticRk from './logistic-rk'
 import logisticBifurcation from './logistic-bifurcation'
@@ -23,17 +24,22 @@ import logisticPerturbation from './logistic-perturbation'
 import predatorPrey from './predator-prey'
 import predatorPreyMap from './predator-prey-map'
 import sir from './sir'
+import leslie from './leslie'
+import sirStabilitaet from './sir-stabilitaet'
 import linearsystemDiscrete from './linearsystem-discrete'
 import expIvp from './exp-ivp'
 import linearFamily from './linear-family'
 import linearIvp from './linear-ivp'
 import logIvpData from './log-ivp-data'
 import romeoJulia from './romeo-julia'
+import pendel from './pendel'
 import michaelisMenten from './michaelis-menten'
+import bioreaktor from './bioreaktor'
 import eulerHeun from './euler-heun'
 import geometric from './geometric'
 import linearsystemPhase from './linearsystem-phase'
 import logIvp from './log-ivp'
+import logisticVergleich from './logistic-vergleich'
 import logisticCobweb from './logistic-cobweb'
 
 const list: AnyAppletDef[] = [
@@ -42,6 +48,7 @@ const list: AnyAppletDef[] = [
   arithmetic,
   geometric,
   heron,
+  newton,
   newtonCooling,
   // 2 update functions and fixed points
   updatefunction,
@@ -54,18 +61,23 @@ const list: AnyAppletDef[] = [
   predatorPrey,
   predatorPreyMap,
   sir,
+  sirStabilitaet,
+  leslie,
   linearsystemDiscrete,
   // 5 scalar ODEs
   expIvp,
   linearFamily,
   linearIvp,
   logIvp,
+  logisticVergleich,
   logIvpData,
   // 6 planar linear ODEs
   linearsystemPhase,
   romeoJulia,
+  pendel,
   // 7 nonlinear ODE systems
   michaelisMenten,
+  bioreaktor,
   // 8 numerics
   eulerHeun,
   // Anhang: mathematical foundations

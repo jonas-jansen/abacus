@@ -41,6 +41,13 @@ function tokens(src: string, shift: Run['shift'], out: Run[]) {
       tokens(arg, s, out)
       continue
     }
+    if (src.startsWith('\\text{', i)) {
+      // \text{Anteil}: a word, upright
+      const end = src.indexOf('}', i + 6)
+      out.push({ text: src.slice(i + 6, end < 0 ? undefined : end), italic: false, shift })
+      i = end < 0 ? src.length : end + 1
+      continue
+    }
     if (c === '\\') {
       const m = /^\\([a-zA-Z]+)/.exec(src.slice(i))
       if (m) {
