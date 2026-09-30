@@ -2,9 +2,8 @@
 // R' = a₁₁ R + a₁₂ J, J' = a₂₁ R + a₂₂ J. The signs say who reacts how: a₁₂ > 0 — Romeo loves
 // more the more Julia loves him; a₂₁ < 0 — Julia backs off when Romeo gets keen.
 
-import { klasse, ode, point, real, zahl } from '@abacus/applet-core'
+import { classify, eigenReadout, klasse, ode, ORIGIN, point, real, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { classify, eigenReadout, ORIGIN } from './linear2'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -1, max: 1, step: 0.01, default: def })
 

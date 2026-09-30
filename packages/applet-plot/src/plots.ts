@@ -3,7 +3,7 @@
  * domains, and draw geometry on a Surface. It knows nothing about parameters or models.
  */
 
-import { extent, padRange, type Frame, type Range, type Run, type Series } from '@abacus/applet-core'
+import { extent, padRange, valueRange, type Frame, type Range, type Run, type Series } from '@abacus/applet-core'
 import type { Surface } from './surface'
 
 export type Domain = Range | 'auto'
@@ -127,7 +127,8 @@ export function plotDomains(spec: PlotSpec, run: Run): Domains {
       const ss = selected(run, spec.series)
       return {
         x: pick(spec.x, () => extent(...ss.map((s) => s.x)) ?? [0, 1]),
-        y: pick(spec.y, () => padRange(extent(...ss.map((s) => s.y)))),
+        // over time: a quantity that is never negative gets its axis from 0
+        y: pick(spec.y, () => (spec.type === 'timeSeriesDiscrete' || spec.type === 'timeSeriesContinuous' ? valueRange : padRange)(extent(...ss.map((s) => s.y)))),
         xInteger: spec.type === 'timeSeriesDiscrete',
       }
     }

@@ -108,7 +108,18 @@ export interface RunOptions {
   detail?: Detail
 }
 
+/**
+ * A zoomed or panned plot asks the model for a drawing run of its window (`RunOptions.detail`,
+ * observables off). Builders use `time` themselves (sampling window, running past the end);
+ * `extraSeries` may use `x` and `y` to recompute what they draw for the window.
+ */
 export interface Detail {
+  /**
+   * The visible range of the plot's x axis, in that plot's own variable: the time t or n
+   * for plots over time, the state for cobwebs and function graphs, a parameter for
+   * diagrams over a parameter (bifurcation: a). Not set for phase planes, whose axes are
+   * states of the solution rather than its variable.
+   */
   x?: readonly [number, number]
   /**
    * The visible range of time (t or n), from plots over time. Beyond the end of the model's
@@ -117,6 +128,7 @@ export interface Detail {
   time?: readonly [number, number]
   /** The visible range of the y axis (for models that can aim their points at it). */
   y?: readonly [number, number]
+  /** Magnification against the full view (≥ 1); more samples, up to MAX_SAMPLES. */
   zoom: number
 }
 

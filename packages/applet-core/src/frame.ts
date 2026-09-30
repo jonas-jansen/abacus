@@ -189,6 +189,17 @@ function logTicks([lo, hi]: Range, maxCount: number): { ticks: number[]; step: n
 }
 
 /** A padded data range for auto-scaling; `null` input gives [0, 1]. */
+/**
+ * An automatic value range for quantities that cannot be negative (populations,
+ * concentrations): from 0 when the data come near it, so the axis does not start at an
+ * arbitrary 1 and exaggerate the change. Data far from 0 (a temperature of 280–315 K) keep
+ * their tight range.
+ */
+export function valueRange(r: Range | null, pad = 0.05): Range {
+  if (r && r[0] >= 0 && r[1] > 0 && r[0] <= r[1] / 2) return [0, r[1] + (r[1] - r[0]) * pad]
+  return padRange(r, pad)
+}
+
 export function padRange(r: Range | null, pad = 0.05): Range {
   if (!r) return [0, 1]
   const [a, b] = r

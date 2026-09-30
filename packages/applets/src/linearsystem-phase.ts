@@ -1,11 +1,9 @@
 // MATLAB: app_linearsystem_phase (+ app_linearsystem) — y' = A·y in the plane. Time series and
 // phase plane from the same A: one island, two figures (§10). Direction field behind the orbit.
 
-import { klasse, ode, point, real, zahl } from '@abacus/applet-core'
+import { classify, eigenReadout, klasse, ode, ORIGIN, point, real, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { classify, eigenReadout, ORIGIN } from './linear2'
 
-export { classify } from './linear2'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -3, max: 3, step: 0.05, default: def })
 

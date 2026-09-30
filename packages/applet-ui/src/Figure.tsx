@@ -1,32 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { clamp, formatNumber, makeFrame, MAX_ZOOM_OUT, type Detail, type Frame, type Mark, type Params, type Point, type Run, type Series } from '@abacus/applet-core'
-import {
-  axesNode,
-  CanvasSurface,
-  drawBahn,
-  nullclineSeries,
-  colorVar,
-  drawPlot,
-  fallbackColors,
-  isSquare,
-  markNodes,
-  panFloors,
-  selected,
-  plotDomains,
-  timeEnd,
-  probeFromPointer,
-  probeNodes,
-  roleStyles,
-  SvgPathSurface,
-  type Domain,
-  type PlotSpec,
-  type PlotView,
-  type ProbeRow,
-} from '@abacus/applet-plot'
-import { handlesOf, type DragHandle, type PlotEntry } from './define'
+import { clamp, formatNumber, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
+import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
+import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
-import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
+import { FigureHead, legendEntries } from './FigureHead'
+import { Handle, handlePosition } from './Handle'
+import { useZoomPan } from './useZoomPan'
+import { magnification as magnificationOf, type Win } from './zoom'
 
 /** The hint over a zoomable plot (markup of tip.ts: keys | what they do). */
 const ZOOM_TIP = '{Mod} + {Rad} | zoomen\n{Finger} | zoomen mit zwei Fingern\n{Shift} + {Ziehen} | verschieben'
@@ -148,12 +129,7 @@ export function Figure<P extends Params>({
     return () => window.clearTimeout(id)
   }, [zoom])
   const full = useMemo(() => plotDomains(spec, run), [spec, run])
-  const magnification = (z: { x: readonly [number, number]; y: readonly [number, number] }) => {
-    const ly = (v: number) => (spec.yScale === 'log' ? Math.log10(Math.max(v, 1e-300)) : v)
-    const mx = (full.x[1] - full.x[0]) / Math.max(1e-300, z.x[1] - z.x[0])
-    const my = (ly(full.y[1]) - ly(full.y[0])) / Math.max(1e-300, ly(z.y[1]) - ly(z.y[0]))
-    return Math.max(1, mx, my)
-  }
+  const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null
     // a phase plane's x axis is a state, not the model's variable: only the magnification counts
@@ -247,57 +223,12 @@ export function Figure<P extends Params>({
     setSource(false)
     onProbe?.(null)
   }
-  // Zoom and pan. The y axis may be logarithmic: then the window moves in log₁₀.
+  // Zoom and pan (useZoomPan): no window before the start of time or below 0 for what is
+  // never negative.
   const zoomable = spec.type !== 'surface3d'
-  const window_ = () => ({ x: frame.xDomain, y: frame.yDomain })
-  const yT = (v: number) => (frame.yLog ? Math.log10(v) : v)
-  const yTi = (u: number) => (frame.yLog ? 10 ** u : u)
-  const MAX_ZOOM = 1e6
-  type Win = { x: readonly [number, number]; y: readonly [number, number] }
-  // no window before the start of time or below 0 for what is never negative: pushed back up
   const floors = useMemo(() => panFloors(spec, run, full), [spec, run, full])
-  const floored = (z: Win): Win => {
-    const fit = (r: readonly [number, number], lo: number) => (r[0] >= lo ? r : ([lo, lo + r[1] - r[0]] as const))
-    return { x: fit(z.x, floors.x), y: frame.yLog ? z.y : fit(z.y, floors.y) }
-  }
-  const setZoomLimited = (z: Win) => {
-    // no deeper than a million-fold: beyond that, double precision and the samples run out;
-    // and no further out than MAX_ZOOM_OUT times the whole picture
-    const ly = (v: number) => (frame.yLog ? Math.log10(Math.max(v, 1e-300)) : v)
-    const out = Math.max((z.x[1] - z.x[0]) / (full.x[1] - full.x[0]), (ly(z.y[1]) - ly(z.y[0])) / (ly(full.y[1]) - ly(full.y[0])))
-    if (magnification(z) <= MAX_ZOOM && !(out > MAX_ZOOM_OUT)) setZoom(floored(z))
-  }
-  const zoomAt = (px: number, py: number, k: number, kx = k) => {
-    const { x, y } = window_()
-    const cx = frame.xInvert(px)
-    const cy = yT(frame.yInvert(py))
-    const [ya, yb] = [yT(y[0]), yT(y[1])]
-    setZoomLimited({ x: [cx - (cx - x[0]) * kx, cx + (x[1] - cx) * kx], y: [yTi(cy - (cy - ya) * k), yTi(cy + (yb - cy) * k)] })
-  }
-  const panBy = (dxPx: number, dyPx: number, from: { x: readonly [number, number]; y: readonly [number, number] }) => {
-    const sx = (from.x[1] - from.x[0]) / plot.w
-    const [ya, yb] = [yT(from.y[0]), yT(from.y[1])]
-    const sy = (yb - ya) / plot.h
-    setZoom(floored({ x: [from.x[0] - dxPx * sx, from.x[1] - dxPx * sx], y: [yTi(ya + dyPx * sy), yTi(yb + dyPx * sy)] }))
-  }
   const inner = useRef<HTMLDivElement>(null)
-  // wheel with Ctrl/⌘ (also a trackpad pinch) zooms; a plain wheel still scrolls the page
-  useEffect(() => {
-    const el = inner.current
-    if (!el || !zoomable) return
-    const wheel = (e: WheelEvent) => {
-      if (!e.ctrlKey && !e.metaKey) return
-      e.preventDefault()
-      const r = el.getBoundingClientRect()
-      zoomAt(e.clientX - r.left - plot.x, e.clientY - r.top - plot.y, Math.exp(Math.max(-0.5, Math.min(0.5, e.deltaY * 0.01))))
-    }
-    el.addEventListener('wheel', wheel, { passive: false })
-    return () => el.removeEventListener('wheel', wheel)
-  })
-  // Shift + drag pans; two fingers pinch and pan
-  const pan = useRef<{ x: number; y: number; from: { x: readonly [number, number]; y: readonly [number, number] } } | null>(null)
-  const touches = useRef(new Map<number, { x: number; y: number }>())
-  const pinch = useRef<{ d: number; cx: number; cy: number; from: { x: readonly [number, number]; y: readonly [number, number] } } | null>(null)
+  const zoomPan = useZoomPan({ el: inner, frame, full, floors, enabled: zoomable, setZoom })
 
   // A click (not a drag, not on a handle) on empty plot space starts a new trajectory there.
   const press = useRef<{ x: number; y: number } | null>(null)
@@ -305,60 +236,10 @@ export function Figure<P extends Params>({
     pointer(e)
     const onHandle = (e.target as Element).closest('.ab-handle')
     press.current = onBahn && !onHandle ? { x: e.clientX, y: e.clientY } : null
-    if (!zoomable || onHandle) return
-    if (e.pointerType === 'touch') {
-      touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-      if (touches.current.size === 2) {
-        const [a, b] = [...touches.current.values()]
-        const r = e.currentTarget.getBoundingClientRect()
-        pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), cx: (a.x + b.x) / 2 - r.left - plot.x, cy: (a.y + b.y) / 2 - r.top - plot.y, from: window_() }
-        press.current = null
-      }
-    } else if (e.shiftKey) {
-      e.preventDefault() // Shift + press would otherwise select text on the page
-      e.currentTarget.setPointerCapture(e.pointerId)
-      pan.current = { x: e.clientX, y: e.clientY, from: window_() }
-      press.current = null
-    }
-  }
-  const moveZoom = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (pan.current) {
-      panBy(e.clientX - pan.current.x, e.clientY - pan.current.y, pan.current.from)
-      return true
-    }
-    if (e.pointerType === 'touch' && touches.current.has(e.pointerId)) {
-      touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-      const p = pinch.current
-      if (p && touches.current.size === 2) {
-        const [a, b] = [...touches.current.values()]
-        const r = e.currentTarget.getBoundingClientRect()
-        const k = p.d / Math.max(1, Math.hypot(a.x - b.x, a.y - b.y))
-        // zoom about the first centre, then follow the fingers
-        const cx = (a.x + b.x) / 2 - r.left - plot.x
-        const cy = (a.y + b.y) / 2 - r.top - plot.y
-        const f = p.from
-        const x0 = frame.xInvert(p.cx)
-        setZoomLimited({
-          x: [x0 - (x0 - f.x[0]) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w, x0 + (f.x[1] - x0) * k - ((cx - p.cx) * (f.x[1] - f.x[0]) * k) / plot.w],
-          y: (() => {
-            const [ya, yb] = [yT(f.y[0]), yT(f.y[1])]
-            const y0 = yT(frame.yInvert(p.cy))
-            const shift = ((cy - p.cy) * (yb - ya) * k) / plot.h
-            return [yTi(y0 - (y0 - ya) * k + shift), yTi(y0 + (yb - y0) * k + shift)] as const
-          })(),
-        })
-        return true
-      }
-    }
-    return false
-  }
-  const endZoom = (e: ReactPointerEvent<HTMLDivElement>) => {
-    pan.current = null
-    touches.current.delete(e.pointerId)
-    if (touches.current.size < 2) pinch.current = null
+    if (!onHandle && zoomPan.down(e)) press.current = null
   }
   const up = (e: ReactPointerEvent<HTMLDivElement>) => {
-    endZoom(e)
+    zoomPan.end(e)
     const p = press.current
     press.current = null
     if (!p || !onBahn || Math.hypot(e.clientX - p.x, e.clientY - p.y) > 4) return
@@ -420,11 +301,11 @@ export function Figure<P extends Params>({
         aria-label={spec.title ?? [spec.yLabel, spec.xLabel].filter(Boolean).join(' über ')}
         ref={inner}
         onPointerMove={(e) => {
-          if (!moveZoom(e)) pointer(e)
+          if (!zoomPan.move(e)) pointer(e)
         }}
         onPointerDown={down}
         onPointerUp={up}
-        onPointerCancel={endZoom}
+        onPointerCancel={zoomPan.end}
         onPointerLeave={leave}
         // in a phase portrait a double click would also add two trajectories; there the pill resets
         onDoubleClick={() => !onBahn && setZoom(null)}
@@ -491,261 +372,4 @@ export function Figure<P extends Params>({
       </div>
     </figure>
   )
-}
-
-/** Where a drag handle sits, in figure coordinates; null when it cannot be placed. */
-function handlePosition(drag: DragHandle<any>, frame: Frame, params: Params): [number, number] | null {
-  let dx: number
-  let dy: number
-  if (drag.at) {
-    const a = drag.at(params)
-    if (!a) return null
-    ;[dx, dy] = a
-  } else {
-    const v = params[drag.param]
-    if (drag.axis === 'xy') [dx, dy] = v as Point
-    else if (drag.axis === 'x') [dx, dy] = [v as number, clamp(0, frame.yDomain[0], frame.yDomain[1])]
-    else [dx, dy] = [clamp(0, frame.xDomain[0], frame.xDomain[1]), v as number]
-  }
-  const cx = frame.plot.x + frame.xScale(dx)
-  const cy = frame.plot.y + frame.yScale(dy)
-  // a handle outside the plot would be unreachable and float over the axes
-  const inside = cx >= frame.plot.x - 1 && cx <= frame.plot.x + frame.plot.w + 1 && cy >= frame.plot.y - 1 && cy <= frame.plot.y + frame.plot.h + 1
-  return Number.isFinite(cx) && Number.isFinite(cy) && inside ? [cx, cy] : null
-}
-
-/**
- * A draggable handle with a ≥ 44 px hit target. `touch-action: none` sits on the handle
- * only, so a drag that starts anywhere else on the plot still scrolls the page (§6.2).
- * The grab offset is kept, so the handle does not jump under the pointer.
- */
-function Handle({
-  drag,
-  at: [cx, cy],
-  frame,
-  params,
-  hot,
-  onParams,
-  onState,
-}: {
-  drag: DragHandle<any>
-  at: [number, number]
-  frame: Frame
-  params: Params
-  hot?: boolean
-  onParams: (patch: Record<string, unknown>) => void
-  onState: (s: 'hover' | 'drag' | null) => void
-}) {
-  const { plot } = frame
-  const grab = useRef<[number, number]>([0, 0])
-  const pointer = (e: ReactPointerEvent<SVGGElement>): [number, number] => {
-    const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
-    return [e.clientX - rect.left, e.clientY - rect.top]
-  }
-  const move = (e: ReactPointerEvent<SVGGElement>) => {
-    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
-    const [px, py] = pointer(e)
-    const x = frame.xInvert(px + grab.current[0] - plot.x)
-    const y = frame.yInvert(py + grab.current[1] - plot.y)
-    if (drag.set) onParams({ ...drag.set(x, y, params) })
-    else onParams({ [drag.param]: drag.axis === 'xy' ? [x, y] : drag.axis === 'x' ? x : y })
-  }
-  const cursor = drag.axis === 'x' ? 'ew-resize' : drag.axis === 'y' ? 'ns-resize' : 'move'
-
-  return (
-    <g
-      className="ab-handle"
-      data-hot={hot || undefined}
-      style={{ touchAction: 'none', pointerEvents: 'auto', cursor }}
-      onPointerEnter={() => onState('hover')}
-      onPointerLeave={(e) => {
-        if (!e.currentTarget.hasPointerCapture(e.pointerId)) onState(null)
-      }}
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId)
-        e.preventDefault()
-        const [px, py] = pointer(e)
-        grab.current = [cx - px, cy - py]
-        onState('drag')
-      }}
-      onPointerMove={move}
-      onPointerUp={(e) => {
-        e.currentTarget.releasePointerCapture(e.pointerId)
-        onState(e.pointerType === 'mouse' ? 'hover' : null)
-      }}
-    >
-      <circle cx={cx} cy={cy} r={22} fill="transparent" />
-      <circle cx={cx} cy={cy} r={12} className="ab-handle-ring" />
-      <circle cx={cx} cy={cy} r={7} className="ab-handle-dot" />
-      {drag.axis !== 'xy' && (
-        // a hint of the direction it moves in
-        <path
-          className="ab-handle-arrows"
-          d={drag.axis === 'x' ? `M${cx - 17} ${cy}l4 -3.5v7zM${cx + 17} ${cy}l-4 -3.5v7z` : `M${cx} ${cy - 17}l-3.5 4h7zM${cx} ${cy + 17}l-3.5 -4h7z`}
-        />
-      )}
-    </g>
-  )
-}
-
-const LOG_HILFE =
-  'Auf einer logarithmischen Achse bedeuten gleiche Abstände gleiche Faktoren: von 1 bis 0,1 ist es so weit wie von 0,1 bis 0,01. So sind sehr große und sehr kleine Werte zugleich zu sehen. Eine Gerade heißt: der Wert ändert sich in jedem Schritt um denselben Faktor. Null und negative Werte haben auf dieser Achse keinen Platz.'
-
-/**
- * The row above a plot: title, legend and axis switch. Every figure has it, so figures side
- * by side keep their plots at the same height. Legend entries are buttons: pointing at one
- * lets the others step back, a click switches the series off (and on) in every plot.
- */
-function FigureHead({
-  title,
-  legend,
-  hidden,
-  onToggle,
-  onFocus,
-  log,
-  vergleich,
-  onVergleichen,
-  bahnen,
-  zoomReset,
-}: {
-  title?: string
-  legend: Series[]
-  hidden?: ReadonlySet<string>
-  onToggle?: (id: string) => void
-  onFocus?: (id: string | null) => void
-  log?: { on: boolean; set: (on: boolean) => void; hilfe?: string }
-  vergleich?: { text: string; loesen?: () => void }
-  onVergleichen?: () => void
-  bahnen?: { n: number; loeschen?: () => void }
-  zoomReset?: () => void
-}) {
-  const [help, setHelp] = useState(false)
-  const helpRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!help) return
-    const close = (e: PointerEvent) => {
-      if (!helpRef.current?.contains(e.target as Node)) setHelp(false)
-    }
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setHelp(false)
-    document.addEventListener('pointerdown', close)
-    document.addEventListener('keydown', esc)
-    return () => {
-      document.removeEventListener('pointerdown', close)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [help])
-
-  return (
-    <div className="ab-fighead">
-      {title && <span className="ab-figtitle">{title}</span>}
-      {onVergleichen && (
-        <button type="button" className="ab-pill" onClick={onVergleichen} data-tip="den jetzigen Zustand festhalten – dann etwas ändern und vergleichen">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-            <path d="M5.5 2.5h5l-1 4 2.5 2.5h-9L5.5 6.5zM8 9v4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
-          vergleichen
-        </button>
-      )}
-      {zoomReset && (
-        <button type="button" className="ab-pill" onClick={zoomReset} data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}>
-          Ausschnitt zurücksetzen
-        </button>
-      )}
-      {bahnen &&
-        (bahnen.n > 0 ? (
-          <button type="button" className="ab-pill" onClick={bahnen.loeschen} data-tip="die zusätzlichen Bahnen entfernen">
-            {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
-          </button>
-        ) : (
-          <span className="ab-fig-hint">klicken: weitere Bahn</span>
-        ))}
-      {vergleich && (
-        <button type="button" className="ab-legend-item ab-legend-ghost" onClick={vergleich.loesen} data-tip="Vergleich lösen">
-          <svg width="22" height="10" aria-hidden="true">
-            <line x1="1" y1="5" x2="21" y2="5" stroke="var(--ab-muted)" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
-          </svg>
-          <MathLabel text={vergleich.text} />
-          <span className="ab-legend-x" aria-hidden="true">
-            ×
-          </span>
-        </button>
-      )}
-      {(legend.length > 1 || legend.some((s) => s.name)) && (
-        <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
-          {legend.map((s) => {
-            const off = hidden?.has(s.id) ?? false
-            return (
-              <button
-                key={s.id}
-                type="button"
-                className="ab-legend-item"
-                aria-pressed={!off}
-                data-tip={off ? 'wieder zeigen' : 'ausblenden'}
-                onClick={() => onToggle?.(s.id)}
-                onPointerEnter={() => !off && onFocus?.(s.id)}
-                onFocus={() => !off && onFocus?.(s.id)}
-                onBlur={() => onFocus?.(null)}
-              >
-                <svg width="22" height="10" aria-hidden="true">
-                  {s.fill ? (
-                    <rect x="4" y="0.5" width="14" height="9" rx="2" fill={`var(--abacus-${s.role})`} fillOpacity="0.25" stroke={`var(--abacus-${s.role})`} />
-                  ) : s.kind === 'discrete' && s.connect === false ? (
-                    <circle cx="11" cy="5" r="3.5" fill={`var(--abacus-${s.role})`} />
-                  ) : (
-                    <line
-                      x1="1"
-                      y1="5"
-                      x2="21"
-                      y2="5"
-                      stroke={`var(--abacus-${s.role})`}
-                      strokeWidth={roleStyles[s.role].width + 0.5}
-                      strokeDasharray={(s.dash ?? roleStyles[s.role].dash).join(' ') || undefined}
-                      strokeLinecap="round"
-                    />
-                  )}
-                </svg>
-                <TeX tex={s.label} />
-                {s.name && <span className="ab-legend-name">{s.name}</span>}
-              </button>
-            )
-          })}
-        </div>
-      )}
-      {log && (
-        <div className="ab-axis-switch" ref={helpRef}>
-          <div className="ab-seg" role="group" aria-label="y-Achse">
-            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
-              linear
-            </button>
-            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
-              log
-            </button>
-          </div>
-          <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
-            ?
-          </button>
-          {help && (
-            <div className="ab-help" role="note">
-              <strong>Logarithmische Achse</strong>
-              <p>{LOG_HILFE}</p>
-              {log.hilfe && (
-                <p>
-                  <MathLabel text={log.hilfe} />
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/** Series shown in a plot that deserve a legend entry (time series and function graphs). */
-function legendEntries(spec: PlotSpec, run: Run) {
-  if (spec.type === 'phasePlane') return nullclineSeries(spec)
-  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'surface3d') return []
-  const ids = spec.series
-  // annotations (brackets, arrows) explain themselves where they are drawn
-  return (ids ? run.series.filter((s) => ids.includes(s.id)) : run.series).filter((s) => s.role !== 'annotation')
 }

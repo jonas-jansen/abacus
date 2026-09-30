@@ -5,7 +5,7 @@
 //
 // Creates packages/applets/src/<id>.ts from a template, adds it to the registry, and with
 // --seite also a page stub in site/src/content/seiten/<id>.mdx. The applet appears on
-// /applet/<id> immediately.
+// /applet/<id> immediately. The guide is docs/applets.md.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -22,99 +22,117 @@ if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
   process.exit(1)
 }
 
+// Each template is a complete applet that passes the checks (formulas in both modes, every
+// parameter changeable in the formulas, a handle for the start value): change it, don't fill it.
+const head = `// TODO: what this applet shows, and where in the slides (chapter, slide numbers).
+
+`
+const meta = `  titel: 'TODO Titel',
+  kurz: 'TODO ein Satz, was man hier sieht.',
+  kapitel: 'I', // TODO: 'I' | 'II' | 'III' | 'IV' | 'Anhang'
+  folien: 'TODO', // e.g. '22–27'`
+
 const templates = {
-  iteration: `import { behaviour, int, iteration, klasse, real, zahl } from '@abacus/applet-core'
+  iteration: `${head}import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = iteration({
   id: '${id}',
   params: {
-    a: real('Parameter a', { min: 0, max: 2, step: 0.01, default: 0.5 }),
-    x0: real('Startwert x₀', { min: -5, max: 5, step: 0.1, default: 1 }),
-    N: int('Anzahl Schritte', { min: 1, max: 100, default: 30 }),
+    a: real('Faktor', { latex: 'a', min: 0, max: 2, step: 0.01, default: 0.5 }),
+    x0: real('Startwert', { latex: 'x_0', min: -5, max: 5, step: 0.1, default: 1 }),
+    N: schritte('Schritte', { latex: 'N', default: 30, max: 100 }),
   },
   start: (p) => p.x0,
   // TODO: the update rule x_{n+1} = f(x_n)
   step: (x, p) => p.a * x,
   horizon: (p) => p.N,
-  series: { label: 'xₙ' },
+  series: { id: 'x', label: 'x_n', name: 'Folge' },
   observables: ({ x }) => ({
-    verhalten: klasse('Verhalten', behaviour(x)),
-    letzter: zahl('letzter Wert', x[x.length - 1]),
+    verhalten: verhalten('Verhalten', x),
+    letzter: zahl('letzter Wert $x_N$', x[x.length - 1]),
   }),
 })
 
 export default defineApplet({
   id: '${id}',
-  titel: 'TODO Titel',
-  kurz: 'TODO ein Satz, was man hier sieht.',
-  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
-  folien: 'TODO',
+${meta}
   model,
-  plots: [{ type: 'timeSeriesDiscrete', xLabel: 'n', yLabel: 'xₙ' }],
+  horizont: 'N',
+  formeln: [
+    // {{a}}: the parameter as a chip; {{#x0}}: always its value; {{*}}: a product sign between numbers
+    { label: 'Vorschrift', tex: String.raw\`x_{n+1} = {{a}}{{*}}x_n\` },
+    { label: 'Start', tex: String.raw\`x_0 = {{#x0}}\` },
+  ],
+  plots: [{ type: 'timeSeriesDiscrete', xLabel: 'n', yLabel: 'x_n', drag: { param: 'x0', axis: 'y' } }],
   anzeige: ['verhalten', 'letzter'],
 })
 `,
-  closedForm: `import { closedForm, real, zahl } from '@abacus/applet-core'
+  closedForm: `${head}import { closedForm, real, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = closedForm({
   id: '${id}',
   params: {
-    k: real('Rate k', { min: -2, max: 2, step: 0.01, default: -0.5 }),
-    x0: real('Anfangswert x₀', { min: 0, max: 10, step: 0.1, default: 5 }),
-    T: real('Zeitfenster T', { min: 1, max: 20, step: 1, default: 10 }),
+    k: real('Rate', { latex: 'k', min: -2, max: 2, step: 0.01, default: -0.5 }),
+    x0: real('Anfangswert', { latex: 'x_0', min: 0, max: 10, step: 0.1, default: 5 }),
+    T: real('Zeitfenster', { latex: 'T', min: 1, max: 20, step: 1, default: 10, limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   domain: (p) => [0, p.T],
   curves: {
     // TODO: the closed-form solution
-    x: { label: 'x(t)', f: (t, p) => p.x0 * Math.exp(p.k * t) },
+    x: { label: 'x(t)', name: 'Lösung', f: (t, p) => p.x0 * Math.exp(p.k * t) },
   },
   observables: ({ p }) => ({
-    endwert: zahl('x(T)', p.x0 * Math.exp(p.k * p.T)),
+    endwert: zahl('Endwert $x(T)$', p.x0 * Math.exp(p.k * p.T)),
   }),
 })
 
 export default defineApplet({
   id: '${id}',
-  titel: 'TODO Titel',
-  kurz: 'TODO ein Satz, was man hier sieht.',
-  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
-  folien: 'TODO',
+${meta}
   model,
-  plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)' }],
+  zeitleiste: true,
+  horizont: 'T',
+  formeln: [
+    { label: 'Lösung', tex: String.raw\`x(t) = {{x0}}\\,e^{{{k}}\\,t}\` },
+  ],
+  plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)', drag: { param: 'x0', axis: 'y' } }],
   anzeige: ['endwert'],
 })
 `,
-  ode: `import { events, ode, real, zahl } from '@abacus/applet-core'
+  ode: `${head}import { events, ode, real, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = ode({
   id: '${id}',
   params: {
-    k: real('Rate k', { min: 0, max: 2, step: 0.01, default: 0.5 }),
-    x0: real('Anfangswert x₀', { min: 0, max: 10, step: 0.1, default: 5 }),
-    T: real('Zeitfenster T', { min: 1, max: 20, step: 1, default: 10 }),
+    k: real('Rate', { latex: 'k', min: 0, max: 2, step: 0.01, default: 0.5 }),
+    x0: real('Anfangswert', { latex: 'x_0', min: 0, max: 10, step: 0.1, default: 5 }),
+    T: real('Zeitfenster', { latex: 'T', min: 1, max: 20, step: 1, default: 10, limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
-  components: [{ id: 'x', label: 'x(t)' }],
+  // one entry per component; several components give a system (and allow a phase plane)
+  components: [{ id: 'x', label: 'x(t)', name: 'Bestand' }],
   start: (p) => [p.x0],
   // TODO: the right-hand side y' = f(t, y)
   rhs: (_t, y, p) => [-p.k * y[0]],
   tEnd: (p) => p.T,
   observables: ({ p, sol }) => {
     const [tHalf] = events(sol, (_t, y) => y[0] - p.x0 / 2)
-    return { halbwertszeit: zahl('Halbwertszeit', tHalf ?? null, tHalf === undefined ? { note: 'nicht im Zeitfenster' } : {}) }
+    return { halbwertszeit: zahl('Halbwertszeit', tHalf ?? null, tHalf === undefined ? { note: 'nicht im Zeitfenster' } : { marks: [{ kind: 'time', t: tHalf }] }) }
   },
 })
 
 export default defineApplet({
   id: '${id}',
-  titel: 'TODO Titel',
-  kurz: 'TODO ein Satz, was man hier sieht.',
-  kapitel: 'I', // TODO: I, II, III, IV oder Anhang
-  folien: 'TODO',
+${meta}
   model,
-  plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)' }],
+  horizont: 'T',
+  formeln: [
+    { label: 'Gleichung', tex: String.raw\`x' = -{{k}}{{*}}x\` },
+    { label: 'Start', tex: String.raw\`x(0) = {{#x0}}\` },
+  ],
+  plots: [{ type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'x(t)', drag: { param: 'x0', axis: 'y' } }],
   anzeige: ['halbwertszeit'],
 })
 `,
@@ -183,4 +201,4 @@ werden hier per Id eingebunden: <Quiz id="…" nr={1} />
   }
 }
 
-console.log(`\nNächste Schritte: Modell in ${id}.ts ausfüllen, dann \`pnpm dev\` → /applet/${id}`)
+console.log(`\nNächste Schritte: Modell in ${id}.ts ändern (Anleitung: docs/applets.md), dann \`pnpm dev\` → /applet/${id}`)

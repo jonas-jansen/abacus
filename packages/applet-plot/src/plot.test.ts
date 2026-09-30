@@ -1,6 +1,6 @@
 import { defaultParams, iteration, makeFrame, real, int } from '@abacus/applet-core'
 import { describe, expect, it } from 'vitest'
-import { axesNode, drawPlot, plotDomains, svgToString, SvgPathSurface, type PlotSpec } from './index'
+import { axesNode, drawPlot, panFloors, plotDomains, svgToString, SvgPathSurface, timeEnd, type PlotSpec } from './index'
 
 const model = iteration({
   id: 'geo',
@@ -54,5 +54,42 @@ describe('axis factor', () => {
     const svg = svgToString(axesNode(makeFrame({ width: 500, height: 300, x: [0, 80], y: [0, 100_000], yLabel: 'x' }), { y: 'x' }))
     expect(svg).toContain('·')
     expect(svg).not.toContain('cdot')
+  })
+})
+
+describe('zoom rules and drawing details', () => {
+  it('lets time start at its beginning and nonnegative quantities at 0', () => {
+    const spec: PlotSpec = { type: 'timeSeriesDiscrete', series: ['x'] }
+    const f = panFloors(spec, run, plotDomains(spec, run))
+    expect(f.x).toBe(0)
+    expect(f.y).toBe(0) // 0,5ⁿ is never negative
+    const neg = model.run({ ...defaultParams(model), a: -0.5 })
+    expect(panFloors(spec, neg, plotDomains(spec, neg)).y).toBe(-Infinity)
+    expect(panFloors({ type: 'cobweb', f: 'f', orbit: 'x' }, run, plotDomains(spec, run))).toEqual({ x: -Infinity, y: -Infinity })
+  })
+
+  it('knows where the span of a plot over time ends', () => {
+    expect(timeEnd({ type: 'timeSeriesDiscrete', series: ['x'] }, run)).toBe(10)
+    expect(timeEnd({ type: 'cobweb', f: 'f', orbit: 'x' }, run)).toBeNull()
+  })
+
+  it('draws no line across a pole, but keeps two-point lines whole', () => {
+    const t = Float64Array.from({ length: 101 }, (_, i) => -1 + i / 50)
+    const pole = { series: [{ id: 'g', label: 'g', kind: 'continuous' as const, x: t, y: t.map((v) => 1 / v), role: 'primary' as const }], observables: {}, meta: {} }
+    const spec: PlotSpec = { type: 'functionGraph', series: ['g'] }
+    const frame = makeFrame({ width: 400, height: 300, x: [-1, 1], y: [-5, 5] })
+    const moves = (r: typeof pole) => {
+      const s = new SvgPathSurface()
+      drawPlot(s, frame, spec, r)
+      return (s.nodes.map((n) => String(n.attrs?.d)).join('').match(/M/g) ?? []).length
+    }
+    expect(moves(pole)).toBe(2) // two branches
+    const line = { ...pole, series: [{ ...pole.series[0], x: Float64Array.of(-1, 1), y: Float64Array.of(-100, 100) }] }
+    expect(moves(line)).toBe(1)
+  })
+
+  it('ends both axes in an arrowhead', () => {
+    const frame = makeFrame({ width: 400, height: 300, x: [0, 10], y: [0, 1], xLabel: 't', yLabel: 'x' })
+    expect(svgToString(axesNode(frame, { x: 't', y: 'x' })).match(/abacus-axis-arrow/g)).toHaveLength(2)
   })
 })

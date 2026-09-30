@@ -14,7 +14,7 @@ describe('formulas', () => {
     const def = applets[id]
     const p = defaultParams(def.model)
     const formeln = typeof def.formeln === 'function' ? def.formeln(p) : def.formeln
-    expect(formeln?.length, 'every applet states its model').toBeGreaterThan(0)
+    expect(formeln?.length ?? 0, `${def.id}: \`formeln\` fehlt – every applet states its model above the plots (docs/applets.md, "Formeln")`).toBeGreaterThan(0)
     for (const f of formeln ?? []) {
       for (const mode of ['symbole', 'zahlen'] as const) {
         const tex = expandFormula(f.tex, def.model.params, p, mode)
@@ -37,7 +37,7 @@ describe('formulas', () => {
     // the horizon (N, T) is set in the timeline, not in the formulas
     const missing = def.model.params.map((s) => s.id).filter((pid) => pid !== def.horizont && !seen.has(pid))
     if (def.horizont) expect(seen.has(def.horizont), 'the horizon belongs to the timeline').toBe(false)
-    expect(missing).toEqual([])
+    expect(missing, `${def.id}: these parameters appear in no formula – write them as {{name}} into \`formeln\` (or make one the \`horizont\`)`).toEqual([])
   })
 
   it('writes numbers the German way, with signs joining the operator', () => {

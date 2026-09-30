@@ -6,7 +6,7 @@
 import { defaultParams, updateParams, type Observables } from '@abacus/applet-core'
 import { describe, expect, it } from 'vitest'
 import { applets, getApplet } from './index'
-import { classify } from './linearsystem-phase'
+import { classify } from '@abacus/applet-core'
 
 describe('registry', () => {
   it.each(Object.keys(applets))('%s runs at its defaults and its displayed observables exist', (id) => {

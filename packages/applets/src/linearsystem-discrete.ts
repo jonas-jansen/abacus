@@ -1,9 +1,8 @@
 // MATLAB: app_linearsystem_phase_discrete — x_{n+1} = A x_n in the plane. The orbit is A^n x₀;
 // it shrinks to 0 exactly when every eigenvalue has |λ| < 1 (spectral radius < 1).
 
-import { iterationN, klasse, point, real, schritte, zahl } from '@abacus/applet-core'
+import { eigen, eigenReadout, iterationN, klasse, ORIGIN, point, real, schritte, spectralRadius, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { eigen, eigenReadout, ORIGIN, spectralRadius } from './linear2'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -1, max: 1, step: 0.01, default: def })
 

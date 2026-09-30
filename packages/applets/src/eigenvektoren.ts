@@ -3,9 +3,8 @@
 // The columns of A (the images of the unit vectors) can be dragged too; the parallelogram they
 // span has the area |det A|.
 
-import { closedForm, klasse, point, real, zahl, type Point, type Series } from '@abacus/applet-core'
+import { closedForm, eigenReadout, klasse, point, type Point, real, type Series, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { eigenReadout } from './linear2'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -5, max: 5, step: 0.1, default: def })
 
