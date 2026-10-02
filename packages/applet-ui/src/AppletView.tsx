@@ -12,6 +12,7 @@ import { TeX } from './TeX'
 import { useAppletState } from './useAppletState'
 import { installTips } from './tip'
 import { useHistory } from './useHistory'
+import { HilfeKnopf, QrKnopf, useVortrag, VortragKnopf } from './Werkzeuge'
 
 export interface AppletViewProps<P extends Params> {
   def: AppletDef<P>
@@ -145,6 +146,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   const rowLit = dragged ?? formulaHot
   const handleHot = hotParam ?? formulaHot
   const rootRef = useRef<HTMLElement>(null)
+  const vortrag = useVortrag(rootRef)
   const focusParam = (id: string) => {
     const row = rootRef.current?.querySelector<HTMLElement>(`[data-param-row="${id}"]`)
     if (!row) return
@@ -192,14 +194,28 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
   }
 
   return (
-    <section className="ab-applet" aria-label={def.titel} data-applet={def.id} ref={rootRef} onKeyDown={onKey}>
-      {kopf && (
+    <section
+      className="ab-applet"
+      aria-label={def.titel}
+      data-applet={def.id}
+      ref={rootRef}
+      onKeyDown={onKey}
+      data-vortrag={vortrag.an || undefined}
+      style={vortrag.an ? ({ '--ab-vortrag': vortrag.zoom } as CSSProperties) : undefined}
+    >
+      {(kopf || vortrag.an) && (
         <header className="ab-head">
           <div>
             <h2 className="ab-title">{def.titel}</h2>
             <p className="ab-sub">{def.kurz}</p>
           </div>
-          {vollbildHref && (
+          {vortrag.an ? (
+            <button type="button" className="ab-icon" onClick={vortrag.ende} data-tip="{Esc} | Vortrag beenden" aria-label="Vortrag beenden">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                <path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+          ) : vollbildHref && (
             <a className="ab-icon" href={vollbildHref} data-tip="Applet auf eigener Seite öffnen" aria-label="Applet auf eigener Seite öffnen">
               <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
                 <path d="M12 3h5v5M17 3l-6 6M8 17H3v-5M3 17l6-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -329,6 +345,11 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                     </svg>
                   </button>
                   <CopyLink />
+                  <QrKnopf />
+                </span>
+                <span className="ab-aktionen" role="group" aria-label="Vortrag und Bedienung">
+                  <VortragKnopf an={vortrag.an} onClick={vortrag.an ? vortrag.ende : vortrag.start} />
+                  <HilfeKnopf bahnen={!!bahnParam} zeitleiste={!!timeline} />
                 </span>
           </div>
           {def.szenarien && def.szenarien.length > 0 && (

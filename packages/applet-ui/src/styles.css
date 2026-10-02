@@ -164,6 +164,11 @@
   border-radius: var(--ab-radius);
   color: var(--ab-faint);
 }
+button.ab-icon {
+  padding: 0;
+  border: 0;
+  background: none;
+}
 .ab-icon:hover {
   background: var(--ab-hover);
   color: var(--ab-text);
@@ -188,9 +193,9 @@
 }
 .ab-toolbar {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 6px;
   padding: 12px 20px;
   border-bottom: 1px solid var(--ab-line);
 }
@@ -255,8 +260,12 @@
   }
 }
 
-/* The tools of the panel as two small toolbars: history (undo, redo) and actions (compare,
-   link, reset) – icons in equal cells, a fine frame around each group. */
+/* The tools of the panel as small toolbars: the parameters (undo, redo, reset) on the left;
+   compare, link and QR code, then lecture mode and help on the right – icons in equal cells,
+   a fine frame around each group. */
+.ab-toolbar > .ab-undo {
+  margin-right: auto;
+}
 
 .ab-undo,
 .ab-aktionen {
@@ -333,6 +342,149 @@
   padding: 6px 12px;
   border-radius: var(--ab-radius);
   background: var(--ab-bg);
+}
+
+/* ================================================================== lecture mode */
+
+/* The applet alone on the screen (full screen, or a layer over the page where a browser has
+   none), its content scaled by --ab-vortrag so the back rows can read it. Hint cards and
+   dialogs are not scaled. */
+.ab-applet[data-vortrag] {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.ab-applet[data-vortrag] > .ab-head,
+.ab-applet[data-vortrag] > .ab-body {
+  zoom: var(--ab-vortrag, 1);
+}
+.ab-applet[data-vortrag] > .ab-head {
+  padding-bottom: 6px;
+}
+.ab-applet[data-vortrag] .ab-title {
+  font-size: 18px;
+}
+.ab-applet:fullscreen::backdrop {
+  background: var(--ab-bg);
+}
+
+/* ================================================================== dialogs */
+
+/* QR code and help: a card in the middle of the screen. */
+.ab-dialog {
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 14px 18px 18px;
+  border: 1px solid var(--ab-line);
+  border-radius: var(--ab-radius);
+  background: var(--ab-bg);
+  color: var(--ab-text);
+  font: 14px/1.4 var(--ab-font);
+  box-shadow: 0 24px 60px -12px rgb(16 24 40 / 0.35);
+}
+.ab-dialog::backdrop {
+  background: rgb(16 24 40 / 0.4);
+}
+.ab-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.ab-dialog-head .ab-section-title {
+  margin: 0;
+}
+.ab-dialog-close {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -6px -4px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ab-muted);
+}
+.ab-dialog-close:hover {
+  background: var(--ab-hover);
+  color: var(--ab-text);
+}
+.ab-qr-body {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.ab-qr {
+  display: block;
+  width: min(360px, calc(100vw - 80px), calc(100vh - 220px));
+  height: auto;
+  margin-bottom: 8px;
+  border: 1px solid var(--ab-line);
+}
+.ab-qr-url {
+  margin: 0;
+  font-weight: 600;
+  word-break: break-all;
+  text-align: center;
+}
+.ab-dialog-note {
+  margin: 0;
+  color: var(--ab-muted);
+  font-size: 13px;
+}
+.ab-hilfe-gruppen {
+  display: grid;
+  gap: 14px;
+}
+.ab-hilfe-gruppen h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 650;
+}
+/* rows of keys and what they do, as in the hint cards but on the page's colours */
+.ab-tasten {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr;
+  align-items: center;
+  gap: 6px 14px;
+  font-size: 13px;
+}
+.ab-tasten .ab-tipcard-keys {
+  justify-content: flex-end;
+  color: var(--ab-muted);
+}
+.ab-tasten .ab-tipcard-what {
+  color: var(--ab-text);
+}
+.ab-tasten kbd {
+  min-width: 20px;
+  padding: 1px 5px;
+  border: 1px solid var(--ab-line);
+  border-bottom-width: 2px;
+  border-radius: var(--ab-radius);
+  background: var(--ab-panel);
+  color: var(--ab-text);
+  font: 600 11.5px/16px var(--ab-font);
+  text-align: center;
+}
+.ab-tasten .ab-tipcard-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 19px;
+  border-radius: var(--ab-radius);
+  background: var(--ab-panel);
+  color: var(--ab-text);
+}
+.ab-tasten .ab-tipcard-plus {
+  opacity: 0.5;
+  font-size: 11px;
 }
 
 /* ================================================================== figure */

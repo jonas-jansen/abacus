@@ -4,6 +4,7 @@ import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, 
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
+import { localPoint } from './scale'
 import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
 import { useZoomPan } from './useZoomPan'
@@ -225,9 +226,9 @@ export function Figure<P extends Params>({
 
   const pointer = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!onProbe) return
-    const r = e.currentTarget.getBoundingClientRect()
-    const px = e.clientX - r.left - plot.x
-    const py = e.clientY - r.top - plot.y
+    const [lx, ly] = localPoint(e.currentTarget, e.clientX, e.clientY)
+    const px = lx - plot.x
+    const py = ly - plot.y
     const off = px < -6 || py < -6 || px > plot.w + 6 || py > plot.h + 6
     const t = handleState === 'drag' || off ? null : probeFromPointer(frame, spec, drawn, view, px, py)
     setSource(t !== null)
@@ -257,9 +258,9 @@ export function Figure<P extends Params>({
     const p = press.current
     press.current = null
     if (!p || !onBahn || Math.hypot(e.clientX - p.x, e.clientY - p.y) > 4) return
-    const r = e.currentTarget.getBoundingClientRect()
-    const px = e.clientX - r.left - plot.x
-    const py = e.clientY - r.top - plot.y
+    const [lx, ly] = localPoint(e.currentTarget, e.clientX, e.clientY)
+    const px = lx - plot.x
+    const py = ly - plot.y
     if (px < 0 || py < 0 || px > plot.w || py > plot.h) return
     onBahn([frame.xInvert(px), frame.yInvert(py)])
   }

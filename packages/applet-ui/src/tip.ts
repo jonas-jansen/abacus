@@ -38,6 +38,10 @@ function keys(mac: boolean): Record<string, string[]> {
     Shift: [mac ? '⇧' : 'Umschalt'],
     Alt: [mac ? '⌥' : 'Alt'],
     Leer: ['Leertaste'],
+    Esc: ['Esc'],
+    Plus: ['+'],
+    Minus: ['−'],
+    Null: ['0'],
     Redo: mac ? ['⇧', '⌘', 'Z'] : ['Strg', 'Y'],
   }
 }
@@ -145,6 +149,9 @@ export function installTips(): void {
     const src = el.dataset.tip
     if (!src || einstellung('hinweise') === 'aus' || !el.isConnected) return
     renderTip(src, card)
+    // in full screen only the full-screen element is drawn: the card goes in there
+    const host = document.fullscreenElement ?? document.body
+    if (card.parentElement !== host) host.append(card)
     card.hidden = false
     place(el)
     shownAt = [...last]

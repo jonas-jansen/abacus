@@ -17,7 +17,8 @@
     "@abacus/applet-core": "workspace:*",
     "@abacus/applet-plot": "workspace:*",
     "@abacus/channel": "workspace:*",
-    "katex": "0.16.47"
+    "katex": "0.16.47",
+    "qrcode-generator": "^2.0.4"
   },
   "peerDependencies": {
     "react": "^19.0.0"

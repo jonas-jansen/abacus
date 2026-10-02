@@ -7,6 +7,7 @@
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react'
 import type { Frame } from '@abacus/applet-core'
 import { allowed, floored, panned, pinched, zoomedAbout, type Win } from './zoom'
+import { localPoint, scaleOf } from './scale'
 
 export interface ZoomPan {
   /** Pointer down: true if a pan or pinch starts (then it is not a click). */
@@ -45,20 +46,20 @@ export function useZoomPan({
     const wheel = (e: WheelEvent) => {
       if (!e.ctrlKey && !e.metaKey) return
       e.preventDefault()
-      const r = node.getBoundingClientRect()
+      const [lx, ly] = localPoint(node, e.clientX, e.clientY)
       const k = Math.exp(Math.max(-0.5, Math.min(0.5, e.deltaY * 0.01)))
-      set(zoomedAbout(current(), frame.xInvert(e.clientX - r.left - plot.x), frame.yInvert(e.clientY - r.top - plot.y), k, k, yLog))
+      set(zoomedAbout(current(), frame.xInvert(lx - plot.x), frame.yInvert(ly - plot.y), k, k, yLog))
     }
     node.addEventListener('wheel', wheel, { passive: false })
     return () => node.removeEventListener('wheel', wheel)
   })
 
-  const pan = useRef<{ x: number; y: number; from: Win } | null>(null)
+  const pan = useRef<{ x: number; y: number; k: number; from: Win } | null>(null)
   const touches = useRef(new Map<number, { x: number; y: number }>())
   const pinch = useRef<{ d: number; cx: number; cy: number; from: Win } | null>(null)
   const local = (e: ReactPointerEvent<HTMLElement>, x: number, y: number) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    return [x - r.left - plot.x, y - r.top - plot.y] as const
+    const [lx, ly] = localPoint(e.currentTarget, x, y)
+    return [lx - plot.x, ly - plot.y] as const
   }
 
   return {
@@ -75,13 +76,13 @@ export function useZoomPan({
       if (!e.shiftKey) return false
       e.preventDefault() // Shift + press would otherwise select text on the page
       e.currentTarget.setPointerCapture(e.pointerId)
-      pan.current = { x: e.clientX, y: e.clientY, from: current() }
+      pan.current = { x: e.clientX, y: e.clientY, k: scaleOf(e.currentTarget), from: current() }
       return true
     },
     move(e) {
       if (pan.current) {
         const p = pan.current
-        set(panned(p.from, e.clientX - p.x, e.clientY - p.y, plot.w, plot.h, yLog), false)
+        set(panned(p.from, (e.clientX - p.x) / p.k, (e.clientY - p.y) / p.k, plot.w, plot.h, yLog), false)
         return true
       }
       if (e.pointerType !== 'touch' || !touches.current.has(e.pointerId)) return false

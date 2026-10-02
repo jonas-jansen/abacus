@@ -3,6 +3,7 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from 'react'
 import { type Frame, type Params, type Point } from '@abacus/applet-core'
 import { type DragHandle } from './define'
+import { localPoint } from './scale'
 
 /** Where a drag handle sits, in figure coordinates; null when it cannot be placed. */
 export function handlePosition(drag: DragHandle<any>, frame: Frame, params: Params): [number, number] | null {
@@ -52,8 +53,7 @@ export function Handle({
   const { plot } = frame
   const grab = useRef<[number, number]>([0, 0])
   const pointer = (e: ReactPointerEvent<SVGGElement>): [number, number] => {
-    const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect()
-    return [e.clientX - rect.left, e.clientY - rect.top]
+    return localPoint(e.currentTarget.ownerSVGElement as SVGSVGElement, e.clientX, e.clientY)
   }
   const move = (e: ReactPointerEvent<SVGGElement>) => {
     if (!e.currentTarget.hasPointerCapture(e.pointerId)) return

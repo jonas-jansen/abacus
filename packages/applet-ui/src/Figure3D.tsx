@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import type { Run } from '@abacus/applet-core'
 import { DEFAULT_VIEW, scene3d, sceneSvg, type PlotSpec, type Stroke, type View3D } from '@abacus/applet-plot'
 import { renderSvg } from './svgReact'
+import { localPoint } from './scale'
 import { TeX } from './TeX'
 
 const SSR_WIDTH = 520
@@ -119,8 +120,7 @@ export function Figure3D({
   }, [hydrated, scene, size, h])
 
   const local = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    return [e.clientX - r.left, e.clientY - r.top] as const
+    return localPoint(e.currentTarget, e.clientX, e.clientY)
   }
   // Near the marker (its dot or its foot): the pointer moves the point, not the view.
   const nearMarker = (px: number, py: number) => {
