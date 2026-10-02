@@ -380,7 +380,8 @@ export function Figure<P extends Params>({
         <FigureActions
           zoomReset={zoom ? () => setZoom(null) : undefined}
           bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
-          style={{ top: plot.y + 6, right: figW - plot.x - plot.w + 6 }}
+          // above the plot's right edge, in the row of the y label
+          style={{ top: Math.max(0, plot.y - 27), right: figW - plot.x - plot.w }}
         />
       </div>
       <FigureLegend

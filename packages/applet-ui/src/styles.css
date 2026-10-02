@@ -195,8 +195,8 @@
 @container (min-width: 600px) {
   .ab-figures[data-count='2'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    /* aligned at the bottom: the x axes stay level even if one head row wraps */
-    align-items: end;
+    /* equally high cards; inside, the plots sit at the bottom, so the x axes stay level */
+    align-items: stretch;
   }
   .ab-controls {
     display: grid !important;
@@ -388,13 +388,29 @@
   display: flex;
   gap: 6px;
 }
-.ab-pill-small {
+.ab-figaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   height: 24px;
-  padding: 0 9px;
-  font-size: 12px;
-  background: color-mix(in srgb, var(--ab-bg) 88%, transparent);
-  box-shadow: 0 0 0 1px var(--ab-line), 0 2px 6px rgb(16 24 40 / 0.08);
-  backdrop-filter: blur(4px);
+  min-width: 24px;
+  padding: 0 5px;
+  border: 1px solid var(--ab-line);
+  border-radius: 999px;
+  background: var(--ab-bg);
+  color: var(--ab-muted);
+  cursor: pointer;
+  justify-content: center;
+}
+.ab-figaction:hover {
+  color: var(--ab-accent);
+  border-color: color-mix(in srgb, var(--ab-accent) 40%, var(--ab-line));
+  background: var(--ab-accent-soft);
+}
+.ab-figaction-n {
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 .ab-tool[aria-pressed='true'] {
   background: var(--ab-accent-soft);

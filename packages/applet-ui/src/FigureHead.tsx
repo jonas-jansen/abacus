@@ -164,7 +164,11 @@ export function FigureLegend({
   )
 }
 
-/** Actions that belong to one plot and only exist sometimes: shown in the plot's corner. */
+/**
+ * Actions that belong to one plot and only exist sometimes – back to the whole picture,
+ * delete added trajectories – as small icons above the plot's right edge, in the row of the
+ * axis label: outside the data, and only there when they apply.
+ */
 export function FigureActions({
   zoomReset,
   bahnen,
@@ -177,14 +181,31 @@ export function FigureActions({
   if (!zoomReset && !(bahnen && bahnen.n > 0)) return null
   return (
     <div className="ab-figactions" style={style}>
-      {zoomReset && (
-        <button type="button" className="ab-pill ab-pill-small" onClick={zoomReset} data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}>
-          ganzes Bild
+      {bahnen && bahnen.n > 0 && (
+        <button
+          type="button"
+          className="ab-figaction"
+          onClick={bahnen.loeschen}
+          data-tip={bahnen.n === 1 ? 'die zusätzliche Bahn löschen' : `die ${bahnen.n} zusätzlichen Bahnen löschen`}
+          aria-label="zusätzliche Bahnen löschen"
+        >
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+            <path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="ab-figaction-n">{bahnen.n}</span>
         </button>
       )}
-      {bahnen && bahnen.n > 0 && (
-        <button type="button" className="ab-pill ab-pill-small" onClick={bahnen.loeschen} data-tip="die zusätzlichen Bahnen entfernen">
-          {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
+      {zoomReset && (
+        <button
+          type="button"
+          className="ab-figaction"
+          onClick={zoomReset}
+          data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}
+          aria-label="zurück zum ganzen Bild"
+        >
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+            <path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       )}
     </div>
