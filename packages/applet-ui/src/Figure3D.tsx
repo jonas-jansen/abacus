@@ -3,11 +3,12 @@ import type { Run } from '@abacus/applet-core'
 import { DEFAULT_VIEW, scene3d, sceneSvg, type PlotSpec, type Stroke, type View3D } from '@abacus/applet-plot'
 import { renderSvg } from './svgReact'
 import { cssColor, useFarbwechsel } from './cssColor'
-import { localPoint } from './scale'
+import { localPoint, scaleOf } from './scale'
 import { TeX } from './TeX'
 
 const SSR_WIDTH = 520
-const MAX = 560
+/** The surface fills its box, but takes no more than this share of the screen's height. */
+const SCREEN_SHARE = 0.68
 
 export type Spec3D = Extract<PlotSpec, { type: 'surface3d' }>
 
@@ -30,6 +31,7 @@ export function Figure3D({
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(SSR_WIDTH)
+  const [maxH, setMaxH] = useState(Math.round(SSR_WIDTH * 0.86))
   const [hydrated, setHydrated] = useState(false)
   const farbwechsel = useFarbwechsel()
   const [view, setView] = useState<View3D>(DEFAULT_VIEW)
@@ -41,15 +43,21 @@ export function Figure3D({
     setHydrated(true)
     const el = outer.current
     if (!el) return
+    const measure = () => setMaxH(Math.max(240, Math.round((window.innerHeight / scaleOf(el)) * SCREEN_SHARE)))
     const ro = new ResizeObserver(([e]) => {
       const w = Math.round(e.contentRect.width)
       if (w > 0) setWidth(w)
+      measure()
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
-  const size = Math.min(width, MAX)
+  const size = Math.min(width, Math.round(maxH / 0.86))
   const h = Math.round(size * 0.86)
   const grid = run.grids?.find((g) => g.id === spec.grid)
   const scene = useMemo(

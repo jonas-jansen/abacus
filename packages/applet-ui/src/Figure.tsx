@@ -5,7 +5,7 @@ import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
 import { cssColor, useFarbwechsel } from './cssColor'
-import { localPoint } from './scale'
+import { localPoint, scaleOf } from './scale'
 import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
 import { useZoomPan } from './useZoomPan'
@@ -17,8 +17,10 @@ const ZOOM_TIP = '{Mod} + {Rad} | zoomen\n{Finger} | zoomen mit zwei Fingern\n{S
 /** Width assumed for the server render; the client re-lays out after measuring. */
 const SSR_WIDTH = 640
 const MIN_HEIGHT = 240
-const MAX_SQUARE = 520
-const MAX_HEIGHT = 520
+/** Height before the screen is known (server render), and the share of the screen's height a plot may take. */
+const SSR_HEIGHT = 520
+const SCREEN_SHARE = 0.68
+const MAX_HEIGHT = 1100
 const MAX_DPR = 2
 
 interface FigureProps<P extends Params> {
@@ -92,28 +94,37 @@ export function Figure<P extends Params>({
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(SSR_WIDTH)
+  // how high a plot may be: a share of the screen, in the applet's own pixels (lecture mode scales)
+  const [maxH, setMaxH] = useState(SSR_HEIGHT)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
     setHydrated(true)
     const el = outer.current
     if (!el) return
+    const measure = () => setMaxH(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round((window.innerHeight / scaleOf(el)) * SCREEN_SHARE))))
     const ro = new ResizeObserver(([e]) => {
       const w = Math.round(e.contentRect.width)
       if (w > 0) setWidth(w)
+      measure()
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
   const farbwechsel = useFarbwechsel()
   const [logY, setLogY] = useState(entry.yScale === 'log')
   const spec = useMemo(() => ({ ...resolveSpec(entry, params), yScale: logY ? 'log' : 'linear' }) as PlotSpec, [entry, params, logY])
   const square = isSquare(spec)
-  const figW = square ? Math.min(width, MAX_SQUARE) : width
-  // side by side, every figure is as high as it is wide, so both x axes sit at one height
+  // Every plot fills its box's width. Side by side, every figure is as high as it is wide, so
+  // both x axes sit at one height; no plot is higher than a good part of the screen.
+  const figW = width
   const aspect = spec.aspect ?? (square || pair ? 1 : width < 640 ? 4 / 3 : 16 / 10)
-  const figH = Math.min(square ? MAX_SQUARE : MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(figW / aspect)))
+  const figH = Math.min(maxH, Math.max(MIN_HEIGHT, Math.round(figW / aspect)))
 
   // While a handle is dragged the axes hold still: an axis that rescales under the pointer
   // would make the handle run away. They catch up when the handle is let go.
@@ -129,7 +140,21 @@ export function Figure<P extends Params>({
     const id = window.setTimeout(() => setSettled(zoom), 120)
     return () => window.clearTimeout(id)
   }, [zoom])
-  const full = useMemo(() => plotDomains(spec, run), [spec, run])
+  // A square plot (phase plane, complex plane, cobweb) in a wider box: rather than stretch it,
+  // show more of the x axis, so a unit is as long as in the square and circles stay round.
+  // A range that starts at 0 (a quantity never negative) grows to the right only.
+  const full = useMemo(() => {
+    const d = plotDomains(spec, run)
+    if (!square || figW <= figH + 1) return d
+    const opts = { x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' }
+    const sq = makeFrame({ ...opts, width: figH, height: figH }).plot
+    const now = makeFrame({ ...opts, width: figW, height: figH }).plot
+    const k = now.w / now.h / (sq.w / sq.h)
+    if (!(k > 1.001)) return d
+    const span = (d.x[1] - d.x[0]) * k
+    const x: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
+    return { ...d, x }
+  }, [spec, run, square, figW, figH])
   const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null
@@ -146,11 +171,11 @@ export function Figure<P extends Params>({
   const ghost = vergleich ? (ghostRun ?? vergleich.run) : null
 
   const frame = useMemo(() => {
-    const auto = dragging && frozen.current ? frozen.current : plotDomains(spec, run)
+    const auto = dragging && frozen.current ? frozen.current : full
     const d = zoom ? { ...auto, x: zoom.x, y: zoom.y } : auto
     if (!dragging) frozen.current = d
     return makeFrame({ width: figW, height: figH, x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' })
-  }, [spec, run, figW, figH, dragging, zoom])
+  }, [spec, full, figW, figH, dragging, zoom])
 
   // Canvas data layer, redrawn on the next animation frame.
   useEffect(() => {
