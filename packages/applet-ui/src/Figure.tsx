@@ -221,8 +221,8 @@ export function Figure<P extends Params>({
   const aktionenBreite = nAktionen * 24 + Math.max(0, nAktionen - 1) * 6 + (bahnen?.length ? 12 : 0)
   const xLabelMitte = plot.x + plot.w + AXIS_OVERHANG + 2 + labelWidth(spec.xLabel ?? '', frame.fontSize) / 2
   const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
-  // the switch moves left if the actions would reach it
-  const switchRechts = Math.max(figW - plot.x - plot.w, nAktionen ? figW - aktionenLinks + 8 : 0)
+  // the switch never moves: the actions stand over the x label, right of the plot's edge
+  const switchRechts = figW - plot.x - plot.w
 
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
 

@@ -295,10 +295,8 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
         </div>
 
         <aside className="ab-panel">
-          <div className="ab-panel-section">
-            <div className="ab-section-head">
-              <h3>Parameter</h3>
-              <span className="ab-head-tools">
+          {/* tools for the whole applet: history, then compare, link, reset */}
+          <div className="ab-toolbar" role="toolbar" aria-label="Werkzeuge">
                 <span className="ab-undo" role="group" aria-label="Verlauf">
                   <button type="button" className="ab-tool" onClick={history.undo} disabled={!history.canUndo} data-tip="{Mod} + {Z} | rückgängig" aria-label="rückgängig">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -332,9 +330,10 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                     </svg>
                   </button>
                 </span>
-              </span>
-            </div>
-            {def.szenarien && def.szenarien.length > 0 && (
+          </div>
+          {def.szenarien && def.szenarien.length > 0 && (
+            <div className="ab-panel-section">
+              <h3 className="ab-section-title">Szenarien</h3>
               <div className="ab-szenarien" role="group" aria-label="Szenarien">
                 {def.szenarien.map((s) => {
                   const target: Record<string, unknown> = { ...defaultParams(def.model), ...s.params }
@@ -346,7 +345,10 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                   )
                 })}
               </div>
-            )}
+                        </div>
+          )}
+          <div className="ab-panel-section">
+            <h3 className="ab-section-title">Parameter</h3>
             <div className="ab-controls">{primary.map(control)}</div>
             {more.length > 0 && (
               <details className="ab-more">
@@ -358,9 +360,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
           </div>
           {run && !locked && def.anzeige && def.anzeige.length > 0 && (
             <div className="ab-panel-section">
-              <div className="ab-section-head">
-                <h3>Messwerte</h3>
-              </div>
+              <h3 className="ab-section-title">Messwerte</h3>
               <dl className="ab-stats" onPointerLeave={() => setHover(null)}>
                 {def.anzeige.map((id) => {
                   const o = run.observables[id]
