@@ -1,0 +1,23 @@
+---
+// One weekly quiz. The rules (window, attempts, solutions) are applied in the browser.
+import { fensterText, regelnText, renderMathText } from '@abacus/quiz'
+import { wochenquizze } from '@abacus/quizzes'
+import { WochenquizIsland } from '../../islands'
+import Seite from '../../layouts/Seite.astro'
+import { scope, url } from '../../config'
+
+export function getStaticPaths() {
+  return wochenquizze.map((w) => ({ params: { id: w.id }, props: { w } }))
+}
+const { w } = Astro.props
+---
+<Seite titel={w.titel} kurz={w.beschreibung} aktiv="quiz" breite="schmal">
+  <p class="eyebrow"><a href={url('/quiz')}>Quizze</a>{w.woche !== undefined && <> · Woche {w.woche}</>}</p>
+  <h1>{w.titel}</h1>
+  {w.beschreibung && <p class="lead" set:html={renderMathText(w.beschreibung)} />}
+  <p class="quiz-meta">
+    {fensterText(w) && <span>{fensterText(w)}</span>}
+    <span>{w.fragen.length} Fragen · {regelnText(w)}</span>
+  </p>
+  <WochenquizIsland client:load id={w.id} scope={scope} />
+</Seite>

@@ -42,21 +42,16 @@ use `###` for headings inside a section.
 **Links that set the applet:** `[a = 3,2](#logistic-cobweb.a=3.2)` sets `a` and keeps the
 rest; several values with `&`, each with the applet's id: `#sir.beta=0.3&sir.gamma=0.1`. A point is `x~y`.
 
-## Quizzes
+## Quizzes on course pages
 
-Quizzes live in `packages/quizzes/src/*.ts` as `defineQuiz({...})` and are usable on any
-page. Their text takes `$math$` and `**bold**`.
+Questions live in `packages/quizzes/src/*.ts` as `defineQuiz({...})` and are placed with
+`<Quiz id="…" />`. All types work here ([quizzes.md](quizzes.md#question-types)); those that
+read the page's applet (`finde` with `applet`, `erzeuge`) only make sense next to it. Each
+is checked when the student presses "Prüfen", with hints (`tipps`) and the solution after the
+first attempt. The **id is permanent**: the notebook stores answers under it; bump `version`
+when a question changes meaning.
 
-| `typ` | The student | Checked by |
-|---|---|---|
-| `vorhersage` | commits a prediction before looking (choices or free text) | nothing: recorded, typically `schaltetFrei` |
-| `finde` | types a value (`groesse`, `einheit`, `toleranz`) | `ziel` (shorthand), or a `pruefer` |
-| `erzeuge` | sets the applet until a condition holds | `pruefer` on the live state of `applet` |
-| `antwort` | writes an answer | nothing: recorded, the `loesung` shows after |
-
-All take `tipps` (a ladder of hints), `loesung` (shown after an attempt) and `version`. Bump
-the version when a question changes meaning, so old answers are not mixed in. The **id is
-permanent**: the notebook stores answers under it.
+Weekly quizzes on the lecture are a separate part of the site: [quizzes.md](quizzes.md#weekly-quizzes).
 
 ### Checkers (`@abacus/applet-core`)
 

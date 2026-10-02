@@ -11,7 +11,7 @@ interface Props {
   kurz?: string
   /** Page width: 'breit' for applet and course pages, 'schmal' for text pages. */
   breite?: 'breit' | 'schmal'
-  aktiv?: 'applets' | 'kurs' | 'notizbuch'
+  aktiv?: 'start' | 'applets' | 'kurs' | 'quiz' | 'notizbuch'
   /** Reachable by its address, but not listed: kept out of search engines too. */
   ungelistet?: boolean
 }
@@ -37,8 +37,9 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
           {kurs.titel}
         </a>
         <nav>
-          <a href={url('/')} aria-current={aktiv === 'applets' ? 'page' : undefined}>Applets</a>
-          <a href={url('/#kurs')} aria-current={aktiv === 'kurs' ? 'page' : undefined}>Kurs</a>
+          <a href={url('/applets')} aria-current={aktiv === 'applets' ? 'page' : undefined}>Applets</a>
+          <a href={url('/kurs')} aria-current={aktiv === 'kurs' ? 'page' : undefined}>Kurs</a>
+          <a href={url('/quiz')} aria-current={aktiv === 'quiz' ? 'page' : undefined}>Quizze</a>
           <a href={url('/notizbuch')} aria-current={aktiv === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
         </nav>
         <button class="settings-btn" type="button" popovertarget="einstellungen" aria-label="Einstellungen">

@@ -9,8 +9,8 @@ packages/
   applet-ui     React: the applet (formulas, plots, panel, timeline, tools)
   applets       the applet definitions + applets.json (the catalog)            (data, no React)
   channel       messages between containers                                    (no dependencies)
-  quiz          React: quiz types, checker display, the notebook
-  quizzes       the quiz definitions                                           (data, no React)
+  quiz          React: question types, grading (bewertung.ts, pure), weekly quizzes, the notebook
+  quizzes       the questions and weekly quizzes (wochen/)                     (data, no React)
 site/           Astro: pages, course pages (MDX), layout, themes
 ```
 

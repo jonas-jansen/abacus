@@ -94,7 +94,7 @@ export function NotebookOverview() {
           <p className="qz-history">
             {e.eingaben.map((x, i) => (
               <span key={i} data-status={x.status}>
-                {typeof x.wert === 'number' ? formatNumber(x.wert, 8) : typeof x.wert === 'string' ? x.wert : 'Einstellung'}
+                {x.anzeige ? <Mathe text={x.anzeige} /> : typeof x.wert === 'number' ? formatNumber(x.wert, 8) : typeof x.wert === 'string' ? x.wert : 'Einstellung'}
               </span>
             ))}
           </p>

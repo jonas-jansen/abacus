@@ -16,3 +16,4 @@ export function getQuiz(id: string): QuizDef {
   if (!q) throw new Error(`Unbekanntes Quiz "${id}".`)
   return q
 }
+export { wochenquizze, getWochenquiz } from './wochen'

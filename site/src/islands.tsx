@@ -3,8 +3,8 @@
 
 import { getApplet } from '@abacus/applets'
 import { AppletView } from '@abacus/applet-ui'
-import { QuizView, type NotebookScope } from '@abacus/quiz'
-import { getQuiz } from '@abacus/quizzes'
+import { QuizView, WochenquizStatus, WochenquizView, type NotebookScope } from '@abacus/quiz'
+import { getQuiz, getWochenquiz } from '@abacus/quizzes'
 
 export function AppletIsland(props: { id: string; zustand?: Record<string, unknown>; gesperrt?: boolean; kopf?: boolean; vollbildHref?: string }) {
   return <AppletView def={getApplet(props.id)} {...props} />
@@ -12,4 +12,12 @@ export function AppletIsland(props: { id: string; zustand?: Record<string, unkno
 
 export function QuizIsland({ id, ...rest }: { id: string; scope: NotebookScope; nr?: string | number; stern?: boolean; schaltetFrei?: string }) {
   return <QuizView def={getQuiz(id)} {...rest} />
+}
+
+export function WochenquizIsland({ id, scope }: { id: string; scope: NotebookScope }) {
+  return <WochenquizView def={getWochenquiz(id)} scope={scope} />
+}
+
+export function WochenquizStatusIsland({ id, scope }: { id: string; scope: NotebookScope }) {
+  return <WochenquizStatus def={getWochenquiz(id)} scope={scope} />
 }

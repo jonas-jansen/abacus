@@ -1,0 +1,70 @@
+---
+import { kapitel } from '@abacus/applets'
+import Seite from '../layouts/Seite.astro'
+import { url } from '../config'
+import { previewSvg } from '../preview'
+
+// listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
+const kapitelListe = kapitel({ alle: import.meta.env.DEV })
+---
+<Seite titel="Applets" aktiv="applets">
+  <h1>Applets</h1>
+  <p class="lead">Zum Ausprobieren: jedes Modell der Vorlesung zum Anfassen, nach Kapiteln geordnet.</p>
+  <div class="gallery-search">
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+      <path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+    </svg>
+    <input id="applet-suche" type="search" placeholder="Applet suchen, z. B. Fixpunkt, Euler, Räuber …" aria-label="Applets durchsuchen" autocomplete="off" />
+  </div>
+  <p id="keine-treffer" class="muted" hidden>Kein Applet passt dazu.</p>
+  <nav class="chapter-nav" aria-label="Kapitel">
+    {kapitelListe.map((k) => <a href={`#kapitel-${k.id}`}>{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</a>)}
+  </nav>
+  {
+    kapitelListe.map((k) => (
+      <section class="chapter" id={`kapitel-${k.id}`}>
+        <h3 class="chapter-title">
+          <span class="chapter-no">{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</span>
+          {k.titel}
+        </h3>
+        <div class="gallery">
+          {k.applets.map((a) => (
+            <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.titel} ${a.kurz} ${k.titel} Kapitel ${k.id} ${a.id}`}>
+              <div class="card-preview" set:html={previewSvg(a)} />
+              <div class="card-body">
+                {a.sichtbar === false && <span class="nicht-gelistet">nicht gelistet</span>}
+                <strong>{a.titel}</strong>
+                <span>{a.kurz}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+
+  <script>
+    // Filter the gallery as you type: every word must occur (umlauts and case ignored).
+    const norm = (s: string) =>
+      s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
+    const input = document.getElementById('applet-suche') as HTMLInputElement | null
+    const none = document.getElementById('keine-treffer')
+    input?.addEventListener('input', () => {
+      const words = norm(input.value).split(/\s+/).filter(Boolean)
+      let shown = 0
+      document.querySelectorAll<HTMLElement>('.chapter').forEach((ch) => {
+        let inChapter = 0
+        ch.querySelectorAll<HTMLElement>('.card').forEach((card) => {
+          const text = norm(card.dataset.suche ?? '')
+          const hit = words.every((w) => text.includes(w))
+          card.hidden = !hit
+          if (hit) inChapter++
+        })
+        ch.hidden = inChapter === 0
+        shown += inChapter
+      })
+      if (none) none.hidden = shown > 0
+    })
+  </script>
+</Seite>

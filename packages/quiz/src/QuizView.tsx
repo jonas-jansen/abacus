@@ -7,6 +7,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { formatNumber, parseNumber, type Diagnose, type Observables } from '@abacus/applet-core'
 import { publish, subscribe, type Messages } from '@abacus/channel'
+import { Antwortfeld } from './Antwortfeld'
+import { antwortText, beantwortet, bewerte, PRUEFBAR, richtigeAntwort } from './bewertung'
 import type { QuizDef } from './define'
 import { Mathe } from './Mathe'
 import { notebook, notebookKey, useNotebookEntry, type Eingabe, type NotebookScope } from './notebook'
@@ -22,11 +24,15 @@ export interface QuizViewProps {
   schaltetFrei?: string
 }
 
-const TYP_LABEL: Record<QuizDef['typ'], string> = {
+export const TYP_LABEL: Record<QuizDef['typ'], string> = {
   vorhersage: 'Vorhersage',
   finde: 'Finden',
   erzeuge: 'Einstellen',
   antwort: 'Begründen',
+  einfach: 'Auswahl',
+  mehrfach: 'Mehrfachauswahl',
+  zuordnung: 'Zuordnen',
+  zahl: 'Rechnen',
 }
 
 const STATUS_TEXT: Record<Diagnose['status'], string> = {
@@ -66,7 +72,7 @@ export function QuizView({ def, scope, nr, stern, schaltetFrei }: QuizViewProps)
   }, [entry, def.id, schaltetFrei])
 
   const commit = (wert: unknown, d: Diagnose) => {
-    notebook().record(key, { typ: def.typ, v: def.version ?? 1, frage: def.frage }, { wert, ts: Date.now(), status: d.status })
+    notebook().record(key, { typ: def.typ, v: def.version ?? 1, frage: def.frage }, { wert, ts: Date.now(), status: d.status, anzeige: antwortText(def, wert) })
     setDiagnose(d)
   }
 
@@ -125,8 +131,20 @@ export function QuizView({ def, scope, nr, stern, schaltetFrei }: QuizViewProps)
       )}
 
       {def.typ === 'antwort' && <Antwort last={eingaben.at(-1)} onSave={(t) => commit(t, { status: 'gespeichert' })} />}
+      {def.typ === 'antwort' && tried && (def.musterloesung || def.kriterien) && <Muster def={def} />}
 
-      {diagnose && def.typ !== 'vorhersage' && <DiagnoseView d={diagnose} richtung={def.typ === 'finde'} />}
+      {PRUEFBAR.has(def.typ) && (
+        <Pruefen
+          def={def}
+          seed={def.id}
+          onCheck={(wert) => {
+            const b = bewerte(def, wert)
+            commit(wert, { status: b.status, hinweis: b.hinweis, richtung: b.richtung })
+          }}
+        />
+      )}
+
+      {diagnose && def.typ !== 'vorhersage' && <DiagnoseView d={diagnose} richtung={def.typ === 'finde' || def.typ === 'zahl'} />}
 
       {def.typ === 'finde' && eingaben.length > 1 && (
         <p className="qz-history">
@@ -140,11 +158,11 @@ export function QuizView({ def, scope, nr, stern, schaltetFrei }: QuizViewProps)
       )}
 
       {def.tipps && def.tipps.length > 0 && <Tipps tipps={def.tipps} />}
-      {def.loesung &&
+      {(def.loesung ?? richtigeAntwort(def)) &&
         (tried ? (
           <details className="qz-loesung">
             <summary>Lösung</summary>
-            <Mathe text={def.loesung} />
+            <Mathe text={def.loesung ?? richtigeAntwort(def)!} />
           </details>
         ) : (
           <p className="qz-muted qz-small">Die Lösung erscheint nach Ihrem ersten Versuch.</p>
@@ -271,5 +289,48 @@ function Tipps({ tipps }: { tipps: readonly string[] }) {
         </button>
       )}
     </div>
+  )
+}
+
+/** A question the computer checks at once: the field and a "Prüfen" button. */
+function Pruefen({ def, seed, onCheck }: { def: QuizDef; seed: string; onCheck: (wert: unknown) => void }) {
+  const [wert, setWert] = useState<unknown>(undefined)
+  return (
+    <form
+      className="qz-pruefen"
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (beantwortet(def, wert)) onCheck(wert)
+      }}
+    >
+      <Antwortfeld def={def} wert={wert} onWert={setWert} seed={seed} />
+      <div className="qz-actions">
+        <button type="submit" className="qz-btn qz-primary" disabled={!beantwortet(def, wert)}>
+          Prüfen
+        </button>
+      </div>
+    </form>
+  )
+}
+
+/** The model answer and what a good answer contains, after an open answer is saved. */
+export function Muster({ def }: { def: Extract<QuizDef, { typ: 'antwort' }> }) {
+  return (
+    <details className="qz-loesung qz-muster" open>
+      <summary>Zum Vergleich</summary>
+      {def.musterloesung && <Mathe text={def.musterloesung} />}
+      {def.kriterien && def.kriterien.length > 0 && (
+        <>
+          <p className="qz-muted qz-small">Eine gute Antwort enthält:</p>
+          <ul className="qz-kriterien">
+            {def.kriterien.map((k, i) => (
+              <li key={i}>
+                <Mathe text={k} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </details>
   )
 }

@@ -239,3 +239,41 @@ describe('comfort', () => {
     expect(a.textContent).not.toContain('festgehalten')
   })
 })
+
+describe('weekly quizzes', () => {
+  it('are taken, submitted and kept as attempts; the course quizzes and weekly quizzes stay apart', async () => {
+    const { getWochenquiz } = await import('@abacus/quizzes')
+    const { WochenquizView, wochenquizKey } = await import('@abacus/quiz')
+    const w = getWochenquiz('woche-01')
+    notebook().clear()
+    const host = mount(<WochenquizView def={w} scope={scope} />)
+    const button = (text: string) => [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(text))!
+    act(() => button('Quiz starten').click())
+    expect(host.querySelectorAll('.wq-frage')).toHaveLength(w.fragen.length)
+
+    // the single choice question: pick the right option by its TeX source (options are shuffled)
+    const label = [...host.querySelectorAll('.wq-frage')[0].querySelectorAll('label')].find((l) => l.textContent?.includes('1{,}05\\,x_n'))!
+    act(() => label.querySelector('input')!.click())
+    // submit with open questions: asks first, then submits
+    act(() => button('Abgeben').click())
+    act(() => button('Ja, abgeben').click())
+
+    const entry = notebook().get(wochenquizKey(scope, 'woche-01'))!
+    expect(entry.typ).toBe('wochenquiz')
+    expect(entry.eingaben).toHaveLength(1)
+    expect(entry.eingaben[0].anzeige).toBe('Versuch 1: 1 von 4 Punkten')
+    expect(host.textContent).toContain('Neuer Versuch')
+
+    // a second attempt is a new entry in the same list
+    act(() => button('Neuer Versuch').click())
+    act(() => button('Abgeben').click())
+    act(() => button('Ja, abgeben').click())
+    expect(notebook().get(wochenquizKey(scope, 'woche-01'))!.eingaben).toHaveLength(2)
+  })
+
+  it('every weekly quiz loads, and only holds questions it can show without an applet', async () => {
+    const { wochenquizze } = await import('@abacus/quizzes')
+    expect(wochenquizze.length).toBeGreaterThan(0)
+    for (const w of wochenquizze) for (const f of w.fragen) expect(f.typ).not.toBe('erzeuge')
+  })
+})

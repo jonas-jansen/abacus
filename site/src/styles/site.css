@@ -786,3 +786,100 @@ details.box[open] > summary::after {
 .card {
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 30px -18px rgb(16 24 40 / 0.2);
 }
+
+/* ------------------------------------------------------------------ start page */
+
+.start-kopf {
+  margin: 8px 0 24px;
+}
+.start-kopf h1 {
+  margin-bottom: 6px;
+}
+/* the four areas as large cards: two by two, one column on phones */
+.bereiche {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 16px;
+  max-width: 960px;
+}
+.bereich {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 4px 14px;
+  padding: 20px 22px;
+  border: 1px solid var(--ab-line);
+  border-radius: var(--ab-radius);
+  background: var(--ab-bg);
+  box-shadow: var(--ab-shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.bereich:hover {
+  border-color: var(--ab-accent);
+  transform: translateY(-1px);
+}
+.bereich-icon {
+  grid-row: span 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ab-radius);
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+}
+.bereich strong {
+  font-size: 1.15rem;
+}
+.bereich > span:not(.bereich-icon):not(.bereich-detail) {
+  color: var(--ab-muted);
+}
+.bereich-detail {
+  margin-top: 6px;
+  color: var(--ab-faint);
+  font-size: 0.85rem;
+}
+.bereich-detail[data-aktuell] {
+  color: var(--ab-accent);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ quizzes */
+
+.quiz-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.quiz-list a {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 2px 12px;
+  padding: 14px 16px;
+  background: var(--ab-bg);
+  border: 1px solid var(--ab-line);
+  border-radius: var(--ab-radius);
+  color: inherit;
+  text-decoration: none;
+}
+.quiz-list a:hover {
+  border-color: var(--ab-accent);
+}
+.quiz-list .course-week {
+  grid-row: span 4;
+}
+.quiz-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  color: var(--ab-faint);
+  font-size: 0.82rem;
+}
+.quiz-list astro-island {
+  display: block;
+  margin-top: 6px;
+}

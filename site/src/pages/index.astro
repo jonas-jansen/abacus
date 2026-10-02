@@ -1,90 +1,75 @@
 ---
+// The start page: the four areas of the site. Which quiz is open now is decided in the
+// browser (the page is static and knows no time).
 import { getCollection } from 'astro:content'
 import { kapitel } from '@abacus/applets'
+import { wochenquizze } from '@abacus/quizzes'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
-import { previewSvg } from '../preview'
 
-// listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
-const kapitelListe = kapitel({ alle: import.meta.env.DEV })
-
-const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort(
-  (a, b) => a.data.woche - b.data.woche || a.data.titel.localeCompare(b.data.titel, 'de'),
-)
+const anzahlApplets = kapitel({ alle: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
+const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort((a, b) => a.data.woche - b.data.woche)
+const quizze = wochenquizze.map((w) => ({ id: w.id, titel: w.titel, woche: w.woche, ab: w.ab ?? '', bis: w.bis ?? '' }))
 ---
-<Seite titel="Übersicht" aktiv="applets">
-  <h1>{kurs.titel}</h1>
+<Seite titel="Start" aktiv="start">
+  <header class="start-kopf">
+    <h1>{kurs.titel}</h1>
+    <p class="lead">Modelle aus der Biologie zum Anfassen, geführte Kursseiten und Quizze zur Vorlesung.</p>
+  </header>
 
-  <h2 class="section-title">Applets</h2>
-  <div class="gallery-search">
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-      <path d="m10.5 10.5 3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-    </svg>
-    <input id="applet-suche" type="search" placeholder="Applet suchen, z. B. Fixpunkt, Euler, Räuber …" aria-label="Applets durchsuchen" autocomplete="off" />
+  <div class="bereiche">
+    <a class="bereich" href={url('/applets')}>
+      <span class="bereich-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c3-12 6-12 9 0s6 0 9-14" /></svg>
+      </span>
+      <strong>Applets</strong>
+      <span>Jedes Modell der Vorlesung zum Ausprobieren: Parameter ziehen, zoomen, vergleichen.</span>
+      <span class="bereich-detail">{anzahlApplets} Applets in vier Kapiteln</span>
+    </a>
+
+    <a class="bereich" href={url('/kurs')}>
+      <span class="bereich-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" /></svg>
+      </span>
+      <strong>Kurs</strong>
+      <span>Geführte Seiten: eine Frage, mit Papier und Applet, und kleine Aufgaben zum Verstehen.</span>
+      <span class="bereich-detail">{seiten.length} Seiten{seiten.length ? `, zuletzt: ${seiten.at(-1)!.data.titel}` : ''}</span>
+    </a>
+
+    <a class="bereich" href={url('/quiz')} id="bereich-quiz">
+      <span class="bereich-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8" /><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></svg>
+      </span>
+      <strong>Quizze</strong>
+      <span>Kurze Quizze zu jeder Woche der Vorlesung, mit Lösungen und mehreren Versuchen.</span>
+      <span class="bereich-detail" id="quiz-aktuell">{wochenquizze.length} Quizze</span>
+    </a>
+
+    <a class="bereich" href={url('/notizbuch')}>
+      <span class="bereich-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" /></svg>
+      </span>
+      <strong>Notizbuch</strong>
+      <span>Alle Ihre Antworten und Versuche, nur auf diesem Gerät, zum Exportieren.</span>
+      <span class="bereich-detail">Antworten, Vorhersagen, Quizversuche</span>
+    </a>
   </div>
-  <p id="keine-treffer" class="muted" hidden>Kein Applet passt dazu.</p>
-  <nav class="chapter-nav" aria-label="Kapitel">
-    {kapitelListe.map((k) => <a href={`#kapitel-${k.id}`}>{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</a>)}
-  </nav>
-  {
-    kapitelListe.map((k) => (
-      <section class="chapter" id={`kapitel-${k.id}`}>
-        <h3 class="chapter-title">
-          <span class="chapter-no">{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</span>
-          {k.titel}
-        </h3>
-        <div class="gallery">
-          {k.applets.map((a) => (
-            <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.titel} ${a.kurz} ${k.titel} Kapitel ${k.id} ${a.id}`}>
-              <div class="card-preview" set:html={previewSvg(a)} />
-              <div class="card-body">
-                {a.sichtbar === false && <span class="nicht-gelistet">nicht gelistet</span>}
-                <strong>{a.titel}</strong>
-                <span>{a.kurz}</span>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    ))
-  }
 
-  <h2 class="section-title" id="kurs">Kurs</h2>
-  <ol class="course-list">
-    {
-      seiten.map((s) => (
-        <li>
-          <a href={url(`/kurs/${s.id}`)}>
-            <span class="course-week">Woche {s.data.woche}</span>
-            <strong>{s.data.titel}</strong>
-            <span class="course-kurz">{s.data.kurz}</span>
-          </a>
-        </li>
-      ))
-    }
-  </ol>
+  <script is:inline type="application/json" id="quiz-daten" set:html={JSON.stringify(quizze)} />
   <script>
-    // Filter the gallery as you type: every word must occur (umlauts and case ignored).
-    const norm = (s: string) =>
-      s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
-    const input = document.getElementById('applet-suche') as HTMLInputElement | null
-    const none = document.getElementById('keine-treffer')
-    input?.addEventListener('input', () => {
-      const words = norm(input.value).split(/\s+/).filter(Boolean)
-      let shown = 0
-      document.querySelectorAll<HTMLElement>('.chapter').forEach((ch) => {
-        let inChapter = 0
-        ch.querySelectorAll<HTMLElement>('.card').forEach((card) => {
-          const text = norm(card.dataset.suche ?? '')
-          const hit = words.every((w) => text.includes(w))
-          card.hidden = !hit
-          if (hit) inChapter++
-        })
-        ch.hidden = inChapter === 0
-        shown += inChapter
-      })
-      if (none) none.hidden = shown > 0
-    })
+    // Point the quiz card at the quiz that is open now (the latest one, if several are).
+    type Q = { id: string; titel: string; woche?: number; ab: string; bis: string }
+    const daten = document.getElementById('quiz-daten')?.textContent
+    const quizze: Q[] = daten ? JSON.parse(daten) : []
+    const jetzt = Date.now()
+    const offen = quizze.filter((q) => (!q.ab || Date.parse(q.ab) <= jetzt) && (!q.bis || jetzt <= Date.parse(q.bis)) && (q.ab || q.bis))
+    const q = offen.at(-1)
+    const detail = document.getElementById('quiz-aktuell')
+    const karte = document.getElementById('bereich-quiz') as HTMLAnchorElement | null
+    if (q && detail && karte) {
+      detail.textContent = `Jetzt offen: ${q.woche !== undefined ? `Woche ${q.woche}, ` : ''}${q.titel}`
+      detail.dataset.aktuell = ''
+      karte.href = karte.href.replace(/\/quiz\/?$/, `/quiz/${q.id}`)
+    }
   </script>
 </Seite>

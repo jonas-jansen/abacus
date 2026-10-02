@@ -10,13 +10,16 @@
 
 import { useSyncExternalStore } from 'react'
 import type { Diagnose } from '@abacus/applet-core'
+import type { QuizDef } from './define'
 
-export type EntryTyp = 'antwort' | 'vorhersage' | 'finde' | 'erzeuge' | 'skizze'
+export type EntryTyp = QuizDef['typ'] | 'skizze' | 'wochenquiz'
 
 export interface Eingabe {
   wert: unknown
   ts: number
   status: Diagnose['status']
+  /** The answer as readable text (an option's wording, a quiz attempt's score), for the notebook. */
+  anzeige?: string
 }
 
 export interface NotebookEntry {
@@ -231,7 +234,7 @@ export function exportMarkdown(store: NotebookStore): string {
     if (!key || !e) continue
     const lines = [`### ${e.frage ?? key.quiz}`, '']
     for (const x of e.eingaben) {
-      const wert = typeof x.wert === 'string' ? x.wert : JSON.stringify(x.wert)
+      const wert = x.anzeige ?? (typeof x.wert === 'string' ? x.wert : JSON.stringify(x.wert))
       lines.push(`- ${fmt(x.ts)}: ${wert}${x.status === 'gespeichert' ? '' : ` (${x.status})`}`)
     }
     if (e.notiz) lines.push('', e.notiz)

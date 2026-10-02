@@ -15,10 +15,11 @@ pnpm build                                # static site in site/dist
 
 ## Pages
 
-- `/` – all applets by chapter, and the course pages
-- `/applet/<id>` – one applet, full width
-- `/kurs/<seite>` – a guided page: text and exercises beside the applet
-- `/notizbuch` – all answers, with export and import
+- `/` – start: the four areas
+- `/applets` – all applets by chapter; `/applet/<id>` – one applet, full width
+- `/kurs` – the guided pages; `/kurs/<seite>` – text and exercises beside the applet
+- `/quiz` – weekly quizzes; `/quiz/<id>` – one quiz with its attempts
+- `/notizbuch` – all answers and attempts, with export and import
 
 ## Documentation
 
@@ -26,7 +27,8 @@ Start at **[docs/README.md](docs/README.md)**:
 [architecture](docs/architecture.md) ·
 [writing applets](docs/applets.md) ·
 [extending the library](docs/extending.md) ·
-[course pages and quizzes](docs/course.md) ·
+[course pages](docs/course.md) ·
+[quizzes](docs/quizzes.md) ·
 [design and themes](docs/design.md) ·
 [teaching](docs/teaching.md) ·
 [operations](docs/operations.md) ·
