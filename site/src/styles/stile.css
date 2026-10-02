@@ -1,0 +1,323 @@
+/*
+ * Style variants to compare (html[data-stil]): A "klar", B "ruhig", C "lebendig".
+ * Without data-stil the site looks as before. Switch: ?stil=a|b|c in the address, or the
+ * settings in the top bar on the dev server. The chosen one will be folded into site.css and
+ * applet-ui/styles.css, and this file removed.
+ */
+
+/* ===================================================================== A · klar */
+
+/* Plot heads: the title is a heading of its own; tools to its right; the legend below. */
+:root[data-stil='a'] .ab-fighead {
+  justify-content: flex-start;
+  gap: 6px 10px;
+  padding-bottom: 6px;
+}
+:root[data-stil='a'] .ab-figtitle {
+  order: 0;
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ab-text);
+}
+:root[data-stil='a'] .ab-fighead > .ab-pill,
+:root[data-stil='a'] .ab-fighead > .ab-fig-hint,
+:root[data-stil='a'] .ab-fighead > .ab-axis-switch {
+  order: 1;
+}
+:root[data-stil='a'] .ab-fighead > .ab-legend,
+:root[data-stil='a'] .ab-fighead > .ab-legend-ghost,
+:root[data-stil='a'] .ab-fighead > .ab-farbskala {
+  order: 2;
+}
+:root[data-stil='a'] .ab-fighead > .ab-legend {
+  flex: 1 0 100%;
+  justify-content: flex-start;
+}
+:root[data-stil='a'] .ab-legend-item {
+  font-size: 12px;
+}
+
+/* Course: every section a card on the grey page; boxes inside are tinted, not white-on-white. */
+:root[data-stil='a'] .abschnitt {
+  display: block;
+  margin: 0 0 20px;
+  padding: 22px 28px 10px;
+  background: var(--ab-bg);
+  border: 1px solid var(--ab-line);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04);
+}
+:root[data-stil='a'] .abschnitt > h2:first-child {
+  margin-top: 0;
+}
+:root[data-stil='a'] .prose h2 {
+  font-size: 1.3rem;
+}
+:root[data-stil='a'] .prose h2::before {
+  width: 28px;
+  height: 28px;
+  background: var(--ab-accent);
+  color: #fff;
+  font-size: 0.85rem;
+}
+:root[data-stil='a'] .abschnitt .box,
+:root[data-stil='a'] .abschnitt .aufgabe,
+:root[data-stil='a'] .abschnitt .qz {
+  background: var(--ab-panel);
+  border-color: transparent;
+}
+:root[data-stil='a'] .abschnitt .aufgabe .qz {
+  background: none;
+  border-top-color: var(--ab-line-strong);
+}
+:root[data-stil='a'] .abschnitt .box-proof,
+:root[data-stil='a'] .abschnitt .box-tip {
+  background: transparent;
+  border-color: var(--ab-line);
+}
+
+/* ==================================================================== B · ruhig */
+
+/* A calm reading page: white, no cards; sections separated by space and a hairline, their
+   number large in a margin column. */
+:root[data-stil='b'] {
+  --page: var(--ab-bg);
+}
+:root[data-stil='b'] .abschnitt {
+  display: block;
+  position: relative;
+  padding: 26px 0 8px 3.6rem;
+  border-top: 1px solid var(--ab-line);
+}
+:root[data-stil='b'] .abschnitt:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+/* the section counts and shows its number in the left margin */
+:root[data-stil='b'] .abschnitt:not(.abschnitt-intro) {
+  counter-increment: schritt;
+}
+:root[data-stil='b'] .abschnitt:not(.abschnitt-intro)::before {
+  content: counter(schritt, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 22px;
+  color: var(--ab-accent);
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-stil='b'] .abschnitt:first-child::before {
+  top: -4px;
+}
+:root[data-stil='b'] .prose h2 {
+  counter-increment: none;
+  margin: 0 0 12px;
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+:root[data-stil='b'] .prose h2::before {
+  content: none;
+}
+:root[data-stil='b'] .box,
+:root[data-stil='b'] .aufgabe,
+:root[data-stil='b'] .qz {
+  background: transparent;
+  border: 0;
+  border-left: 2px solid var(--ab-line-strong);
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-stil='b'] .aufgabe {
+  border-left-color: var(--ab-accent);
+}
+:root[data-stil='b'] .aufgabe .qz {
+  border-left: 0;
+}
+:root[data-stil='b'] .box-def {
+  border-left-color: var(--abacus-tertiary);
+}
+:root[data-stil='b'] .box-lie {
+  border-left-color: var(--abacus-secondary);
+}
+:root[data-stil='b'] .box-claim {
+  border-left-color: var(--ab-accent);
+}
+
+/* Plot titles as small labels, like the column titles of the formulas ("VORSCHRIFT"). */
+:root[data-stil='b'] .ab-figtitle {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ab-accent);
+}
+:root[data-stil='b'] .ab-applet {
+  box-shadow: none;
+}
+
+/* ================================================================= C · lebendig */
+
+/* More depth and colour: a soft gradient page, plots in their own cards, box types by colour. */
+:root[data-stil='c'] {
+  --page: linear-gradient(180deg, color-mix(in srgb, var(--ab-accent) 7%, var(--ab-panel)) 0, var(--ab-panel) 420px);
+  --ab-radius: 20px;
+}
+:root[data-stil='c'] body {
+  background: var(--ab-panel) var(--page) no-repeat;
+}
+:root[data-stil='c'] .ab-applet {
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 18px 40px -18px rgb(16 24 40 / 0.18);
+}
+:root[data-stil='c'] .ab-figure {
+  padding: 10px 12px 6px;
+  background: var(--ab-bg);
+  border: 1px solid var(--ab-line);
+  border-radius: 16px;
+}
+:root[data-stil='c'] .ab-figtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ab-text);
+}
+:root[data-stil='c'] .ab-figtitle::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ab-accent);
+}
+
+:root[data-stil='c'] .abschnitt {
+  display: block;
+  margin: 0 0 22px;
+  padding: 24px 28px 12px;
+  background: var(--ab-bg);
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 32px -16px rgb(16 24 40 / 0.14);
+}
+:root[data-stil='c'] .abschnitt > h2:first-child {
+  margin-top: 0;
+}
+:root[data-stil='c'] .prose h2 {
+  font-size: 1.3rem;
+}
+:root[data-stil='c'] .prose h2::before {
+  content: 'Schritt ' counter(schritt);
+  width: auto;
+  height: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+:root[data-stil='c'] .box,
+:root[data-stil='c'] .aufgabe,
+:root[data-stil='c'] .qz {
+  border: 0;
+  border-radius: 14px;
+}
+:root[data-stil='c'] .aufgabe {
+  background: color-mix(in srgb, var(--ab-accent) 6%, var(--ab-bg));
+  box-shadow: inset 0 3px 0 var(--ab-accent);
+}
+:root[data-stil='c'] .aufgabe .qz {
+  background: var(--ab-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 0;
+}
+:root[data-stil='c'] .qz {
+  background: var(--ab-panel);
+}
+:root[data-stil='c'] .box-def {
+  background: color-mix(in srgb, var(--abacus-tertiary) 9%, var(--ab-bg));
+}
+:root[data-stil='c'] .box-claim {
+  background: color-mix(in srgb, var(--ab-accent) 8%, var(--ab-bg));
+}
+:root[data-stil='c'] .box-lie {
+  background: color-mix(in srgb, var(--abacus-secondary) 10%, var(--ab-bg));
+}
+:root[data-stil='c'] .box-later {
+  background: var(--ab-panel);
+  border: 1px dashed var(--ab-line-strong);
+}
+:root[data-stil='c'] .box-proof {
+  background: var(--ab-panel);
+}
+:root[data-stil='c'] .box-def .box-label {
+  color: var(--abacus-tertiary);
+}
+:root[data-stil='c'] .box-claim .box-label {
+  color: var(--ab-accent);
+}
+:root[data-stil='c'] .box-lie .box-label {
+  color: var(--abacus-secondary);
+}
+:root[data-stil='c'] .card {
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 30px -18px rgb(16 24 40 / 0.2);
+}
+
+/* ============================================================ the switch (dev only) */
+
+.stil-wahl {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+.stil-wahl button {
+  flex: 1;
+  padding: 5px 0;
+  border: 1px solid var(--ab-line);
+  border-radius: 8px;
+  background: var(--ab-bg);
+  color: var(--ab-text);
+  font: 500 0.82rem var(--ab-font);
+  cursor: pointer;
+}
+.stil-wahl button[aria-pressed='true'] {
+  border-color: var(--ab-accent);
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
+}
+
+/* A and C: figures side by side line up – same title row, plots at the bottom, equal cards */
+:root[data-stil='a'] .ab-figures,
+:root[data-stil='c'] .ab-figures {
+  align-items: stretch;
+}
+:root[data-stil='a'] .ab-figure,
+:root[data-stil='c'] .ab-figure {
+  display: flex;
+  flex-direction: column;
+}
+:root[data-stil='a'] .ab-figure > .ab-figure-inner,
+:root[data-stil='c'] .ab-figure > .ab-figure-inner {
+  margin-top: auto;
+}
+:root[data-stil='a'] .ab-figtitle,
+:root[data-stil='c'] .ab-figtitle {
+  min-height: 30px;
+  line-height: 30px;
+}
+:root[data-stil='c'] .ab-fighead {
+  justify-content: flex-start;
+}
+:root[data-stil='c'] .ab-figtitle {
+  flex: 1 1 auto;
+}
+:root[data-stil='c'] .ab-fighead > .ab-legend {
+  flex: 1 0 100%;
+  justify-content: flex-start;
+  order: 2;
+}

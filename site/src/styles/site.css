@@ -463,6 +463,11 @@ h1 {
 
 /* ------------------------------------------------------------------ prose */
 
+/* the sections of a course page (rehype-abschnitte.mjs): no box of their own by default */
+.abschnitt {
+  display: contents;
+}
+
 .prose {
   font-size: 1.02rem;
   line-height: 1.65;
