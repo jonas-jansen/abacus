@@ -3,12 +3,19 @@
 // centre without); upright (±π, 0) is a saddle. Swinging far, the period is longer than the
 // 2π√(l/g) of small oscillations; with enough speed the pendulum goes over the top.
 
-import { equilibria2, klasse, liste, ode, periodOf, point, real, zahl, type Mark } from '@abacus/applet-core'
+import { equilibria2, formatNumber, klasse, liste, ode, periodOf, point, real, zahl, type Mark } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const G = 9.81
 type P = { d: number; l: number }
 const f = ([a, w]: ArrayLike<number> & Iterable<number>, p: P) => [w, -p.d * w - (G / p.l) * Math.sin(a)]
+
+/** A multiple of π as text: "−2π", "−π", "0", "π", "2π" (others as numbers). */
+function vielfachesPi(v: number): string {
+  const k = Math.round(v / Math.PI)
+  if (Math.abs(v - k * Math.PI) > 1e-6) return formatNumber(v, 4)
+  return k === 0 ? '0' : `${k < 0 ? '−' : ''}${Math.abs(k) === 1 ? '' : Math.abs(k)}π`
+}
 
 const model = ode({
   id: 'pendel',
@@ -44,7 +51,8 @@ const model = ode({
         marks: per ? per.crossings.map((t) => ({ kind: 'time' as const, t })) : [],
       }),
       klein: zahl('kleine Auslenkung: $2\\pi\\sqrt{l/g}$', T0, { digits: 3 }),
-      gleichgewichte: liste('Gleichgewichte $\\alpha^*$', eq.map((e) => e.x[0]), { marks: eq.map((e, item) => ({ ...mark(e.x), item })) }),
+      // multiples of π: −2π, −π, 0, π, 2π
+      gleichgewichte: liste('Gleichgewichte $\\alpha^*$', eq.map((e) => vielfachesPi(e.x[0])), { marks: eq.map((e, item) => ({ ...mark(e.x), item })) }),
     }
   },
 })

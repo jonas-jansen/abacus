@@ -1671,6 +1671,9 @@ html[data-hinweise='aus'] .ab-hint {
 .ab-stat dt .katex {
   font-size: 1.05em;
   color: var(--ab-text);
+  /* KaTeX's boxes (a root sign) reach beyond the line; they must not catch the pointer of
+     the readout next to them */
+  pointer-events: none;
 }
 .ab-stat-link {
   margin-left: 5px;
