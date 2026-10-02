@@ -26,7 +26,8 @@
   --ab-mark-soft: rgb(14 159 110 / 0.16);
   --ab-warn-soft: #fdf3e7;
   --ab-warn: #8a4b08;
-  --ab-radius: 14px;
+  /* the corners of every box: cards, panels, boxes in the text, hints (round buttons stay round) */
+  --ab-radius: 2px;
   --ab-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -8px rgb(16 24 40 / 0.08);
 
   --abacus-primary: #1f5eea;
@@ -160,7 +161,7 @@
   width: 30px;
   height: 30px;
   margin: -4px -6px 0 0;
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
   color: var(--ab-faint);
 }
 .ab-icon:hover {
@@ -297,7 +298,7 @@
   gap: 10px;
   min-height: 340px;
   margin-top: 8px;
-  border-radius: 10px;
+  border-radius: var(--ab-radius);
   background: repeating-linear-gradient(-45deg, var(--ab-panel), var(--ab-panel) 10px, var(--ab-bg) 10px, var(--ab-bg) 20px);
   color: var(--ab-muted);
   text-align: center;
@@ -327,7 +328,7 @@
   padding: 10px 12px 6px;
   background: var(--ab-bg);
   border: 1px solid var(--ab-line);
-  border-radius: 14px;
+  border-radius: var(--ab-radius);
 }
 .ab-figure > .ab-figure-inner {
   margin-top: auto;
@@ -495,7 +496,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   display: inline-flex;
   flex: none;
   padding: 2px;
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
   background: var(--ab-panel);
 }
 .ab-seg button {
@@ -543,7 +544,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   right: 0;
   width: min(320px, 80vw);
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   box-shadow: 0 0 0 1px var(--ab-line), 0 12px 32px -10px rgb(16 24 40 / 0.35);
   font-size: 13px;
@@ -673,7 +674,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .ab-param-wrap {
   margin: -6px -8px;
   padding: 6px 8px;
-  border-radius: 10px;
+  border-radius: var(--ab-radius);
   transition: background 0.15s;
 }
 .ab-param-wrap[data-hot] {
@@ -753,7 +754,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   display: grid;
   gap: 1px;
   padding: 6px 10px;
-  border-radius: 9px;
+  border-radius: var(--ab-radius);
   background: rgb(20 23 28 / 0.88);
   color: #fff;
   font-size: 12.5px;
@@ -845,7 +846,7 @@ html[data-werte='aus'] .ab-probe-step {
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--ab-line);
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   color: var(--ab-muted);
   font: 600 12px var(--ab-font);
@@ -865,7 +866,7 @@ html[data-werte='aus'] .ab-probe-step {
   z-index: 1000;
   max-width: min(300px, calc(100vw - 16px));
   padding: 7px 11px;
-  border-radius: 10px;
+  border-radius: var(--ab-radius);
   background: rgb(22 25 31 / 0.94);
   color: #f3f4f6;
   border: 1px solid rgb(255 255 255 / 0.08);
@@ -942,7 +943,7 @@ html[data-werte='aus'] .ab-probe-step {
   gap: 16px;
   margin: 4px 0 12px;
   padding: 14px 14px 14px 20px;
-  border-radius: 12px;
+  border-radius: var(--ab-radius);
   background: var(--ab-panel);
 }
 .ab-formulas {
@@ -1585,7 +1586,7 @@ html[data-hinweise='aus'] .ab-hint {
 .ab-feedback {
   margin: 6px 0 0;
   padding: 7px 10px;
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
   background: var(--ab-warn-soft);
   color: var(--ab-warn);
   font-size: 12.5px;
@@ -1603,7 +1604,7 @@ html[data-hinweise='aus'] .ab-hint {
   flex-wrap: wrap;
   gap: 2px;
   padding: 3px;
-  border-radius: 9px;
+  border-radius: var(--ab-radius);
   background: var(--ab-panel);
 }
 /* many options wrap onto several lines, each option stays in one piece */
@@ -1699,7 +1700,7 @@ html[data-hinweise='aus'] .ab-hint {
   gap: 12px;
   min-height: 38px;
   padding: 6px 8px;
-  border-radius: 10px;
+  border-radius: var(--ab-radius);
   transition: background 0.12s;
 }
 .ab-stat + .ab-stat {
@@ -1762,7 +1763,7 @@ html[data-hinweise='aus'] .ab-hint {
 }
 .ab-vektor {
   padding: 1px 4px;
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
 }
 .ab-vektor .katex,
 .ab-gleichung .katex {
@@ -1844,7 +1845,7 @@ html[data-hinweise='aus'] .ab-hint {
     width: 40px;
     height: 40px;
     border: 1px solid var(--ab-line-strong);
-    border-radius: 10px;
+    border-radius: var(--ab-radius);
     background: var(--ab-bg);
     font-size: 18px;
   }

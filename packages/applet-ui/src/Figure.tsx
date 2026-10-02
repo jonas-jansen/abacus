@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { clamp, formatNumber, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
+import { AXIS_OVERHANG, clamp, formatNumber, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
 import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
@@ -380,8 +380,9 @@ export function Figure<P extends Params>({
         <FigureActions
           zoomReset={zoom ? () => setZoom(null) : undefined}
           bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
-          // above the plot's right edge, in the row of the y label
-          style={{ top: Math.max(0, plot.y - 27), right: figW - plot.x - plot.w }}
+          // above the plot's right edge, centred on the line of the y label (whose middle is
+          // the arrow tip, AXIS_OVERHANG above the plot); the icons are 24 px high
+          style={{ top: Math.max(0, plot.y - AXIS_OVERHANG - 12), right: figW - plot.x - plot.w }}
         />
       </div>
       <FigureLegend

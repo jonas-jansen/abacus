@@ -46,7 +46,7 @@
   padding: 22px 28px 10px;
   background: var(--ab-bg);
   border: 1px solid var(--ab-line);
-  border-radius: 16px;
+  border-radius: var(--ab-radius);
   box-shadow: 0 1px 2px rgb(16 24 40 / 0.04);
 }
 :root[data-stil='a'] .abschnitt > h2:first-child {
@@ -165,7 +165,6 @@
 /* More depth and colour: a soft gradient page, plots in their own cards, box types by colour. */
 :root[data-stil='c'] {
   --page: linear-gradient(180deg, color-mix(in srgb, var(--ab-accent) 7%, var(--ab-panel)) 0, var(--ab-panel) 420px);
-  --ab-radius: 20px;
 }
 :root[data-stil='c'] body {
   background: var(--ab-panel) var(--page) no-repeat;
@@ -174,7 +173,7 @@
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 18px 40px -18px rgb(16 24 40 / 0.18);
 }
 :root[data-stil='c'] .ab-figure {
-  border-radius: 16px;
+  border-radius: var(--ab-radius);
 }
 :root[data-stil='c'] .ab-figtitle {
   display: inline-flex;
@@ -197,7 +196,7 @@
   margin: 0 0 22px;
   padding: 24px 28px 12px;
   background: var(--ab-bg);
-  border-radius: 20px;
+  border-radius: var(--ab-radius);
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 32px -16px rgb(16 24 40 / 0.14);
 }
 :root[data-stil='c'] .abschnitt > h2:first-child {
@@ -220,7 +219,7 @@
 :root[data-stil='c'] .aufgabe,
 :root[data-stil='c'] .qz {
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--ab-radius);
 }
 :root[data-stil='c'] .aufgabe {
   background: color-mix(in srgb, var(--ab-accent) 6%, var(--ab-bg));
@@ -228,7 +227,7 @@
 }
 :root[data-stil='c'] .aufgabe .qz {
   background: var(--ab-bg);
-  border-radius: 12px;
+  border-radius: var(--ab-radius);
   padding: 14px 16px;
   border: 0;
 }
@@ -261,7 +260,7 @@
   color: var(--abacus-secondary);
 }
 :root[data-stil='c'] .card {
-  border-radius: 18px;
+  border-radius: var(--ab-radius);
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 30px -18px rgb(16 24 40 / 0.2);
 }
 
@@ -276,7 +275,7 @@
   flex: 1;
   padding: 5px 0;
   border: 1px solid var(--ab-line);
-  border-radius: 8px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   color: var(--ab-text);
   font: 500 0.82rem var(--ab-font);
