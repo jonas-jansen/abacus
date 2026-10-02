@@ -173,11 +173,7 @@ Helpers in `@abacus/applet-core`:
 readouts; its formulas render in both modes with every parameter reachable; it runs at the
 smallest horizon; and the answer key of the slides. `pnpm build` must stay clean.
 
-## Colours (corporate design)
+## Colours
 
-All colours come from a few brand variables, `--ci-*` (defaults and explanation at the top
-of `packages/applet-ui/src/styles.css`); lines, panels, muted text, tints and the curves'
-neutral roles are mixed from them, for light and dark mode alike. A theme is one small file
-in `site/src/themes/` that sets them (`uhoh.css`, `standard.css`); the active one is the one
-line in `site/src/styles/thema.css`. Curves use `--ci-reihe-1…3`, so keep those three clearly
-different in hue and dark enough for thin lines on `--ci-flaeche`.
+Applets never name colours: series take a `role` (`primary`, `secondary`, …) and the theme
+decides. Themes and the brand variables are described in [design.md](design.md#colours-and-themes).

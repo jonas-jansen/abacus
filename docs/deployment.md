@@ -54,7 +54,7 @@ Things to decide at that point:
   another, e.g. `/applets/` public and `/applets/kurs/` behind `Require shib-session`.
   Astro routes map one-to-one to directories, so this is a matter of where pages live.
 - **Server-side notebook.** Only needed if students should see their notebook on several
-  devices. The UI talks to the `NotebookStore` interface (`packages/applet-ui/src/notebook.ts`),
+  devices. The UI talks to the `NotebookStore` interface (`packages/quiz/src/notebook.ts`),
   so a store that syncs to a small endpoint reading `REMOTE_USER` / `eppn` can be added without
   touching any page. This is the point where personal data leaves the device – it reverses
   the privacy decision in spec §2 and brings DSGVO obligations with it. Export/import already
