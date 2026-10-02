@@ -32,10 +32,14 @@ const model = iterationN({
   extraSeries: ({ p, n, x: [S, I] }) => {
     const R = (p.beta * N) / (p.gamma + p.alpha)
     const q = 1 + (p.alpha + p.gamma) * (R - 1)
+    let spitze = 0
+    for (const v of I) spitze = Math.max(spitze, v)
     return [
       { id: 'neu', label: '\\beta\\, x_1 x_2', name: 'Neuinfektionen je Schritt', kind: 'discrete', x: n, y: n.map((_, k) => p.beta * S[k] * I[k]), role: 'tertiary' },
-      // the initial phase with x₁ ≈ N: geometric growth by q per step
-      { id: 'anfang', label: 'x_2(0)\\, q^n', name: 'Anfangsphase', kind: 'continuous', x: n, y: n.map((k) => p.I0 * q ** k), role: 'reference' },
+      // the initial phase with x₁ ≈ N: geometric growth by q per step. It describes only the
+      // start; it ends where it leaves the picture (above the most infected), or it would
+      // stretch a linear axis to 10³² and flatten the real curve.
+      { id: 'anfang', label: 'x_2(0)\\, q^n', name: 'Anfangsphase', kind: 'continuous', x: n, y: n.map((k) => (p.I0 * q ** k <= 1.2 * spitze ? p.I0 * q ** k : NaN)), role: 'reference' },
     ]
   },
   observables: ({ p, x: [, I] }) => {
