@@ -102,7 +102,8 @@ export function makeFrame(input: FrameInput): Frame {
   // a fixed minimum width, so the plot does not shift sideways while zooming or dragging
   const yLabelWidth = Math.max(estimateTextWidth('−0,000', fontSize), ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
 
-  const left = Math.ceil(yLabelWidth + TICK + 6 + 4)
+  // and room for the y axis's power-of-ten badge, left of the upper tip
+  const left = Math.ceil(Math.max(yLabelWidth + TICK + 6 + 4, yScaled.exp ? TICK + 8 + FACTOR_WIDTH(fontSize) + 2 : 0))
   // room above the plot for the y arrow and the label beside its tip
   const top = Math.ceil(AXIS_OVERHANG + (input.yLabel ? fontSize * 1.2 : 4))
   const bottom = Math.ceil(fontSize + TICK + 6 + 2)
@@ -114,7 +115,8 @@ export function makeFrame(input: FrameInput): Frame {
   // right of the plot: the x variable after the arrow tip, and a factor after the last number
   const tail = AXIS_OVERHANG + (input.xLabel ? 5 + labelWidth(input.xLabel, fontSize) : 4) + 2
   const lastHalf = Math.max(0, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2))
-  const factorRoom = xScaled.exp ? lastHalf + 6 + FACTOR_WIDTH(fontSize) + 2 : 0
+  // the x factor starts where the x variable does (just right of the tip), or after the last number
+  const factorRoom = xScaled.exp ? Math.max(AXIS_OVERHANG + 2, lastHalf + 6) + FACTOR_WIDTH(fontSize) + 2 : 0
   const right = Math.ceil(Math.max(tail, factorRoom, estimateTextWidth('0,000', fontSize) / 2 + 2, lastHalf + 2))
 
   const plot = {

@@ -60,6 +60,8 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
   }
   // A power of ten that scales all numbers of an axis stands with those numbers – above the
   // y numbers, after the last x number – as a small badge "× 10⁴": a note about the whole axis.
+  // Its text shares the line of the axis variable: the y badge left of the upper tip, on the
+  // line of y; the x badge below the axis, starting where x starts.
   const badge = (e: number, x: number, mitte: number, anchor: 'start' | 'end') => {
     // in the tick numbers' font: "×10" and the exponent raised
     const exp = String(e).replace('-', '−')
@@ -70,7 +72,7 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
       tag: 'g',
       attrs: { class: 'abacus-factor' },
       children: [
-        { tag: 'rect', attrs: { x: left, y: mitte - h / 2, width: w, height: h, rx: 5, class: 'abacus-factor-bg' } },
+        { tag: 'rect', attrs: { x: left, y: mitte - h / 2, width: w, height: h, rx: 2, class: 'abacus-factor-bg' } },
         {
           tag: 'text',
           attrs: { x: left + w / 2, y: mitte + fontSize * 0.36, 'text-anchor': 'middle', class: 'abacus-factor-text' },
@@ -82,11 +84,12 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
       ],
     })
   }
-  if (frame.yExp) badge(frame.yExp, plot.x - TICK - 2, tipY + 2, 'end')
+  // the badge's text sits at mitte + 0.36 fontSize, the y label's at tipY + 0.35 fontSize
+  if (frame.yExp) badge(frame.yExp, plot.x - TICK - 8, tipY, 'end')
   if (frame.xExp && frame.xTicks.length) {
     const i = frame.xTicks.length - 1
     const rechts = X(frame.xTicks[i]) + estimateTextWidth(frame.xTickLabels[i], fontSize) / 2
-    badge(frame.xExp, rechts + 6, bottom + TICK + 3 + fontSize * 0.5, 'start')
+    badge(frame.xExp, Math.max(tipX + 2, rechts + 6), bottom + TICK + 3 + fontSize * 0.5, 'start')
   }
 
   return { tag: 'g', attrs: { 'font-size': fontSize }, children: nodes }
