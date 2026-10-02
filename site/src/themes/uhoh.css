@@ -3,7 +3,7 @@
  *
  * Blau for buttons, links and the first curve; Beere and Tanne for the second and third
  * curve (three dark, clearly different hues); Himmel for marks in the plots; Anthrazit as
- * the text; Lichtgrau behind the page. Dark mode uses the light tints of the same colours.
+ * the text; Lichtgrau behind the page. Dark mode brightens the same hues.
  */
 :root {
   /* UHOH Blau #003F75 · Himmel #74B8C7 · Beere #70295A · Sand #C1A24A · Apfel #AFCA0A
@@ -19,13 +19,15 @@
   --ci-flaeche: #ffffff;
   --ci-seite: #ecf1f1; /* Lichtgrau */
 
-  --ci-akzent-dunkel: #99b2c8; /* Blau 40 % */
-  --ci-reihe-1-dunkel: #99b2c8; /* Blau 40 % */
-  --ci-reihe-2-dunkel: #c6a9bd; /* Beere 40 % */
-  --ci-reihe-3-dunkel: #bfd43b; /* Apfel 80 % */
-  --ci-gut-dunkel: #74b8c7; /* Himmel */
-  --ci-warnung-dunkel: #dac792; /* Sand 60 % */
-  --ci-text-dunkel: #ecf1f1; /* Lichtgrau */
-  --ci-flaeche-dunkel: color-mix(in srgb, #003f75 14%, #121416); /* a night in Blau */
-  --ci-seite-dunkel: color-mix(in srgb, #003f75 10%, #0b0d0f);
+  /* Dark: the same hues, lighter and more saturated (OKLCH: hue kept, lightness ~0.74–0.84),
+     so they shine on the dark ground instead of looking washed out. Apfel is bright as it is. */
+  --ci-akzent-dunkel: #69affa; /* Blau, bright */
+  --ci-reihe-1-dunkel: #69affa; /* Blau, bright */
+  --ci-reihe-2-dunkel: #e982c7; /* Beere, bright */
+  --ci-reihe-3-dunkel: #afca0a; /* Apfel */
+  --ci-gut-dunkel: #5ad0e8; /* Himmel, bright */
+  --ci-warnung-dunkel: #eac769; /* Sand, bright */
+  --ci-text-dunkel: #f1f5f5; /* Lichtgrau, a touch lighter */
+  --ci-flaeche-dunkel: #0b1826; /* a deep night in Blau */
+  --ci-seite-dunkel: #050e18;
 }
