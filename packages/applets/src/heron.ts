@@ -53,10 +53,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'heron',
-  titel: 'Heron-Verfahren für √2',
-  kurz: 'Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich.',
-  kapitel: 'I',
-  folien: '10–12, 58–64',
   model,
   horizont: 'N',
   formeln: [

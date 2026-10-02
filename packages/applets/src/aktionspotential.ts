@@ -64,10 +64,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'aktionspotential',
-  titel: 'Aktionspotential einer Herzzelle',
-  kurz: 'Zwei Zahlen pro Schritt: das Potential und seine Erholung – regelmäßig, chaotisch oder in Ruhe.',
-  kapitel: 'II',
-  folien: '61–65',
   model,
   horizont: 'N',
   formeln: [

@@ -30,10 +30,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'exp-ivp',
-  titel: 'Exponentielles Wachstum',
-  kurz: 'Die Änderung ist proportional zum Bestand.',
-  kapitel: 'III',
-  folien: '24–31',
   model,
   horizont: 'T',
   formeln: [

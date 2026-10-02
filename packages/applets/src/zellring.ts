@@ -92,10 +92,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'zellring',
-  titel: 'Ring aus 50 Herzzellen',
-  kurz: 'Eine Erregungswelle läuft um den Ring – ein zweiter Reiz zur falschen Zeit lässt sie ewig kreisen.',
-  kapitel: 'II',
-  folien: '66–72',
   model,
   horizont: 'N',
   formeln: [

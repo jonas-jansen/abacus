@@ -50,10 +50,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'logistic-cobweb',
-  titel: 'Spinnwebdiagramm der logistischen Abbildung',
-  kurz: 'Vom Graphen zur Diagonale und zurück: so entsteht die Folge.',
-  kapitel: 'I',
-  folien: '43–56',
   model,
   horizont: 'N',
   formeln: [

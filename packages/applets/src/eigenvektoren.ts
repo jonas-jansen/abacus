@@ -75,10 +75,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'eigenvektoren',
-  titel: 'Eigenvektoren: wann A v in dieselbe Richtung zeigt',
-  kurz: 'Drehen Sie v, bis A v parallel liegt – dann ist v ein Eigenvektor.',
-  kapitel: 'Anhang',
-  folien: '56–57, 64, 80–91',
   model,
   formeln: [
     { label: 'Matrix', tex: String.raw`A = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix}` },

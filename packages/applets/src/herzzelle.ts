@@ -79,10 +79,6 @@ const model = ode({
 
 export default defineApplet({
   id: 'herzzelle',
-  titel: 'Aktionspotential: Schrittmacher und Muskelzelle',
-  kurz: 'Ein System aus vier Differentialgleichungen – periodisch von selbst oder im Takt eines Reizes.',
-  kapitel: 'IV',
-  folien: '29–32',
   model,
   horizont: 'T',
   formeln: [

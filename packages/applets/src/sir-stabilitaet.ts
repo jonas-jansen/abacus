@@ -62,10 +62,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'sir-stabilitaet',
-  titel: 'Epidemie: Gleichgewichte und Stabilität',
-  kurz: 'Krankheitsfrei oder endemisch – die Basisreproduktionszahl R und die Jacobi-Matrix entscheiden.',
-  kapitel: 'II',
-  folien: '44–58',
   model,
   horizont: 'T',
   formeln: [

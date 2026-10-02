@@ -6,8 +6,6 @@ export const kurs = {
   id: 'dynsys',
   semester: 'ws2026',
   titel: 'Mathematik für Biowissenschaften',
-  /** Where the admin edits the release plan (site/freigabe.json). */
-  freigabeBearbeiten: 'https://github.com/jonas-jansen/abacus/edit/main/site/freigabe.json',
 }
 
 export const scope: NotebookScope = { kurs: kurs.id, semester: kurs.semester }

@@ -59,10 +59,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'log-ivp-data',
-  titel: 'Logistisches Modell an Daten anpassen',
-  kurz: 'Drei Regler, 37 Messwerte: Wie gut lässt sich das Wachstum beschreiben?',
-  kapitel: 'III',
-  folien: '35–36',
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N\left(1 - \frac{N}{{{K}}}\right)` },

@@ -313,3 +313,25 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(szenario('herzzelle', 'Muskelzelle ohne Reiz').art.value).toBe('ruht')
   })
 })
+
+describe('catalog (applets.json)', () => {
+  it('gives every applet its title, description and chapter', async () => {
+    const katalog = (await import('../applets.json')).default.applets
+    expect(katalog.map((e) => e.id).sort()).toEqual(Object.keys(applets).sort())
+    for (const e of katalog) {
+      const a = applets[e.id]
+      expect([a.titel, a.kurz, a.kapitel, a.sichtbar]).toEqual([e.titel, e.kurz, e.kapitel, e.sichtbar])
+    }
+  })
+
+  it('names every mismatch between catalog and code', async () => {
+    const { verbinden } = await import('./index')
+    const mod = { ...applets.heron }
+    const e = { id: 'heron', sichtbar: true, kapitel: 'I' as const, folien: '', titel: 'H', kurz: 'k' }
+    expect(() => verbinden([e, e], [mod])).toThrow(/zweimal/)
+    expect(() => verbinden([{ ...e, id: 'herron' }], [mod])).toThrow(/kein Applet mit dieser id[\s\S]*"heron" fehlt/)
+    expect(() => verbinden([{ ...e, kapitel: 'V' as never }], [mod])).toThrow(/kapitel "V"/)
+    expect(() => verbinden([{ ...e, sichtbar: 'nein' as never }], [mod])).toThrow(/true oder false/)
+    expect(verbinden([e], [mod])[0].titel).toBe('H')
+  })
+})

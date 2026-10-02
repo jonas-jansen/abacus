@@ -52,10 +52,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'sir',
-  titel: 'Epidemie-Modell',
-  kurz: 'Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?',
-  kapitel: 'II',
-  folien: '40–58',
   model,
   horizont: 'T',
   formeln: [

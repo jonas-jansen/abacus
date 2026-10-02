@@ -29,10 +29,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'linear-ivp',
-  titel: 'Anfangswertproblem',
-  kurz: 'Der Anfangswert legt die Konstante fest – und damit genau eine Lösung.',
-  kapitel: 'III',
-  folien: '17–19',
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },

@@ -126,10 +126,6 @@ const handles = (row: 1 | 2) => {
 
 export default defineApplet({
   id: 'lgs',
-  titel: 'Lineare Gleichungssysteme als Geraden',
-  kurz: 'Zwei Gleichungen, zwei Geraden: ein Schnittpunkt, keiner oder unendlich viele.',
-  kapitel: 'Anhang',
-  folien: '64–73',
   model,
   formeln: [
     { label: 'System', tex: String.raw`{{a11}}{{*}}x_1 {{+a12}}{{*}}x_2 = {{b1}} \\ {{a21}}{{*}}x_1 {{+a22}}{{*}}x_2 = {{b2}}` },

@@ -4,20 +4,13 @@ import { kapitel } from '@abacus/applets'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
 import { previewSvg } from '../preview'
-import { appletFreigabe, appletSichtbar, freigabeText, heute, offen, planOderFehler, seitenFreigabe, seiteSichtbar } from '../freigabe'
 
-const alleSeiten = await getCollection('seiten')
-planOderFehler(alleSeiten.map((s) => s.id))
-const tag = heute()
-// released applets only (the dev server shows all, the unreleased ones marked)
-const kapitelListe = kapitel()
-  .map((k) => ({ ...k, applets: k.applets.filter((a) => appletSichtbar(a.id, tag)) }))
-  .filter((k) => k.applets.length > 0)
-/** The dev server's mark on what students do not see yet. */
-const nochNicht = (v: string) => (offen(v, tag) ? null : freigabeText(v))
-const seiten = alleSeiten
-  .filter((s) => seiteSichtbar(s, tag))
-  .sort((a, b) => a.data.woche - b.data.woche || a.data.titel.localeCompare(b.data.titel, 'de'))
+// listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
+const kapitelListe = kapitel({ alle: import.meta.env.DEV })
+
+const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort(
+  (a, b) => a.data.woche - b.data.woche || a.data.titel.localeCompare(b.data.titel, 'de'),
+)
 ---
 <Seite titel="Übersicht" aktiv="applets">
   <h1>{kurs.titel}</h1>
@@ -46,7 +39,7 @@ const seiten = alleSeiten
             <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.titel} ${a.kurz} ${k.titel} Kapitel ${k.id} ${a.id}`}>
               <div class="card-preview" set:html={previewSvg(a)} />
               <div class="card-body">
-                {nochNicht(appletFreigabe(a.id)) && <span class="freigabe-badge">für Studierende {nochNicht(appletFreigabe(a.id))}</span>}
+                {a.sichtbar === false && <span class="nicht-gelistet">nicht gelistet</span>}
                 <strong>{a.titel}</strong>
                 <span>{a.kurz}</span>
               </div>
@@ -64,10 +57,7 @@ const seiten = alleSeiten
         <li>
           <a href={url(`/kurs/${s.id}`)}>
             <span class="course-week">Woche {s.data.woche}</span>
-            <strong>
-              {s.data.titel}
-              {nochNicht(seitenFreigabe(s)) && <span class="freigabe-badge freigabe-inline">für Studierende {nochNicht(seitenFreigabe(s))}</span>}
-            </strong>
+            <strong>{s.data.titel}</strong>
             <span class="course-kurz">{s.data.kurz}</span>
           </a>
         </li>

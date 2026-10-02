@@ -29,10 +29,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'arithmetic',
-  titel: 'Arithmetische Folge',
-  kurz: 'Jeder Schritt addiert denselben Betrag.',
-  kapitel: 'I',
-  folien: '22–23',
   model,
   horizont: 'N',
   formeln: [

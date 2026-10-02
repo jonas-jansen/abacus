@@ -67,10 +67,6 @@ const model = ode({
 
 export default defineApplet({
   id: 'bioreaktor',
-  titel: 'Bakterien im Bioreaktor',
-  kurz: 'Nährstoff fließt zu, Kultur fließt ab – bei zu starkem Durchfluss wird sie ausgewaschen.',
-  kapitel: 'IV',
-  folien: '9, 27–28',
   model,
   horizont: 'T',
   formeln: [

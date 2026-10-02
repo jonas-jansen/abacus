@@ -102,10 +102,6 @@ const model = defineModel({
 
 export default defineApplet({
   id: 'komplexe-zahlen',
-  titel: 'Komplexe Zahlen in der Ebene',
-  kurz: 'Addieren heißt Pfeile aneinanderlegen, Multiplizieren heißt drehen und strecken.',
-  kapitel: 'Anhang',
-  folien: '32–44',
   model,
   formeln: (p) => [
     { label: 'Zahlen', tex: String.raw`z = {{#z.0}} {{#+z.1}}\,i` + (p.op === 'potenz' ? '' : String.raw` \\ w = {{#w.0}} {{#+w.1}}\,i`) },

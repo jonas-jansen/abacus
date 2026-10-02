@@ -146,10 +146,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'newton',
-  titel: 'Newton-Verfahren',
-  kurz: 'Die Tangente statt der Kurve: ihre Nullstelle ist der nächste Schritt.',
-  kapitel: 'I',
-  folien: '57–64',
   model,
   horizont: 'N',
   // one step at a time: the timeline opens at the start

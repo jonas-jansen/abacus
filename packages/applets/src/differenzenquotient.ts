@@ -68,10 +68,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'differenzenquotient',
-  titel: 'Vom Differenzenquotienten zur Ableitung',
-  kurz: 'Die Sekante wird zur Tangente, wenn der zweite Punkt auf den ersten zuläuft.',
-  kapitel: 'Anhang',
-  folien: '18–26',
   model,
   formeln: [
     { label: 'Funktion', tex: String.raw`f(x) = {{f}}` },

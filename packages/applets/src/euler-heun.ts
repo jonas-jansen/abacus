@@ -101,10 +101,6 @@ const model = defineModel({
 
 export default defineApplet({
   id: 'euler-heun',
-  titel: 'Euler- und Heun-Verfahren',
-  kurz: 'Zwei Näherungsverfahren gegen die exakte Lösung: Wie schnell wird der Fehler kleiner?',
-  kapitel: 'III',
-  folien: '65–72',
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr)` },

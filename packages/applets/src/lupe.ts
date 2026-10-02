@@ -48,10 +48,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'lupe',
-  titel: 'Blick durch die Lupe',
-  kurz: 'Aus der Nähe betrachtet ist jede glatte Kurve eine Gerade: ihre Tangente.',
-  kapitel: 'Anhang',
-  folien: '25–27',
   model,
   formeln: [
     { label: 'Funktion', tex: String.raw`f(x) = {{f}}` },

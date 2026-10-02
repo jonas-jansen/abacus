@@ -27,10 +27,6 @@ if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
 const head = `// TODO: what this applet shows, and where in the slides (chapter, slide numbers).
 
 `
-const meta = `  titel: 'TODO Titel',
-  kurz: 'TODO ein Satz, was man hier sieht.',
-  kapitel: 'I', // TODO: 'I' | 'II' | 'III' | 'IV' | 'Anhang'
-  folien: 'TODO', // e.g. '22–27'`
 
 const templates = {
   iteration: `${head}import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
@@ -56,7 +52,6 @@ const model = iteration({
 
 export default defineApplet({
   id: '${id}',
-${meta}
   model,
   horizont: 'N',
   formeln: [
@@ -90,7 +85,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: '${id}',
-${meta}
   model,
   zeitleiste: true,
   horizont: 'T',
@@ -125,7 +119,6 @@ const model = ode({
 
 export default defineApplet({
   id: '${id}',
-${meta}
   model,
   horizont: 'T',
   formeln: [
@@ -164,8 +157,15 @@ writeFileSync(
     .replace('// @new-applet:entries', `// @new-applet:entries\n  ${camel},`),
 )
 
+// the catalog line: title, description, chapter, slides – and not listed until switched on
+const katalogFile = join(root, 'packages/applets/applets.json')
+const katalog = readFileSync(katalogFile, 'utf8')
+const zeile = `    ${JSON.stringify({ id, sichtbar: false, kapitel: 'I', folien: '', titel: 'TODO Titel', kurz: 'TODO ein Satz, was man hier sieht.' }).replace(/","/g, '", "').replace(/":/g, '": ').replace(/,"/g, ', "')}`
+writeFileSync(katalogFile, katalog.replace(/\n  \]\n\}\s*$/, `,\n${zeile}\n  ]\n}\n`))
+
 console.log(`✓ packages/applets/src/${id}.ts (${kind})`)
 console.log('✓ in packages/applets/src/index.ts registriert')
+console.log('✓ in packages/applets/applets.json eingetragen (sichtbar: false, Titel und Kapitel dort anpassen)')
 
 if (withPage) {
   const page = join(root, 'site/src/content/seiten', `${id}.mdx`)

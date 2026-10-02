@@ -101,6 +101,8 @@ export interface AppletDef<P extends Params = Params> {
   /** Open the timeline at the start instead of showing everything. */
   schritte?: boolean
   runOptions?: (p: P) => Partial<RunOptions>
+  /** Listed in the overview (default true). Unlisted applets keep their address, to share. */
+  sichtbar?: boolean
   /**
    * Named settings from the slides, one click each (e.g. "Szenario A" of the SIR model):
    * the defaults with these values. Shown as chips above the parameters.
@@ -117,7 +119,16 @@ export interface Szenario<P = Params> {
 
 export type AnyAppletDef = AppletDef<any>
 
-export function defineApplet<P extends Params>(def: AppletDef<P>): AppletDef<P> {
+/** The catalog fields: they live in packages/applets/applets.json, one line per applet. */
+export type KatalogFeld = 'titel' | 'kurz' | 'kapitel' | 'folien' | 'sichtbar'
+
+/**
+ * What an applet file defines: model, formulas, plots … – everything but the catalog fields,
+ * which the registry adds from applets.json (a test may still give them directly).
+ */
+export type AppletModul<P extends Params = Params> = Omit<AppletDef<P>, KatalogFeld> & Partial<Pick<AppletDef<P>, KatalogFeld>>
+
+export function defineApplet<P extends Params>(def: AppletModul<P>): AppletModul<P> {
   if (!/^[a-z0-9][a-z0-9_-]*$/i.test(def.id)) {
     throw new Error(`Applet id "${def.id}" must be URL-safe: letters, digits, '-' and '_' only.`)
   }

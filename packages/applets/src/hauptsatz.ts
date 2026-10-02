@@ -66,10 +66,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'hauptsatz',
-  titel: 'Hauptsatz: Fläche und Steigung',
-  kurz: 'Die Flächenfunktion F wächst genau so schnell, wie f an der oberen Grenze hoch ist.',
-  kapitel: 'Anhang',
-  folien: '106–110',
   model,
   formeln: [
     { label: 'Funktion', tex: String.raw`f(x) = {{f}}` },

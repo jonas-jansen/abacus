@@ -83,10 +83,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'folgen-grenzwert',
-  titel: 'Grenzwert einer Folge',
-  kurz: 'Zu jedem noch so schmalen ε-Band gibt es ein N, ab dem die Folge darin bleibt.',
-  kapitel: 'Anhang',
-  folien: '5–8',
   horizont: 'N',
   zeitleiste: true,
   model,

@@ -45,10 +45,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'predator-prey',
-  titel: 'Räuber und Beute',
-  kurz: 'Zwei Populationen, die voneinander leben – Gleichgewicht, Schwingung oder Aussterben.',
-  kapitel: 'II',
-  folien: '8–13',
   model,
   horizont: 'N',
   formeln: [

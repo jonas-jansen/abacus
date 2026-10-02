@@ -51,10 +51,6 @@ const model = ode({
 
 export default defineApplet({
   id: 'pendel',
-  titel: 'Gedämpftes Pendel',
-  kurz: 'Eine Gleichung zweiter Ordnung als System: Auslenkung und Winkelgeschwindigkeit in der Phasenebene.',
-  kapitel: 'IV',
-  folien: '5–7',
   model,
   horizont: 'T',
   formeln: [

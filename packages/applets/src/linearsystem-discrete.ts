@@ -42,10 +42,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'linearsystem-discrete',
-  titel: 'Lineare Abbildung in der Ebene',
-  kurz: 'Immer wieder mit derselben Matrix multiplizieren: Spirale, Sprung oder Gerade.',
-  kapitel: 'II',
-  folien: '17–19, 31–36',
   model,
   horizont: 'N',
   formeln: [

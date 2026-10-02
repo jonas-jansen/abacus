@@ -1,9 +1,12 @@
 /**
- * Registry of all applets. `pnpm new-applet <id>` adds entries between the markers.
- * Adding an applet must require touching this package only (§3, second rule).
+ * Registry of all applets: the code (the modules below) joined with the catalog
+ * (../applets.json: title, description, chapter, slides, listed or not – one line per applet,
+ * edited by hand). `pnpm new-applet <id>` adds both. The catalog's order is the order in the
+ * overview, within each chapter.
  */
 
-import { KAPITEL, KAPITEL_ORDER, type AnyAppletDef, type Kapitel } from '@abacus/applet-ui/define'
+import { KAPITEL, KAPITEL_ORDER, type AnyAppletDef, type AppletModul, type Kapitel } from '@abacus/applet-ui/define'
+import katalog from '../applets.json'
 // @new-applet:imports
 import folgenGrenzwert from './folgen-grenzwert'
 import differenzenquotient from './differenzenquotient'
@@ -46,7 +49,7 @@ import logIvp from './log-ivp'
 import logisticVergleich from './logistic-vergleich'
 import logisticCobweb from './logistic-cobweb'
 
-const list: AnyAppletDef[] = [
+const module: AppletModul<any>[] = [
   // @new-applet:entries
   // 1 sequences and recursions
   arithmetic,
@@ -99,14 +102,48 @@ const list: AnyAppletDef[] = [
   eigenvektoren,
 ]
 
-// sorted by chapter of the slides; within a chapter in the order of the list above
+export interface KatalogEintrag {
+  id: string
+  sichtbar: boolean
+  kapitel: Kapitel
+  folien: string
+  titel: string
+  kurz: string
+}
+
+/** The catalog joined with the code; a mismatch fails loudly, naming what to fix. */
+export function verbinden(eintraege: readonly KatalogEintrag[], mods: readonly AppletModul<any>[]): AnyAppletDef[] {
+  const code = new Map(mods.map((m) => [m.id, m]))
+  const fehler: string[] = []
+  const gesehen = new Set<string>()
+  for (const e of eintraege) {
+    if (gesehen.has(e.id)) fehler.push(`"${e.id}" steht zweimal in applets.json.`)
+    gesehen.add(e.id)
+    if (!code.has(e.id)) fehler.push(`"${e.id}" steht in applets.json, aber es gibt kein Applet mit dieser id.`)
+    if (!(KAPITEL_ORDER as readonly string[]).includes(e.kapitel)) fehler.push(`"${e.id}": kapitel "${e.kapitel}" gibt es nicht (${KAPITEL_ORDER.join(', ')}).`)
+    if (typeof e.sichtbar !== 'boolean') fehler.push(`"${e.id}": sichtbar muss true oder false sein.`)
+    if (!e.titel || !e.kurz) fehler.push(`"${e.id}": titel und kurz dürfen nicht leer sein.`)
+  }
+  for (const m of mods) if (!gesehen.has(m.id)) fehler.push(`Das Applet "${m.id}" fehlt in applets.json.`)
+  if (fehler.length) throw new Error(`packages/applets/applets.json:\n  ${fehler.join('\n  ')}`)
+  return eintraege.map((e) => ({ ...code.get(e.id)!, ...e, folien: e.folien || undefined }) as AnyAppletDef)
+}
+
+const list = verbinden(katalog.applets as KatalogEintrag[], module)
+
+// sorted by chapter of the slides; within a chapter in the order of the catalog
 const byChapter = [...list].sort((a, b) => KAPITEL_ORDER.indexOf(a.kapitel) - KAPITEL_ORDER.indexOf(b.kapitel))
 
 export const applets: Readonly<Record<string, AnyAppletDef>> = Object.fromEntries(byChapter.map((a) => [a.id, a]))
 
-/** The applets grouped by chapter, in the order of the slides. Empty chapters are left out. */
-export function kapitel(): { id: Kapitel; titel: string; applets: AnyAppletDef[] }[] {
-  return KAPITEL_ORDER.map((id) => ({ id, titel: KAPITEL[id], applets: byChapter.filter((a) => a.kapitel === id) })).filter((k) => k.applets.length > 0)
+/**
+ * The applets grouped by chapter, in the order of the slides; only those listed in the
+ * overview unless `alle`. Empty chapters are left out.
+ */
+export function kapitel({ alle = false } = {}): { id: Kapitel; titel: string; applets: AnyAppletDef[] }[] {
+  return KAPITEL_ORDER.map((id) => ({ id, titel: KAPITEL[id], applets: byChapter.filter((a) => a.kapitel === id && (alle || a.sichtbar !== false)) })).filter(
+    (k) => k.applets.length > 0,
+  )
 }
 
 export function getApplet(id: string): AnyAppletDef {

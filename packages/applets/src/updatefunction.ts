@@ -48,10 +48,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'updatefunction',
-  titel: 'Die Update-Funktion',
-  kurz: 'Erst die Funktion, dann die Folge: Nullstellen, Fixpunkte, Steigung.',
-  kapitel: 'I',
-  folien: '18–20, 32–33',
   model,
   formeln: (p) => [
     {

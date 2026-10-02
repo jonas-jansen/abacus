@@ -36,10 +36,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'newton-cooling',
-  titel: 'Newtonsches Abkühlen',
-  kurz: 'Der Tee nähert sich der Raumtemperatur – wenn die Schritte nicht zu groß sind.',
-  kapitel: 'I',
-  folien: '27–28',
   model,
   horizont: 'N',
   formeln: [

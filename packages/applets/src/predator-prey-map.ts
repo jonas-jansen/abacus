@@ -72,10 +72,6 @@ const model = defineModel({
 
 export default defineApplet({
   id: 'predator-prey-map',
-  titel: 'Räuber-Beute: die Update-Funktion als Fläche',
-  kurz: 'Wo wächst die Beute, wo schrumpft sie? Eine Fläche über der Ebene zeigt es.',
-  kapitel: 'II',
-  folien: '14',
   model,
   formeln: [
     { label: 'Update-Funktion', tex: String.raw`f_1(y_1, y_2) = (1 + {{r}})\,y_1 - {{r}}{{*}}y_1^2 - {{gamma}}{{*}}y_1 y_2 \\ f_2(y_1, y_2) = {{gamma}}{{*}}y_1 y_2` },

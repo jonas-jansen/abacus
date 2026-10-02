@@ -38,10 +38,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'linear-family',
-  titel: 'Allgemeine Lösung einer linearen Gleichung',
-  kurz: 'Eine Differentialgleichung, unendlich viele Lösungen – die Konstante C wählt eine aus.',
-  kapitel: 'III',
-  folien: '8–12',
   model,
   formeln: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },

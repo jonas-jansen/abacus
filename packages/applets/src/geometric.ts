@@ -29,10 +29,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'geometric',
-  titel: 'Geometrische Folge',
-  kurz: 'Jeder Wert ist das a-fache des vorigen.',
-  kapitel: 'I',
-  folien: '24–25, 30–31',
   model,
   horizont: 'N',
   formeln: [

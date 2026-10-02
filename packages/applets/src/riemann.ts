@@ -83,10 +83,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'riemann',
-  titel: 'Integral als Grenzwert von Rechtecksummen',
-  kurz: 'Immer schmalere Rechtecke füllen die Fläche unter der Kurve immer genauer.',
-  kapitel: 'Anhang',
-  folien: '100–107',
   model,
   formeln: [
     { label: 'Näherung', tex: String.raw`\int_{{{a}}}^{{{b}}} f(x)\,dx \approx \sum_{i=1}^{{{n}}} f(\xi_i)\,\Delta x \\ f(x) = {{f}}` },

@@ -70,10 +70,6 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'logistic-vergleich',
-  titel: 'Diskret oder kontinuierlich?',
-  kurz: 'Dasselbe logistische Wachstum – nur die diskrete Version kann über das Ziel hinausschießen.',
-  kapitel: 'III',
-  folien: '42–47, 71–72',
   model,
   zeitleiste: true,
   horizont: 'T',

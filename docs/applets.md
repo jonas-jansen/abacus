@@ -28,7 +28,7 @@ const model = ode({
 })
 
 export default defineApplet({
-  id: 'konkurrenz', titel: '…', kurz: 'one sentence', kapitel: 'IV', folien: '25–37',
+  id: 'konkurrenz',
   model,
   horizont: 'T',
   formeln: [{ label: 'System', tex: String.raw`x' = {{r1}}\,x\,(1 - …)` }, { label: 'Start', tex: String.raw`(x, y)(0) = {{#start}}` }],
@@ -38,8 +38,16 @@ export default defineApplet({
 })
 ```
 
-Register it in `packages/applets/src/index.ts` (the scaffold does that). The list order is the
-order within a chapter.
+Register it in `packages/applets/src/index.ts`, and give it its line in the catalog
+`packages/applets/applets.json` (the scaffold does both):
+
+```json
+{"id": "konkurrenz", "sichtbar": false, "kapitel": "IV", "folien": "25–37", "titel": "Konkurrenz zweier Hefearten", "kurz": "Wer verdrängt wen?"}
+```
+
+Title, description, chapter and slides live only there; `sichtbar` decides whether the
+overview lists it (its address works either way), and the line order is the order within a
+chapter. A missing or extra line fails with a message naming it.
 
 ## Models
 
@@ -156,7 +164,7 @@ Helpers in `@abacus/applet-core`:
 
 - Direct manipulation first: handles, formula chips, linked views; no walls of text.
 - Vectors are bold (`\mathbf{y}`) everywhere; no "·" as a separator in texts.
-- Chapter and slides on every applet (`kapitel`, `folien`); German texts, English code comments.
+- Chapter and slides on every applet (in the catalog); German texts, English code comments.
 - Values that come from the slides are checked in `applets.test.ts`.
 
 ## Checks

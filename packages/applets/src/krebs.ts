@@ -63,10 +63,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'krebs',
-  titel: 'Krebserkrankung: drei Gruppen',
-  kurz: 'Gesund, leicht und schwer erkrankt – niemand geht verloren, und die Anteile pendeln sich ein.',
-  kapitel: 'II',
-  folien: '19–25',
   model,
   horizont: 'T',
   formeln: [

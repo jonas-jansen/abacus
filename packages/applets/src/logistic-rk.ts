@@ -48,10 +48,6 @@ const model = iteration({
 
 export default defineApplet({
   id: 'logistic-rk',
-  titel: 'Diskretes logistisches Wachstum',
-  kurz: 'Wachstumsrate r und Kapazität K – welcher Parameter entscheidet über Ruhe oder Chaos?',
-  kapitel: 'I',
-  folien: '32–36',
   model,
   horizont: 'N',
   formeln: [

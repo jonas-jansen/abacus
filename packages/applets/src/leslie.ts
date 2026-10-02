@@ -60,10 +60,6 @@ const model = iterationN({
 
 export default defineApplet({
   id: 'leslie',
-  titel: 'Leslie-Modell: Altersklassen',
-  kurz: 'Geburten und Überleben in drei Altersklassen – der Spektralradius entscheidet über Wachstum oder Aussterben.',
-  kapitel: 'II',
-  folien: '26–37',
   model,
   horizont: 'N',
   formeln: [
