@@ -161,7 +161,12 @@ export function QuizView({ def, scope, number, star, unlocks }: QuizViewProps) {
   )
 }
 
+/**
+ * Words of the verdict. While a retry follows (course pages, practice), "Noch nicht" invites the
+ * next attempt; on a submitted attempt the verdict is final: "Falsch".
+ */
 const VERDICT: Record<Diagnosis['status'], string> = { correct: 'Richtig', close: 'Fast', wrong: 'Noch nicht', saved: 'Festgehalten' }
+const FINAL: Record<Diagnosis['status'], string> = { correct: 'Richtig', close: 'Teilweise', wrong: 'Falsch', saved: 'Abgegeben' }
 const DIRECTION: Record<NonNullable<Diagnosis['direction']>, string> = { 'too small': 'zu klein', 'too large': 'zu groß' }
 
 /** The verdict on an answer: a badge, the direction for numbers, and the hint. */
@@ -180,7 +185,7 @@ export function Verdict({ d, points }: { d: Pick<Diagnosis, 'status' | 'hint' | 
 }
 
 /** "Richtig" with a check in a green circle, "Fast" in amber, "Noch nicht" in red. */
-export function StatusBadge({ status, text }: { status: Diagnosis['status']; text?: string }) {
+export function StatusBadge({ status, text, final = false }: { status: Diagnosis['status']; text?: string; final?: boolean }) {
   return (
     <span className="qz-badge" data-status={status}>
       <span className="qz-badge-icon" aria-hidden="true">
@@ -191,7 +196,7 @@ export function StatusBadge({ status, text }: { status: Diagnosis['status']; tex
           {status === 'saved' && <circle cx="8" cy="8" r="2.5" fill="currentColor" />}
         </svg>
       </span>
-      {text ?? VERDICT[status]}
+      {text ?? (final ? FINAL : VERDICT)[status]}
     </span>
   )
 }

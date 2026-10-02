@@ -233,7 +233,7 @@ function QuestionHead({ q, n, status, points }: { q: QuizDef; n: number; status?
         <span className="qz-nr">{n}</span>
         {TYPE_LABEL[q.type]}
       </span>
-      {status && <StatusBadge status={status} text={points} />}
+      {status && <StatusBadge status={status} text={points} final />}
     </header>
   )
 }
@@ -297,7 +297,7 @@ function Result({ w, a, visible }: { w: WeeklyQuiz; a: Attempt; visible: boolean
         const graded = g && g.max > 0
         return (
           <section key={q.id} className="qz wq-question" data-status={graded ? g.status : undefined}>
-            <QuestionHead q={q} n={i + 1} status={graded ? g.status : undefined} points={graded && g.status === 'close' ? `${formatNumber(round2(g.points), 3)} Punkte` : undefined} />
+            <QuestionHead q={q} n={i + 1} status={graded ? g.status : undefined} points={graded && g.status === 'close' ? `Teilweise · ${formatNumber(round2(g.points), 3)} Punkte` : undefined} />
             <div className="qz-question">
               <MathText text={q.question} />
             </div>
