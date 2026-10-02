@@ -297,7 +297,7 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
         <aside className="ab-panel">
           {/* tools for the whole applet: history, then compare, link, reset */}
           <div className="ab-toolbar" role="toolbar" aria-label="Werkzeuge">
-                <span className="ab-undo" role="group" aria-label="Verlauf">
+                <span className="ab-undo" role="group" aria-label="Parameter: Verlauf und zurücksetzen">
                   <button type="button" className="ab-tool" onClick={history.undo} disabled={!history.canUndo} data-tip="{Mod} + {Z} | rückgängig" aria-label="rückgängig">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M6 4 2.5 7.5 6 11M3 7.5h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -306,6 +306,11 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                   <button type="button" className="ab-tool" onClick={history.redo} disabled={!history.canRedo} data-tip="{Redo} | wiederholen" aria-label="wiederholen">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a3.5 3.5 0 0 0 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button type="button" className="ab-tool" onClick={reset} data-tip="alle Parameter zurücksetzen" aria-label="alle Parameter zurücksetzen">
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M3.5 8a4.5 4.5 0 1 0 1.5-3.4M3.5 2.5v2.7h2.7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </span>
@@ -324,11 +329,6 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                     </svg>
                   </button>
                   <CopyLink />
-                  <button type="button" className="ab-tool" onClick={reset} data-tip="alle Parameter zurücksetzen" aria-label="alle Parameter zurücksetzen">
-                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-                      <path d="M3.5 8a4.5 4.5 0 1 0 1.5-3.4M3.5 2.5v2.7h2.7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
                 </span>
           </div>
           {def.szenarien && def.szenarien.length > 0 && (
