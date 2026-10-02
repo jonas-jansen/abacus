@@ -86,6 +86,37 @@ export function useVortrag(root: RefObject<HTMLElement | null>) {
   return { an, zoom, start, ende }
 }
 
+/** Copies the current link, which carries the parameters in its hash. */
+export function CopyLink() {
+  const [done, setDone] = useState(false)
+  const timer = useRef(0)
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+  const copy = async () => {
+    try {
+      // the hash is written with a short delay after the last change
+      await new Promise((r) => setTimeout(r, 300))
+      await navigator.clipboard.writeText(window.location.href)
+      setDone(true)
+      timer.current = window.setTimeout(() => setDone(false), 1600)
+    } catch {
+      /* clipboard unavailable: nothing to do */
+    }
+  }
+  return (
+    <button type="button" className="ab-tool ab-copy" onClick={copy} data-tip="Link zu genau diesem Zustand kopieren" aria-label={done ? 'Link kopiert' : 'Link kopieren'} data-done={done || undefined}>
+      {done ? (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      )}
+    </button>
+  )
+}
+
 export function VortragKnopf({ an, onClick }: { an: boolean; onClick: () => void }) {
   return (
     <button

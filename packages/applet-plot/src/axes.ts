@@ -1,6 +1,6 @@
 /** Bottom SVG layer (§5.2): grid, axes, ticks, tick labels, axis labels. */
 
-import { AXIS_OVERHANG, estimateTextWidth, labelWidth, TICK, type Frame } from '@abacus/applet-core'
+import { AXIS_OVERHANG, estimateTextWidth, TICK, type Frame } from '@abacus/applet-core'
 import { mathText } from './mathText'
 import type { SvgNode } from './svg'
 
