@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import type { Run } from '@abacus/applet-core'
 import { DEFAULT_VIEW, scene3d, sceneSvg, type PlotSpec, type Stroke, type View3D } from '@abacus/applet-plot'
 import { renderSvg } from './svgReact'
-import { cssColor } from './cssColor'
+import { cssColor, useFarbwechsel } from './cssColor'
 import { localPoint } from './scale'
 import { TeX } from './TeX'
 
@@ -31,6 +31,7 @@ export function Figure3D({
   const canvas = useRef<HTMLCanvasElement>(null)
   const [width, setWidth] = useState(SSR_WIDTH)
   const [hydrated, setHydrated] = useState(false)
+  const farbwechsel = useFarbwechsel()
   const [view, setView] = useState<View3D>(DEFAULT_VIEW)
   // marker drags keep the offset from the pointer to the point's foot on the floor
   const drag = useRef<{ x: number; y: number; v: View3D; marker: boolean; off: [number, number] } | null>(null)
@@ -118,7 +119,7 @@ export function Figure3D({
       }
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, scene, size, h])
+  }, [hydrated, scene, size, h, farbwechsel])
 
   const local = (e: ReactPointerEvent<HTMLDivElement>) => {
     return localPoint(e.currentTarget, e.clientX, e.clientY)

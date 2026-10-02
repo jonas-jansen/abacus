@@ -4,6 +4,9 @@
  * `color`. Cached by that text, so a change of theme or mode simply misses the cache.
  */
 
+import { useEffect, useState } from 'react'
+import { onFarbwechsel } from './settings'
+
 const cache = new Map<string, string>()
 let probe: HTMLSpanElement | null = null
 
@@ -23,4 +26,11 @@ export function cssColor(css: CSSStyleDeclaration, name: string, fallback: strin
   const out = probe.style.color ? getComputedStyle(probe).color : fallback
   cache.set(raw, out)
   return out
+}
+
+/** A number that changes whenever light or dark changes: a dependency for canvas drawing. */
+export function useFarbwechsel(): number {
+  const [n, setN] = useState(0)
+  useEffect(() => onFarbwechsel(() => setN((k) => k + 1)), [])
+  return n
 }

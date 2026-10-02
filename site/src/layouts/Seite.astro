@@ -3,7 +3,7 @@ import '@abacus/applet-ui/styles.css'
 import '@abacus/quiz/styles.css'
 import '../styles/site.css'
 import '../styles/thema.css'
-import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT } from '@abacus/applet-ui/settings'
+import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT, FARBEN } from '@abacus/applet-ui/settings'
 import { kurs, url } from '../config'
 
 interface Props {
@@ -47,17 +47,20 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
           </svg>
         </button>
         <div id="einstellungen" class="settings" popover>
+          <div class="settings-title">Farben</div>
+          <div class="settings-seg" role="radiogroup" aria-label="Farben">
+            {FARBEN.map((f) => (
+              <button type="button" role="radio" data-farbe={f.wert} aria-checked={f.wert === 'auto' ? 'true' : 'false'}>{f.label}</button>
+            ))}
+          </div>
           <div class="settings-title">Anzeige</div>
           {Object.entries(EINSTELLUNGEN).map(([name, e]) => (
             <label class="settings-row">
-              <span>
-                <span class="settings-label">{e.label}</span>
-                <span class="settings-text">{e.text}</span>
-              </span>
+              <span class="settings-label">{e.label}</span>
               <input type="checkbox" role="switch" data-einstellung={name} checked />
             </label>
           ))}
-          <p class="settings-foot">Für den Unterricht mit Beamer: beide aus. Gilt für diesen Browser.</p>
+          <p class="settings-foot">Für den Beamer: beide aus.</p>
         </div>
       </div>
     </header>
@@ -65,11 +68,21 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
       <slot />
     </main>
     <script>
-      import { einstellung, setEinstellung, type Einstellung } from '@abacus/applet-ui/settings'
+      import { einstellung, farbe, setEinstellung, setFarbe, type Einstellung, type Farbe } from '@abacus/applet-ui/settings'
       for (const box of document.querySelectorAll<HTMLInputElement>('input[data-einstellung]')) {
         const name = box.dataset.einstellung as Einstellung
         box.checked = einstellung(name) !== 'aus'
         box.addEventListener('change', () => setEinstellung(name, box.checked ? 'an' : 'aus'))
+      }
+      const knoepfe = document.querySelectorAll<HTMLButtonElement>('button[data-farbe]')
+      const zeige = (f: Farbe) => knoepfe.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.farbe === f)))
+      zeige(farbe())
+      for (const b of knoepfe) {
+        b.addEventListener('click', () => {
+          const f = b.dataset.farbe as Farbe
+          setFarbe(f)
+          zeige(f)
+        })
       }
     </script>
   </body>

@@ -4,7 +4,7 @@ import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, 
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
-import { cssColor } from './cssColor'
+import { cssColor, useFarbwechsel } from './cssColor'
 import { localPoint } from './scale'
 import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
@@ -106,6 +106,7 @@ export function Figure<P extends Params>({
     return () => ro.disconnect()
   }, [])
 
+  const farbwechsel = useFarbwechsel()
   const [logY, setLogY] = useState(entry.yScale === 'log')
   const spec = useMemo(() => ({ ...resolveSpec(entry, params), yScale: logY ? 'log' : 'linear' }) as PlotSpec, [entry, params, logY])
   const square = isSquare(spec)
@@ -175,7 +176,7 @@ export function Figure<P extends Params>({
       drawPlot(surface, frame, spec, drawn, view)
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen])
+  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
