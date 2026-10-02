@@ -316,6 +316,22 @@
   margin: 0;
   min-width: 0;
 }
+/* Every plot in a card of its own: title, plot and legend read as one unit, and plots side
+   by side are clearly separate. Cards in a row have the same height, their plots level. */
+.ab-figures {
+  align-items: stretch;
+}
+.ab-figure {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 6px;
+  background: var(--ab-bg);
+  border: 1px solid var(--ab-line);
+  border-radius: 14px;
+}
+.ab-figure > .ab-figure-inner {
+  margin-top: auto;
+}
 .ab-figure-inner {
   position: relative;
   margin: 0 auto;

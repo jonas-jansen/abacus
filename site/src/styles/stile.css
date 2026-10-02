@@ -174,9 +174,6 @@
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 18px 40px -18px rgb(16 24 40 / 0.18);
 }
 :root[data-stil='c'] .ab-figure {
-  padding: 10px 12px 6px;
-  background: var(--ab-bg);
-  border: 1px solid var(--ab-line);
   border-radius: 16px;
 }
 :root[data-stil='c'] .ab-figtitle {

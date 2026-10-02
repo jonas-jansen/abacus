@@ -36,6 +36,8 @@ export function FigureHead({
     }
   }, [help])
 
+  // nothing to say above the plot: no empty row (plots side by side stay level at the bottom)
+  if (!title && !log) return null
   return (
     <div className="ab-fighead">
       {title && <span className="ab-figtitle">{title}</span>}
