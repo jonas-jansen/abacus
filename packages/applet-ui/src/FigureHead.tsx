@@ -1,6 +1,6 @@
-/** The row above a figure: title, compare, zoom reset, trajectories, legend and lin/log switch. */
+/** Around a figure: its head (title, axis switch), its legend below, and actions in its corner. */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { formatNumber, type Run, type Series } from '@abacus/applet-core'
 import { nullclineSeries, roleStyles, type PlotSpec } from '@abacus/applet-plot'
 import { MathLabel } from './MathLabel'
@@ -10,35 +10,15 @@ const LOG_HILFE =
   'Auf einer logarithmischen Achse bedeuten gleiche Abstände gleiche Faktoren: von 1 bis 0,1 ist es so weit wie von 0,1 bis 0,01. So sind sehr große und sehr kleine Werte zugleich zu sehen. Eine Gerade heißt: der Wert ändert sich in jedem Schritt um denselben Faktor. Null und negative Werte haben auf dieser Achse keinen Platz.'
 
 /**
- * The row above a plot: title, legend and axis switch. Every figure has it, so figures side
- * by side keep their plots at the same height. Legend entries are buttons: pointing at one
- * lets the others step back, a click switches the series off (and on) in every plot.
+ * The row above a plot: its title and, where offered, the lin/log switch – nothing else, so it
+ * reads at a glance. Every figure has it, so figures side by side keep their plots level.
  */
 export function FigureHead({
   title,
-  legend,
-  hidden,
-  onToggle,
-  onFocus,
   log,
-  vergleich,
-  onVergleichen,
-  bahnen,
-  zoomReset,
-  farbskala,
 }: {
   title?: string
-  legend: Series[]
-  hidden?: ReadonlySet<string>
-  onToggle?: (id: string) => void
-  onFocus?: (id: string | null) => void
   log?: { on: boolean; set: (on: boolean) => void; hilfe?: string }
-  vergleich?: { text: string; loesen?: () => void }
-  onVergleichen?: () => void
-  bahnen?: { n: number; loeschen?: () => void }
-  zoomReset?: () => void
-  /** A heat map's colour scale: what the colour means, from lo to hi. */
-  farbskala?: { label: string; lo: number; hi: number }
 }) {
   const [help, setHelp] = useState(false)
   const helpRef = useRef<HTMLDivElement>(null)
@@ -59,27 +39,64 @@ export function FigureHead({
   return (
     <div className="ab-fighead">
       {title && <span className="ab-figtitle">{title}</span>}
-      {onVergleichen && (
-        <button type="button" className="ab-pill" onClick={onVergleichen} data-tip="den jetzigen Zustand festhalten – dann etwas ändern und vergleichen">
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
-            <path d="M5.5 2.5h5l-1 4 2.5 2.5h-9L5.5 6.5zM8 9v4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
-          vergleichen
-        </button>
-      )}
-      {zoomReset && (
-        <button type="button" className="ab-pill" onClick={zoomReset} data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}>
-          Ausschnitt zurücksetzen
-        </button>
-      )}
-      {bahnen &&
-        (bahnen.n > 0 ? (
-          <button type="button" className="ab-pill" onClick={bahnen.loeschen} data-tip="die zusätzlichen Bahnen entfernen">
-            {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
+      {log && (
+        <div className="ab-axis-switch" ref={helpRef}>
+          <div className="ab-seg" role="group" aria-label="y-Achse">
+            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
+              linear
+            </button>
+            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
+              log
+            </button>
+          </div>
+          <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
+            ?
           </button>
-        ) : (
-          <span className="ab-fig-hint">klicken: weitere Bahn</span>
-        ))}
+          {help && (
+            <div className="ab-help" role="note">
+              <strong>Logarithmische Achse</strong>
+              <p>{LOG_HILFE}</p>
+              {log.hilfe && (
+                <p>
+                  <MathLabel text={log.hilfe} />
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Below a plot: what its lines and colours mean. Entries are buttons: pointing at one lets the
+ * others step back, a click switches the series off (and on) in every plot. The held state
+ * of "vergleichen" is listed here too, with its own × to let go of it.
+ */
+export function FigureLegend({
+  legend,
+  hidden,
+  onToggle,
+  onFocus,
+  vergleich,
+  farbskala,
+  hinweis,
+}: {
+  legend: Series[]
+  hidden?: ReadonlySet<string>
+  onToggle?: (id: string) => void
+  onFocus?: (id: string | null) => void
+  vergleich?: { text: string; loesen?: () => void }
+  /** A heat map's colour scale: what the colour means, from lo to hi. */
+  farbskala?: { label: string; lo: number; hi: number }
+  /** A quiet line on what the plot does when clicked, e.g. "klicken: weitere Bahn". */
+  hinweis?: string
+}) {
+  const zeigen = legend.length > 1 || legend.some((s) => s.name)
+  if (!zeigen && !vergleich && !farbskala && !hinweis) return null
+  return (
+    <div className="ab-figlegend">
       {vergleich && (
         <button type="button" className="ab-legend-item ab-legend-ghost" onClick={vergleich.loesen} data-tip="Vergleich lösen">
           <svg width="22" height="10" aria-hidden="true">
@@ -99,7 +116,7 @@ export function FigureHead({
           <span className="ab-farbskala-zahl">{formatNumber(farbskala.hi, 3)}</span>
         </span>
       )}
-      {(legend.length > 1 || legend.some((s) => s.name)) && (
+      {zeigen && (
         <div className="ab-legend" role="group" aria-label="Legende: zeigen oder ausblenden" onPointerLeave={() => onFocus?.(null)}>
           {legend.map((s) => {
             const off = hidden?.has(s.id) ?? false
@@ -140,31 +157,33 @@ export function FigureHead({
           })}
         </div>
       )}
-      {log && (
-        <div className="ab-axis-switch" ref={helpRef}>
-          <div className="ab-seg" role="group" aria-label="y-Achse">
-            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
-              linear
-            </button>
-            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
-              log
-            </button>
-          </div>
-          <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
-            ?
-          </button>
-          {help && (
-            <div className="ab-help" role="note">
-              <strong>Logarithmische Achse</strong>
-              <p>{LOG_HILFE}</p>
-              {log.hilfe && (
-                <p>
-                  <MathLabel text={log.hilfe} />
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+      {hinweis && <span className="ab-fig-hint">{hinweis}</span>}
+    </div>
+  )
+}
+
+/** Actions that belong to one plot and only exist sometimes: shown in the plot's corner. */
+export function FigureActions({
+  zoomReset,
+  bahnen,
+  style,
+}: {
+  zoomReset?: () => void
+  bahnen?: { n: number; loeschen?: () => void }
+  style?: CSSProperties
+}) {
+  if (!zoomReset && !(bahnen && bahnen.n > 0)) return null
+  return (
+    <div className="ab-figactions" style={style}>
+      {zoomReset && (
+        <button type="button" className="ab-pill ab-pill-small" onClick={zoomReset} data-tip={bahnen ? 'zurück zum ganzen Bild' : '{Doppelklick} | zurück zum ganzen Bild'}>
+          ganzes Bild
+        </button>
+      )}
+      {bahnen && bahnen.n > 0 && (
+        <button type="button" className="ab-pill ab-pill-small" onClick={bahnen.loeschen} data-tip="die zusätzlichen Bahnen entfernen">
+          {bahnen.n === 1 ? '1 Bahn' : `${bahnen.n} Bahnen`} löschen
+        </button>
       )}
     </div>
   )

@@ -34,7 +34,8 @@ const model = iterationN({
     return {
       reproduktion: zahl('Reproduktionszahl $\\beta x_1(0)/(\\gamma + \\alpha)$', R, { digits: 3 }),
       ausbruch: klasse('Epidemie', R > 1 ? 'bricht aus' : 'stirbt aus'),
-      gleichgewicht: liste('Gleichgewicht $(x_1^*, x_2^*)$', eq, {
+      gleichgewicht: liste('Gleichgewicht $\\mathbf{x}^*$', eq, {
+        form: 'vektor',
         marks: [
           { kind: 'value', v: eq[0], item: 0 },
           { kind: 'value', v: eq[1], item: 1 },

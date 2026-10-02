@@ -336,28 +336,58 @@
   font-size: 12.5px;
   color: var(--ab-muted);
 }
-/* The row above each plot: title left; legend and axis switch right. Always there, so
-   figures side by side keep their plots level. */
+/* The row above each plot: only its title (and the lin/log switch where offered). Always
+   there, so figures side by side keep their plots level. */
 .ab-fighead {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 4px 12px;
   min-height: 30px;
-  padding: 0 2px 2px;
+  padding: 0 2px 4px;
 }
 .ab-figtitle {
-  margin-right: auto;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ab-muted);
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ab-text);
+}
+/* Below each plot: the legend, centred and quiet, as a caption. */
+.ab-figlegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 6px 4px 2px;
+}
+.ab-figlegend .ab-legend-item {
+  font-size: 12px;
+}
+/* Actions of one plot that exist only sometimes (whole picture, delete trajectories): in its corner. */
+.ab-figactions {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.ab-pill-small {
+  height: 24px;
+  padding: 0 9px;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--ab-bg) 88%, transparent);
+  box-shadow: 0 0 0 1px var(--ab-line), 0 2px 6px rgb(16 24 40 / 0.08);
+  backdrop-filter: blur(4px);
+}
+.ab-tool[aria-pressed='true'] {
+  background: var(--ab-accent-soft);
+  color: var(--ab-accent);
 }
 .ab-legend {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 2px;
 }
 .ab-legend-item {
@@ -764,6 +794,24 @@ html[data-werte='aus'] .ab-probe-step {
   background: var(--ab-accent-soft);
   color: var(--ab-accent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ab-accent) 40%, transparent);
+}
+
+/* The tempo of playback: a small text button in the timeline, ½× · 1× · 2× · 4× */
+.ab-tempo {
+  min-width: 34px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--ab-line);
+  border-radius: 8px;
+  background: var(--ab-bg);
+  color: var(--ab-muted);
+  font: 600 12px var(--ab-font);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.ab-tempo:hover {
+  color: var(--ab-text);
+  border-color: var(--ab-line-strong);
 }
 
 /* ================================================================== hints */
@@ -1665,6 +1713,40 @@ html[data-hinweise='aus'] .ab-hint {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   transition: background 0.12s, color 0.12s;
+}
+.ab-vektor {
+  padding: 1px 4px;
+  border-radius: 8px;
+}
+.ab-vektor .katex,
+.ab-gleichung .katex {
+  font-size: 1.08em;
+}
+.ab-vektor[data-active] {
+  background: var(--ab-mark-soft);
+}
+/* named values as small equations, aligned at "=" */
+.ab-gleichungen {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: baseline;
+  column-gap: 5px;
+  row-gap: 1px;
+}
+.ab-gleichung {
+  display: contents;
+}
+.ab-gleichung > :first-child {
+  justify-self: end;
+}
+.ab-gleichung > :last-child {
+  justify-self: start;
+}
+.ab-gleich {
+  color: var(--ab-muted);
+}
+.ab-gleichung[data-active] > * {
+  background: var(--ab-mark-soft);
 }
 .ab-stat[data-linked] .ab-chip {
   background: var(--ab-bg);

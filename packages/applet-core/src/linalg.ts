@@ -45,9 +45,10 @@ export function eigenvector(a: number, b: number, c: number, d: number, l: numbe
 export function eigenReadout(a: number, b: number, c: number, d: number, extra: Pick<Observable, 'note'> & { at?: readonly [number, number] } = {}): Observable {
   const { at = [0, 0], ...rest } = extra
   const e = eigen(a, b, c, d)
-  if (e.complex) return liste('Eigenwerte', `${formatNumber(e.complex.re, 3)} ± ${formatNumber(e.complex.im, 3)} i`, rest)
+  if (e.complex) return liste('Eigenwerte', [`${formatNumber(e.complex.re, 3)} ± ${formatNumber(e.complex.im, 3)} i`], { ...rest, namen: ['\\lambda_{1,2}'] })
   return liste('Eigenwerte', e.real, {
     ...rest,
+    namen: ['\\lambda_1', '\\lambda_2'],
     marks: e.real.map((l, item): Mark => {
       const [vx, vy] = eigenvector(a, b, c, d, l)
       return { kind: 'line', x: at[0], y: at[1], slope: vx === 0 ? Infinity : vy / vx, in: 'phase', item }
@@ -142,6 +143,17 @@ export function spectralRadiusOf(A: Matrix): number {
 /** An eigenvalue as text, e.g. "1,2" or "−0,3 ± 0,4 i" (conjugates are shown once). */
 export function complexText(l: Complex, digits = 3): string {
   return l.im === 0 ? formatNumber(l.re, digits) : `${formatNumber(l.re, digits)} ± ${formatNumber(Math.abs(l.im), digits)} i`
+}
+
+/** TeX names for `eigenvalueTexts`: λ₁, λ₂ …, a conjugate pair as λ₂,₃. */
+export function eigenvalueNames(ls: readonly Complex[]): string[] {
+  const out: string[] = []
+  let k = 1
+  for (const l of ls) {
+    if (l.im > 0) out.push(`\\lambda_{${k},${k + 1}}`), (k += 2)
+    else if (l.im === 0) out.push(`\\lambda_{${k}}`), (k += 1)
+  }
+  return out
 }
 
 /** The eigenvalues as readout values, a conjugate pair shown once. */

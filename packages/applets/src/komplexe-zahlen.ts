@@ -93,8 +93,18 @@ const model = defineModel({
     const observables: Record<string, Observable> = {}
     if (opts.observables !== false) {
       observables.ergebnis = klasse('Ergebnis', text(e), { marks: [{ kind: 'point', x: e[0], y: e[1], in: 'phase' }] })
-      observables.betrag = liste(p.op === 'potenz' ? 'Beträge $|z|$, $|z^n|$' : 'Beträge $|z|$, $|w|$, Ergebnis', p.op === 'potenz' ? [betrag(p.z), betrag(e)] : [betrag(p.z), betrag(p.w), betrag(e)], { digits: 3 })
-      observables.winkel = liste(p.op === 'potenz' ? 'Winkel von $z$, $z^n$ (Grad)' : 'Winkel von $z$, $w$, Ergebnis (Grad)', p.op === 'potenz' ? [winkel(p.z), winkel(e)] : [winkel(p.z), winkel(p.w), winkel(e)], { digits: 3 })
+      // the result's symbol: z + w, z w or zⁿ
+      const r = p.op === 'summe' ? 'z + w' : p.op === 'produkt' ? 'z\\,w' : 'z^n'
+      const potenz = p.op === 'potenz'
+      observables.betrag = liste('Beträge', potenz ? [betrag(p.z), betrag(e)] : [betrag(p.z), betrag(p.w), betrag(e)], {
+        digits: 3,
+        namen: potenz ? ['|z|', '|z^n|'] : ['|z|', '|w|', `|${r}|`],
+      })
+      observables.winkel = liste('Winkel', potenz ? [winkel(p.z), winkel(e)] : [winkel(p.z), winkel(p.w), winkel(e)], {
+        digits: 3,
+        einheit: '^\\circ',
+        namen: potenz ? ['\\arg z', '\\arg z^n'] : ['\\arg z', '\\arg w', `\\arg(${r})`],
+      })
     }
     return { series, observables, meta: {} }
   },

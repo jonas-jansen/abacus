@@ -6,7 +6,9 @@ import { handlesOf, type AppletDef, type PlotEntry } from './define'
 import { Figure } from './Figure'
 import { Figure3D, type Spec3D } from './Figure3D'
 import { FormulaBar } from './FormulaBar'
+import { texNumber } from './formula'
 import { MathLabel } from './MathLabel'
+import { TeX } from './TeX'
 import { useAppletState } from './useAppletState'
 import { installTips } from './tip'
 import { useHistory } from './useHistory'
@@ -254,7 +256,6 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       onFocusSeries={setFocusSeries}
                       vergleich={vergleich ? { run: vergleich.run, text: vergleichText, detail: vergleichDetail } : null}
                       onVergleichLoesen={() => setVergleich(null)}
-                      onVergleichen={i === 0 && !vergleich ? () => setVergleich({ params, run }) : undefined}
                       bahnen={startParamOf(entry) ? bahnen : undefined}
                       onBahn={startParamOf(entry) ? (s) => setStarts((l) => [...l, s].slice(-MAX_BAHNEN)) : undefined}
                       onBahnenLoeschen={() => setStarts([])}
@@ -307,6 +308,19 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                   <button type="button" className="ab-tool" onClick={history.redo} disabled={!history.canRedo} data-tip="{Redo} | wiederholen" aria-label="wiederholen">
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                       <path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a3.5 3.5 0 0 0 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="ab-tool"
+                    aria-pressed={!!vergleich}
+                    disabled={!run}
+                    onClick={() => setVergleich(vergleich ? null : run ? { params, run } : null)}
+                    data-tip={vergleich ? 'Vergleich lösen' : 'vergleichen: den jetzigen Zustand festhalten, dann etwas ändern'}
+                    aria-label={vergleich ? 'Vergleich lösen' : 'vergleichen'}
+                  >
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                      <path d="M5.5 2.5h5l-1 4 2.5 2.5h-9L5.5 6.5zM8 9v4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
                     </svg>
                   </button>
                   <CopyLink />
@@ -379,6 +393,19 @@ function snap(spec: ParamSpec | undefined, v: ParamValue): ParamValue {
     return [roundTo(v[0], d(spec.xBounds[1] - spec.xBounds[0])), roundTo(v[1], d(spec.yBounds[1] - spec.yBounds[0]))]
   }
   return v
+}
+
+/** A readout value as TeX, the German way: 0{,}819, -0{,}5 \pm 1\,i, 1{,}4 \cdot 10^{11}. */
+function valueTex(o: Observable, x: number | string): string {
+  if (typeof x === 'number') return (o.kind === 'index' ? String(x) : texNumber(x, o.digits ?? 4)) + (o.einheit ?? '')
+  const SUP: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
+  return x
+    .replace(/± 1 i$/, '± i')
+    .replace(/·10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_m, e: string) => `\\cdot 10^{${[...e].map((c) => SUP[c]).join('')}}`)
+    .replace(/−/g, '-')
+    .replace(/,/g, '{,}')
+    .replace(/±/g, '\\pm')
+    .replace(/\s*i$/, '\\,i')
 }
 
 const valueText = (o: Observable, v: number) => (o.kind === 'index' ? String(v) : formatNumber(v, o.digits ?? 4))
@@ -462,6 +489,29 @@ function Readout({
       <dd>
         {missing ? (
           <span className="ab-stat-none">{v === null ? '—' : 'keine'}</span>
+        ) : o.form === 'vektor' && Array.isArray(v) ? (
+          <span className="ab-vektor" data-active={active !== null || undefined}>
+            <TeX tex={`\\begin{pmatrix} ${(v as readonly (number | string)[]).map((x) => valueTex(o, x)).join(' \\\\ ')} \\end{pmatrix}`} />
+          </span>
+        ) : o.namen && Array.isArray(v) ? (
+          <span className="ab-gleichungen">
+            {(v as readonly (number | string)[]).map((x, i) => {
+              const item = perItem ? i : undefined
+              return (
+                <span
+                  key={i}
+                  className="ab-gleichung"
+                  data-active={active === 'all' || (item !== undefined && active === item) || undefined}
+                  onPointerEnter={item !== undefined ? () => onSpot(item) : undefined}
+                  onPointerLeave={item !== undefined ? () => onSpot(undefined) : undefined}
+                >
+                  <TeX tex={o.namen![i] ?? ''} />
+                  <span className="ab-gleich">=</span>
+                  <TeX tex={valueTex(o, x)} />
+                </span>
+              )
+            })}
+          </span>
         ) : (
           values.map((x, i) => (
             <span
@@ -518,6 +568,32 @@ const Glyph = {
   fwd: <path d="M5.5 3.5 10.5 8l-5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />,
 }
 
+/** Playback tempi, cycled by the button in the timeline; the choice is kept for the visit. */
+const TEMPI = [0.5, 1, 2, 4] as const
+type Tempo = (typeof TEMPI)[number]
+const tempoText = (t: Tempo) => (t === 0.5 ? '½×' : `${t}×`)
+
+function useTempo(): [Tempo, (t: Tempo) => void] {
+  const [tempo, setTempo] = useState<Tempo>(1)
+  useEffect(() => {
+    try {
+      const t = Number(sessionStorage.getItem('abacus:tempo'))
+      if ((TEMPI as readonly number[]).includes(t)) setTempo(t as Tempo)
+    } catch {
+      // no storage: 1×
+    }
+  }, [])
+  const set = (t: Tempo) => {
+    setTempo(t)
+    try {
+      sessionStorage.setItem('abacus:tempo', String(t))
+    } catch {
+      // no storage: only this applet
+    }
+  }
+  return [tempo, set]
+}
+
 /**
  * Time as a timeline (§6.1): play it, scrub it, or step with ‹ ›. Iterations step through n;
  * continuous models run through t. At the right end everything is shown, and a longer
@@ -548,6 +624,7 @@ export function Timeline({
 }) {
   const k = value ?? max
   const [playing, setPlaying] = useState(false)
+  const [tempo, setTempo] = useTempo()
   const span = max - min
   // a horizon of 0 (typed) leaves nothing to play, but the field to change it stays
   const empty = !(span > 0)
@@ -561,8 +638,9 @@ export function Timeline({
   useEffect(() => {
     if (!playing) return
     const from = k >= max ? min : k
-    // Quick for short runs, never longer than 8 s for long ones; continuous time in 6 s.
-    const duration = continuous ? 6000 * ((max - from) / (span || 1)) : Math.min(8000, Math.max(1500, (max - from) * 140))
+    // At 1×: a step every 0,45 s, so each can be followed, but no run longer than 12 s; the
+    // whole continuous time window in 10 s. The tempo button scales both.
+    const duration = (continuous ? 10_000 * ((max - from) / (span || 1)) : Math.min(12_000, (max - from) * 450)) / tempo
     const t0 = performance.now()
     let id = requestAnimationFrame(function tick(now) {
       const f = (now - t0) / duration
@@ -576,9 +654,10 @@ export function Timeline({
       id = requestAnimationFrame(tick)
     })
     return () => cancelAnimationFrame(id)
-    // restarting on every step would reset the clock; only start/stop and the horizon matter
+    // restarting on every step would reset the clock; only start/stop, horizon and tempo matter
+    // (a new tempo while playing goes on from where it is)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, max, min])
+  }, [playing, max, min, tempo])
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === ' ' && (e.target as HTMLElement).tagName !== 'BUTTON') {
@@ -618,6 +697,15 @@ export function Timeline({
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           {Glyph.fwd}
         </svg>
+      </button>
+      <button
+        type="button"
+        className="ab-tempo"
+        onClick={() => setTempo(TEMPI[(TEMPI.indexOf(tempo) + 1) % TEMPI.length])}
+        aria-label={`Tempo ${tempoText(tempo)}, ändern`}
+        data-tip="Tempo: ½× · 1× · 2× · 4×"
+      >
+        {tempoText(tempo)}
       </button>
       <output className="ab-timeline-n" aria-live="off">
         <span>

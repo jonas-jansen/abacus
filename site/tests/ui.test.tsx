@@ -224,12 +224,18 @@ describe('comfort', () => {
 
   it('comparing keeps the old state and shows what changed', () => {
     const a = mount(<AppletView def={getApplet('geometric')} />)
-    click(button(a, 'vergleichen'))
+    // the pin among the tools of the panel
+    click(a.querySelector('button[aria-label="vergleichen"]'))
     type(a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement, '1,1')
     act(() => (a.querySelector('input[aria-label="Faktor a"]') as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     expect(a.textContent).toContain('festgehalten')
     expect(a.querySelector('.ab-stat-before')?.textContent).toContain('vorher')
     click(a.querySelector('.ab-legend-ghost'))
+    expect(a.textContent).not.toContain('festgehalten')
+    // the pin again: hold, and let go
+    click(a.querySelector('button[aria-label="vergleichen"]'))
+    expect(a.querySelector('button[aria-label="Vergleich lösen"]')?.getAttribute('aria-pressed')).toBe('true')
+    click(a.querySelector('button[aria-label="Vergleich lösen"]'))
     expect(a.textContent).not.toContain('festgehalten')
   })
 })

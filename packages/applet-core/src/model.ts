@@ -100,6 +100,12 @@ export interface Observable {
   digits?: number
   /** Highlighted in the plots while the readout is pointed at. */
   marks?: readonly Mark[]
+  /** Several values that form one state, (x₁*, x₂*, x₃*): shown as a column vector. */
+  form?: 'vektor'
+  /** TeX names of several values, e.g. λ₁, λ₂: shown as aligned equations "λ₁ = 1". */
+  namen?: readonly string[]
+  /** TeX unit after each value in equations and vectors, e.g. ^\\circ for degrees. */
+  einheit?: string
 }
 
 export type Observables = Readonly<Record<string, Observable>>

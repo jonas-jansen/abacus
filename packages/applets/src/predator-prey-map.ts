@@ -59,10 +59,10 @@ const model = defineModel({
       observables: (opts.observables === false
         ? {}
         : {
-            f: liste('$(f_1, f_2)$ im Punkt', [f1, f2]),
+            f: liste('$\\mathbf{f}(\\mathbf{y})$ im Punkt', [f1, f2], { form: 'vektor' }),
             beute: klasse('Beute', f1 > y1 ? 'wächst' : f1 < y1 ? 'schrumpft' : 'bleibt'),
             raeuber: klasse('Räuber', f2 > y2 ? 'wachsen' : f2 < y2 ? 'schrumpfen' : 'bleiben'),
-            gleichgewicht: liste(coexist ? 'Koexistenz $(y_1^*, y_2^*)$' : 'Gleichgewicht ohne Räuber', eq),
+            gleichgewicht: liste(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, { form: 'vektor' }),
             abstand: zahl('Abstand zum Gleichgewicht', Math.hypot(y1 - eq[0], y2 - eq[1]), { digits: 3 }),
           }) as Record<string, Observable>,
       meta: {},

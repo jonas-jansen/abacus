@@ -4,7 +4,7 @@
 // (b₃ = 9, s₁ = 0,1, s₂ = 0,6) has three eigenvalues of the same modulus 3/∛50 < 1: it dies
 // out, and its age structure keeps cycling with period 3 instead of settling.
 
-import { eigenvalues, eigenvalueTexts, iterationN, klasse, liste, real, schritte, spectralRadiusOf, zahl } from '@abacus/applet-core'
+import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, klasse, liste, real, schritte, spectralRadiusOf, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { b1: number; b2: number; b3: number; s1: number; s2: number; x1: number; x2: number; x3: number }
@@ -52,7 +52,7 @@ const model = iterationN({
     return {
       rho: zahl('Spektralradius $\\rho(L)$', rho, { digits: 4 }),
       zukunft: klasse('Die Population', rho < 1 - 1e-9 ? 'stirbt aus' : rho > 1 + 1e-9 ? 'wächst' : 'bleibt beschränkt'),
-      eigenwerte: liste('Eigenwerte', eigenvalueTexts(ls)),
+      eigenwerte: liste('Eigenwerte', eigenvalueTexts(ls), { namen: eigenvalueNames(ls) }),
       gesamt: zahl('Gesamtzahl $x_1 + x_2 + x_3$ bei $N$', total, { digits: 4, marks: [{ kind: 'time', t: last }] }),
     }
   },

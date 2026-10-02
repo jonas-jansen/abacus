@@ -53,7 +53,7 @@ const model = iterationN({
         note: b ? undefined : 'gibt es nur für R > 1',
         marks: b ? [mark(b.x)] : [],
       }),
-      bStand: liste('endemisch: $(x_1^*, x_2^*)$', b ? b.x : null, { marks: b ? [mark(b.x)] : [] }),
+      bStand: liste('endemischer Zustand $\\mathbf{x}^*_b$', b ? b.x : null, { form: 'vektor', marks: b ? [mark(b.x)] : [] }),
       bedingung: klasse('Bedingung $1 < R \\le 2/\\alpha$', R > 1 && R <= 2 / p.alpha ? 'erfüllt' : 'nicht erfüllt'),
       spitze: zahl('meiste Infizierte', peak?.value ?? null, { digits: 5, marks: peak ? [{ kind: 'point', x: peak.index, y: peak.value, in: 'time' }] : [] }),
     }

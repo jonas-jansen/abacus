@@ -36,9 +36,11 @@ const model = closedForm({
     return {
       nullstellen: liste('Nullstellen', zeros, {
         note: 'keine im Bild',
+        namen: zeros.length > 1 ? zeros.map((_, i) => `x_${i + 1}`) : ['x'],
         marks: zeros.map((x, item) => ({ kind: 'point', x, y: 0, in: 'map', item })),
       }),
       fixpunkte: liste('Fixpunkte $f(x^*) = x^*$', fps, {
+        namen: fps.length > 1 ? fps.map((_, i) => `x_${i + 1}^*`) : ['x^*'],
         marks: fps.map((v, item) => ({ kind: 'value', v, item })),
       }),
       steigung0: zahl("Steigung $f'(0)$", derivative(g, 0), { digits: 3, marks: [{ kind: 'line', x: 0, y: g(0), slope: derivative(g, 0), in: 'map' }] }),

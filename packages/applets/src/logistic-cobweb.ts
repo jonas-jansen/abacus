@@ -31,12 +31,12 @@ const model = iteration({
       fixpunkte: liste(
         'Fixpunkte $y^*$',
         fps.map((f) => f.x),
-        { marks: fps.map((f, item) => ({ kind: 'value', v: f.x, item })) },
+        { namen: fps.map((_, i) => `y_${i + 1}^*`), marks: fps.map((f, item) => ({ kind: 'value', v: f.x, item })) },
       ),
       steigungen: liste(
         'Steigung $f\'(y^*)$',
         fps.map((f) => f.slope),
-        { digits: 3, marks: fps.map((f, item) => ({ kind: 'line', x: f.x, y: f.x, slope: f.slope, in: 'map', item })) },
+        { digits: 3, namen: fps.map((_, i) => `f'(y_${i + 1}^*)`), marks: fps.map((f, item) => ({ kind: 'line', x: f.x, y: f.x, slope: f.slope, in: 'map', item })) },
       ),
       periode: index('Periode', periode, {
         note: periode === null ? `keine Periode ≤ ${MAX_PERIOD} gefunden` : undefined,

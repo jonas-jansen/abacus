@@ -58,7 +58,7 @@ const model = ode({
         note: kultur ? undefined : 'bei diesem Durchfluss wachsen die Bakterien langsamer, als sie hinausgespült werden',
         marks: [mark(ziel)],
       }),
-      gleichgewicht: liste('Gleichgewicht $(b^*, n^*)$', ziel.x, { marks: [mark(ziel)] }),
+      gleichgewicht: liste('Gleichgewicht $(b^*, n^*)$', ziel.x, { form: 'vektor', marks: [mark(ziel)] }),
       typ: klasse('Typ', ziel.typ, { marks: [mark(ziel)] }),
       eigenwerte: eigenReadout(ziel.J[0][0], ziel.J[0][1], ziel.J[1][0], ziel.J[1][1], { at: ziel.x }),
     }

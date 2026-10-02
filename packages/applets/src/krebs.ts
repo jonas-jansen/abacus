@@ -4,7 +4,7 @@
 // of A sums to 1: nobody is lost, N = x₁ + x₂ + x₃ is conserved (II 24), λ = 1 is an
 // eigenvalue, and the sequence approaches the stationary state — the eigenvector to λ = 1.
 
-import { eigenvalues, eigenvalueTexts, iterationN, liste, real, schritte, zahl } from '@abacus/applet-core'
+import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, liste, real, schritte, zahl } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { p: number; h: number; s: number; N: number }
@@ -48,15 +48,17 @@ const model = iterationN({
   ],
   observables: ({ p, x }) => {
     const st = stationaer(p)
+    const ls = eigenvalues(matrix(p))
     const last = x[0].length - 1
     return {
-      stationaer: liste('stationärer Zustand $(x_1^*, x_2^*, x_3^*)$', st, {
+      stationaer: liste('stationärer Zustand $\\mathbf{x}^*$', st, {
+        form: 'vektor',
         digits: 5,
         marks: st ? st.map((v, item) => ({ kind: 'value' as const, v, item })) : [],
         note: st ? undefined : 'für h = 0 oder s = 0 sammeln sich alle in einer Gruppe',
       }),
       summe: zahl('$x_1 + x_2 + x_3$ bei $n_{\\max}$', x[0][last] + x[1][last] + x[2][last], { digits: 7 }),
-      eigenwerte: liste('Eigenwerte von $A$', eigenvalueTexts(eigenvalues(matrix(p)))),
+      eigenwerte: liste('Eigenwerte von $A$', eigenvalueTexts(ls), { namen: eigenvalueNames(ls) }),
     }
   },
 })

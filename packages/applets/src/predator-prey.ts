@@ -30,7 +30,8 @@ const model = iterationN({
     const last = y2[y2.length - 1]
     const v = behaviour(y1)
     return {
-      gleichgewicht: liste(coexist ? 'Koexistenz $(y_1^*, y_2^*)$' : 'Gleichgewicht ohne Räuber', eq, {
+      gleichgewicht: liste(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, {
+        form: 'vektor',
         marks: [
           { kind: 'value', v: eq[0], item: 0 },
           { kind: 'value', v: eq[1], item: 1 },

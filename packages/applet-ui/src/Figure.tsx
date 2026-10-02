@@ -4,7 +4,7 @@ import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, 
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
-import { FigureHead, legendEntries } from './FigureHead'
+import { FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
 import { useZoomPan } from './useZoomPan'
 import { magnification as magnificationOf, type Win } from './zoom'
@@ -46,7 +46,6 @@ interface FigureProps<P extends Params> {
   vergleich?: { run: Run; text: string; detail?: (d: Detail) => Run | null } | null
   onVergleichLoesen?: () => void
   /** Offer to hold the current state for comparison (shown on one figure only). */
-  onVergleichen?: () => void
   /** Phase portrait: further trajectories, and what a click on empty space does. */
   bahnen?: readonly Run[]
   onBahn?: (start: [number, number]) => void
@@ -83,7 +82,6 @@ export function Figure<P extends Params>({
   onFocusSeries,
   vergleich,
   onVergleichLoesen,
-  onVergleichen,
   bahnen,
   onBahn,
   onBahnenLoeschen,
@@ -299,19 +297,7 @@ export function Figure<P extends Params>({
 
   return (
     <figure className="ab-figure" ref={outer} data-spot={markGeom.length > 0 || undefined}>
-      <FigureHead
-        title={spec.title}
-        legend={legend}
-        hidden={view.hidden}
-        onToggle={onToggleSeries}
-        onFocus={onFocusSeries}
-        log={entry.logToggle ? { on: logY, set: setLogY, hilfe: entry.logHilfe } : undefined}
-        vergleich={vergleich ? { text: vergleich.text, loesen: onVergleichLoesen } : undefined}
-        onVergleichen={onVergleichen}
-        bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
-        zoomReset={zoom ? () => setZoom(null) : undefined}
-        farbskala={farbskala}
-      />
+      <FigureHead title={spec.title} log={entry.logToggle ? { on: logY, set: setLogY, hilfe: entry.logHilfe } : undefined} />
       <div
         className="ab-figure-inner"
         role="img"
@@ -391,7 +377,21 @@ export function Figure<P extends Params>({
             ))}
           </div>
         )}
+        <FigureActions
+          zoomReset={zoom ? () => setZoom(null) : undefined}
+          bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
+          style={{ top: plot.y + 6, right: figW - plot.x - plot.w + 6 }}
+        />
       </div>
+      <FigureLegend
+        legend={legend}
+        hidden={view.hidden}
+        onToggle={onToggleSeries}
+        onFocus={onFocusSeries}
+        vergleich={vergleich ? { text: vergleich.text, loesen: onVergleichLoesen } : undefined}
+        farbskala={farbskala}
+        hinweis={onBahn && !(bahnen && bahnen.length) ? 'klicken: weitere Bahn' : undefined}
+      />
     </figure>
   )
 }

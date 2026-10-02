@@ -93,7 +93,7 @@ const model = defineModel({
       observables.h = zahl('Schrittweite $h = 10/m$', T_END / p.m, { digits: 3, marks: [{ kind: 'time', t: T_END / p.m }] })
       observables.fehlerEuler = zahl('größter Fehler Euler', maxError('euler', p.m), { digits: 3, marks: worst('euler') })
       observables.fehlerHeun = zahl('größter Fehler Heun', maxError('heun', p.m), { digits: 3, marks: worst('heun') })
-      observables.ordnung = liste('halbes $h$ teilt den Fehler durch (Euler, Heun)', [ratio('euler'), ratio('heun')], { digits: 3 })
+      observables.ordnung = liste('halbes $h$ teilt den Fehler durch', [ratio('euler'), ratio('heun')], { digits: 3, namen: ['\\text{Euler}', '\\text{Heun}'] })
     }
     return { series, observables, meta: {} }
   },
