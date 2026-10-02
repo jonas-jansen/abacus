@@ -130,10 +130,10 @@
 .ab-applet button:disabled {
   cursor: default;
 }
+/* the ring follows each element's own corners: round buttons stay round */
 .ab-applet :focus-visible {
   outline: 2px solid var(--ab-accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 .ab-head {
@@ -291,14 +291,9 @@ button.ab-icon {
 .ab-undo .ab-tool:disabled {
   opacity: 0.3;
 }
-.ab-copy[data-done] {
-  width: auto;
-  padding: 0 6px;
-  color: var(--ab-mark) !important;
-}
-.ab-copy-done {
-  font-size: 12px;
-  white-space: nowrap;
+.ab-toolbar .ab-tool.ab-copy[data-done] {
+  background: var(--ab-mark-soft);
+  color: var(--ab-mark);
 }
 .ab-textbtn {
   padding: 0;

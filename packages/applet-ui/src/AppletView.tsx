@@ -473,7 +473,7 @@ function Readout({
   const changed = before !== null && before !== (values.map((x) => x.text).join(', ') || '—')
 
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault()
       onPin()
     }
@@ -572,9 +572,11 @@ function CopyLink() {
     }
   }
   return (
-    <button type="button" className="ab-tool ab-copy" onClick={copy} data-tip="Link zu genau diesem Zustand kopieren" aria-label="Link kopieren" data-done={done || undefined}>
+    <button type="button" className="ab-tool ab-copy" onClick={copy} data-tip="Link zu genau diesem Zustand kopieren" aria-label={done ? 'Link kopiert' : 'Link kopieren'} data-done={done || undefined}>
       {done ? (
-        <span className="ab-copy-done">kopiert ✓</span>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       ) : (
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           <path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.5 2.5 0 0 1 3.5 3.5L10.5 8M9 11.5l-1.2 1.2a2.5 2.5 0 0 1-3.5-3.5L5.5 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -668,10 +670,10 @@ function TempoKnopf({ tempo, onTempo }: { tempo: number; onTempo: (t: number) =>
         if (d && !d.moved) next()
       }}
       onKeyDown={(e) => {
-        // keyboard: Enter/Space cycle (as a click), arrows fine-tune
+        // keyboard: Enter cycles (as a click), arrows fine-tune; Space plays
         if (e.key === 'ArrowRight' || e.key === 'ArrowUp') (e.preventDefault(), onTempo(tempo * 1.25))
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') (e.preventDefault(), onTempo(tempo / 1.25))
-        if (e.key === 'Enter' || e.key === ' ') (e.preventDefault(), next())
+        if (e.key === 'Enter') (e.preventDefault(), next())
       }}
       aria-label={`Tempo ${tempoText(tempo)}`}
       data-tip={'Klick | ½× · 1× · 2× · 4×\n{Ziehen} | stufenlos 0,1× bis 10×\n{Rad} | ebenso'}
@@ -746,17 +748,40 @@ export function Timeline({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, max, min, tempo])
 
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === ' ' && (e.target as HTMLElement).tagName !== 'BUTTON') {
-      e.preventDefault()
-      setPlaying((p) => !p)
+  // Space only plays and pauses – wherever the focus is in the applet (a focused button is
+  // not pressed again; Enter still does that), and on a page with this applet alone also with
+  // nothing focused. Typing in a field keeps its space.
+  const bar = useRef<HTMLDivElement>(null)
+  const emptyRef = useRef(empty)
+  emptyRef.current = empty
+  useEffect(() => {
+    const root = bar.current?.closest('.ab-applet')
+    if (!root) return
+    const ours = (t: EventTarget | null) => {
+      const el = t as HTMLElement | null
+      if (!el || (el.tagName === 'INPUT' && !['range', 'checkbox', 'radio', 'button'].includes((el as HTMLInputElement).type)) || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable) return false
+      if (root.contains(el)) return true
+      return (el === document.body || el === document.documentElement) && document.querySelectorAll('.ab-applet').length === 1
     }
-  }
+    const down = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey || !ours(e.target) || document.querySelector('dialog[open]')) return
+      e.preventDefault()
+      if (!e.repeat && !emptyRef.current) setPlaying((p) => !p)
+    }
+    // a button would act on the key's release
+    const up = (e: globalThis.KeyboardEvent) => e.key === ' ' && ours(e.target) && !document.querySelector('dialog[open]') && e.preventDefault()
+    document.addEventListener('keydown', down)
+    document.addEventListener('keyup', up)
+    return () => {
+      document.removeEventListener('keydown', down)
+      document.removeEventListener('keyup', up)
+    }
+  }, [])
   const sym = continuous ? 't' : 'n'
   const show = (v: number) => (continuous ? formatNumber(v, 3) : formatNumber(v, 7))
 
   return (
-    <div className="ab-timeline" role="group" aria-label={continuous ? 'Zeit' : 'Schritte'} onKeyDown={onKey}>
+    <div className="ab-timeline" role="group" aria-label={continuous ? 'Zeit' : 'Schritte'} ref={bar}>
       <button type="button" className="ab-play" disabled={empty} onClick={() => setPlaying(!playing)} aria-label={playing ? 'anhalten' : 'abspielen'} data-tip={playing ? '{Leer} | anhalten' : '{Leer} | abspielen'}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
           {playing ? Glyph.pause : Glyph.play}

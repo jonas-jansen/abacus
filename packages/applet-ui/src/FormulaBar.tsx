@@ -221,7 +221,8 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
     const el = target(e)
     const id = el?.dataset.param
     if (!id) return
-    if (e.key === 'Enter' || e.key === ' ') {
+    // Space belongs to the timeline
+    if (e.key === 'Enter') {
       e.preventDefault()
       activate(id)
       return
