@@ -213,16 +213,13 @@ export function Figure<P extends Params>({
     return { label: spec.zLabel ?? g.label, lo, hi }
   }, [spec, run])
   const { plot } = frame
-  // The row above the plot, on the line of the y label (its middle is the arrow tip): the
-  // lin/log switch ends at the plot's right edge; the plot's actions are centred above the x
-  // label at the right arrow tip. Both are placed the same in every plot, title or not.
+  // The plot's actions stand on the line of the y label (its middle is the arrow tip), centred
+  // above the x label at the right arrow tip.
   const kopfzeile = plot.y - AXIS_OVERHANG
   const nAktionen = (zoom ? 1 : 0) + (bahnen?.length ? 1 : 0)
   const aktionenBreite = nAktionen * 24 + Math.max(0, nAktionen - 1) * 6 + (bahnen?.length ? 12 : 0)
   const xLabelMitte = plot.x + plot.w + AXIS_OVERHANG + 2 + labelWidth(spec.xLabel ?? '', frame.fontSize) / 2
   const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
-  // the switch never moves: the actions stand over the x label, right of the plot's edge
-  const switchRechts = figW - plot.x - plot.w
 
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
 
@@ -308,7 +305,7 @@ export function Figure<P extends Params>({
 
   return (
     <figure className="ab-figure" ref={outer} data-spot={markGeom.length > 0 || undefined}>
-      <FigureHead title={spec.title} />
+      <FigureHead title={spec.title}>{entry.logToggle && <AxisSwitch log={{ on: logY, set: setLogY, hilfe: entry.logHilfe }} />}</FigureHead>
       <div
         className="ab-figure-inner"
         role="img"
@@ -387,9 +384,6 @@ export function Figure<P extends Params>({
               </span>
             ))}
           </div>
-        )}
-        {entry.logToggle && (
-          <AxisSwitch log={{ on: logY, set: setLogY, hilfe: entry.logHilfe }} style={{ position: 'absolute', top: kopfzeile - 13, right: switchRechts }} />
         )}
         <FigureActions
           zoomReset={zoom ? () => setZoom(null) : undefined}

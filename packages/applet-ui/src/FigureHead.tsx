@@ -1,6 +1,6 @@
 /** Around a figure: its head (title, axis switch), its legend below, and actions in its corner. */
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { formatNumber, type Run, type Series } from '@abacus/applet-core'
 import { nullclineSeries, roleStyles, type PlotSpec } from '@abacus/applet-plot'
 import { MathLabel } from './MathLabel'
@@ -13,19 +13,18 @@ const LOG_HILFE =
  * The row above a plot: its title and, where offered, the lin/log switch – nothing else, so it
  * reads at a glance. Every figure has it, so figures side by side keep their plots level.
  */
-export function FigureHead({ title }: { title?: string }) {
-  if (!title) return null
+export function FigureHead({ title, children }: { title?: string; children?: ReactNode }) {
   return (
     <div className="ab-fighead">
-      <span className="ab-figtitle">{title}</span>
+      {title ? <span className="ab-figtitle">{title}</span> : <span />}
+      {children}
     </div>
   )
 }
 
 /**
- * The switch between a linear and a logarithmic y axis, with its "?" explanation. It has a
- * fixed place: above the plot's right edge, in the row of the y label – the same in every
- * plot, title or not.
+ * The switch between a linear and a logarithmic y axis, with its "?" explanation. It sits at
+ * the right end of the title row, which every plot has, title or not.
  */
 export function AxisSwitch({ log, style }: { log: { on: boolean; set: (on: boolean) => void; hilfe?: string }; style?: CSSProperties }) {
   const [help, setHelp] = useState(false)

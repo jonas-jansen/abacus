@@ -219,7 +219,7 @@
 @container (min-width: 600px) {
   .ab-figures[data-count='2'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    /* equally high cards; inside, the plots sit at the bottom, so the x axes stay level */
+    /* equally high cards; every card has its title row, so the plots stay level */
     align-items: stretch;
   }
   .ab-controls {
@@ -342,7 +342,8 @@
   min-width: 0;
 }
 /* Every plot in a card of its own: title, plot and legend read as one unit, and plots side
-   by side are clearly separate. Cards in a row have the same height, their plots level. */
+   by side are clearly separate. Cards in a row have the same height, their plots level at
+   the top; a card with a shorter legend just has room below. */
 .ab-figures {
   align-items: stretch;
 }
@@ -353,9 +354,6 @@
   background: var(--ab-bg);
   border: 1px solid var(--ab-line);
   border-radius: var(--ab-radius);
-}
-.ab-figure > .ab-figure-inner {
-  margin-top: auto;
 }
 .ab-figure-inner {
   position: relative;
