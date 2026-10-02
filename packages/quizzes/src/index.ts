@@ -1,19 +1,20 @@
-/** Registry of all quizzes. Ids are global: a quiz can appear on any page. */
+/** Registry of all questions for course pages. Ids are global: a question can appear on any page. */
 
 import type { QuizDef } from '@abacus/quiz/define'
-import geometrisch from './geometrisch'
-import logistik from './logistik'
-import wachstum from './wachstum'
+import geometric from './geometric'
+import growth from './growth'
+import logistic from './logistic'
 
-const list: QuizDef[] = [...geometrisch, ...logistik, ...wachstum]
+const list: QuizDef[] = [...geometric, ...logistic, ...growth]
 
 export const quizzes: Readonly<Record<string, QuizDef>> = Object.fromEntries(list.map((q) => [q.id, q]))
 
-if (Object.keys(quizzes).length !== list.length) throw new Error('Doppelte Quiz-Ids.')
+if (Object.keys(quizzes).length !== list.length) throw new Error('Duplicate quiz ids.')
 
 export function getQuiz(id: string): QuizDef {
   const q = quizzes[id]
-  if (!q) throw new Error(`Unbekanntes Quiz "${id}".`)
+  if (!q) throw new Error(`Unknown quiz "${id}".`)
   return q
 }
-export { wochenquizze, getWochenquiz } from './wochen'
+
+export { weeklyQuizzes, getWeeklyQuiz } from './weekly'

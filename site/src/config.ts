@@ -5,7 +5,7 @@ import type { NotebookScope } from '@abacus/quiz'
 export const kurs = {
   id: 'dynsys',
   semester: 'ws2026',
-  titel: 'Mathematik für Biowissenschaften',
+  title: 'Mathematik für Biowissenschaften',
 }
 
 export const scope: NotebookScope = { kurs: kurs.id, semester: kurs.semester }

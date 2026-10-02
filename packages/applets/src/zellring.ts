@@ -8,7 +8,7 @@
 // only run one way and circles for ever — re-entry (n = 41); later still it runs both ways
 // and dies out (n = 45).
 
-import { bool, index, int, iterationN, klasse, real, schritte, type Grid } from '@abacus/applet-core'
+import { bool, index, int, iterationN, category, real, steps, type Grid } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const M = 50
@@ -64,7 +64,7 @@ const model = iterationN({
     k: real('Reiz im Ruhezustand', { latex: 'k', min: 0, max: 0.1, step: 0.001, default: 0.02 }),
     a: real('Erholung', { latex: 'a', min: 0, max: 0.99, step: 0.01, default: 0.89, limits: { min: 0, max: 0.999, reason: 'Für 0 < a < 1 gibt es einen Ruhezustand.' } }),
     c: real('Zufluss', { latex: 'c', min: 0, max: 1, step: 0.01, default: 0.28 }),
-    N: schritte('Schritte', { latex: 'N', default: 120, max: 1000 }),
+    N: steps('Schritte', { latex: 'N', default: 120, max: 1000 }),
   },
   components,
   start: (p) => nach(p, 0), // at rest, cell 1 excited
@@ -82,7 +82,7 @@ const model = iterationN({
     // whether the excitation lasts: a longer run
     const bleibt = aktiv(nach(p, 400)) > 0
     return {
-      erregung: klasse('Die Erregung', bleibt ? 'kreist weiter (Reentry)' : 'erlischt', {
+      erregung: category('Die Erregung', bleibt ? 'kreist weiter (Reentry)' : 'erlischt', {
         note: bleibt ? 'eine Welle läuft immer wieder um den Ring' : undefined,
       }),
       aktiv: index('erregte Zellen bei $N$', jetzt),
@@ -93,8 +93,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'zellring',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     {
       label: 'Zelle i',
       tex: String.raw`y_1^i(n+1) = (1 - {{d}})\,f_1(\mathbf{y}^i) + \frac{{{d}}}{2}\bigl(f_1(\mathbf{y}^{i+1}) + f_1(\mathbf{y}^{i-1})\bigr) \\ y_2^i(n+1) = {{a}}{{*}}y_2^i(n) - {{b}}{{*}}y_1^i(n) + {{c}}`,
@@ -105,9 +105,9 @@ export default defineApplet({
     { type: 'heatmap', grid: 'y1', title: 'Erregung über die Zeit', xLabel: 'n', yLabel: '\\text{Zelle } i', zLabel: 'y_1', zRange: [0, 4.5] },
     { type: 'bars', grid: 'y1', title: 'Der Ring bei n', xLabel: 'i', yLabel: 'y_1^i', y: [0, 5] },
   ],
-  layout: { main: ['d', 'zweiter', 'n2'], sichtbar: { zelle: (p) => p.zweiter, n2: (p) => p.zweiter } },
-  anzeige: ['erregung', 'aktiv'],
-  szenarien: [
+  layout: { main: ['d', 'zweiter', 'n2'], visible: { zelle: (p) => p.zweiter, n2: (p) => p.zweiter } },
+  readouts: ['erregung', 'aktiv'],
+  scenarios: [
     { label: 'ohne Kopplung', text: 'd = 0: nur Zelle 1 feuert (Folie 68)', params: { d: 0 } },
     { label: 'eine Welle', text: 'd = 0,4: die Welle läuft in beide Richtungen und erlischt (Folie 69)', params: {} },
     { label: 'Szenario I', text: 'zweiter Reiz bei n = 37: die Zellen sind noch refraktär (Folie 70)', params: { zweiter: true, n2: 37 } },

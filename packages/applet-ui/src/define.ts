@@ -6,9 +6,9 @@
 
 import type { Model, Params, RunOptions } from '@abacus/applet-core'
 import type { Domain, PlotSpec } from '@abacus/applet-plot'
-import type { Formel } from './formula'
+import type { Formula } from './formula'
 
-export type { Formel } from './formula'
+export type { Formula } from './formula'
 
 export type Resolvable<T, P> = T | ((p: P) => T)
 
@@ -52,65 +52,65 @@ export interface LayoutHint<P = Params> {
   /** Parameters shown up front. The rest go into "weitere Parameter". Default: all if ≤ 4, else the first three. */
   main?: readonly string[]
   /** Parameters that only matter in some settings, e.g. `{ b: (p) => p.form === 'linear' }`. */
-  sichtbar?: Readonly<Record<string, (p: P) => boolean>>
+  visible?: Readonly<Record<string, (p: P) => boolean>>
 }
 
 /** The chapters of the lecture slides ("Mathematik für Biowissenschaften"). */
-export const KAPITEL = {
+export const CHAPTERS = {
   I: 'Diskrete dynamische Systeme mit einer Variablen',
   II: 'Diskrete dynamische Systeme mit mehreren Variablen',
   III: 'Kontinuierliche dynamische Systeme mit einer Variablen',
   IV: 'Kontinuierliche dynamische Systeme mit mehreren Variablen',
-  Anhang: 'Mathematische Grundlagen',
+  Appendix: 'Mathematische Grundlagen',
 } as const
 
-export type Kapitel = keyof typeof KAPITEL
-export const KAPITEL_ORDER: readonly Kapitel[] = ['I', 'II', 'III', 'IV', 'Anhang']
+export type Chapter = keyof typeof CHAPTERS
+export const CHAPTER_ORDER: readonly Chapter[] = ['I', 'II', 'III', 'IV', 'Appendix']
 
 export interface AppletDef<P extends Params = Params> {
   /** Stable, URL-safe, no dots. Used in the URL hash, on the channel and in routes. */
   id: string
-  titel: string
-  kurz: string
+  title: string
+  summary: string
   /** Chapter of the lecture slides; applets are listed by chapter everywhere. */
-  kapitel: Kapitel
+  chapter: Chapter
   /** Where in the slides, e.g. "22–27". */
-  folien?: string
+  slides?: string
   model: Model<P>
   /**
    * The model as formulas with live parameters, e.g.
    * `[{ label: 'Vorschrift', tex: 'x_{n+1} = {{a}}\\,x_n' }]` (syntax: formula.ts).
    * A function when the formulas depend on a setting.
    */
-  formeln?: readonly Formel[] | ((p: P) => readonly Formel[])
+  formulas?: readonly Formula[] | ((p: P) => readonly Formula[])
   /** One island, however many plots it drives (§10). */
   plots: readonly PlotEntry<P>[]
   layout?: LayoutHint<P>
   /** Observable ids to display live. */
-  anzeige?: readonly string[]
+  readouts?: readonly string[]
   /**
    * Show the timeline (play, scrub). Default: on for iterations and ODEs, off for closed
    * forms — set it when a closed form is a motion in time.
    */
-  zeitleiste?: boolean
+  timeline?: boolean
   /**
    * The parameter that sets how far the timeline runs (steps N, time window T). It is set in
    * the timeline itself ("n = 12 / 40", the 40 editable), not among the model's parameters.
    */
-  horizont?: string
+  horizon?: string
   /** Open the timeline at the start instead of showing everything. */
-  schritte?: boolean
+  stepwise?: boolean
   runOptions?: (p: P) => Partial<RunOptions>
   /** Listed in the overview (default true). Unlisted applets keep their address, to share. */
-  sichtbar?: boolean
+  visible?: boolean
   /**
    * Named settings from the slides, one click each (e.g. "Szenario A" of the SIR model):
    * the defaults with these values. Shown as chips above the parameters.
    */
-  szenarien?: readonly Szenario<P>[]
+  scenarios?: readonly Scenario<P>[]
 }
 
-export interface Szenario<P = Params> {
+export interface Scenario<P = Params> {
   label: string
   /** One line on what it shows, as the chip's hint. */
   text?: string
@@ -120,15 +120,15 @@ export interface Szenario<P = Params> {
 export type AnyAppletDef = AppletDef<any>
 
 /** The catalog fields: they live in packages/applets/applets.json, one entry per applet. */
-export type KatalogFeld = 'titel' | 'kurz' | 'kapitel' | 'folien' | 'sichtbar'
+export type CatalogField = 'title' | 'summary' | 'chapter' | 'slides' | 'visible'
 
 /**
  * What an applet file defines: model, formulas, plots … – everything but the catalog fields,
  * which the registry adds from applets.json (a test may still give them directly).
  */
-export type AppletModul<P extends Params = Params> = Omit<AppletDef<P>, KatalogFeld> & Partial<Pick<AppletDef<P>, KatalogFeld>>
+export type AppletModule<P extends Params = Params> = Omit<AppletDef<P>, CatalogField> & Partial<Pick<AppletDef<P>, CatalogField>>
 
-export function defineApplet<P extends Params>(def: AppletModul<P>): AppletModul<P> {
+export function defineApplet<P extends Params>(def: AppletModule<P>): AppletModule<P> {
   if (!/^[a-z0-9][a-z0-9_-]*$/i.test(def.id)) {
     throw new Error(`Applet id "${def.id}" must be URL-safe: letters, digits, '-' and '_' only.`)
   }
@@ -138,10 +138,10 @@ export function defineApplet<P extends Params>(def: AppletModul<P>): AppletModul
       if (!ids.has(h.param)) throw new Error(`Applet "${def.id}": drag handle refers to unknown parameter "${h.param}".`)
     }
   }
-  for (const s of def.szenarien ?? []) {
+  for (const s of def.scenarios ?? []) {
     for (const id of Object.keys(s.params)) if (!ids.has(id)) throw new Error(`Applet "${def.id}": Szenario "${s.label}" sets unknown parameter "${id}".`)
   }
-  for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.sichtbar ?? {}), ...(def.horizont ? [def.horizont] : [])]) {
+  for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.visible ?? {}), ...(def.horizon ? [def.horizon] : [])]) {
     if (!ids.has(id)) throw new Error(`Applet "${def.id}": layout.main refers to unknown parameter "${id}".`)
   }
   return def

@@ -9,8 +9,8 @@ packages/
   applet-ui     React: the applet (formulas, plots, panel, timeline, tools)
   applets       the applet definitions + applets.json (the catalog)            (data, no React)
   channel       messages between containers                                    (no dependencies)
-  quiz          React: question types, grading (bewertung.ts, pure), weekly quizzes, the notebook
-  quizzes       the questions and weekly quizzes (wochen/)                     (data, no React)
+  quiz          React: question types, grading (grading.ts, pure), weekly quizzes, the notebook
+  quizzes       the questions and weekly quizzes (weekly/)                     (data, no React)
 site/           Astro: pages, course pages (MDX), layout, themes
 ```
 
@@ -101,7 +101,7 @@ and client markup match. Hint cards (`tip.ts`) are one listener for the whole pa
 
 | File | Role |
 |---|---|
-| `packages/applets/applets.json` | catalog: title, chapter, slides, `sichtbar`, order |
+| `packages/applets/applets.json` | catalog: title, summary, chapter, slides, `visible`, order |
 | `packages/applets/src/index.ts` | registry; checks catalog and code against each other |
 | `packages/applet-ui/src/define.ts` | `defineApplet` and the `AppletDef` type |
 | `packages/applet-ui/src/styles.css` | all applet styles; colour tokens at the top |

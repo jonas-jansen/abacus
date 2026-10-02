@@ -3,7 +3,7 @@
 // zⁿ wind around the origin — outwards for |z| > 1, inwards for |z| < 1. That is exactly what
 // complex eigenvalues do to linear systems.
 
-import { choice, defineModel, int, klasse, liste, point, type Observable, type Point, type Series } from '@abacus/applet-core'
+import { choice, defineModel, int, category, list, point, type Observable, type Point, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type Op = 'summe' | 'produkt' | 'potenz'
@@ -92,18 +92,18 @@ const model = defineModel({
     }
     const observables: Record<string, Observable> = {}
     if (opts.observables !== false) {
-      observables.ergebnis = klasse('Ergebnis', text(e), { marks: [{ kind: 'point', x: e[0], y: e[1], in: 'phase' }] })
+      observables.ergebnis = category('Ergebnis', text(e), { marks: [{ kind: 'point', x: e[0], y: e[1], in: 'phase' }] })
       // the result's symbol: z + w, z w or zⁿ
       const r = p.op === 'summe' ? 'z + w' : p.op === 'produkt' ? 'z\\,w' : 'z^n'
       const potenz = p.op === 'potenz'
-      observables.betrag = liste('Beträge', potenz ? [betrag(p.z), betrag(e)] : [betrag(p.z), betrag(p.w), betrag(e)], {
+      observables.betrag = list('Beträge', potenz ? [betrag(p.z), betrag(e)] : [betrag(p.z), betrag(p.w), betrag(e)], {
         digits: 3,
-        namen: potenz ? ['|z|', '|z^n|'] : ['|z|', '|w|', `|${r}|`],
+        names: potenz ? ['|z|', '|z^n|'] : ['|z|', '|w|', `|${r}|`],
       })
-      observables.winkel = liste('Winkel', potenz ? [winkel(p.z), winkel(e)] : [winkel(p.z), winkel(p.w), winkel(e)], {
+      observables.winkel = list('Winkel', potenz ? [winkel(p.z), winkel(e)] : [winkel(p.z), winkel(p.w), winkel(e)], {
         digits: 3,
-        einheit: '^\\circ',
-        namen: potenz ? ['\\arg z', '\\arg z^n'] : ['\\arg z', '\\arg w', `\\arg(${r})`],
+        unit: '^\\circ',
+        names: potenz ? ['\\arg z', '\\arg z^n'] : ['\\arg z', '\\arg w', `\\arg(${r})`],
       })
     }
     return { series, observables, meta: {} }
@@ -113,7 +113,7 @@ const model = defineModel({
 export default defineApplet({
   id: 'komplexe-zahlen',
   model,
-  formeln: (p) => [
+  formulas: (p) => [
     { label: 'Zahlen', tex: String.raw`z = {{#z.0}} {{#+z.1}}\,i` + (p.op === 'potenz' ? '' : String.raw` \\ w = {{#w.0}} {{#+w.1}}\,i`) },
     {
       label: 'Rechnung',
@@ -142,6 +142,6 @@ export default defineApplet({
       ],
     },
   ],
-  layout: { main: ['op', 'z', 'w', 'n'], sichtbar: { w: (p) => p.op !== 'potenz', n: (p) => p.op === 'potenz' } },
-  anzeige: ['ergebnis', 'betrag', 'winkel'],
+  layout: { main: ['op', 'z', 'w', 'n'], visible: { w: (p) => p.op !== 'potenz', n: (p) => p.op === 'potenz' } },
+  readouts: ['ergebnis', 'betrag', 'winkel'],
 })

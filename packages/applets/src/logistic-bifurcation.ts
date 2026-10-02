@@ -1,7 +1,7 @@
 // MATLAB: app_logistic_a — y_{n+1} = a y_n (1 − y_n) for a from 0 to 4, with the bifurcation
 // diagram: where the sequence ends up, for every a at once. The current a is a line through it.
 
-import { detectPeriod, index, iteration, real, schritte, verhalten } from '@abacus/applet-core'
+import { detectPeriod, index, iteration, real, steps, behaviour } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const MAX_PERIOD = 32
@@ -52,7 +52,7 @@ const model = iteration({
   params: {
     a: real('Wachstumsrate', { latex: 'a', min: 0, max: 4, step: 0.001, default: 3.2 }),
     y0: real('Startwert', { latex: 'y_0', min: 0, max: 1, step: 0.01, default: 0.05 }),
-    N: schritte('Schritte', { latex: 'N', default: 30, max: 200 }),
+    N: steps('Schritte', { latex: 'N', default: 30, max: 200 }),
   },
   start: (p) => p.y0,
   step: (y, p) => p.a * y * (1 - y),
@@ -77,7 +77,7 @@ const model = iteration({
           { kind: 'point', x: p.a, y: c, in: 'phase' } as const,
         ]),
       }),
-      verhalten: verhalten('Verhalten', x),
+      verhalten: behaviour('Verhalten', x),
     }
   },
 })
@@ -85,8 +85,8 @@ const model = iteration({
 export default defineApplet({
   id: 'logistic-bifurcation',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n)` },
     { label: 'Start', tex: String.raw`y_0 = {{#y0}}` },
   ],
@@ -103,5 +103,5 @@ export default defineApplet({
     },
     { type: 'timeSeriesDiscrete', series: ['y'], xLabel: 'n', yLabel: 'y_n', y: [0, 1], drag: { param: 'y0', axis: 'y' } },
   ],
-  anzeige: ['periode', 'verhalten'],
+  readouts: ['periode', 'verhalten'],
 })

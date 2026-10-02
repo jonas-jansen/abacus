@@ -4,7 +4,7 @@
 // of A sums to 1: nobody is lost, N = x₁ + x₂ + x₃ is conserved (II 24), λ = 1 is an
 // eigenvalue, and the sequence approaches the stationary state — the eigenvector to λ = 1.
 
-import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, liste, real, schritte, zahl } from '@abacus/applet-core'
+import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, list, real, steps, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { p: number; h: number; s: number; N: number }
@@ -33,7 +33,7 @@ const model = iterationN({
     h: anteil('leicht Erkrankte gesunden', 'h', 0.6),
     s: anteil('schwer Erkrankte bessern sich', 's', 0.35),
     N: real('Bevölkerung', { latex: 'N', min: 1000, max: 1_000_000, step: 1000, default: 100_000, limits: { min: 0, reason: 'Eine Anzahl ist nicht negativ.' } }),
-    T: schritte('Jahre', { latex: 'n_{\\max}', default: 60, max: 500 }),
+    T: steps('Jahre', { latex: 'n_{\\max}', default: 60, max: 500 }),
   },
   components: [
     { id: 'x1', label: 'x_1', name: 'gesund', role: 'primary' },
@@ -51,14 +51,14 @@ const model = iterationN({
     const ls = eigenvalues(matrix(p))
     const last = x[0].length - 1
     return {
-      stationaer: liste('stationärer Zustand $\\mathbf{x}^*$', st, {
-        form: 'vektor',
+      stationaer: list('stationärer Zustand $\\mathbf{x}^*$', st, {
+        form: 'vector',
         digits: 5,
         marks: st ? st.map((v, item) => ({ kind: 'value' as const, v, item })) : [],
         note: st ? undefined : 'für h = 0 oder s = 0 sammeln sich alle in einer Gruppe',
       }),
-      summe: zahl('$x_1 + x_2 + x_3$ bei $n_{\\max}$', x[0][last] + x[1][last] + x[2][last], { digits: 7 }),
-      eigenwerte: liste('Eigenwerte von $A$', eigenvalueTexts(ls), { namen: eigenvalueNames(ls) }),
+      summe: quantity('$x_1 + x_2 + x_3$ bei $n_{\\max}$', x[0][last] + x[1][last] + x[2][last], { digits: 7 }),
+      eigenwerte: list('Eigenwerte von $A$', eigenvalueTexts(ls), { names: eigenvalueNames(ls) }),
     }
   },
 })
@@ -66,8 +66,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'krebs',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     {
       label: 'Modell',
       tex: String.raw`\mathbf{x}(n+1) = \begin{pmatrix} 1 - {{p}} & {{h}} & 0 \\ {{p}} & 0 & {{s}} \\ 0 & 1 - {{h}} & 1 - {{s}} \end{pmatrix} \mathbf{x}(n)`,
@@ -79,8 +79,8 @@ export default defineApplet({
     { type: 'timeSeriesDiscrete', series: ['x1', 'summe'], title: 'Gesunde', xLabel: 'n', yLabel: 'x_1(n)' },
     { type: 'timeSeriesDiscrete', series: ['x2', 'x3'], title: 'Erkrankte', xLabel: 'n', yLabel: 'x_2, x_3' },
   ],
-  anzeige: ['stationaer', 'summe', 'eigenwerte'],
-  szenarien: [
+  readouts: ['stationaer', 'summe', 'eigenwerte'],
+  scenarios: [
     { label: 'Folie 20', text: '0,3 % erkranken, 60 % gesunden, 35 % bessern sich', params: {} },
     { label: 'bessere Behandlung', text: '80 % der leicht Erkrankten gesunden', params: { h: 0.8 } },
   ],

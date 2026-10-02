@@ -1,7 +1,7 @@
 // MATLAB: app_linear_diff — x' = a x + b has the solutions x(t) = C e^{at} − b/a: one curve for
 // every constant C. All of them approach the equilibrium −b/a if a < 0 and flee it if a > 0.
 
-import { closedForm, klasse, linspace, real, zahl, type Series } from '@abacus/applet-core'
+import { closedForm, category, linspace, real, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 /** x(t) = C e^{at} − b/a, and its limit C + b t for a → 0. */
@@ -29,9 +29,9 @@ const model = closedForm({
   observables: ({ p }) => {
     const eq = Math.abs(p.a) < 1e-9 ? null : -p.b / p.a
     return {
-      gleichgewicht: zahl('Gleichgewicht $-b/a$', eq, { note: 'keines für a = 0', marks: eq === null ? [] : [{ kind: 'value', v: eq }] }),
-      stabilitaet: klasse('Gleichgewicht ist', p.a < 0 ? 'stabil' : p.a > 0 ? 'instabil' : null, { note: 'kein Gleichgewicht' }),
-      start: zahl('Startwert $x(0) = C - b/a$', general(0, p.a, p.b, p.C), { marks: [{ kind: 'point', x: 0, y: general(0, p.a, p.b, p.C), in: 'time' }] }),
+      gleichgewicht: quantity('Gleichgewicht $-b/a$', eq, { note: 'keines für a = 0', marks: eq === null ? [] : [{ kind: 'value', v: eq }] }),
+      stabilitaet: category('Gleichgewicht ist', p.a < 0 ? 'stabil' : p.a > 0 ? 'instabil' : null, { note: 'kein Gleichgewicht' }),
+      start: quantity('Startwert $x(0) = C - b/a$', general(0, p.a, p.b, p.C), { marks: [{ kind: 'point', x: 0, y: general(0, p.a, p.b, p.C), in: 'time' }] }),
     }
   },
 })
@@ -39,7 +39,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'linear-family',
   model,
-  formeln: [
+  formulas: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{a}}{{*}}x {{+b}}` },
     { label: 'Lösungen', tex: String.raw`x(t) = {{C}}{{*}}e^{{{a}}\,t} - \frac{{{b}}}{{{a}}}` },
     { label: 'Gleichgewicht', tex: String.raw`x^* = -\frac{{{b}}}{{{a}}}` },
@@ -60,5 +60,5 @@ export default defineApplet({
       ],
     },
   ],
-  anzeige: ['gleichgewicht', 'stabilitaet', 'start'],
+  readouts: ['gleichgewicht', 'stabilitaet', 'start'],
 })

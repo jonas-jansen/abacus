@@ -2,7 +2,7 @@
 //   x₁⁺ = x₁ − β x₁ x₂ + α (N − x₁),   x₂⁺ = (1 − γ − α) x₂ + β x₁ x₂,
 // population N = 100 000. Coupling α + γ ≤ 1 (else x₂ could turn negative).
 
-import { index, iterationN, klasse, liste, maximum, real, schritte, zahl } from '@abacus/applet-core'
+import { index, iterationN, category, list, maximum, real, steps, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const N = 100_000
@@ -14,7 +14,7 @@ const model = iterationN({
     gamma: real('Genesungsrate', { latex: '\\gamma', min: 0, max: 1, step: 0.01, default: 0.1 }),
     alpha: real('Erneuerungsrate', { latex: '\\alpha', min: 0, max: 1, step: 0.01, default: 0.1 }),
     I0: real('anfangs Infizierte', { latex: 'x_2(0)', min: 0, max: 1000, step: 1, default: 1, limits: { min: 0, max: N, reason: 'Es gibt nur 100 000 Menschen.' } }),
-    T: schritte('Schritte', { latex: 'n_{\\max}', default: 80, max: 300 }),
+    T: steps('Schritte', { latex: 'n_{\\max}', default: 80, max: 300 }),
   },
   normalize: (p) => (p.alpha + p.gamma > 1 ? { ...p, gamma: 1 - p.alpha } : p),
   constraintNote: 'α + γ ≤ 1',
@@ -32,17 +32,17 @@ const model = iterationN({
     const eq = endemic ? [sStar, (p.alpha * (N - sStar)) / (p.gamma + p.alpha)] : [N, 0]
     const peak = maximum(I)
     return {
-      reproduktion: zahl('Reproduktionszahl $\\beta x_1(0)/(\\gamma + \\alpha)$', R, { digits: 3 }),
-      ausbruch: klasse('Epidemie', R > 1 ? 'bricht aus' : 'stirbt aus'),
-      gleichgewicht: liste('Gleichgewicht $\\mathbf{x}^*$', eq, {
-        form: 'vektor',
+      reproduktion: quantity('Reproduktionszahl $\\beta x_1(0)/(\\gamma + \\alpha)$', R, { digits: 3 }),
+      ausbruch: category('Epidemie', R > 1 ? 'bricht aus' : 'stirbt aus'),
+      gleichgewicht: list('Gleichgewicht $\\mathbf{x}^*$', eq, {
+        form: 'vector',
         marks: [
           { kind: 'value', v: eq[0], item: 0 },
           { kind: 'value', v: eq[1], item: 1 },
           { kind: 'point', x: eq[0], y: eq[1], in: 'phase' },
         ],
       }),
-      spitze: zahl('höchstens infiziert', peak?.value ?? null, {
+      spitze: quantity('höchstens infiziert', peak?.value ?? null, {
         digits: 5,
         marks: peak ? [{ kind: 'point', x: peak.index, y: peak.value, in: 'time' }] : [],
       }),
@@ -54,8 +54,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'sir',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'System', tex: String.raw`x_1(n+1) = x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,\bigl(100\,000 - x_1(n)\bigr) \\ x_2(n+1) = (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n)` },
     { label: 'Start', tex: String.raw`x_1(0) = 100\,000 - x_2(0) \\ x_2(0) = {{#I0}}` },
   ],
@@ -93,5 +93,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['beta', 'gamma', 'alpha'] },
-  anzeige: ['reproduktion', 'ausbruch', 'gleichgewicht', 'spitze', 'spitzeBei'],
+  readouts: ['reproduktion', 'ausbruch', 'gleichgewicht', 'spitze', 'spitzeBei'],
 })

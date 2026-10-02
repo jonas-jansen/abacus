@@ -44,7 +44,7 @@ Without a new builder, a model can be written by hand: `defineModel({ …, run(p
 
 ## A readout helper
 
-Readouts are `Observable`s built by `zahl`, `index`, `klasse` and `liste`
+Readouts are `Observable`s built by `quantity`, `index`, `category` and `list`
 (`packages/applet-core/src/observables.ts`). A helper computes a value and returns one of
 these, e.g. `verhalten`, `periodOf`, `eigenReadout`. Keep the **value** a stable category or
 number (quizzes compare it) and put wording into `format`, `note` or `namen`. Add a unit test

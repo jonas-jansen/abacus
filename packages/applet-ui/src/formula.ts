@@ -19,7 +19,7 @@
 
 import { type ParamSpec, type ParamValue, type Params } from '@abacus/applet-core'
 
-export interface Formel {
+export interface Formula {
   /** Short caption at the left of the first line, e.g. "Vorschrift", "Start". */
   label?: string
   /** TeX; lines separated by `\\`. */

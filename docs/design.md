@@ -52,22 +52,22 @@ Two layers, at the top of `packages/applet-ui/src/styles.css`:
 
 | Brand variable | Used for |
 |---|---|
-| `--ci-akzent` | buttons, links, active states, the play button |
-| `--ci-reihe-1`, `-2`, `-3` | curves by role: primary, secondary, tertiary |
-| `--ci-gut` | marks in the plots, "copied" |
-| `--ci-warnung` | notes and warnings |
+| `--ci-accent` | buttons, links, active states, the play button |
+| `--ci-series-1`, `-2`, `-3` | curves by role: primary, secondary, tertiary |
+| `--ci-good` | marks in the plots, "copied" |
+| `--ci-warning` | notes and warnings |
 | `--ci-text` | text; neutrals are mixed from it |
-| `--ci-flaeche` | the applet and cards |
-| `--ci-seite` | the page behind |
-| `--ci-schrift` | the font |
-| `…-dunkel` | the same in dark mode |
+| `--ci-surface` | the applet and cards |
+| `--ci-page` | the page behind |
+| `--ci-font` | the font |
+| `…-dark` | the same in dark mode |
 
 **A theme** is one file in `site/src/themes/` that sets these; `site/src/styles/thema.css`
 picks it with one `@import`. `standard.css` is the library's own look; `uhoh.css` is the
 Universität Hohenheim corporate design. For a new one:
 
 - the three curve colours must differ clearly in hue, and be dark enough for thin lines on
-  `--ci-flaeche`;
+  `--ci-surface`;
 - in dark mode, keep each hue but raise lightness and saturation (OKLCH lightness ≈ 0.74–0.84);
   plain tints look washed out on a dark ground;
 - check both modes; the canvas follows the theme, and redraws when the mode changes.

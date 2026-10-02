@@ -12,7 +12,7 @@ import { TeX } from './TeX'
 
 /** A readout value as TeX, the German way: 0{,}819, -0{,}5 \pm 1\,i, 1{,}4 \cdot 10^{11}. */
 function valueTex(o: Observable, x: number | string): string {
-  if (typeof x === 'number') return (o.kind === 'index' ? String(x) : texNumber(x, o.digits ?? 4)) + (o.einheit ?? '')
+  if (typeof x === 'number') return (o.kind === 'index' ? String(x) : texNumber(x, o.digits ?? 4)) + (o.unit ?? '')
   const SUP: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
   return x
     .replace(/± 1 i$/, '± i')
@@ -104,11 +104,11 @@ export function Readout({
       <dd>
         {missing ? (
           <span className="ab-stat-none">{v === null ? '—' : 'keine'}</span>
-        ) : o.form === 'vektor' && Array.isArray(v) ? (
+        ) : o.form === 'vector' && Array.isArray(v) ? (
           <span className="ab-vektor" data-active={active !== null || undefined}>
             <TeX tex={`\\begin{pmatrix} ${(v as readonly (number | string)[]).map((x) => valueTex(o, x)).join(' \\\\ ')} \\end{pmatrix}`} />
           </span>
-        ) : o.namen && Array.isArray(v) ? (
+        ) : o.names && Array.isArray(v) ? (
           <span className="ab-gleichungen">
             {(v as readonly (number | string)[]).map((x, i) => {
               const item = perItem ? i : undefined
@@ -120,7 +120,7 @@ export function Readout({
                   onPointerEnter={item !== undefined ? () => onSpot(item) : undefined}
                   onPointerLeave={item !== undefined ? () => onSpot(undefined) : undefined}
                 >
-                  <TeX tex={o.namen![i] ?? ''} />
+                  <TeX tex={o.names![i] ?? ''} />
                   <span className="ab-gleich">=</span>
                   <TeX tex={valueTex(o, x)} />
                 </span>

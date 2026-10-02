@@ -40,11 +40,11 @@ export interface Series {
   legend?: boolean
   /**
    * A construction that unfolds with the timeline: the step each point belongs to
-   * (nondecreasing). At step k the plot shows the steps before k faintly ('spur') or not at
-   * all ('aktuell'), step k itself in full, and nothing later.
+   * (nondecreasing). At step k the plot shows the steps before k faintly ('trace') or not at
+   * all ('current'), step k itself in full, and nothing later.
    */
-  schritt?: Float64Array
-  schrittModus?: 'spur' | 'aktuell'
+  stepOf?: Float64Array
+  stepMode?: 'trace' | 'current'
   /** TeX labels of points, shown next to the points of the current step (e.g. x_3). */
   labels?: readonly (string | undefined)[]
 }
@@ -89,7 +89,7 @@ export type ObservableValue = number | string | readonly number[] | readonly str
 
 export interface Observable {
   value: ObservableValue
-  kind: 'zahl' | 'index' | 'klasse' | 'liste'
+  kind: 'quantity' | 'index' | 'category' | 'list'
   label: string
   format?: (v: ObservableValue) => string
   /** Detection tolerance used. */
@@ -101,11 +101,11 @@ export interface Observable {
   /** Highlighted in the plots while the readout is pointed at. */
   marks?: readonly Mark[]
   /** Several values that form one state, (x₁*, x₂*, x₃*): shown as a column vector. */
-  form?: 'vektor'
+  form?: 'vector'
   /** TeX names of several values, e.g. λ₁, λ₂: shown as aligned equations "λ₁ = 1". */
-  namen?: readonly string[]
+  names?: readonly string[]
   /** TeX unit after each value in equations and vectors, e.g. ^\\circ for degrees. */
-  einheit?: string
+  unit?: string
 }
 
 export type Observables = Readonly<Record<string, Observable>>

@@ -7,7 +7,7 @@
   or slides. Opening it shows exactly that state.
 - **Use the scenario chips.** Applets carry the settings from the slides as chips
   ("Folie 20", "bessere Behandlung"); one click switches.
-- **Decide what students see.** `packages/applets/applets.json`: `"sichtbar": false` hides an
+- **Decide what students see.** `packages/applets/applets.json`: `"visible": false` hides an
   applet from the overview while its link keeps working ([course.md](course.md#which-applets-are-listed)).
 
 ## In the lecture hall

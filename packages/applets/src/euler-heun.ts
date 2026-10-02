@@ -4,7 +4,7 @@
 // error and quarter Heun's; Euler is stable only for h < 2/0,6 (m ≥ 4) and free of
 // oscillation for h < 1/0,6 (m ≥ 7).
 
-import { bool, defineModel, int, liste, zahl, type Observable, type Series } from '@abacus/applet-core'
+import { bool, defineModel, int, list, quantity, type Observable, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const T_END = 10
@@ -90,10 +90,10 @@ const model = defineModel({
       }
       // halving h divides the error by 2^order: about 2 for Euler, 4 for Heun once h is small
       const ratio = (method: Method) => maxError(method, p.m) / maxError(method, 2 * p.m)
-      observables.h = zahl('Schrittweite $h = 10/m$', T_END / p.m, { digits: 3, marks: [{ kind: 'time', t: T_END / p.m }] })
-      observables.fehlerEuler = zahl('größter Fehler Euler', maxError('euler', p.m), { digits: 3, marks: worst('euler') })
-      observables.fehlerHeun = zahl('größter Fehler Heun', maxError('heun', p.m), { digits: 3, marks: worst('heun') })
-      observables.ordnung = liste('halbes $h$ teilt den Fehler durch', [ratio('euler'), ratio('heun')], { digits: 3, namen: ['\\text{Euler}', '\\text{Heun}'] })
+      observables.h = quantity('Schrittweite $h = 10/m$', T_END / p.m, { digits: 3, marks: [{ kind: 'time', t: T_END / p.m }] })
+      observables.fehlerEuler = quantity('größter Fehler Euler', maxError('euler', p.m), { digits: 3, marks: worst('euler') })
+      observables.fehlerHeun = quantity('größter Fehler Heun', maxError('heun', p.m), { digits: 3, marks: worst('heun') })
+      observables.ordnung = list('halbes $h$ teilt den Fehler durch', [ratio('euler'), ratio('heun')], { digits: 3, names: ['\\text{Euler}', '\\text{Heun}'] })
     }
     return { series, observables, meta: {} }
   },
@@ -102,7 +102,7 @@ const model = defineModel({
 export default defineApplet({
   id: 'euler-heun',
   model,
-  formeln: [
+  formulas: [
     { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr)` },
     { label: 'Verfahren', tex: String.raw`h = \frac{10}{{{m}}} \\ T_{n+1} = T_n + h\,f(t_n, T_n) \quad \text{Euler: } {{euler}} \\ T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr) \quad \text{Heun: } {{heun}}` },
     { label: 'Lösung', tex: String.raw`T(t) = 19{,}25\,e^{-0{,}6\,t} - 1{,}35\,t + 295{,}75 \quad \text{zeigen: } {{exakt}}` },
@@ -120,5 +120,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['m', 'euler', 'heun', 'exakt'] },
-  anzeige: ['h', 'fehlerEuler', 'fehlerHeun', 'ordnung'],
+  readouts: ['h', 'fehlerEuler', 'fehlerHeun', 'ordnung'],
 })

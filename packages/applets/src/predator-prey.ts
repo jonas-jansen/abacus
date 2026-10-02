@@ -3,7 +3,7 @@
 //   y₂⁺ = γ y₁ y₂                         (predators: live on prey)
 // Coexistence y* = (1/γ, r (1 − 1/γ)/γ) exists for γ > 1: below that the predator dies out.
 
-import { behaviour, iterationN, klasse, liste, point, real, schritte } from '@abacus/applet-core'
+import { behaviourClass, iterationN, category, list, point, real, steps } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 export const preyNext = (y1: number, y2: number, r: number, g: number) => (1 + r) * y1 - r * y1 * y1 - g * y1 * y2
@@ -15,7 +15,7 @@ const model = iterationN({
     r: real('Wachstumsrate der Beute', { latex: 'r', min: 0, max: 4, step: 0.01, default: 3.1 }),
     gamma: real('Jagderfolg', { latex: '\\gamma', min: 0, max: 2.5, step: 0.01, default: 2.1 }),
     start: point('Start', { latex: '\\mathbf{y}(0)', xBounds: [0, 1.2], yBounds: [0, 1.2], default: [0.8, 0.2] }),
-    N: schritte('Schritte', { latex: 'N', default: 40, max: 200 }),
+    N: steps('Schritte', { latex: 'N', default: 40, max: 200 }),
   },
   components: [
     { id: 'beute', label: 'y_1', name: 'Beute', role: 'primary' },
@@ -28,18 +28,18 @@ const model = iterationN({
     const coexist = p.gamma > 1
     const eq = coexist ? [1 / p.gamma, (p.r * (1 - 1 / p.gamma)) / p.gamma] : [1, 0]
     const last = y2[y2.length - 1]
-    const v = behaviour(y1)
+    const v = behaviourClass(y1)
     return {
-      gleichgewicht: liste(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, {
-        form: 'vektor',
+      gleichgewicht: list(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, {
+        form: 'vector',
         marks: [
           { kind: 'value', v: eq[0], item: 0 },
           { kind: 'value', v: eq[1], item: 1 },
           { kind: 'point', x: eq[0], y: eq[1], in: 'phase' },
         ],
       }),
-      raeuber: klasse('Räuber', last < 1e-6 ? 'sterben aus' : 'überleben'),
-      verhalten: klasse('Beute', v === 'divergent' ? 'explodiert' : v, v === null ? { note: 'kein einfaches Muster' } : {}),
+      raeuber: category('Räuber', last < 1e-6 ? 'sterben aus' : 'überleben'),
+      verhalten: category('Beute', v === 'divergent' ? 'explodiert' : v, v === null ? { note: 'kein einfaches Muster' } : {}),
     }
   },
 })
@@ -47,8 +47,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'predator-prey',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'System', tex: String.raw`y_1(n+1) = (1 + {{r}})\,y_1(n) - {{r}}{{*}}y_1(n)^2 - {{gamma}}{{*}}y_1(n)\,y_2(n) \\ y_2(n+1) = {{gamma}}{{*}}y_1(n)\,y_2(n)` },
     { label: 'Start', tex: String.raw`\mathbf{y}(0) = {{#start}}` },
   ],
@@ -81,5 +81,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['r', 'gamma', 'start'] },
-  anzeige: ['gleichgewicht', 'raeuber', 'verhalten'],
+  readouts: ['gleichgewicht', 'raeuber', 'verhalten'],
 })

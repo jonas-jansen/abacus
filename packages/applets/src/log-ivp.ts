@@ -1,7 +1,7 @@
 // MATLAB: app_log_IVP — logistic growth x' = r·x·(1 − x/K), x(0) = x₀, in closed form.
 // Build order #2: closed form, three coupled parameters, continuous curve, responsive frame.
 
-import { closedForm, real, zahl } from '@abacus/applet-core'
+import { closedForm, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 /** x(t) = K·x₀ / (x₀ + (K − x₀)·e^(−rt)) */
@@ -27,12 +27,12 @@ const model = closedForm({
     const tw = Number.isFinite(t) && t > 0 ? t : null
     const mid = p.K / 2
     return {
-      gleichgewicht: zahl('Gleichgewicht', p.K, { marks: [{ kind: 'value', v: p.K }] }),
-      wendepunkt: zahl('steilste Stelle $t^*$', tw, {
+      gleichgewicht: quantity('Gleichgewicht', p.K, { marks: [{ kind: 'value', v: p.K }] }),
+      wendepunkt: quantity('steilste Stelle $t^*$', tw, {
         note: 'keine für t > 0',
         marks: tw === null ? [] : [{ kind: 'time', t: tw }, { kind: 'point', x: tw, y: mid, in: 'time' }],
       }),
-      steigungMax: zahl('größte Steigung', tw === null ? null : (p.r * p.K) / 4, {
+      steigungMax: quantity('größte Steigung', tw === null ? null : (p.r * p.K) / 4, {
         note: 'nicht für t > 0',
         marks: tw === null ? [] : [{ kind: 'line', x: tw, y: mid, slope: (p.r * p.K) / 4, in: 'time' }],
       }),
@@ -43,8 +43,8 @@ const model = closedForm({
 export default defineApplet({
   id: 'log-ivp',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'Gleichung', tex: String.raw`\frac{dx}{dt} = {{r}}{{*}}x\left(1 - \frac{x}{{{K}}}\right)` },
     { label: 'Start', tex: String.raw`x(0) = {{#x0}}` },
     { label: 'Lösung', tex: String.raw`x(t) = \frac{{{K}}{{*}}{{x0}}}{{{x0}} + ({{K}} - {{x0}})\,e^{-{{r}}\,t}}` },
@@ -72,7 +72,7 @@ export default defineApplet({
       ],
     },
   ],
-  zeitleiste: true,
+  timeline: true,
   layout: { main: ['r', 'K', 'x0'] },
-  anzeige: ['gleichgewicht', 'wendepunkt', 'steigungMax'],
+  readouts: ['gleichgewicht', 'wendepunkt', 'steigungMax'],
 })

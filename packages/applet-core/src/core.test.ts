@@ -1,8 +1,8 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import {
-  ablesen,
-  behaviour,
+  readOff,
+  behaviourClass,
   createRng,
   decodeApplet,
   defaultParams,
@@ -15,7 +15,7 @@ import {
   iterateTail,
   iteration,
   MAX_ZOOM_OUT,
-  schritte,
+  steps,
   makeFrame,
   niceTicks,
   parseNumber,
@@ -27,7 +27,7 @@ import {
   rosenbrock,
   ode,
   limitOf,
-  schwelle,
+  threshold,
   sweepTail,
   updateParams,
   writeApplet,
@@ -70,9 +70,9 @@ describe('fixed points', () => {
 
 describe('behaviour', () => {
   it('classifies simple tails', () => {
-    expect(behaviour([1, 0.5, 0.25, 0.125])).toBe('monoton')
-    expect(behaviour([1, -0.5, 0.25, -0.125])).toBe('oszillierend')
-    expect(behaviour([1, 1e5, 1e10])).toBe('divergent')
+    expect(behaviourClass([1, 0.5, 0.25, 0.125])).toBe('monotone')
+    expect(behaviourClass([1, -0.5, 0.25, -0.125])).toBe('oscillating')
+    expect(behaviourClass([1, 1e5, 1e10])).toBe('divergent')
   })
 })
 
@@ -261,20 +261,20 @@ describe('frame (§5.6)', () => {
 
 describe('checkers (§8.2)', () => {
   it('schwelle gives direction and nudge', () => {
-    const check = schwelle({ ziel: 3, toleranz: 0.05, zuKlein: (v) => `bei ${formatNumber(v)} noch Fixpunkt` })
-    expect(check('3,02', {}, {})).toEqual({ status: 'richtig', hinweis: undefined })
-    expect(check('2,9', {}, {})).toMatchObject({ status: 'nah', richtung: 'zu klein', hinweis: 'bei 2,9 noch Fixpunkt' })
-    expect(check('4', {}, {})).toMatchObject({ status: 'falsch', richtung: 'zu groß' })
-    expect(check('drei', {}, {})).toMatchObject({ status: 'falsch' })
+    const check = threshold({ target: 3, tolerance: 0.05, tooSmall: (v) => `bei ${formatNumber(v)} noch Fixpunkt` })
+    expect(check('3,02', {}, {})).toEqual({ status: 'correct', hint: undefined })
+    expect(check('2,9', {}, {})).toMatchObject({ status: 'close', direction: 'too small', hint: 'bei 2,9 noch Fixpunkt' })
+    expect(check('4', {}, {})).toMatchObject({ status: 'wrong', direction: 'too large' })
+    expect(check('drei', {}, {})).toMatchObject({ status: 'wrong' })
   })
 
   it('ablesen compares against observables and respects null', () => {
-    const check = ablesen({ observable: 'fp', toleranz: 0.01 })
-    const obs = { fp: { kind: 'liste' as const, label: 'Fixpunkte', value: [0, 0.6] } }
-    expect(check('0.6', {}, obs).status).toBe('richtig')
-    expect(check('0.5', {}, { fp: { kind: 'zahl', label: '', value: null, note: 'nicht gefunden' } })).toEqual({
-      status: 'gespeichert',
-      hinweis: 'nicht gefunden',
+    const check = readOff({ observable: 'fp', tolerance: 0.01 })
+    const obs = { fp: { kind: 'list' as const, label: 'Fixpunkte', value: [0, 0.6] } }
+    expect(check('0.6', {}, obs).status).toBe('correct')
+    expect(check('0.5', {}, { fp: { kind: 'quantity', label: '', value: null, note: 'nicht gefunden' } })).toEqual({
+      status: 'saved',
+      hint: 'nicht gefunden',
     })
   })
 })
@@ -390,7 +390,7 @@ describe('detail when zoomed (RunOptions.detail)', () => {
   it('iterations go on with the same values, sequences too', () => {
     const m = iteration({
       id: 'i',
-      params: { N: schritte('N', { default: 10 }) },
+      params: { N: steps('N', { default: 10 }) },
       start: () => 1,
       step: (x) => x / 2,
       horizon: (p) => p.N,

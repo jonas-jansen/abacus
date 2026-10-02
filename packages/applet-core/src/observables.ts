@@ -9,10 +9,10 @@
 import type { Observable, ObservableValue } from './model'
 import { derivative, roots } from './numeric'
 
-type Extra = Pick<Observable, 'format' | 'tol' | 'note' | 'digits' | 'marks' | 'form' | 'namen' | 'einheit'>
+type Extra = Pick<Observable, 'format' | 'tol' | 'note' | 'digits' | 'marks' | 'form' | 'names' | 'unit'>
 
-export const zahl = (label: string, value: number | null, extra: Extra = {}): Observable => ({
-  kind: 'zahl',
+export const quantity = (label: string, value: number | null, extra: Extra = {}): Observable => ({
+  kind: 'quantity',
   label,
   value: value !== null && Number.isFinite(value) ? value : null,
   ...extra,
@@ -25,15 +25,15 @@ export const index = (label: string, value: number | null, extra: Extra = {}): O
   ...extra,
 })
 
-export const klasse = (label: string, value: string | null, extra: Extra = {}): Observable => ({
-  kind: 'klasse',
+export const category = (label: string, value: string | null, extra: Extra = {}): Observable => ({
+  kind: 'category',
   label,
   value,
   ...extra,
 })
 
-export const liste = (label: string, value: readonly number[] | readonly string[] | string | null, extra: Extra = {}): Observable => ({
-  kind: 'liste',
+export const list = (label: string, value: readonly number[] | readonly string[] | string | null, extra: Extra = {}): Observable => ({
+  kind: 'list',
   label,
   value: value as ObservableValue,
   ...extra,
@@ -87,13 +87,13 @@ export function limitOf(xs: ArrayLike<number>, { tol = 1e-6, window = 5 } = {}):
   return Math.abs(last) <= 1e-12 * size ? 0 : last
 }
 
-export type Verhalten = 'monoton' | 'oszillierend' | 'divergent'
+export type Behaviour = 'monotone' | 'oscillating' | 'divergent'
 
 /**
  * Sign pattern of the tail differences. Returns null when there is no simple pattern
  * (e.g. chaotic tails) — the caller should explain that in the observable's note.
  */
-export function behaviour(xs: ArrayLike<number>, { divergeAt = 1e8, window = 20 } = {}): Verhalten | null {
+export function behaviourClass(xs: ArrayLike<number>, { divergeAt = 1e8, window = 20 } = {}): Behaviour | null {
   const m = xs.length
   for (let i = 0; i < m; i++) if (!Number.isFinite(xs[i]) || Math.abs(xs[i]) > divergeAt) return 'divergent'
   if (m < 2) return null
@@ -105,8 +105,8 @@ export function behaviour(xs: ArrayLike<number>, { divergeAt = 1e8, window = 20 
     const d = xs[i] - xs[i - 1]
     if (Math.abs(d) > scale) signs.push(Math.sign(d))
   }
-  if (signs.every((s) => s === signs[0])) return 'monoton'
-  if (signs.every((s, i) => i === 0 || s !== signs[i - 1])) return 'oszillierend'
+  if (signs.every((s) => s === signs[0])) return 'monotone'
+  if (signs.every((s, i) => i === 0 || s !== signs[i - 1])) return 'oscillating'
   return null
 }
 
@@ -127,18 +127,19 @@ export function settles(xs: ArrayLike<number>, window = 10): boolean {
   return d(m - 1) / d(m - 2) < 0.999
 }
 
-const VERHALTEN_TEXT: Record<Verhalten, string> = { monoton: 'monoton', oszillierend: 'oszillierend', divergent: 'divergent' }
+/** What the readout shows (German, for the students). */
+const BEHAVIOUR_TEXT: Record<Behaviour, string> = { monotone: 'monoton', oscillating: 'oszillierend', divergent: 'divergent' }
 
 /**
- * The "Verhalten" readout of a sequence. Its value is the class of `behaviour` (what quizzes
+ * The "Verhalten" readout of a sequence. Its value is the class of `behaviourClass` (what quizzes
  * check); what it shows adds "konvergent" when the sequence settles.
  */
-export function verhalten(label: string, xs: ArrayLike<number>, extra: Extra = {}): Observable {
-  const v = behaviour(xs)
+export function behaviour(label: string, xs: ArrayLike<number>, extra: Extra = {}): Observable {
+  const v = behaviourClass(xs)
   const konvergent = v !== null && v !== 'divergent' && settles(xs)
-  return klasse(label, v, {
+  return category(label, v, {
     ...(v === null ? { note: 'kein einfaches Muster' } : {}),
-    format: (value) => (typeof value === 'string' && value in VERHALTEN_TEXT ? VERHALTEN_TEXT[value as Verhalten] + (konvergent ? ' konvergent' : '') : String(value ?? '—')),
+    format: (value) => (typeof value === 'string' && value in BEHAVIOUR_TEXT ? BEHAVIOUR_TEXT[value as Behaviour] + (konvergent ? ' konvergent' : '') : String(value ?? '—')),
     ...extra,
   })
 }
@@ -210,7 +211,7 @@ export function firstIndexWhere(xs: ArrayLike<number>, pred: (x: number, n: numb
 }
 
 /** Root mean square of model − data: how well a curve fits measurements. */
-export function rmsFehler(model: (t: number) => number, t: ArrayLike<number>, data: ArrayLike<number>): number | null {
+export function rmsError(model: (t: number) => number, t: ArrayLike<number>, data: ArrayLike<number>): number | null {
   let s = 0
   let n = 0
   for (let i = 0; i < t.length; i++) {

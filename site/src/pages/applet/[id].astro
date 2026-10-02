@@ -12,32 +12,32 @@ export function getStaticPaths() {
 
 const { id } = Astro.params
 const def = getApplet(id!)
-const seiten = (await getCollection('seiten', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.entwurf))).sort(
-  (a, b) => a.data.woche - b.data.woche,
+const pages = (await getCollection('course', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.draft))).sort(
+  (a, b) => a.data.week - b.data.week,
 )
 ---
-<Seite titel={def.titel} kurz={def.kurz} aktiv="applets" ungelistet={def.sichtbar === false}>
+<Seite title={def.title} summary={def.summary} active="applets" unlisted={def.visible === false}>
   <div class="explore-head">
     <div>
       <p class="eyebrow chapter-badge">
-        <a href={url(`/#kapitel-${def.kapitel}`)}>{def.kapitel === 'Anhang' ? 'Anhang' : `Kapitel ${def.kapitel}`}</a>
-        {def.folien && <span> · Folien {def.folien}</span>}
+        <a href={url(`/applets#kapitel-${def.chapter}`)}>{def.chapter === 'Appendix' ? 'Anhang' : `Kapitel ${def.chapter}`}</a>
+        {def.slides && <span> · Folien {def.slides}</span>}
       </p>
-      <h1>{def.titel}</h1>
-      <p class="lead">{def.kurz}</p>
+      <h1>{def.title}</h1>
+      <p class="lead">{def.summary}</p>
     </div>
     {
-      seiten.length > 0 && (
+      pages.length > 0 && (
         <div class="explore-links">
           <span class="eyebrow">Im Kurs</span>
-          {seiten.map((s) => (
+          {pages.map((s) => (
             <a class="chip" href={url(`/kurs/${s.id}`)}>
-              {s.data.titel} →
+              {s.data.title} →
             </a>
           ))}
         </div>
       )
     }
   </div>
-  <AppletIsland client:load id={def.id} kopf={false} />
+  <AppletIsland client:load id={def.id} showHeader={false} />
 </Seite>

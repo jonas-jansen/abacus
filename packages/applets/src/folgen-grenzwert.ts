@@ -2,7 +2,7 @@
 // |x_n − L| < ε for all n ≥ N. The ε-band lies around L; the terms outside it are coloured,
 // and N(ε) is where the sequence enters the band for good.
 
-import { choice, closedForm, index, int, real, zahl, type Series } from '@abacus/applet-core'
+import { choice, closedForm, index, int, real, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const FOLGEN = {
@@ -71,7 +71,7 @@ const model = closedForm({
     const N0 = eintritt(p.folge, p.eps)
     const outside = [...series.x.y].filter((v) => Math.abs(v - L) >= p.eps).length
     return {
-      grenzwert: zahl('Grenzwert $L$', L, { marks: [{ kind: 'value', v: L }] }),
+      grenzwert: quantity('Grenzwert $L$', L, { marks: [{ kind: 'value', v: L }] }),
       ab: index('im Band ab $N(\\varepsilon)$', N0, {
         note: 'erst nach mehr als einer Million Gliedern',
         marks: N0 === null ? [] : [{ kind: 'time', t: N0 }],
@@ -83,13 +83,13 @@ const model = closedForm({
 
 export default defineApplet({
   id: 'folgen-grenzwert',
-  horizont: 'N',
-  zeitleiste: true,
+  horizon: 'N',
+  timeline: true,
   model,
-  formeln: (p) => [
+  formulas: (p) => [
     { label: 'Folge', tex: String.raw`x_n = {{folge}}` },
     { label: 'Grenzwert', tex: String.raw`\lim_{n \to \infty} x_n = ${FOLGEN[p.folge].Ltex}` },
-    { label: 'Bedingung', tex: String.raw`|x_n - L| < {{eps}} \ \text{ für alle } n \ge N(\varepsilon)` },
+    { label: 'Bedingung', tex: String.raw`|x_n - L| < {{eps}} \ \text{ für all } n \ge N(\varepsilon)` },
   ],
   plots: [
     {
@@ -102,5 +102,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['folge', 'eps'] },
-  anzeige: ['grenzwert', 'ab', 'aussen'],
+  readouts: ['grenzwert', 'ab', 'aussen'],
 })

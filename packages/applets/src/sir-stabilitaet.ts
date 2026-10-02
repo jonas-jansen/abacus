@@ -4,7 +4,7 @@
 // x₂ grows like (1 + (α + γ)(R − 1))ⁿ — a straight line on a log axis (II 56–57). The new
 // infections per step, β x₁ x₂, peak earlier and higher the larger R is (II 58).
 
-import { equilibria2, formatNumber, iterationN, klasse, liste, maximum, real, schritte, spectralRadius, zahl, type Mark } from '@abacus/applet-core'
+import { equilibria2, formatNumber, iterationN, category, list, maximum, real, steps, spectralRadius, quantity, type Mark } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const N = 100_000
@@ -18,7 +18,7 @@ const model = iterationN({
     gamma: real('Genesungsrate', { latex: '\\gamma', min: 0, max: 1, step: 0.01, default: 0.1 }),
     alpha: real('Erneuerungsrate', { latex: '\\alpha', min: 0, max: 1, step: 0.01, default: 0.1 }),
     I0: real('anfangs Infizierte', { latex: 'x_2(0)', min: 0, max: 50_000, step: 1, default: 1, limits: { min: 0, max: N, reason: 'Es gibt nur 100 000 Menschen.' } }),
-    T: schritte('Schritte', { latex: 'n_{\\max}', default: 80, max: 300 }),
+    T: steps('Schritte', { latex: 'n_{\\max}', default: 80, max: 300 }),
   },
   normalize: (p) => (p.alpha + p.gamma > 1 ? { ...p, gamma: 1 - p.alpha } : p),
   constraintNote: 'α + γ ≤ 1',
@@ -51,15 +51,15 @@ const model = iterationN({
     const peak = maximum(I)
     const stab = (e: (typeof eq)[number]) => `${e.stable ? 'stabil' : 'instabil'}, ρ(J) = ${formatNumber(spectralRadius(e.eigen), 3)}`
     return {
-      R: zahl('Basisreproduktionszahl $R = \\beta N/(\\gamma + \\alpha)$', R, { digits: 3 }),
-      a: klasse('krankheitsfrei $x^*_a = (N, 0)$', a ? stab(a) : null, { marks: a ? [mark(a.x)] : [] }),
-      b: klasse('endemisch $x^*_b$', b ? stab(b) : null, {
+      R: quantity('Basisreproduktionszahl $R = \\beta N/(\\gamma + \\alpha)$', R, { digits: 3 }),
+      a: category('krankheitsfrei $x^*_a = (N, 0)$', a ? stab(a) : null, { marks: a ? [mark(a.x)] : [] }),
+      b: category('endemisch $x^*_b$', b ? stab(b) : null, {
         note: b ? undefined : 'gibt es nur für R > 1',
         marks: b ? [mark(b.x)] : [],
       }),
-      bStand: liste('endemischer Zustand $\\mathbf{x}^*_b$', b ? b.x : null, { form: 'vektor', marks: b ? [mark(b.x)] : [] }),
-      bedingung: klasse('Bedingung $1 < R \\le 2/\\alpha$', R > 1 && R <= 2 / p.alpha ? 'erfüllt' : 'nicht erfüllt'),
-      spitze: zahl('meiste Infizierte', peak?.value ?? null, { digits: 5, marks: peak ? [{ kind: 'point', x: peak.index, y: peak.value, in: 'time' }] : [] }),
+      bStand: list('endemischer Zustand $\\mathbf{x}^*_b$', b ? b.x : null, { form: 'vector', marks: b ? [mark(b.x)] : [] }),
+      bedingung: category('Bedingung $1 < R \\le 2/\\alpha$', R > 1 && R <= 2 / p.alpha ? 'erfüllt' : 'nicht erfüllt'),
+      spitze: quantity('meiste Infizierte', peak?.value ?? null, { digits: 5, marks: peak ? [{ kind: 'point', x: peak.index, y: peak.value, in: 'time' }] : [] }),
     }
   },
 })
@@ -67,8 +67,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'sir-stabilitaet',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'System', tex: String.raw`x_1(n+1) = x_1(n) - {{beta}}{{*}}x_1(n)\,x_2(n) + {{alpha}}\,\bigl(N - x_1(n)\bigr) \\ x_2(n+1) = (1 - {{gamma}} - {{alpha}})\,x_2(n) + {{beta}}{{*}}x_1(n)\,x_2(n)` },
     { label: 'Start', tex: String.raw`x_1(0) = N - x_2(0) \\ x_2(0) = {{#I0}}` },
     { label: 'Anfangsphase', tex: String.raw`q = 1 + (\alpha + \gamma)(R - 1)` },
@@ -89,8 +89,8 @@ export default defineApplet({
     { type: 'timeSeriesDiscrete', series: ['neu'], title: 'Neuinfektionen', xLabel: 'n', yLabel: '\\beta x_1 x_2' },
   ],
   layout: { main: ['beta', 'gamma', 'alpha'] },
-  anzeige: ['R', 'a', 'b', 'bStand', 'bedingung', 'spitze'],
-  szenarien: [
+  readouts: ['R', 'a', 'b', 'bStand', 'bedingung', 'spitze'],
+  scenarios: [
     { label: 'Szenario A', text: 'β = 1,2·10⁻⁶, x(0) = (70 000, 30 000): R = 0,6, die Krankheit verschwindet', params: { beta: 1.2e-6, gamma: 0.1, alpha: 0.1, I0: 30_000 } },
     { label: 'Szenario B', text: 'β = 7,6·10⁻⁶, x(0) = (99 999, 1): R = 3,8, endemisch', params: { beta: 7.6e-6, gamma: 0.1, alpha: 0.1, I0: 1 } },
   ],

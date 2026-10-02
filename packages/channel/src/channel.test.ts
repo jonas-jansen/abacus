@@ -16,10 +16,10 @@ describe('channel', () => {
   })
 
   it('replays retained messages to late subscribers', () => {
-    publish('quiz/result', { quiz: 'q', value: 3, status: 'richtig' })
+    publish('quiz/result', { quiz: 'q', value: 3, status: 'correct' })
     const late = vi.fn()
     subscribe('quiz/result', late, { id: 'q' })
-    expect(late).toHaveBeenCalledWith({ quiz: 'q', value: 3, status: 'richtig' })
+    expect(late).toHaveBeenCalledWith({ quiz: 'q', value: 3, status: 'correct' })
   })
 
   it('is observable from plain window listeners', () => {

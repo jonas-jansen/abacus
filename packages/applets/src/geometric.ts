@@ -1,6 +1,6 @@
 // MATLAB: app_geometric — x_{n+1} = a·x_n. Build order #1: the whole pipeline on a trivial iteration.
 
-import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
+import { iteration, real, steps, behaviour, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = iteration({
@@ -8,7 +8,7 @@ const model = iteration({
   params: {
     a: real('Faktor', { latex: 'a', min: -2, max: 2, step: 0.01, default: 0.8 }),
     x0: real('Startwert', { latex: 'x_0', min: -10, max: 10, step: 0.1, default: 5 }),
-    N: schritte('Schritte', { latex: 'N', default: 25, max: 80 }),
+    N: steps('Schritte', { latex: 'N', default: 25, max: 80 }),
   },
   start: (p) => p.x0,
   step: (x, p) => p.a * x,
@@ -18,8 +18,8 @@ const model = iteration({
     // x_n = aⁿ·x₀: the limit follows from a alone, however many steps are drawn.
     const L = p.x0 === 0 || Math.abs(p.a) < 1 ? 0 : p.a === 1 ? p.x0 : null
     return {
-      verhalten: verhalten('Verhalten', x),
-      grenzwert: zahl('Grenzwert', L, {
+      verhalten: behaviour('Verhalten', x),
+      grenzwert: quantity('Grenzwert', L, {
         note: p.a === -1 ? 'springt zwischen zwei Werten' : 'wächst über alle Grenzen',
         marks: L === null ? [] : [{ kind: 'value', v: L }],
       }),
@@ -30,8 +30,8 @@ const model = iteration({
 export default defineApplet({
   id: 'geometric',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = {{a}}{{*}}x_n` },
     { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
     { label: 'Lösung', tex: String.raw`x_n = {{(a)}}^{n}{{*}}{{x0}}` },
@@ -50,5 +50,5 @@ export default defineApplet({
       ],
     },
   ],
-  anzeige: ['grenzwert', 'verhalten'],
+  readouts: ['grenzwert', 'verhalten'],
 })

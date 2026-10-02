@@ -1,45 +1,45 @@
 ---
-titel: Immer derselbe Faktor
-kurz: Geometrische Folgen – wachsen, schrumpfen, springen.
-woche: 1
+title: Immer derselbe Faktor
+summary: Geometrische Folgen – wachsen, schrumpfen, springen.
+week: 1
 applet: geometric
-zustand: { a: -0.9 }
-gesperrt: true
+state: { a: -0.9 }
+locked: true
 ---
 
 ## Mit Papier
 
 Für $x_0 = 5$ und $x_{n+1} = a\,x_n$: Rechnen Sie $x_1, x_2, x_3$ für $a = 2$, $a = \tfrac12$ und $a = -1$ aus.
 
-<Quiz id="geo-formel" nr={1} />
+<Quiz id="geo-formel" number={1} />
 
 ## Vorhersage
 
-<Quiz id="geo-vorhersage-negativ" nr={2} schaltetFrei />
+<Quiz id="geo-vorhersage-negativ" number={2} unlocks />
 
 Ändern Sie zuerst **nur $a$**. Vergleichen Sie [a = 0,9](#geometric.a=0.9), [a = −0,9](#geometric.a=-0.9) und [a = 1,1](#geometric.a=1.1).
 
 ## Aufgaben
 
-<Quiz id="geo-konstant" nr={3} />
-<Quiz id="geo-oszilliert" nr={4} />
-<Quiz id="geo-unter-001" nr={5} stern />
+<Quiz id="geo-konstant" number={3} />
+<Quiz id="geo-oszilliert" number={4} />
+<Quiz id="geo-unter-001" number={5} star />
 
 ## Vom Bild zur Behauptung
 
-<Behauptung>
+<Claim>
 Für $x_0 \neq 0$ gilt $x_n \to 0$ genau dann, wenn $|a| < 1$. Das Vorzeichen wechselt genau dann bei jedem Schritt, wenn $a < 0$.
-</Behauptung>
+</Claim>
 
-<Beweis>
+<Proof>
 Induktiv ist $x_n = a^n x_0$, also $|x_n| = |a|^n |x_0|$. Das geht für $|a| < 1$ gegen $0$, wächst für $|a| > 1$ über alle Grenzen und bleibt für $|a| = 1$ konstant. Das Vorzeichen von $a^n$ wechselt genau für $a < 0$.
-</Beweis>
+</Proof>
 
 ## Wo das Bild lügt
 
-<Bildluege>
+<Caveat>
 Bei [a = 1,01](#geometric.a=1.01) sieht die Folge fast konstant aus. Sie wächst aber über alle Grenzen: $1{,}01^n > 2$ erst ab $n = 70$.
-</Bildluege>
+</Caveat>
 
 ## Weiterdenken
 

@@ -2,7 +2,7 @@
 // small random kicks from n = 5 on. A stable fixed point absorbs them; an unstable one
 // amplifies them. The kicks are seeded, so every student sees the same sequence.
 
-import { bool, int, iteration, klasse, maximum, real, sample, schritte, zahl } from '@abacus/applet-core'
+import { bool, int, iteration, category, maximum, real, sample, steps, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const KICK_FROM = 5
@@ -14,7 +14,7 @@ const model = iteration({
     stoerung: bool('Störung', { labelOn: 'an', labelOff: 'aus', default: true }),
     eps: real('Stärke der Störung', { latex: '\\varepsilon', min: 0, max: 0.05, step: 0.001, default: 0.005 }),
     seed: int('Zufallsfolge', { latex: 's', min: 1, max: 20, default: 5 }),
-    N: schritte('Schritte', { latex: 'N', default: 100, max: 300 }),
+    N: steps('Schritte', { latex: 'N', default: 100, max: 300 }),
   },
   start: (p) => 1 - 1 / p.a,
   step: (y, p, n, rng) => {
@@ -39,10 +39,10 @@ const model = iteration({
     const slope = 2 - p.a
     const dev = maximum(x.subarray(Math.min(x.length, KICK_FROM)).map((v) => Math.abs(v - fix)))
     return {
-      fixpunkt: zahl('Fixpunkt $y^* = 1 - 1/a$', fix, { marks: [{ kind: 'value', v: fix }] }),
-      steigung: zahl("Steigung $f'(y^*) = 2 - a$", slope, { digits: 3, marks: [{ kind: 'line', x: fix, y: fix, slope, in: 'map' }] }),
-      stabil: klasse('Fixpunkt ist', Math.abs(slope) < 1 ? 'stabil' : Math.abs(slope) > 1 ? 'instabil' : 'Grenzfall'),
-      abweichung: zahl('größte Abweichung von $y^*$', dev?.value ?? null, {
+      fixpunkt: quantity('Fixpunkt $y^* = 1 - 1/a$', fix, { marks: [{ kind: 'value', v: fix }] }),
+      steigung: quantity("Steigung $f'(y^*) = 2 - a$", slope, { digits: 3, marks: [{ kind: 'line', x: fix, y: fix, slope, in: 'map' }] }),
+      stabil: category('Fixpunkt ist', Math.abs(slope) < 1 ? 'stabil' : Math.abs(slope) > 1 ? 'instabil' : 'Grenzfall'),
+      abweichung: quantity('größte Abweichung von $y^*$', dev?.value ?? null, {
         digits: 2,
         note: 'noch keine Störung',
         marks: dev ? [{ kind: 'point', x: dev.index + KICK_FROM, y: x[dev.index + KICK_FROM], in: 'time' }] : [],
@@ -54,8 +54,8 @@ const model = iteration({
 export default defineApplet({
   id: 'logistic-perturbation',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`y_{n+1} = {{a}}{{*}}y_n\,(1 - y_n) + {{eps}}{{*}}\xi_n` },
     { label: 'Start', tex: String.raw`y_0 = y^* = 1 - \frac{1}{{{a}}}` },
     { label: 'Störung', tex: String.raw`\xi_n \sim \mathcal{N}(0, 1) \text{ ab } n = 5, \quad {{stoerung}}, \ \text{Zufallsfolge } {{#seed}}` },
@@ -82,5 +82,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['a', 'stoerung', 'eps'] },
-  anzeige: ['fixpunkt', 'steigung', 'stabil', 'abweichung'],
+  readouts: ['fixpunkt', 'steigung', 'stabil', 'abweichung'],
 })

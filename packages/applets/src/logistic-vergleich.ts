@@ -4,7 +4,7 @@
 // With a step h, N_{n+1} = N_n + h r_d (1 − N_n/K) N_n is Euler's method (III 72): as h
 // shrinks (with r_d = r) the points close in on the curve; h = 1 is the discrete model.
 
-import { closedForm, detectPeriod, index, real, verhalten, zahl } from '@abacus/applet-core'
+import { closedForm, detectPeriod, index, real, behaviour, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { r: number; rd: number; K: number; N0: number; h: number; T: number }
@@ -60,10 +60,10 @@ const model = closedForm({
     const periode = detectPeriod(long.subarray(long.length - 64), { maxPeriod: 16 })
     const abstand = d.t.reduce((m, t, i) => Math.max(m, Math.abs(d.N[i] - exact(t, p))), 0)
     return {
-      kontinuierlich: zahl('kontinuierlich: Grenzwert', p.N0 > 0 ? p.K : 0, { marks: [{ kind: 'value', v: p.K }] }),
-      diskret: verhalten('diskret: Verhalten', long),
+      kontinuierlich: quantity('kontinuierlich: Grenzwert', p.N0 > 0 ? p.K : 0, { marks: [{ kind: 'value', v: p.K }] }),
+      diskret: behaviour('diskret: Verhalten', long),
       periode: index('diskret: Periode', periode, periode === null ? { note: 'keine Periode ≤ 16 – Chaos?' } : {}),
-      abstand: zahl('größter Abstand $|N_n - N(t_n)|$', abstand, { digits: 3 }),
+      abstand: quantity('größter Abstand $|N_n - N(t_n)|$', abstand, { digits: 3 }),
     }
   },
 })
@@ -71,9 +71,9 @@ const model = closedForm({
 export default defineApplet({
   id: 'logistic-vergleich',
   model,
-  zeitleiste: true,
-  horizont: 'T',
-  formeln: [
+  timeline: true,
+  horizon: 'T',
+  formulas: [
     { label: 'Kontinuierlich', tex: String.raw`N' = {{r}}\left(1 - \frac{N}{{{K}}}\right) N` },
     { label: 'Diskret', tex: String.raw`N_{n+1} = N_n + {{h}}{{*}}{{rd}}\left(1 - \frac{N_n}{{{K}}}\right) N_n` },
     { label: 'Start', tex: String.raw`N(0) = N_0 = {{#N0}}` },
@@ -88,8 +88,8 @@ export default defineApplet({
     },
   ],
   layout: { main: ['r', 'rd', 'h'] },
-  anzeige: ['kontinuierlich', 'diskret', 'periode', 'abstand'],
-  szenarien: [
+  readouts: ['kontinuierlich', 'diskret', 'periode', 'abstand'],
+  scenarios: [
     { label: 'Folie 43', text: 'r = 0,55, r_d = 1,2 r: qualitativ ähnlich', params: { r: 0.55, rd: 0.66, N0: 0.2, K: 210, h: 1, T: 30 } },
     { label: 'Folie 44', text: 'r = r_d = 3: die diskrete Folge springt chaotisch', params: { r: 3, rd: 3, N0: 0.2, K: 210, h: 1, T: 30 } },
     { label: 'Folie 45', text: 'r = r_d = 2,1: die diskrete Folge pendelt sich zwischen zwei Werten ein', params: { r: 2.1, rd: 2.1, N0: 0.2, K: 210, h: 1, T: 30 } },

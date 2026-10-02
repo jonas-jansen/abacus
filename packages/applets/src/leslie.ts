@@ -4,7 +4,7 @@
 // (b₃ = 9, s₁ = 0,1, s₂ = 0,6) has three eigenvalues of the same modulus 3/∛50 < 1: it dies
 // out, and its age structure keeps cycling with period 3 instead of settling.
 
-import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, klasse, liste, real, schritte, spectralRadiusOf, zahl } from '@abacus/applet-core'
+import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, category, list, real, steps, spectralRadiusOf, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { b1: number; b2: number; b3: number; s1: number; s2: number; x1: number; x2: number; x3: number }
@@ -30,7 +30,7 @@ const model = iterationN({
     x1: start('Anfang Klasse 1', 'x_1(0)', 0),
     x2: start('Anfang Klasse 2', 'x_2(0)', 0),
     x3: start('Anfang Klasse 3', 'x_3(0)', 1000),
-    N: schritte('Schritte', { latex: 'N', default: 30, max: 200 }),
+    N: steps('Schritte', { latex: 'N', default: 30, max: 200 }),
   },
   components: [
     { id: 'x1', label: 'x_1', name: 'jung', role: 'primary' },
@@ -50,10 +50,10 @@ const model = iterationN({
     const last = x[0].length - 1
     const total = x[0][last] + x[1][last] + x[2][last]
     return {
-      rho: zahl('Spektralradius $\\rho(L)$', rho, { digits: 4 }),
-      zukunft: klasse('Die Population', rho < 1 - 1e-9 ? 'stirbt aus' : rho > 1 + 1e-9 ? 'wächst' : 'bleibt beschränkt'),
-      eigenwerte: liste('Eigenwerte', eigenvalueTexts(ls), { namen: eigenvalueNames(ls) }),
-      gesamt: zahl('Gesamtzahl $x_1 + x_2 + x_3$ bei $N$', total, { digits: 4, marks: [{ kind: 'time', t: last }] }),
+      rho: quantity('Spektralradius $\\rho(L)$', rho, { digits: 4 }),
+      zukunft: category('Die Population', rho < 1 - 1e-9 ? 'stirbt aus' : rho > 1 + 1e-9 ? 'wächst' : 'bleibt beschränkt'),
+      eigenwerte: list('Eigenwerte', eigenvalueTexts(ls), { names: eigenvalueNames(ls) }),
+      gesamt: quantity('Gesamtzahl $x_1 + x_2 + x_3$ bei $N$', total, { digits: 4, marks: [{ kind: 'time', t: last }] }),
     }
   },
 })
@@ -61,8 +61,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'leslie',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     {
       label: 'Modell',
       tex: String.raw`\mathbf{x}(n+1) = \begin{pmatrix} {{b1}} & {{b2}} & {{b3}} \\ {{s1}} & 0 & 0 \\ 0 & {{s2}} & 0 \end{pmatrix} \mathbf{x}(n)`,
@@ -81,8 +81,8 @@ export default defineApplet({
     { type: 'bars', series: ['x1', 'x2', 'x3'], share: true, title: 'Altersstruktur bei n', xLabel: 'i', yLabel: 'Anteil', y: [0, 1] },
   ],
   layout: { main: ['b3', 's1', 's2'] },
-  anzeige: ['rho', 'zukunft', 'eigenwerte', 'gesamt'],
-  szenarien: [
+  readouts: ['rho', 'zukunft', 'eigenwerte', 'gesamt'],
+  scenarios: [
     { label: 'Folie 29', text: 'b₃ = 9, s₁ = 0,1, s₂ = 0,6: stirbt aus, die Altersstruktur kreist mit Periode 3', params: {} },
     { label: 'wächst', text: 'b₃ = 20: ρ = ∛1,2 > 1', params: { b3: 20 } },
     { label: 'stabile Struktur', text: 'auch die mittlere Klasse bekommt Nachwuchs: die Anteile stellen sich ein', params: { b2: 4, b3: 9 } },

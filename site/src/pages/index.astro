@@ -2,18 +2,18 @@
 // The start page: the four areas of the site. Which quiz is open now is decided in the
 // browser (the page is static and knows no time).
 import { getCollection } from 'astro:content'
-import { kapitel } from '@abacus/applets'
-import { wochenquizze } from '@abacus/quizzes'
+import { chapters } from '@abacus/applets'
+import { weeklyQuizzes } from '@abacus/quizzes'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
 
-const anzahlApplets = kapitel({ alle: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
-const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort((a, b) => a.data.woche - b.data.woche)
-const quizze = wochenquizze.map((w) => ({ id: w.id, titel: w.titel, woche: w.woche, ab: w.ab ?? '', bis: w.bis ?? '' }))
+const anzahlApplets = chapters({ all: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
+const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort((a, b) => a.data.week - b.data.week)
+const quizzes = weeklyQuizzes.map((w) => ({ id: w.id, title: w.title, week: w.week, opens: w.opens ?? '', closes: w.closes ?? '' }))
 ---
-<Seite titel="Start" aktiv="start">
+<Seite title="Start" active="start">
   <header class="start-kopf">
-    <h1>{kurs.titel}</h1>
+    <h1>{kurs.title}</h1>
     <p class="lead">Modelle aus der Biologie zum Anfassen, geführte Kursseiten und Quizze zur Vorlesung.</p>
   </header>
 
@@ -33,7 +33,7 @@ const quizze = wochenquizze.map((w) => ({ id: w.id, titel: w.titel, woche: w.woc
       </span>
       <strong>Kurs</strong>
       <span>Geführte Seiten: eine Frage, mit Papier und Applet, und kleine Aufgaben zum Verstehen.</span>
-      <span class="bereich-detail">{seiten.length} Seiten{seiten.length ? `, zuletzt: ${seiten.at(-1)!.data.titel}` : ''}</span>
+      <span class="bereich-detail">{pages.length} Seiten{pages.length ? `, zuletzt: ${pages.at(-1)!.data.title}` : ''}</span>
     </a>
 
     <a class="bereich" href={url('/quiz')} id="bereich-quiz">
@@ -42,7 +42,7 @@ const quizze = wochenquizze.map((w) => ({ id: w.id, titel: w.titel, woche: w.woc
       </span>
       <strong>Quizze</strong>
       <span>Kurze Quizze zu jeder Woche der Vorlesung, mit Lösungen und mehreren Versuchen.</span>
-      <span class="bereich-detail" id="quiz-aktuell">{wochenquizze.length} Quizze</span>
+      <span class="bereich-detail" id="quiz-aktuell">{weeklyQuizzes.length} Quizze</span>
     </a>
 
     <a class="bereich" href={url('/notizbuch')}>
@@ -55,19 +55,19 @@ const quizze = wochenquizze.map((w) => ({ id: w.id, titel: w.titel, woche: w.woc
     </a>
   </div>
 
-  <script is:inline type="application/json" id="quiz-daten" set:html={JSON.stringify(quizze)} />
+  <script is:inline type="application/json" id="quiz-data" set:html={JSON.stringify(quizzes)} />
   <script>
     // Point the quiz card at the quiz that is open now (the latest one, if several are).
-    type Q = { id: string; titel: string; woche?: number; ab: string; bis: string }
-    const daten = document.getElementById('quiz-daten')?.textContent
-    const quizze: Q[] = daten ? JSON.parse(daten) : []
-    const jetzt = Date.now()
-    const offen = quizze.filter((q) => (!q.ab || Date.parse(q.ab) <= jetzt) && (!q.bis || jetzt <= Date.parse(q.bis)) && (q.ab || q.bis))
-    const q = offen.at(-1)
+    type Q = { id: string; title: string; week?: number; opens: string; closes: string }
+    const data = document.getElementById('quiz-data')?.textContent
+    const quizzes: Q[] = data ? JSON.parse(data) : []
+    const now = Date.now()
+    const open = quizzes.filter((q) => (!q.opens || Date.parse(q.opens) <= now) && (!q.closes || now <= Date.parse(q.closes)) && (q.opens || q.closes))
+    const q = open.at(-1)
     const detail = document.getElementById('quiz-aktuell')
     const karte = document.getElementById('bereich-quiz') as HTMLAnchorElement | null
     if (q && detail && karte) {
-      detail.textContent = `Jetzt offen: ${q.woche !== undefined ? `Woche ${q.woche}, ` : ''}${q.titel}`
+      detail.textContent = `Jetzt offen: ${q.week !== undefined ? `Woche ${q.week}, ` : ''}${q.title}`
       detail.dataset.aktuell = ''
       karte.href = karte.href.replace(/\/quiz\/?$/, `/quiz/${q.id}`)
     }

@@ -1,7 +1,7 @@
 // MATLAB: app_log_IVPdata — fit the logistic curve N(t) = N₀ K e^{rt} / (K + N₀ (e^{rt} − 1))
 // to 37 measurements by hand. The mean deviation says how well; the residuals show where.
 
-import { bool, closedForm, real, rmsFehler, zahl, type Series } from '@abacus/applet-core'
+import { bool, closedForm, real, rmsError, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 /** Measurements from the MATLAB app (t = 0, 1, …, 36). */
@@ -44,15 +44,15 @@ const model = closedForm({
       if (Math.abs(fit(t) - DATA[i]) > Math.abs(fit(TD[worst]) - DATA[worst])) worst = i
     })
     return {
-      rms: zahl('mittlere Abweichung (RMS)', rmsFehler(fit, TD, DATA), { digits: 3 }),
-      groesste: zahl('größte Abweichung', Math.abs(fit(TD[worst]) - DATA[worst]), {
+      rms: quantity('mittlere Abweichung (RMS)', rmsError(fit, TD, DATA), { digits: 3 }),
+      groesste: quantity('größte Abweichung', Math.abs(fit(TD[worst]) - DATA[worst]), {
         digits: 3,
         marks: [
           { kind: 'point', x: TD[worst], y: DATA[worst], in: 'time' },
           { kind: 'time', t: TD[worst] },
         ],
       }),
-      kapazitaet: zahl('Sättigung $K$', p.K, { marks: [{ kind: 'value', v: p.K }] }),
+      kapazitaet: quantity('Sättigung $K$', p.K, { marks: [{ kind: 'value', v: p.K }] }),
     }
   },
 })
@@ -60,7 +60,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'log-ivp-data',
   model,
-  formeln: [
+  formulas: [
     { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N\left(1 - \frac{N}{{{K}}}\right)` },
     { label: 'Start', tex: String.raw`N(0) = {{#N0}}` },
     { label: 'Lösung', tex: String.raw`N(t) = \frac{{{N0}}{{*}}{{K}}{{*}}e^{{{r}}\,t}}{{{K}} + {{N0}}\,(e^{{{r}}\,t} - 1)} \\ d_i = N(t_i) - N_i \quad {{abweichungen}}` },
@@ -88,5 +88,5 @@ export default defineApplet({
       ],
     },
   ],
-  anzeige: ['rms', 'groesste', 'kapazitaet'],
+  readouts: ['rms', 'groesste', 'kapazitaet'],
 })

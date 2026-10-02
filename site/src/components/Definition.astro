@@ -1,7 +1,8 @@
 ---
+// <Definition term="Fixpunkt">…</Definition>
 interface Props {
-  begriff?: string
+  term?: string
 }
-const { begriff } = Astro.props
+const { term } = Astro.props
 ---
-<aside class="box box-def"><p class="box-label">Definition{begriff && <span class="box-term">{begriff}</span>}</p><slot /></aside>
+<aside class="box box-def"><p class="box-label">Definition{term && <span class="box-term">{term}</span>}</p><slot /></aside>

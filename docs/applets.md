@@ -5,7 +5,7 @@ An applet is one file in `packages/applets/src/`: a **model** (what is computed)
 links, hints, chapter listing – comes with it.
 
 ```sh
-pnpm new-applet konkurrenz --kind ode      # or iteration | closedForm; --seite adds a course page
+pnpm new-applet konkurrenz --kind ode      # or iteration | closedForm; --page adds a course page
 pnpm dev                                   # → http://localhost:4321/applet/konkurrenz
 pnpm test                                  # the checks below run for every applet
 ```
@@ -24,17 +24,17 @@ const model = ode({
   start: (p) => p.start,
   rhs: (_t, [x, y], p) => [ … ],
   tEnd: (p) => p.T,
-  observables: ({ p, series }) => ({ ausgang: klasse('Ausgang', …) }),
+  observables: ({ p, series }) => ({ ausgang: category('Ausgang', …) }),
 })
 
 export default defineApplet({
   id: 'konkurrenz',
   model,
-  horizont: 'T',
-  formeln: [{ label: 'System', tex: String.raw`x' = {{r1}}\,x\,(1 - …)` }, { label: 'Start', tex: String.raw`(x, y)(0) = {{#start}}` }],
+  horizon: 'T',
+  formulas: [{ label: 'System', tex: String.raw`x' = {{r1}}\,x\,(1 - …)` }, { label: 'Start', tex: String.raw`(x, y)(0) = {{#start}}` }],
   plots: [{ type: 'phasePlane', xSeries: 'x', ySeries: 'y', field: true, nullclines: true, bahnen: true, drag: { param: 'start', axis: 'xy' } }],
-  anzeige: ['ausgang'],
-  szenarien: [{ label: 'Folie 26', text: 'what it shows', params: { r1: 0.8 } }],
+  readouts: ['ausgang'],
+  scenarios: [{ label: 'Folie 26', text: 'what it shows', params: { r1: 0.8 } }],
 })
 ```
 
@@ -42,10 +42,10 @@ Register it in `packages/applets/src/index.ts`, and give it its entry in the cat
 `packages/applets/applets.json` (the scaffold does both):
 
 ```json
-{"id": "konkurrenz", "sichtbar": false, "kapitel": "IV", "folien": "25–37", "titel": "Konkurrenz zweier Hefearten", "kurz": "Wer verdrängt wen?"}
+{"id": "konkurrenz", "visible": false, "chapter": "IV", "slides": "25–37", "title": "Konkurrenz zweier Hefearten", "summary": "Wer verdrängt wen?"}
 ```
 
-Title, description, chapter and slides live only there; `sichtbar` decides whether the
+Title, summary, chapter and slides live only there; `visible` decides whether the
 overview lists it (its address works either way), and the order of the entries is the order within a
 chapter. A missing or extra entry fails with a message naming it.
 
@@ -73,7 +73,7 @@ as a in a bifurcation diagram) and `detail.y` to recompute what they draw.
 |---|---|---|
 | `real(label, { latex, min, max, step, default, unit?, scale?, limits? })` | number | `min`/`max` are only the slider's range; `limits: { min, reason }` restricts typing, with the reason shown |
 | `int(label, { … })` | integer | |
-| `schritte(label, { default, max })` | steps N | typed up to 10⁶ |
+| `steps(label, { default, max })` | steps N | typed up to 10⁶ |
 | `point(label, { latex, xBounds, yBounds, default })` | [x, y] | a start in the plane; `{{#start}}` shows it as a column vector |
 | `choice(label, options, default)` | string | options' labels take `$math$` |
 | `bool(label, { default, labelOn, labelOff })` | boolean | |
@@ -95,7 +95,7 @@ solution), lines are separated by `\\` and align at their relation.
 | `{{*}}` | a product sign that only appears between two numbers |
 | `{{z.0}}` | one entry of a point |
 
-The step count or time window named in `horizont` belongs to the timeline, not the formulas.
+The step count or time window named in `horizon` belongs to the timeline, not the formulas.
 Numbers are German (`0{,}6`); whole numbers below 10⁷ are written out (`100\,000`).
 
 ## Plots
@@ -118,7 +118,8 @@ Common options: `title`, `xLabel`, `yLabel` (TeX-lite: `y_n`, `\alpha`, `\text{A
 
 Series carry `label` (TeX symbol) and `name` (what it is: legend shows "y₁ Beute"), `role`
 (`primary`, `secondary`, `tertiary`, `reference`, `ghost`, `data`, `annotation`) and may be
-`fill` (areas), `arrow` (vectors, labelled at the tip), `dash`, `legend: false`.
+`fill` (areas), `arrow` (vectors, labelled at the tip), `dash`, `legend: false`, and
+`stepOf` + `stepMode` (a construction that unfolds with the timeline, as in `newton.ts`).
 
 **Handles** – everything with a place in the picture should be draggable there:
 `drag: { param: 'x0', axis: 'y' }` drags a value; `at(p)` and `set(x, y, p)` let a handle
@@ -132,10 +133,10 @@ never negative gets no room below 0.
 
 | Constructor | For |
 |---|---|
-| `zahl(label, v, { digits, note, marks })` | a number (null = not detected, with a `note` saying why) |
+| `quantity(label, v, { digits, note, marks, unit })` | a number (null = not detected, with a `note` saying why) |
 | `index(label, n)` | a count or step |
-| `klasse(label, text)` | a category ("stabil", "wird ausgewaschen") |
-| `liste(label, values)` | several numbers or texts, one chip each |
+| `category(label, text)` | a category ("stabil", "wird ausgewaschen") |
+| `list(label, values, opts)` | several numbers or texts: chips; a column vector with `form: 'vector'`; aligned equations with `names: ['\\lambda_1', …]` |
 
 Labels take `$math$`. `marks` point into the plots while the readout is hovered:
 `{ kind: 'value', v }`, `{ kind: 'time', t }`, `{ kind: 'point', x, y, in: 'time' | 'map' | 'phase' }`,
@@ -145,7 +146,7 @@ Helpers in `@abacus/applet-core`:
 
 | Function | Gives |
 |---|---|
-| `verhalten(label, xs)` | "monoton / oszillierend (konvergent)", "divergent" |
+| `behaviour(label, xs)` | value `monotone` / `oscillating` / `divergent`, shown as "monoton / oszillierend (konvergent)" |
 | `detectPeriod(tail)`, `periodOf(t, y)` | period of a sequence / of an oscillation in time |
 | `fixedPoints(f, a, b)`, `roots`, `bisect`, `events(sol, g)` | fixed points, zeros, crossing times |
 | `eigen`, `classify`, `eigenReadout` | 2×2: eigenvalues, type (Sattel, stabiler Strudel …), readout with eigen-directions |
@@ -154,11 +155,11 @@ Helpers in `@abacus/applet-core`:
 
 ## Scenarios, layout, timeline
 
-- `szenarien: [{ label, text, params }]`: chips above the parameters, each the defaults plus
+- `scenarios: [{ label, text, params }]`: chips above the parameters, each the defaults plus
   `params`. Use them for every setting the slides show.
-- `layout: { main: [...], sichtbar: { b: (p) => p.form === 'linear' } }`: which parameters are
+- `layout: { main: [...], visible: { b: (p) => p.form === 'linear' } }`: which parameters are
   up front, and which only in some settings.
-- `zeitleiste: true` gives a closed form a timeline; `schritte: true` opens it at the start.
+- `timeline: true` gives a closed form a timeline; `stepwise: true` opens it at the start.
 
 ## Conventions
 

@@ -11,7 +11,7 @@
 | `pnpm typecheck` | every package and the tests |
 | `pnpm check:deps` | the import rules between packages ([architecture.md](architecture.md)) |
 | `pnpm build` | static site in `site/dist` |
-| `pnpm new-applet <id> --kind iteration\|closedForm\|ode [--seite]` | a working applet (and course page), registered and in the catalog, unlisted |
+| `pnpm new-applet <id> --kind iteration\|closedForm\|ode [--page]` | a working applet (and course page), registered and in the catalog, unlisted |
 | `node scripts/shoot.mjs <dir> /applet/<id> [--width 390] [--dark]` | screenshots from the running dev server |
 
 ## Tests
@@ -39,8 +39,8 @@ nothing is published. For your own server see [deployment.md](deployment.md).
 
 ## Visibility of applets
 
-Edit `packages/applets/applets.json` (`"sichtbar": true | false`) and push. Unlisted applets
-stay reachable by address; course pages marked `entwurf: true` are not built at all
+Edit `packages/applets/applets.json` (`"visible": true | false`) and push. Unlisted applets
+stay reachable by address; course pages marked `draft: true` are not built at all
 ([course.md](course.md)).
 
 ## Kept out of the repository
@@ -50,5 +50,5 @@ not be published.
 
 ## Course identity
 
-`site/src/config.ts`: `kurs.id`, `kurs.semester` and `kurs.titel`. Id and semester are part
+`site/src/config.ts`: `kurs.id`, `kurs.semester` and `kurs.title`. Id and semester are part
 of every notebook key; changing them later orphans the answers students have stored.

@@ -1,7 +1,7 @@
 // MATLAB: app_linearsystem_phase (+ app_linearsystem) — y' = A·y in the plane. Time series and
 // phase plane from the same A: one island, two figures (§10). Direction field behind the orbit.
 
-import { classify, eigenReadout, klasse, ode, ORIGIN, point, real, zahl } from '@abacus/applet-core'
+import { classify, eigenReadout, category, ode, ORIGIN, point, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 
@@ -29,10 +29,10 @@ const model = ode({
     const tr = p.a + p.d
     const det = p.a * p.d - p.b * p.c
     return {
-      spur: zahl('Spur', tr),
-      determinante: zahl('Determinante', det),
+      spur: quantity('Spur', tr),
+      determinante: quantity('Determinante', det),
       eigenwerte: eigenReadout(p.a, p.b, p.c, p.d),
-      typ: klasse('Typ', classify(tr, det), { marks: [ORIGIN] }),
+      typ: category('Typ', classify(tr, det), { marks: [ORIGIN] }),
     }
   },
 })
@@ -40,8 +40,8 @@ const model = ode({
 export default defineApplet({
   id: 'linearsystem-phase',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'System', tex: String.raw`\mathbf{y}' = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} \mathbf{y}` },
     { label: 'Start', tex: String.raw`\mathbf{y}(0) = {{#start}}` },
   ],
@@ -50,5 +50,5 @@ export default defineApplet({
     { type: 'timeSeriesContinuous', xLabel: 't', yLabel: 'y(t)', y: [-6, 6] },
   ],
   layout: { main: ['a', 'b', 'c', 'd'] },
-  anzeige: ['spur', 'determinante', 'eigenwerte', 'typ'],
+  readouts: ['spur', 'determinante', 'eigenwerte', 'typ'],
 })

@@ -1,0 +1,18 @@
+---
+// An exercise: introductory text, math, and one or more <Quiz> as one unit.
+//   <Exercise number={3} title="Die Schwelle finden" star>…text…<Quiz id="log-schwelle" /></Exercise>
+interface Props {
+  number?: number | string
+  title?: string
+  /** A harder exercise. */
+  star?: boolean
+}
+const { number, title, star = false } = Astro.props
+---
+<section class="aufgabe">
+  <header class="aufgabe-head">
+    <span class="aufgabe-nr">{number !== undefined ? `Aufgabe ${number}` : 'Aufgabe'}{star && <span class="aufgabe-stern" title="schwieriger"> ★</span>}</span>
+    {title && <h3>{title}</h3>}
+  </header>
+  <div class="aufgabe-body"><slot /></div>
+</section>

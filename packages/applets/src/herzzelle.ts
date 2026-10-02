@@ -8,7 +8,7 @@
 // −80 and +20 mV (IV 30). With g_L = 0,2, V_L = −85 mV it rests and fires only when
 // stimulated, here every 0,7 s (IV 32). Time runs in seconds; the rates are per ms.
 
-import { klasse, ode, periodOf, real, zahl } from '@abacus/applet-core'
+import { category, ode, periodOf, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { gNa: number; gK: number; gL: number; VL: number; I: number; Ts: number }
@@ -69,10 +69,10 @@ const model = ode({
     const feuert = hi > 0
     const art = !feuert ? 'ruht' : p.I > 0 && per && Math.abs(per.period - p.Ts) < 0.02 * p.Ts ? 'folgt den Reizen' : 'feuert von selbst'
     return {
-      art: klasse('Die Zelle', art, art === 'feuert von selbst' ? { note: 'eine periodische Lösung ohne äußeren Reiz: Schrittmacher' } : {}),
-      periode: zahl('Periode', per?.period ?? null, { digits: 3, note: per ? undefined : 'keine gleichmäßige Wiederholung', marks: per ? per.crossings.map((t, item) => ({ kind: 'time' as const, t, item })) : [] }),
-      spitze: zahl('höchstes Potential (mV)', hi, { digits: 3 }),
-      ruhe: zahl('tiefstes Potential (mV)', lo, { digits: 3 }),
+      art: category('Die Zelle', art, art === 'feuert von selbst' ? { note: 'eine periodische Lösung ohne äußeren Reiz: Schrittmacher' } : {}),
+      periode: quantity('Periode', per?.period ?? null, { digits: 3, note: per ? undefined : 'keine gleichmäßige Wiederholung', marks: per ? per.crossings.map((t, item) => ({ kind: 'time' as const, t, item })) : [] }),
+      spitze: quantity('höchstes Potential (mV)', hi, { digits: 3 }),
+      ruhe: quantity('tiefstes Potential (mV)', lo, { digits: 3 }),
     }
   },
 })
@@ -80,21 +80,21 @@ const model = ode({
 export default defineApplet({
   id: 'herzzelle',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     {
       label: 'Membran',
       tex: String.raw`C_m V' = -({{gNa}}\,m^3 h + 0{,}14)(V - 40) - {{gL}}\,(V - {{VL}}) \\ \qquad - \bigl(1{,}2\,e^{\frac{-V-90}{50}} + 0{,}015\,e^{\frac{V+90}{60}} + {{gK}}\,n^4\bigr)(V + 100) + I_{stim}(t)`,
     },
-    { label: 'Tore', tex: String.raw`m' = \frac{m_\infty(V) - m}{\tau_m(V)}, \; \text{ebenso } h, n \\ I_{stim} = {{I}} \text{ alle } {{Ts}}\,\text{s für 2 ms}` },
+    { label: 'Tore', tex: String.raw`m' = \frac{m_\infty(V) - m}{\tau_m(V)}, \; \text{ebenso } h, n \\ I_{stim} = {{I}} \text{ all } {{Ts}}\,\text{s für 2 ms}` },
   ],
   plots: [
     { type: 'timeSeriesContinuous', series: ['V'], title: 'Membranpotential', xLabel: 't', yLabel: 'V \\text{ (mV)}', y: [-100, 50] },
     { type: 'timeSeriesContinuous', series: ['m', 'h', 'n'], title: 'Tore', xLabel: 't', yLabel: 'm, h, n', y: [0, 1] },
   ],
   layout: { main: ['gL', 'VL', 'I'] },
-  anzeige: ['art', 'periode', 'spitze', 'ruhe'],
-  szenarien: [
+  readouts: ['art', 'periode', 'spitze', 'ruhe'],
+  scenarios: [
     { label: 'Schrittmacherzelle', text: 'g_L = 0,075, V_L = −60 mV, kein Reiz: feuert von selbst (Folie 30)', params: {} },
     { label: 'Muskelzelle', text: 'g_L = 0,2, V_L = −85 mV, Reiz alle 0,7 s: feuert im Takt (Folie 32)', params: { gL: 0.2, VL: -85, I: 150, Ts: 0.7, T: 2.2 } },
     { label: 'Muskelzelle ohne Reiz', text: 'dieselbe Zelle ohne Reiz: sie ruht', params: { gL: 0.2, VL: -85, I: 0, T: 2.2 } },

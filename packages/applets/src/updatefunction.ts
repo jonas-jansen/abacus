@@ -2,7 +2,7 @@
 // f(x) = a x + b or quadratic f(x) = x + r (1 − x/K) x. Roots, fixed points (where the graph
 // meets the diagonal) and the slope are read off the graph.
 
-import { choice, closedForm, derivative, fixedPoints, liste, real, roots, zahl } from '@abacus/applet-core'
+import { choice, closedForm, derivative, fixedPoints, list, real, roots, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { form: 'linear' | 'quadratisch'; a: number; b: number; r: number; K: number }
@@ -34,16 +34,16 @@ const model = closedForm({
     const zeros = roots(g, lo, hi)
     const fps = fixedPoints(g, lo, hi).map((q) => q.x)
     return {
-      nullstellen: liste('Nullstellen', zeros, {
+      nullstellen: list('Nullstellen', zeros, {
         note: 'keine im Bild',
-        namen: zeros.length > 1 ? zeros.map((_, i) => `x_${i + 1}`) : ['x'],
+        names: zeros.length > 1 ? zeros.map((_, i) => `x_${i + 1}`) : ['x'],
         marks: zeros.map((x, item) => ({ kind: 'point', x, y: 0, in: 'map', item })),
       }),
-      fixpunkte: liste('Fixpunkte $f(x^*) = x^*$', fps, {
-        namen: fps.length > 1 ? fps.map((_, i) => `x_${i + 1}^*`) : ['x^*'],
+      fixpunkte: list('Fixpunkte $f(x^*) = x^*$', fps, {
+        names: fps.length > 1 ? fps.map((_, i) => `x_${i + 1}^*`) : ['x^*'],
         marks: fps.map((v, item) => ({ kind: 'value', v, item })),
       }),
-      steigung0: zahl("Steigung $f'(0)$", derivative(g, 0), { digits: 3, marks: [{ kind: 'line', x: 0, y: g(0), slope: derivative(g, 0), in: 'map' }] }),
+      steigung0: quantity("Steigung $f'(0)$", derivative(g, 0), { digits: 3, marks: [{ kind: 'line', x: 0, y: g(0), slope: derivative(g, 0), in: 'map' }] }),
     }
   },
 })
@@ -51,7 +51,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'updatefunction',
   model,
-  formeln: (p) => [
+  formulas: (p) => [
     {
       label: 'Update-Funktion',
       tex:
@@ -80,12 +80,12 @@ export default defineApplet({
   ],
   layout: {
     main: ['form', 'a', 'b', 'r', 'K'],
-    sichtbar: {
+    visible: {
       a: (p) => p.form === 'linear',
       b: (p) => p.form === 'linear',
       r: (p) => p.form === 'quadratisch',
       K: (p) => p.form === 'quadratisch',
     },
   },
-  anzeige: ['nullstellen', 'fixpunkte', 'steigung0'],
+  readouts: ['nullstellen', 'fixpunkte', 'steigung0'],
 })

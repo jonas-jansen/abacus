@@ -1,7 +1,7 @@
 // MATLAB: app_exp_IVP — N' = r N, N(0) = N₀, solved by N(t) = N₀ e^{rt}. Growth or decay by the
 // sign of r; the doubling (half-life) time ln 2 / |r| does not depend on N₀.
 
-import { closedForm, klasse, real, zahl } from '@abacus/applet-core'
+import { closedForm, category, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = closedForm({
@@ -18,12 +18,12 @@ const model = closedForm({
     const td = p.r === 0 ? null : Math.LN2 / Math.abs(p.r)
     const target = p.r > 0 ? 2 * p.N0 : p.N0 / 2
     return {
-      art: klasse('Verhalten', p.r > 0 ? 'Wachstum' : p.r < 0 ? 'Zerfall' : 'konstant'),
-      verdopplung: zahl(p.r >= 0 ? 'Verdopplungszeit $\\ln 2 / r$' : 'Halbwertszeit $\\ln 2 / |r|$', td, {
+      art: category('Verhalten', p.r > 0 ? 'Wachstum' : p.r < 0 ? 'Zerfall' : 'konstant'),
+      verdopplung: quantity(p.r >= 0 ? 'Verdopplungszeit $\\ln 2 / r$' : 'Halbwertszeit $\\ln 2 / |r|$', td, {
         note: 'bei r = 0 ändert sich nichts',
         marks: td === null ? [] : [{ kind: 'time', t: td }, { kind: 'point', x: td, y: target, in: 'time' }, { kind: 'value', v: target }],
       }),
-      ende: zahl('$N(T)$', p.N0 * Math.exp(p.r * p.T), { marks: [{ kind: 'point', x: p.T, y: p.N0 * Math.exp(p.r * p.T), in: 'time' }] }),
+      ende: quantity('$N(T)$', p.N0 * Math.exp(p.r * p.T), { marks: [{ kind: 'point', x: p.T, y: p.N0 * Math.exp(p.r * p.T), in: 'time' }] }),
     }
   },
 })
@@ -31,8 +31,8 @@ const model = closedForm({
 export default defineApplet({
   id: 'exp-ivp',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'Gleichung', tex: String.raw`\frac{dN}{dt} = {{r}}{{*}}N` },
     { label: 'Start', tex: String.raw`N(0) = {{#N0}}` },
     { label: 'Lösung', tex: String.raw`N(t) = {{N0}}{{*}}e^{{{r}}\,t}` },
@@ -53,7 +53,7 @@ export default defineApplet({
       ],
     },
   ],
-  zeitleiste: true,
+  timeline: true,
   layout: { main: ['r', 'N0'] },
-  anzeige: ['art', 'verdopplung', 'ende'],
+  readouts: ['art', 'verdopplung', 'ende'],
 })

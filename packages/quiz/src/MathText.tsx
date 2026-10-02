@@ -21,7 +21,7 @@ export function renderMathText(text: string): string {
   return out + esc(text.slice(last)).replace(/\n\n+/g, '<br><br>')
 }
 
-export function Mathe({ text, className }: { text: string; className?: string }) {
+export function MathText({ text, className }: { text: string; className?: string }) {
   const html = useMemo(() => renderMathText(text), [text])
   return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />
 }

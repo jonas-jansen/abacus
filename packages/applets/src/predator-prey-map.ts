@@ -2,7 +2,7 @@
 // (y₁, y₂) plane. Coloured by whether the population grows (f_i > y_i) or shrinks; the curve
 // f_i = y_i separates the two.
 
-import { choice, defineModel, klasse, linspace, liste, point, real, zahl, type Grid, type Observable, type Point } from '@abacus/applet-core'
+import { choice, defineModel, category, linspace, list, point, real, quantity, type Grid, type Observable, type Point } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 import { predNext, preyNext } from './predator-prey'
 
@@ -59,11 +59,11 @@ const model = defineModel({
       observables: (opts.observables === false
         ? {}
         : {
-            f: liste('$\\mathbf{f}(\\mathbf{y})$ im Punkt', [f1, f2], { form: 'vektor' }),
-            beute: klasse('Beute', f1 > y1 ? 'wächst' : f1 < y1 ? 'schrumpft' : 'bleibt'),
-            raeuber: klasse('Räuber', f2 > y2 ? 'wachsen' : f2 < y2 ? 'schrumpfen' : 'bleiben'),
-            gleichgewicht: liste(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, { form: 'vektor' }),
-            abstand: zahl('Abstand zum Gleichgewicht', Math.hypot(y1 - eq[0], y2 - eq[1]), { digits: 3 }),
+            f: list('$\\mathbf{f}(\\mathbf{y})$ im Punkt', [f1, f2], { form: 'vector' }),
+            beute: category('Beute', f1 > y1 ? 'wächst' : f1 < y1 ? 'schrumpft' : 'bleibt'),
+            raeuber: category('Räuber', f2 > y2 ? 'wachsen' : f2 < y2 ? 'schrumpfen' : 'bleiben'),
+            gleichgewicht: list(coexist ? 'Koexistenz $\\mathbf{y}^*$' : 'Gleichgewicht ohne Räuber', eq, { form: 'vector' }),
+            abstand: quantity('Abstand zum Gleichgewicht', Math.hypot(y1 - eq[0], y2 - eq[1]), { digits: 3 }),
           }) as Record<string, Observable>,
       meta: {},
     }
@@ -73,12 +73,12 @@ const model = defineModel({
 export default defineApplet({
   id: 'predator-prey-map',
   model,
-  formeln: [
+  formulas: [
     { label: 'Update-Funktion', tex: String.raw`f_1(y_1, y_2) = (1 + {{r}})\,y_1 - {{r}}{{*}}y_1^2 - {{gamma}}{{*}}y_1 y_2 \\ f_2(y_1, y_2) = {{gamma}}{{*}}y_1 y_2` },
     { label: 'Punkt', tex: String.raw`\mathbf{y} = {{#y}}` },
     { label: 'Fläche', tex: String.raw`{{teil}}` },
   ],
   plots: [{ type: 'surface3d', grid: 'f', xLabel: 'y_1', yLabel: 'y_2', drag: { param: 'y', axis: 'xy' } }],
   layout: { main: ['teil', 'r', 'gamma', 'y'] },
-  anzeige: ['f', 'beute', 'raeuber', 'gleichgewicht'],
+  readouts: ['f', 'beute', 'raeuber', 'gleichgewicht'],
 })

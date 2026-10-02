@@ -13,9 +13,9 @@ describe('formulas', () => {
   it.each(Object.keys(applets))('%s: formulas render in both modes', (id) => {
     const def = applets[id]
     const p = defaultParams(def.model)
-    const formeln = typeof def.formeln === 'function' ? def.formeln(p) : def.formeln
-    expect(formeln?.length ?? 0, `${def.id}: \`formeln\` fehlt – every applet states its model above the plots (docs/applets.md, "Formeln")`).toBeGreaterThan(0)
-    for (const f of formeln ?? []) {
+    const formulas = typeof def.formulas === 'function' ? def.formulas(p) : def.formulas
+    expect(formulas?.length ?? 0, `${def.id}: \`formulas\` fehlt – every applet states its model above the plots (docs/applets.md, "Formeln")`).toBeGreaterThan(0)
+    for (const f of formulas ?? []) {
       for (const mode of ['symbole', 'zahlen'] as const) {
         const tex = expandFormula(f.tex, def.model.params, p, mode)
         expect(tex, `unresolved placeholder in ${f.label}`).not.toMatch(/\{\{/)
@@ -31,13 +31,13 @@ describe('formulas', () => {
     const variants = [p0, ...def.model.params.flatMap((s) => (s.kind === 'choice' ? s.options.map((o) => ({ ...p0, [s.id]: o.value })) : []))]
     const seen = new Set<string>()
     for (const p of variants) {
-      const formeln = typeof def.formeln === 'function' ? def.formeln(p) : (def.formeln ?? [])
-      for (const f of formeln) for (const m of f.tex.matchAll(/\{\{\s*[+(#]?\s*([A-Za-z_]\w*)/g)) seen.add(m[1])
+      const formulas = typeof def.formulas === 'function' ? def.formulas(p) : (def.formulas ?? [])
+      for (const f of formulas) for (const m of f.tex.matchAll(/\{\{\s*[+(#]?\s*([A-Za-z_]\w*)/g)) seen.add(m[1])
     }
     // the horizon (N, T) is set in the timeline, not in the formulas
-    const missing = def.model.params.map((s) => s.id).filter((pid) => pid !== def.horizont && !seen.has(pid))
-    if (def.horizont) expect(seen.has(def.horizont), 'the horizon belongs to the timeline').toBe(false)
-    expect(missing, `${def.id}: these parameters appear in no formula – write them as {{name}} into \`formeln\` (or make one the \`horizont\`)`).toEqual([])
+    const missing = def.model.params.map((s) => s.id).filter((pid) => pid !== def.horizon && !seen.has(pid))
+    if (def.horizon) expect(seen.has(def.horizon), 'the horizon belongs to the timeline').toBe(false)
+    expect(missing, `${def.id}: these parameters appear in no formula – write them as {{name}} into \`formulas\` (or make one the \`horizont\`)`).toEqual([])
   })
 
   it('writes numbers the German way, with signs joining the operator', () => {

@@ -8,7 +8,7 @@ sciences. Static site (Astro + React islands); everything runs in the browser.
 ```sh
 pnpm install
 pnpm dev                                  # http://localhost:4321
-pnpm new-applet <id> --kind ode           # or iteration | closedForm; --seite adds a course page
+pnpm new-applet <id> --kind ode           # or iteration | closedForm; --page adds a course page
 pnpm check                                # dependency rules, types, tests
 pnpm build                                # static site in site/dist
 ```
@@ -17,7 +17,7 @@ pnpm build                                # static site in site/dist
 
 - `/` – start: the four areas
 - `/applets` – all applets by chapter; `/applet/<id>` – one applet, full width
-- `/kurs` – the guided pages; `/kurs/<seite>` – text and exercises beside the applet
+- `/kurs` – the guided pages; `/kurs/<page>` – text and exercises beside the applet
 - `/quiz` – weekly quizzes; `/quiz/<id>` – one quiz with its attempts
 - `/notizbuch` – all answers and attempts, with export and import
 

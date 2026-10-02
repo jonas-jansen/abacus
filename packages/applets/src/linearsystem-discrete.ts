@@ -1,7 +1,7 @@
 // MATLAB: app_linearsystem_phase_discrete — x_{n+1} = A x_n in the plane. The orbit is A^n x₀;
 // it shrinks to 0 exactly when every eigenvalue has |λ| < 1 (spectral radius < 1).
 
-import { eigen, eigenReadout, iterationN, klasse, ORIGIN, point, real, schritte, spectralRadius, zahl } from '@abacus/applet-core'
+import { eigen, eigenReadout, iterationN, category, ORIGIN, point, real, steps, spectralRadius, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -1, max: 1, step: 0.01, default: def })
@@ -14,7 +14,7 @@ const model = iterationN({
     c: entry('unten links', 'a_{21}', -0.5),
     d: entry('unten rechts', 'a_{22}', 0),
     start: point('Anfangswert', { latex: '\\mathbf{x}_0', xBounds: [-2, 2], yBounds: [-2, 2], default: [1, 0] }),
-    N: schritte('Schritte', { latex: 'N', default: 25, max: 100 }),
+    N: steps('Schritte', { latex: 'N', default: 25, max: 100 }),
   },
   components: [
     { id: 'x1', label: 'x_{1,n}', role: 'primary' },
@@ -33,9 +33,9 @@ const model = iterationN({
     const rho = spectralRadius(e)
     return {
       eigenwerte: eigenReadout(p.a, p.b, p.c, p.d),
-      radius: zahl('Spektralradius $\\max |\\lambda|$', rho, { digits: 3 }),
-      verhalten: klasse('Die Folge', rho < 1 - 1e-12 ? 'geht gegen 0' : rho > 1 + 1e-12 ? 'wächst (fast immer)' : 'Grenzfall |λ| = 1', { marks: [ORIGIN] }),
-      form: klasse('Bahn', e.complex ? 'dreht sich' : e.real.some((l) => l < 0) ? 'springt hin und her' : 'geradlinig'),
+      radius: quantity('Spektralradius $\\max |\\lambda|$', rho, { digits: 3 }),
+      verhalten: category('Die Folge', rho < 1 - 1e-12 ? 'geht gegen 0' : rho > 1 + 1e-12 ? 'wächst (fast immer)' : 'Grenzfall |λ| = 1', { marks: [ORIGIN] }),
+      form: category('Bahn', e.complex ? 'dreht sich' : e.real.some((l) => l < 0) ? 'springt hin und her' : 'geradlinig'),
     }
   },
 })
@@ -43,8 +43,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'linearsystem-discrete',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'System', tex: String.raw`\mathbf{x}(n+1) = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix} \mathbf{x}(n)` },
     { label: 'Start', tex: String.raw`\mathbf{x}(0) = {{#start}}` },
   ],
@@ -69,5 +69,5 @@ export default defineApplet({
     { type: 'timeSeriesDiscrete', series: ['x1', 'x2'], xLabel: 'n', yLabel: 'x_n', y: [-2, 2] },
   ],
   layout: { main: ['a', 'b', 'c', 'd'] },
-  anzeige: ['eigenwerte', 'radius', 'verhalten', 'form'],
+  readouts: ['eigenwerte', 'radius', 'verhalten', 'form'],
 })

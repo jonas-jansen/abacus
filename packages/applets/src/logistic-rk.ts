@@ -1,7 +1,7 @@
 // MATLAB: app_logistic_rK — x_{n+1} = x_n + r (1 − x_n/K) x_n. K is always a fixed point with
 // f′(K) = 1 − r, so monotone approach ends at r = 1 and convergence at r = 2 — for every K.
 
-import { detectPeriod, fixedPoints, index, iteration, liste, real, sample, schritte, verhalten } from '@abacus/applet-core'
+import { detectPeriod, fixedPoints, index, iteration, list, real, sample, steps, behaviour } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const MAX_PERIOD = 16
@@ -12,7 +12,7 @@ const model = iteration({
     r: real('Wachstumsrate', { latex: 'r', min: 0, max: 3, step: 0.01, default: 1 }),
     K: real('Kapazität', { latex: 'K', min: 0.5, max: 8, step: 0.1, default: 5, limits: { min: 1e-6, reason: 'K steht im Nenner und muss positiv sein.' } }),
     x0: real('Startwert', { latex: 'x_0', min: 0, max: 8, step: 0.05, default: 0.1 }),
-    N: schritte('Schritte', { latex: 'N', default: 50, max: 150 }),
+    N: steps('Schritte', { latex: 'N', default: 50, max: 150 }),
   },
   start: (p) => p.x0,
   step: (x, p) => x + p.r * (1 - x / p.K) * x,
@@ -27,21 +27,21 @@ const model = iteration({
     const periode = detectPeriod(tail(2000, 64), { maxPeriod: MAX_PERIOD })
     const cycle = tail(2000, 64)
     return {
-      fixpunkte: liste(
+      fixpunkte: list(
         'Fixpunkte $x^*$',
         fps.map((f) => f.x),
-        { namen: fps.map((_, i) => `x_${i + 1}^*`), marks: fps.map((f, item) => ({ kind: 'value', v: f.x, item })) },
+        { names: fps.map((_, i) => `x_${i + 1}^*`), marks: fps.map((f, item) => ({ kind: 'value', v: f.x, item })) },
       ),
-      steigungen: liste(
+      steigungen: list(
         "Steigung $f'(x^*)$",
         fps.map((f) => f.slope),
-        { digits: 3, namen: fps.map((_, i) => `f'(x_${i + 1}^*)`), marks: fps.map((f, item) => ({ kind: 'line', x: f.x, y: f.x, slope: f.slope, in: 'map', item })) },
+        { digits: 3, names: fps.map((_, i) => `f'(x_${i + 1}^*)`), marks: fps.map((f, item) => ({ kind: 'line', x: f.x, y: f.x, slope: f.slope, in: 'map', item })) },
       ),
       periode: index('Periode', periode, {
         note: periode === null ? `keine Periode ≤ ${MAX_PERIOD} gefunden` : undefined,
         marks: periode === null ? [] : [...cycle.slice(-periode)].map((c) => ({ kind: 'value', v: c })),
       }),
-      verhalten: verhalten('Verhalten', x),
+      verhalten: behaviour('Verhalten', x),
     }
   },
 })
@@ -49,8 +49,8 @@ const model = iteration({
 export default defineApplet({
   id: 'logistic-rk',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = x_n {{+r}}\left(1 - \frac{x_n}{{{K}}}\right) x_n` },
     { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
     { label: 'Steigung', tex: String.raw`f'({{K}}) = 1 - {{r}}` },
@@ -75,5 +75,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['r', 'K', 'x0'] },
-  anzeige: ['fixpunkte', 'steigungen', 'periode', 'verhalten'],
+  readouts: ['fixpunkte', 'steigungen', 'periode', 'verhalten'],
 })

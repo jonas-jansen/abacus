@@ -19,67 +19,67 @@
  *    neutral roles. Change a brand colour and the whole interface follows.
  */
 :root {
-  --ci-schrift: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --ci-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
   /* light */
-  --ci-akzent: #1f5eea; /* buttons, links, the active state */
-  --ci-reihe-1: #1f5eea; /* curves: primary, secondary, tertiary role */
-  --ci-reihe-2: #e0620e;
-  --ci-reihe-3: #8b3fd1;
-  --ci-gut: #0e9f6e; /* marks in the plots, "copied" */
-  --ci-warnung: #8a4b08;
+  --ci-accent: #1f5eea; /* buttons, links, the active state */
+  --ci-series-1: #1f5eea; /* curves: primary, secondary, tertiary role */
+  --ci-series-2: #e0620e;
+  --ci-series-3: #8b3fd1;
+  --ci-good: #0e9f6e; /* marks in the plots, "copied" */
+  --ci-warning: #8a4b08;
   --ci-text: #15181c;
-  --ci-flaeche: #ffffff; /* the applet, cards */
-  --ci-seite: #f3f4f6; /* the page behind */
+  --ci-surface: #ffffff; /* the applet, cards */
+  --ci-page: #f3f4f6; /* the page behind */
 
   /* dark */
-  --ci-akzent-dunkel: #7eaaff;
-  --ci-reihe-1-dunkel: #7eaaff;
-  --ci-reihe-2-dunkel: #f39b5b;
-  --ci-reihe-3-dunkel: #c69be6;
-  --ci-gut-dunkel: #4fd1a1;
-  --ci-warnung-dunkel: #f5c38a;
-  --ci-text-dunkel: #e8eaed;
-  --ci-flaeche-dunkel: #16191d;
-  --ci-seite-dunkel: #0f1215;
+  --ci-accent-dark: #7eaaff;
+  --ci-series-1-dark: #7eaaff;
+  --ci-series-2-dark: #f39b5b;
+  --ci-series-3-dark: #c69be6;
+  --ci-good-dark: #4fd1a1;
+  --ci-warning-dark: #f5c38a;
+  --ci-text-dark: #e8eaed;
+  --ci-surface-dark: #16191d;
+  --ci-page-dark: #0f1215;
 }
 
 /* the brand colours of the current mode */
 :root {
-  --marke-akzent: var(--ci-akzent);
-  --marke-reihe-1: var(--ci-reihe-1);
-  --marke-reihe-2: var(--ci-reihe-2);
-  --marke-reihe-3: var(--ci-reihe-3);
-  --marke-gut: var(--ci-gut);
-  --marke-warnung: var(--ci-warnung);
-  --marke-text: var(--ci-text);
-  --marke-flaeche: var(--ci-flaeche);
-  --marke-seite: var(--ci-seite);
+  --brand-accent: var(--ci-accent);
+  --brand-series-1: var(--ci-series-1);
+  --brand-series-2: var(--ci-series-2);
+  --brand-series-3: var(--ci-series-3);
+  --brand-good: var(--ci-good);
+  --brand-warning: var(--ci-warning);
+  --brand-text: var(--ci-text);
+  --brand-surface: var(--ci-surface);
+  --brand-page: var(--ci-page);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --marke-akzent: var(--ci-akzent-dunkel);
-    --marke-reihe-1: var(--ci-reihe-1-dunkel);
-    --marke-reihe-2: var(--ci-reihe-2-dunkel);
-    --marke-reihe-3: var(--ci-reihe-3-dunkel);
-    --marke-gut: var(--ci-gut-dunkel);
-    --marke-warnung: var(--ci-warnung-dunkel);
-    --marke-text: var(--ci-text-dunkel);
-    --marke-flaeche: var(--ci-flaeche-dunkel);
-    --marke-seite: var(--ci-seite-dunkel);
+    --brand-accent: var(--ci-accent-dark);
+    --brand-series-1: var(--ci-series-1-dark);
+    --brand-series-2: var(--ci-series-2-dark);
+    --brand-series-3: var(--ci-series-3-dark);
+    --brand-good: var(--ci-good-dark);
+    --brand-warning: var(--ci-warning-dark);
+    --brand-text: var(--ci-text-dark);
+    --brand-surface: var(--ci-surface-dark);
+    --brand-page: var(--ci-page-dark);
     --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
   }
 }
 :root[data-theme='dark'] {
-  --marke-akzent: var(--ci-akzent-dunkel);
-  --marke-reihe-1: var(--ci-reihe-1-dunkel);
-  --marke-reihe-2: var(--ci-reihe-2-dunkel);
-  --marke-reihe-3: var(--ci-reihe-3-dunkel);
-  --marke-gut: var(--ci-gut-dunkel);
-  --marke-warnung: var(--ci-warnung-dunkel);
-  --marke-text: var(--ci-text-dunkel);
-  --marke-flaeche: var(--ci-flaeche-dunkel);
-  --marke-seite: var(--ci-seite-dunkel);
+  --brand-accent: var(--ci-accent-dark);
+  --brand-series-1: var(--ci-series-1-dark);
+  --brand-series-2: var(--ci-series-2-dark);
+  --brand-series-3: var(--ci-series-3-dark);
+  --brand-good: var(--ci-good-dark);
+  --brand-warning: var(--ci-warning-dark);
+  --brand-text: var(--ci-text-dark);
+  --brand-surface: var(--ci-surface-dark);
+  --brand-page: var(--ci-page-dark);
   --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
 }
 
@@ -87,34 +87,34 @@
    same mixtures serve light and dark. (Tokens are resolved where they are used, so these
    follow the mode.) */
 :root {
-  --ab-font: var(--ci-schrift);
-  --ab-bg: var(--marke-flaeche);
-  --ab-text: var(--marke-text);
-  --ab-muted: color-mix(in srgb, var(--marke-text) 70%, var(--marke-flaeche));
-  --ab-faint: color-mix(in srgb, var(--marke-text) 50%, var(--marke-flaeche));
-  --ab-line: color-mix(in srgb, var(--marke-text) 10%, var(--marke-flaeche));
-  --ab-line-strong: color-mix(in srgb, var(--marke-text) 20%, var(--marke-flaeche));
-  --ab-track: color-mix(in srgb, var(--marke-text) 12%, var(--marke-flaeche));
-  --ab-panel: color-mix(in srgb, var(--marke-text) 3.5%, var(--marke-flaeche));
-  --ab-hover: color-mix(in srgb, var(--marke-text) 5.5%, var(--marke-flaeche));
-  --ab-accent: var(--marke-akzent);
-  --ab-accent-soft: color-mix(in srgb, var(--marke-akzent) 10%, var(--marke-flaeche));
-  --ab-mark: var(--marke-gut);
-  --ab-mark-soft: color-mix(in srgb, var(--marke-gut) 16%, transparent);
-  --ab-warn: var(--marke-warnung);
-  --ab-warn-soft: color-mix(in srgb, var(--marke-warnung) 10%, var(--marke-flaeche));
-  --ab-page: var(--marke-seite);
+  --ab-font: var(--ci-font);
+  --ab-bg: var(--brand-surface);
+  --ab-text: var(--brand-text);
+  --ab-muted: color-mix(in srgb, var(--brand-text) 70%, var(--brand-surface));
+  --ab-faint: color-mix(in srgb, var(--brand-text) 50%, var(--brand-surface));
+  --ab-line: color-mix(in srgb, var(--brand-text) 10%, var(--brand-surface));
+  --ab-line-strong: color-mix(in srgb, var(--brand-text) 20%, var(--brand-surface));
+  --ab-track: color-mix(in srgb, var(--brand-text) 12%, var(--brand-surface));
+  --ab-panel: color-mix(in srgb, var(--brand-text) 3.5%, var(--brand-surface));
+  --ab-hover: color-mix(in srgb, var(--brand-text) 5.5%, var(--brand-surface));
+  --ab-accent: var(--brand-accent);
+  --ab-accent-soft: color-mix(in srgb, var(--brand-accent) 10%, var(--brand-surface));
+  --ab-mark: var(--brand-good);
+  --ab-mark-soft: color-mix(in srgb, var(--brand-good) 16%, transparent);
+  --ab-warn: var(--brand-warning);
+  --ab-warn-soft: color-mix(in srgb, var(--brand-warning) 10%, var(--brand-surface));
+  --ab-page: var(--brand-page);
 
-  --abacus-primary: var(--marke-reihe-1);
-  --abacus-secondary: var(--marke-reihe-2);
-  --abacus-tertiary: var(--marke-reihe-3);
-  --abacus-reference: color-mix(in srgb, var(--marke-text) 78%, var(--marke-flaeche));
-  --abacus-ghost: color-mix(in srgb, var(--marke-text) 50%, var(--marke-flaeche));
-  --abacus-annotation: color-mix(in srgb, var(--marke-text) 75%, var(--marke-flaeche));
-  --abacus-grid: color-mix(in srgb, var(--marke-text) 6%, var(--marke-flaeche));
-  --abacus-data: color-mix(in srgb, var(--marke-text) 88%, var(--marke-flaeche));
-  --abacus-axis: color-mix(in srgb, var(--marke-text) 38%, var(--marke-flaeche));
-  --abacus-tick: color-mix(in srgb, var(--marke-text) 62%, var(--marke-flaeche));
+  --abacus-primary: var(--brand-series-1);
+  --abacus-secondary: var(--brand-series-2);
+  --abacus-tertiary: var(--brand-series-3);
+  --abacus-reference: color-mix(in srgb, var(--brand-text) 78%, var(--brand-surface));
+  --abacus-ghost: color-mix(in srgb, var(--brand-text) 50%, var(--brand-surface));
+  --abacus-annotation: color-mix(in srgb, var(--brand-text) 75%, var(--brand-surface));
+  --abacus-grid: color-mix(in srgb, var(--brand-text) 6%, var(--brand-surface));
+  --abacus-data: color-mix(in srgb, var(--brand-text) 88%, var(--brand-surface));
+  --abacus-axis: color-mix(in srgb, var(--brand-text) 38%, var(--brand-surface));
+  --abacus-tick: color-mix(in srgb, var(--brand-text) 62%, var(--brand-surface));
 }
 :root {
   /* the corners of every box: cards, panels, boxes in the text, hints (round buttons stay round) */
@@ -2006,7 +2006,7 @@ html[data-hinweise='aus'] .ab-hint {
   color: #fff;
   box-shadow: none;
 }
-.ab-stat[data-kind='klasse'] .ab-chip {
+.ab-stat[data-kind='category'] .ab-chip {
   background: var(--ab-accent-soft);
   color: var(--ab-accent);
 }

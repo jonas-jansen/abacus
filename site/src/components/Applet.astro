@@ -1,14 +1,16 @@
 ---
-// An additional applet inside the prose. The page's main applet comes from the frontmatter.
+// A further applet inside the prose. The page's main applet comes from the frontmatter.
+//   <Applet id="geometric" state={{ a: -0.9 }} />
 import { AppletIsland } from '../islands'
 import { url } from '../config'
 
 interface Props {
   id: string
-  zustand?: Record<string, unknown>
+  /** Opening parameters. */
+  state?: Record<string, unknown>
 }
-const { id, zustand } = Astro.props
+const { id, state } = Astro.props
 ---
 <div class="inline-applet">
-  <AppletIsland client:visible id={id} zustand={zustand} vollbildHref={url(`/applet/${id}`)} />
+  <AppletIsland client:visible id={id} initialState={state} pageHref={url(`/applet/${id}`)} />
 </div>

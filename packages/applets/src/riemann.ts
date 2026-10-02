@@ -2,25 +2,25 @@
 // area. With more rectangles the sum approaches the integral F(b) − F(a) — for midpoints the
 // error shrinks like 1/n², for left or right points like 1/n.
 
-import { choice, closedForm, int, real, zahl, type Series } from '@abacus/applet-core'
+import { choice, closedForm, int, real, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { FUNKTIONEN, funktionOptionen, inDomain, type FunktionId } from './funktionen'
+import { FUNCTIONS, functionChoices, inDomain, type FunctionId } from './functions'
 
-const IDS = ['inv', 'x2', 'lin', 'sin', 'exp', 'sqrt'] as const satisfies readonly FunktionId[]
+const IDS = ['inv', 'x2', 'lin', 'sin', 'exp', 'sqrt'] as const satisfies readonly FunctionId[]
 type Regel = 'mitte' | 'links' | 'rechts'
-type P = { f: FunktionId; a: number; b: number; n: number; regel: Regel }
+type P = { f: FunctionId; a: number; b: number; n: number; regel: Regel }
 
 const OFFSET: Record<Regel, number> = { links: 0, mitte: 0.5, rechts: 1 }
 
 /** The plot window: [a, b] with half its width on either side, within the domain of f. */
 function fenster(p: P): [number, number] {
-  const [lo, hi] = FUNKTIONEN[p.f].domain
+  const [lo, hi] = FUNCTIONS[p.f].domain
   const w = (p.b - p.a) / 2
   return [Math.max(lo, p.a - w), Math.min(hi, p.b + w)]
 }
 
 function summe(p: P): number {
-  const { f } = FUNKTIONEN[p.f]
+  const { f } = FUNCTIONS[p.f]
   const dx = (p.b - p.a) / p.n
   let s = 0
   for (let i = 0; i < p.n; i++) s += f(p.a + (i + OFFSET[p.regel]) * dx)
@@ -30,7 +30,7 @@ function summe(p: P): number {
 const model = closedForm({
   id: 'riemann',
   params: {
-    f: choice('Funktion', funktionOptionen(IDS), 'inv'),
+    f: choice('Funktion', functionChoices(IDS), 'inv'),
     a: real('untere Grenze', { latex: 'a', min: -3, max: 3, step: 0.05, default: 1 }),
     b: real('obere Grenze', { latex: 'b', min: -3, max: 4, step: 0.05, default: 2 }),
     n: int('Rechtecke', { latex: 'n', min: 1, max: 100, default: 5, limits: { min: 1, max: 5000, reason: 'Zwischen 1 und 5000 Rechtecken.' } }),
@@ -51,9 +51,9 @@ const model = closedForm({
   },
   constraintNote: 'a < b, beide im Definitionsbereich von f',
   domain: (p) => fenster(p),
-  curves: { f: { label: 'f(x)', f: (x, p) => FUNKTIONEN[p.f].f(x) } },
+  curves: { f: { label: 'f(x)', f: (x, p) => FUNCTIONS[p.f].f(x) } },
   extraSeries: ({ p }) => {
-    const { f } = FUNKTIONEN[p.f]
+    const { f } = FUNCTIONS[p.f]
     const dx = (p.b - p.a) / p.n
     const x = new Float64Array(p.n * 5)
     const y = new Float64Array(p.n * 5)
@@ -67,16 +67,16 @@ const model = closedForm({
     return [r]
   },
   observables: ({ p }) => {
-    const F = FUNKTIONEN[p.f]
+    const F = FUNCTIONS[p.f]
     const S = summe(p)
     const I = F.F(p.b) - F.F(p.a)
     const err = Math.abs(S - I)
     const order = p.regel === 'mitte' ? 2 : 1
     return {
-      summe: zahl('Rechtecksumme', S, { digits: 6 }),
-      integral: zahl('Integral $F(b) - F(a)$', I, { digits: 6 }),
-      fehler: zahl('Fehler', err, { digits: 3 }),
-      skaliert: zahl(order === 2 ? 'Fehler $\\cdot\\, n^2$ (bleibt fast gleich)' : 'Fehler $\\cdot\\, n$ (bleibt fast gleich)', err * p.n ** order, { digits: 3 }),
+      summe: quantity('Rechtecksumme', S, { digits: 6 }),
+      integral: quantity('Integral $F(b) - F(a)$', I, { digits: 6 }),
+      fehler: quantity('Fehler', err, { digits: 3 }),
+      skaliert: quantity(order === 2 ? 'Fehler $\\cdot\\, n^2$ (bleibt fast gleich)' : 'Fehler $\\cdot\\, n$ (bleibt fast gleich)', err * p.n ** order, { digits: 3 }),
     }
   },
 })
@@ -84,7 +84,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'riemann',
   model,
-  formeln: [
+  formulas: [
     { label: 'Näherung', tex: String.raw`\int_{{{a}}}^{{{b}}} f(x)\,dx \approx \sum_{i=1}^{{{n}}} f(\xi_i)\,\Delta x \\ f(x) = {{f}}` },
     { label: 'Rechtecke', tex: String.raw`\Delta x = \frac{{{b}} - {{a}}}{{{n}}} \\ \xi_i\ \text{ in der } {{regel}}` },
   ],
@@ -101,5 +101,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['f', 'n', 'regel', 'a', 'b'] },
-  anzeige: ['summe', 'integral', 'fehler', 'skaliert'],
+  readouts: ['summe', 'integral', 'fehler', 'skaliert'],
 })

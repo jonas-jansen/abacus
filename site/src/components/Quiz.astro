@@ -1,22 +1,24 @@
 ---
-// <Quiz id="log-schwelle" nr={3} />            — any quiz from @abacus/quizzes
-// <Quiz id="log-vorhersage-32" schaltetFrei /> — committing it unlocks the page's applet
+// <Quiz id="log-schwelle" number={3} />            — any question from @abacus/quizzes
+// <Quiz id="log-vorhersage-32" unlocks />          — answering it unlocks the page's applet
 import { QuizIsland } from '../islands'
 import { scope } from '../config'
 
 interface Props {
   id: string
-  nr?: number | string
-  stern?: boolean
-  schaltetFrei?: boolean | string
+  number?: number | string
+  /** A harder question. */
+  star?: boolean
+  /** Unlock the page's applet (true) or the applet with this id once answered. */
+  unlocks?: boolean | string
 }
-const { id, nr, stern, schaltetFrei } = Astro.props
-const unlock = schaltetFrei === true ? Astro.locals.applet : schaltetFrei || undefined
+const { id, number, star, unlocks } = Astro.props
+const unlock = unlocks === true ? Astro.locals.applet : unlocks || undefined
 ---
 {
   unlock ? (
-    <QuizIsland client:load id={id} scope={scope} nr={nr} stern={stern} schaltetFrei={unlock} />
+    <QuizIsland client:load id={id} scope={scope} number={number} star={star} unlocks={unlock} />
   ) : (
-    <QuizIsland client:visible id={id} scope={scope} nr={nr} stern={stern} />
+    <QuizIsland client:visible id={id} scope={scope} number={number} star={star} />
   )
 }

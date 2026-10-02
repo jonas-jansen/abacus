@@ -215,7 +215,7 @@ function Tasten({ src }: { src: string }) {
   return <div ref={ref} className="ab-tasten" />
 }
 
-export function HilfeKnopf({ bahnen, zeitleiste }: { bahnen: boolean; zeitleiste: boolean }) {
+export function HilfeKnopf({ bahnen, timeline }: { bahnen: boolean; timeline: boolean }) {
   const [open, setOpen] = useState(false)
   const gruppen: [string, string][] = [
     [
@@ -231,7 +231,7 @@ export function HilfeKnopf({ bahnen, zeitleiste }: { bahnen: boolean; zeitleiste
       ].join('\n'),
     ],
     ['Zahlen', '{Ziehen} | Zahl seitwärts ziehen: Wert ändern\nKlick | Zahl eintippen\nKlick | auf einen Messwert: im Bild markieren'],
-    ...(zeitleiste
+    ...(timeline
       ? ([['Zeitleiste', '{Leer} | abspielen, anhalten\nKlick | Tempo: ½× · 1× · 2× · 4×\n{Ziehen} | Tempo stufenlos, 0,1× bis 10×']] as [string, string][])
       : []),
     ['Verlauf', '{Mod} + {Z} | rückgängig\n{Redo} | wiederholen'],
@@ -248,9 +248,9 @@ export function HilfeKnopf({ bahnen, zeitleiste }: { bahnen: boolean; zeitleiste
       </button>
       <Dialog open={open} onClose={() => setOpen(false)} title="Bedienung">
         <div className="ab-hilfe-gruppen">
-          {gruppen.map(([titel, src]) => (
-            <section key={titel}>
-              <h4>{titel}</h4>
+          {gruppen.map(([titleText, src]) => (
+            <section key={titleText}>
+              <h4>{titleText}</h4>
               <Tasten src={src} />
             </section>
           ))}

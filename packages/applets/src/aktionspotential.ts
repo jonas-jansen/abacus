@@ -4,7 +4,7 @@
 // b = 0,18 extra small spikes appear between the action potentials — chaotic early
 // afterdepolarisations (EADs); with b = 0,6 and k = 0,02 it rests and answers one stimulus.
 
-import { detectPeriod, iterationN, klasse, index, real, schritte } from '@abacus/applet-core'
+import { detectPeriod, iterationN, category, index, real, steps } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { a: number; b: number; c: number; k: number }
@@ -36,7 +36,7 @@ const model = iterationN({
     c: real('Zufluss', { latex: 'c', min: 0, max: 1, step: 0.01, default: 0.28 }),
     k: real('Reiz', { latex: 'k', min: 0, max: 0.1, step: 0.001, default: 0.03 }),
     y10: real('Anfangspotential', { latex: 'y_1(0)', min: 0, max: 3, step: 0.01, default: 0.2 }),
-    N: schritte('Schritte', { latex: 'N', default: 180, max: 2000 }),
+    N: steps('Schritte', { latex: 'N', default: 180, max: 2000 }),
   },
   components: [
     { id: 'y1', label: 'y_1', name: 'Potential', role: 'primary' },
@@ -55,7 +55,7 @@ const model = iterationN({
     for (const v of tail) max = Math.max(max, v)
     const art = max < 1 ? 'Ruhe' : periode !== null ? 'regelmäßige Aktionspotentiale' : 'unregelmäßig: EADs'
     return {
-      art: klasse('Die Zelle', art, art === 'unregelmäßig: EADs' ? { note: 'kleine Zacken zwischen den Aktionspotentialen, ohne Periode' } : {}),
+      art: category('Die Zelle', art, art === 'unregelmäßig: EADs' ? { note: 'kleine Zacken zwischen den Aktionspotentialen, ohne Periode' } : {}),
       periode: index('Periode (Schritte)', periode, periode === null && art !== 'Ruhe' ? { note: 'keine Periode ≤ 120' } : {}),
       anzahl: index('Aktionspotentiale bis $N$', sp.length, { marks: sp.map((t, item) => ({ kind: 'time' as const, t, item })) }),
     }
@@ -65,8 +65,8 @@ const model = iterationN({
 export default defineApplet({
   id: 'aktionspotential',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Modell', tex: String.raw`y_1(n+1) = y_1(n)^2\,e^{y_2(n) - y_1(n)} + {{k}} \\ y_2(n+1) = {{a}}{{*}}y_2(n) - {{b}}{{*}}y_1(n) + {{c}}` },
     { label: 'Start', tex: String.raw`y_1(0) = {{#y10}} \\ y_2(0) = \frac{c}{1 - a}` },
   ],
@@ -75,8 +75,8 @@ export default defineApplet({
     { type: 'timeSeriesDiscrete', series: ['y2'], title: 'Erholungsvariable', xLabel: 'n', yLabel: 'y_2(n)' },
   ],
   layout: { main: ['b', 'k'] },
-  anzeige: ['art', 'periode', 'anzahl'],
-  szenarien: [
+  readouts: ['art', 'periode', 'anzahl'],
+  scenarios: [
     { label: 'spontan, b = 0,26', text: 'regelmäßige Aktionspotentiale (Folie 63 links)', params: {} },
     { label: 'EADs, b = 0,18', text: 'chaotische frühe Nachdepolarisationen (Folie 63 rechts)', params: { b: 0.18, N: 210 } },
     { label: 'aus der Ruhe', text: 'b = 0,6, k = 0,02: eine Anregung, dann wieder Ruhe (Folie 64)', params: { b: 0.6, k: 0.02, y10: 0.3, N: 30 } },

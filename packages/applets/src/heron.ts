@@ -2,7 +2,7 @@
 // for x² = 2. Converges to ±√2 by the sign of x₀; the number of correct digits roughly
 // doubles per step.
 
-import { iteration, liste, real, sample, schritte, zahl } from '@abacus/applet-core'
+import { iteration, list, real, sample, steps, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const heron = (x: number) => 0.5 * (x + 2 / x)
@@ -16,7 +16,7 @@ const model = iteration({
   id: 'heron',
   params: {
     x0: real('Startwert', { latex: 'x_0', min: -3, max: 5, step: 0.05, default: 0.5 }),
-    N: schritte('Schritte', { latex: 'N', default: 8, max: 12 }),
+    N: steps('Schritte', { latex: 'N', default: 8, max: 12 }),
   },
   start: (p) => p.x0,
   step: (x) => heron(x),
@@ -37,16 +37,16 @@ const model = iteration({
   observables: ({ p, x }) => {
     if (p.x0 === 0) {
       const none = { note: 'bei x₀ = 0 ist 2/x₀ nicht definiert' }
-      return { grenzwert: zahl('Grenzwert', null, none), stellen: liste('richtige Stellen', null, none), fehler: zahl('Fehler', null, none) }
+      return { grenzwert: quantity('Grenzwert', null, none), stellen: list('richtige Stellen', null, none), fehler: quantity('Fehler', null, none) }
     }
     const L = p.x0 < 0 ? -Math.SQRT2 : Math.SQRT2
     const d = [...x].map((v) => digits(v, L))
     return {
-      grenzwert: zahl('Grenzwert', L, { digits: 10, marks: [{ kind: 'value', v: L }] }),
-      stellen: liste('richtige Stellen je Schritt', d, {
+      grenzwert: quantity('Grenzwert', L, { digits: 10, marks: [{ kind: 'value', v: L }] }),
+      stellen: list('richtige Stellen je Schritt', d, {
         marks: [...x].map((v, item) => ({ kind: 'point', x: item, y: Math.max(Math.abs(v - L), Number.EPSILON * Math.SQRT2), in: 'time', item })),
       }),
-      fehler: zahl('Fehler $|x_N - x^*|$', Math.abs(x[x.length - 1] - L), { digits: 3 }),
+      fehler: quantity('Fehler $|x_N - x^*|$', Math.abs(x[x.length - 1] - L), { digits: 3 }),
     }
   },
 })
@@ -54,8 +54,8 @@ const model = iteration({
 export default defineApplet({
   id: 'heron',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = \frac12\left(x_n + \frac{2}{x_n}\right)` },
     { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
   ],
@@ -74,5 +74,5 @@ export default defineApplet({
         'Hier heißt jede Zehnerpotenz weiter unten: eine richtige Nachkommastelle mehr. Die Punkte fallen immer steiler – die Zahl der richtigen Stellen verdoppelt sich ungefähr in jedem Schritt. Bei $10^{-16}$ ist die Rechengenauigkeit des Computers erreicht.',
     },
   ],
-  anzeige: ['grenzwert', 'stellen', 'fehler'],
+  readouts: ['grenzwert', 'stellen', 'fehler'],
 })

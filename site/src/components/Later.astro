@@ -1,0 +1,11 @@
+---
+// A claim whose proof comes later: <Later week={5}>…</Later>
+interface Props {
+  week?: number
+}
+const { week } = Astro.props
+---
+<aside class="box box-later">
+  <p class="box-label">{week ? `Beweis folgt in Woche ${week}` : 'Beweis folgt später'}</p>
+  <slot />
+</aside>

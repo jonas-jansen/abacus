@@ -577,17 +577,17 @@ function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, c
 
 /** The step a stepped series shows: the timeline's, or its last. */
 export function currentStep(series: Series, view: PlotView): number {
-  const k = series.schritt!
+  const k = series.stepOf!
   const last = k.length ? k[k.length - 1] : 0
   return view.steps === undefined ? last : Math.min(view.steps, last)
 }
 
 /**
- * A series with `schritt`: earlier steps faint (or hidden), the current one in full and a
+ * A series with `stepOf`: earlier steps faint (or hidden), the current one in full and a
  * little stronger, later ones not yet.
  */
 function drawStepped(s: Surface, frame: Frame, series: Series, view: PlotView, fade: number) {
-  const k = series.schritt!
+  const k = series.stepOf!
   const cur = currentStep(series, view)
   const part = (keep: (step: number) => boolean) => {
     const x: number[] = []
@@ -614,7 +614,7 @@ function drawStepped(s: Surface, frame: Frame, series: Series, view: PlotView, f
     polyline(s, frame, p.x, p.y)
     s.end()
   }
-  if ((series.schrittModus ?? 'spur') === 'spur') {
+  if ((series.stepMode ?? 'trace') === 'trace') {
     s.fade(fade * 0.35)
     draw(part((step) => step < cur), false)
   }
@@ -628,9 +628,9 @@ export function stepLabels(spec: PlotSpec, run: Run, view: PlotView): { x: numbe
   const out: { x: number; y: number; tex: string; role: Series['role'] }[] = []
   for (const series of shown(run, spec.series, view)) {
     if (!series.labels) continue
-    const cur = series.schritt ? currentStep(series, view) : NaN
+    const cur = series.stepOf ? currentStep(series, view) : NaN
     series.labels.forEach((tex, i) => {
-      if (!tex || (series.schritt && series.schritt[i] !== cur)) return
+      if (!tex || (series.stepOf && series.stepOf[i] !== cur)) return
       out.push({ x: series.x[i], y: series.y[i], tex, role: series.role })
     })
   }
@@ -712,7 +712,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
       }
       for (const series of shown(run, spec.series, view)) {
         s.fade(dim(series, view))
-        if (series.schritt) {
+        if (series.stepOf) {
           drawStepped(s, frame, series, view, dim(series, view))
           continue
         }

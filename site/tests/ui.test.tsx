@@ -74,8 +74,8 @@ describe('server render', () => {
 
 describe('containers on the channel', () => {
   it('a prediction quiz unlocks the applet, and keeps it unlocked after a reload', () => {
-    const applet = () => mount(<AppletView def={getApplet('logistic-cobweb')} gesperrt />)
-    const quiz = () => mount(<QuizView def={getQuiz('log-vorhersage-32')} scope={scope} schaltetFrei="logistic-cobweb" />)
+    const applet = () => mount(<AppletView def={getApplet('logistic-cobweb')} startLocked />)
+    const quiz = () => mount(<QuizView def={getQuiz('log-vorhersage-32')} scope={scope} unlocks="logistic-cobweb" />)
     const a = applet()
     const q = quiz()
     expect(a.querySelector('.ab-locked')).not.toBeNull()
@@ -100,8 +100,8 @@ describe('containers on the channel', () => {
     expect(q.querySelector('.katex')).not.toBeNull()
     type(input, '1')
     submit(q.querySelector('form'))
-    expect(q.textContent).toContain('Stimmt.')
-    expect(notebook().get('vzms:test:ws:geo-konstant')!.eingaben.map((e) => e.status)).toEqual(['falsch', 'richtig'])
+    expect(q.textContent).toContain('Richtig')
+    expect(notebook().get('vzms:test:ws:geo-konstant')!.inputs.map((e) => e.status)).toEqual(['wrong', 'correct'])
     expect(q.textContent).toContain('Lösung')
   })
 
@@ -109,8 +109,8 @@ describe('containers on the channel', () => {
     const q = mount(<QuizView def={getQuiz('log-schwelle')} scope={scope} />)
     type(q.querySelector('input') as HTMLInputElement, '3')
     submit(q.querySelector('form'))
-    expect(q.textContent).not.toContain('Stimmt.')
-    expect(notebook().get('vzms:test:ws:log-schwelle')!.eingaben[0].status).toBe('gespeichert')
+    expect(q.textContent).not.toContain('Richtig')
+    expect(notebook().get('vzms:test:ws:log-schwelle')!.inputs[0].status).toBe('saved')
   })
 
   it('Erzeuge reads the live applet state from the channel', () => {
@@ -122,7 +122,7 @@ describe('containers on the channel', () => {
     type(aField, '3,5')
     act(() => aField.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     click(button(q, 'Einstellung prüfen'))
-    expect(q.textContent).toContain('Stimmt.')
+    expect(q.textContent).toContain('Richtig')
   })
 
   it('applet/command sets parameters from outside', () => {
@@ -174,13 +174,13 @@ describe('applet container', () => {
 
   it('a million steps render without trouble', () => {
     const t0 = performance.now()
-    const html = renderToString(<AppletView def={getApplet('geometric')} zustand={{ N: 1_000_000, a: -0.999 }} />)
+    const html = renderToString(<AppletView def={getApplet('geometric')} initialState={{ N: 1_000_000, a: -0.999 }} />)
     expect(html).toMatch(/<path d="M/)
     expect(performance.now() - t0).toBeLessThan(3000)
   })
 
   it('keyboard: arrows step, Shift steps ×10, fine mode narrows the range', () => {
-    const a = mount(<AppletView def={getApplet('geometric')} zustand={{ a: 0.5 }} />)
+    const a = mount(<AppletView def={getApplet('geometric')} initialState={{ a: 0.5 }} />)
     const range = a.querySelector('input.ab-range') as HTMLInputElement
     const field = a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement
     act(() => range.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })))
@@ -242,38 +242,38 @@ describe('comfort', () => {
 
 describe('weekly quizzes', () => {
   it('are taken, submitted and kept as attempts; the course quizzes and weekly quizzes stay apart', async () => {
-    const { getWochenquiz } = await import('@abacus/quizzes')
-    const { WochenquizView, wochenquizKey } = await import('@abacus/quiz')
-    const w = getWochenquiz('woche-01')
+    const { getWeeklyQuiz } = await import('@abacus/quizzes')
+    const { WeeklyQuizView, weeklyQuizKey } = await import('@abacus/quiz')
+    const w = getWeeklyQuiz('woche-01')
     notebook().clear()
-    const host = mount(<WochenquizView def={w} scope={scope} />)
+    const host = mount(<WeeklyQuizView def={w} scope={scope} />)
     const button = (text: string) => [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(text))!
     act(() => button('Quiz starten').click())
-    expect(host.querySelectorAll('.wq-frage')).toHaveLength(w.fragen.length)
+    expect(host.querySelectorAll('.wq-question')).toHaveLength(w.questions.length)
 
     // the single choice question: pick the right option by its TeX source (options are shuffled)
-    const label = [...host.querySelectorAll('.wq-frage')[0].querySelectorAll('label')].find((l) => l.textContent?.includes('1{,}05\\,x_n'))!
+    const label = [...host.querySelectorAll('.wq-question')[0].querySelectorAll('label')].find((l) => l.textContent?.includes('1{,}05\\,x_n'))!
     act(() => label.querySelector('input')!.click())
     // submit with open questions: asks first, then submits
     act(() => button('Abgeben').click())
     act(() => button('Ja, abgeben').click())
 
-    const entry = notebook().get(wochenquizKey(scope, 'woche-01'))!
-    expect(entry.typ).toBe('wochenquiz')
-    expect(entry.eingaben).toHaveLength(1)
-    expect(entry.eingaben[0].anzeige).toBe('Versuch 1: 1 von 4 Punkten')
+    const entry = notebook().get(weeklyQuizKey(scope, 'woche-01'))!
+    expect(entry.type).toBe('weekly')
+    expect(entry.inputs).toHaveLength(1)
+    expect(entry.inputs[0].display).toBe('Versuch 1: 1 von 4 Punkten')
     expect(host.textContent).toContain('Neuer Versuch')
 
     // a second attempt is a new entry in the same list
     act(() => button('Neuer Versuch').click())
     act(() => button('Abgeben').click())
     act(() => button('Ja, abgeben').click())
-    expect(notebook().get(wochenquizKey(scope, 'woche-01'))!.eingaben).toHaveLength(2)
+    expect(notebook().get(weeklyQuizKey(scope, 'woche-01'))!.inputs).toHaveLength(2)
   })
 
   it('every weekly quiz loads, and only holds questions it can show without an applet', async () => {
-    const { wochenquizze } = await import('@abacus/quizzes')
-    expect(wochenquizze.length).toBeGreaterThan(0)
-    for (const w of wochenquizze) for (const f of w.fragen) expect(f.typ).not.toBe('erzeuge')
+    const { weeklyQuizzes } = await import('@abacus/quizzes')
+    expect(weeklyQuizzes.length).toBeGreaterThan(0)
+    for (const w of weeklyQuizzes) for (const f of w.questions) expect(f.type).not.toBe('configure')
   })
 })

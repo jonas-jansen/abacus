@@ -6,7 +6,7 @@
 // b is counted in 10¹¹ bacteria per litre (as on the slides' axis), so b and n share a plot
 // and ν = 0,5·10⁻¹¹ g per bacterium becomes 0,5 g per 10¹¹ bacteria.
 
-import { classify, eigenReadout, jacobian, klasse, liste, ode, real, type Mark } from '@abacus/applet-core'
+import { classify, eigenReadout, jacobian, category, list, ode, real, type Mark } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 type P = { D: number; nin: number; nu: number; kmax: number; k50: number; b0: number; n0: number }
@@ -54,12 +54,12 @@ const model = ode({
     const ziel = eq.find((e) => e.stabil) ?? eq[0]
     const mark = (e: (typeof eq)[number]): Mark => ({ kind: 'point', x: e.x[0], y: e.x[1], in: 'phase' })
     return {
-      kultur: klasse('Die Kultur', kultur?.stabil ? 'hält sich' : 'wird ausgewaschen', {
+      kultur: category('Die Kultur', kultur?.stabil ? 'hält sich' : 'wird ausgewaschen', {
         note: kultur ? undefined : 'bei diesem Durchfluss wachsen die Bakterien langsamer, als sie hinausgespült werden',
         marks: [mark(ziel)],
       }),
-      gleichgewicht: liste('Gleichgewicht $(b^*, n^*)$', ziel.x, { form: 'vektor', marks: [mark(ziel)] }),
-      typ: klasse('Typ', ziel.typ, { marks: [mark(ziel)] }),
+      gleichgewicht: list('Gleichgewicht $(b^*, n^*)$', ziel.x, { form: 'vector', marks: [mark(ziel)] }),
+      typ: category('Typ', ziel.typ, { marks: [mark(ziel)] }),
       eigenwerte: eigenReadout(ziel.J[0][0], ziel.J[0][1], ziel.J[1][0], ziel.J[1][1], { at: ziel.x }),
     }
   },
@@ -68,8 +68,8 @@ const model = ode({
 export default defineApplet({
   id: 'bioreaktor',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     {
       label: 'System',
       tex: String.raw`b' = \frac{{{kmax}}\,n}{{{k50}} + n}\,b - {{D}}\,b \\ n' = -{{nu}}\,\frac{{{kmax}}\,n}{{{k50}} + n}\,b - {{D}}\,n + {{D}}{{*}}{{nin}}`,
@@ -102,8 +102,8 @@ export default defineApplet({
     },
   ],
   layout: { main: ['D', 'nin', 'kmax'] },
-  anzeige: ['kultur', 'gleichgewicht', 'typ', 'eigenwerte'],
-  szenarien: [
+  readouts: ['kultur', 'gleichgewicht', 'typ', 'eigenwerte'],
+  scenarios: [
     { label: 'Folie 27', text: 'D = 0,1/h: die Kultur stellt sich auf ein Gleichgewicht ein', params: {} },
     { label: 'knapp', text: 'D = 0,4/h: knapp unter der Grenze k_max n_in/(k₅₀ + n_in) ≈ 0,41/h', params: { D: 0.4 } },
     { label: 'Auswaschen', text: 'D = 0,5/h: schneller hinausgespült als nachgewachsen', params: { D: 0.5 } },

@@ -3,7 +3,7 @@
 // The columns of A (the images of the unit vectors) can be dragged too; the parallelogram they
 // span has the area |det A|.
 
-import { closedForm, eigenReadout, klasse, point, type Point, real, type Series, zahl } from '@abacus/applet-core'
+import { closedForm, eigenReadout, category, point, type Point, real, type Series, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -5, max: 5, step: 0.1, default: def })
@@ -64,11 +64,11 @@ const model = closedForm({
     const n = Math.hypot(...p.v)
     const parallel = w !== null && (w < 1 || w > 179)
     return {
-      winkel: zahl('Winkel zwischen $\\mathbf{v}$ und $A\\mathbf{v}$ (Grad)', w, { digits: 3, note: 'v = 0 oder A v = 0' }),
-      faktor: zahl('Streckung $|A\\mathbf{v}| / |\\mathbf{v}|$', n === 0 ? null : Math.hypot(...Av(p)) / n, { digits: 3 }),
-      eigen: klasse('$\\mathbf{v}$ ist', parallel ? 'ein Eigenvektor' : 'kein Eigenvektor'),
+      winkel: quantity('Winkel zwischen $\\mathbf{v}$ und $A\\mathbf{v}$ (Grad)', w, { digits: 3, note: 'v = 0 oder A v = 0' }),
+      faktor: quantity('Streckung $|A\\mathbf{v}| / |\\mathbf{v}|$', n === 0 ? null : Math.hypot(...Av(p)) / n, { digits: 3 }),
+      eigen: category('$\\mathbf{v}$ ist', parallel ? 'ein Eigenvektor' : 'kein Eigenvektor'),
       eigenwerte: eigenReadout(p.a, p.b, p.c, p.d),
-      det: zahl('Determinante $\\det A$', p.a * p.d - p.b * p.c),
+      det: quantity('Determinante $\\det A$', p.a * p.d - p.b * p.c),
     }
   },
 })
@@ -76,7 +76,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'eigenvektoren',
   model,
-  formeln: [
+  formulas: [
     { label: 'Matrix', tex: String.raw`A = \begin{pmatrix} {{a}} & {{b}} \\ {{c}} & {{d}} \end{pmatrix}` },
     { label: 'Vektor', tex: String.raw`\mathbf{v} = {{#v}}` },
     { label: 'Eigenvektor', tex: String.raw`A\mathbf{v} = \lambda\mathbf{v}` },
@@ -97,5 +97,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['a', 'b', 'c', 'd', 'v'] },
-  anzeige: ['winkel', 'faktor', 'eigen', 'eigenwerte', 'det'],
+  readouts: ['winkel', 'faktor', 'eigen', 'eigenwerte', 'det'],
 })

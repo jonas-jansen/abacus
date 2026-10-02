@@ -1,135 +1,159 @@
 /**
- * Quiz definitions — the second container. A quiz is self-contained (question, checker,
- * hints, solution) and reusable on any page. If it refers to an applet, it only knows the
- * applet's id and reads its state from the channel; it never imports the applet.
+ * Quiz definitions – the second container. A question is self-contained (question, answer
+ * key or checker, hints, solution) and reusable on any page. If it refers to an applet, it
+ * only knows the applet's id and reads its state from the channel; it never imports it.
  *
- * Text fields accept inline math: `$f'(y^*) = 2 - a$`, display math with `$$…$$`.
+ * Text fields accept inline math `$f'(y^*) = 2 - a$`, display math `$$…$$` and `**bold**`.
+ * Options and matching items may also be pictures: a plot of an applet in a given state, or
+ * an image file (see `QuizImage`).
  */
 
-import { schwelle, type Params, type Pruefer } from '@abacus/applet-core'
+import { threshold, type Checker, type Params } from '@abacus/applet-core'
+
+/**
+ * A picture in a question:
+ * - `{ applet: 'logistic-cobweb', state: { a: 3.2 }, plot: 0 }` – that applet's plot (first by
+ *   default) in that state, drawn by the plot library like in the applet itself;
+ * - `{ src: 'bilder/zelle.png' }` – an image file under `site/public/` (SVG, PNG, JPG).
+ */
+export type QuizImage =
+  | { applet: string; state?: Readonly<Record<string, unknown>>; plot?: number; alt?: string }
+  | { src: string; alt?: string }
+
+/** What an option or a matching item shows: text (with $math$) or a picture. */
+export type Content = string | QuizImage
+
+export const isImage = (c: Content): c is QuizImage => typeof c !== 'string'
 
 interface Base {
-  /** Globally unique and stable: the notebook stores answers under it. */
+  /** Stable for good: the notebook stores answers under it. */
   id: string
-  frage: string
-  /** Applet whose live state the checker receives. */
+  question: string
+  /** A picture under the question. */
+  image?: QuizImage
+  /** Applet whose live state the checker receives (course pages). */
   applet?: string
-  /** Progressive hint ladder. */
-  tipps?: readonly string[]
-  /** Shown only after an attempt has been recorded. */
-  loesung?: string
+  /** A ladder of hints, one at a time (course pages). */
+  hints?: readonly string[]
+  /** Shown with the result. */
+  solution?: string
   /** Bump when the question changes meaning, so old answers are not mixed with new ones. */
   version?: number
 }
 
-export interface VorhersageQuiz extends Base {
-  typ: 'vorhersage'
+/** A prediction, committed before looking; not graded. */
+export interface PredictionQuiz extends Base {
+  type: 'prediction'
   /** Multiple choice; free text if omitted. */
-  optionen?: readonly string[]
+  options?: readonly string[]
 }
 
-export interface FindeQuiz extends Base {
-  typ: 'finde'
-  /** The quantity, e.g. "a" or "t*". */
-  groesse: string
-  einheit?: string
+/** A value to find, typically in an applet, checked by a checker. */
+export interface FindQuiz extends Base {
+  type: 'find'
+  /** The quantity, e.g. "$a$" or "$t^*$". */
+  quantity: string
+  unit?: string
   /** Stated to the student ("auf 0,05 genau"). */
-  toleranz?: number
-  pruefer?: Pruefer<any>
-  /** sofort: immediate diagnosis · spaeter: stored, confronted with the proof later · keine: recorded only. */
-  pruefung?: 'sofort' | 'spaeter' | 'keine'
+  tolerance?: number
+  checker?: Checker<any>
+  /** now: immediate diagnosis · later: kept, confronted with the proof later · never: recorded only. */
+  checking?: 'now' | 'later' | 'never'
 }
 
-export interface ErzeugeQuiz extends Base {
-  typ: 'erzeuge'
+/** Set the applet until a condition holds (course pages only). */
+export interface ConfigureQuiz extends Base {
+  type: 'configure'
   applet: string
-  /** Receives the applet's current params and observables. */
-  pruefer: Pruefer<any>
+  /** Receives the applet's current parameters and readouts. */
+  checker: Checker<any>
 }
 
-export interface AntwortQuiz extends Base {
-  typ: 'antwort'
-  /** Shown after the answer is saved, to compare with. Open answers are not checked by the computer. */
-  musterloesung?: string
-  /** What a good answer contains: shown with the model answer (and, later, for grading). */
-  kriterien?: readonly string[]
+/** An open answer in words. Not graded by the computer; compared with the model answer. */
+export interface OpenQuiz extends Base {
+  type: 'open'
+  /** Shown after the answer is submitted, to compare with. */
+  modelAnswer?: string
+  /** What a good answer contains: shown with the model answer (and later a grading rubric). */
+  criteria?: readonly string[]
 }
 
 /** One right option among several. */
-export interface EinfachQuiz extends Base {
-  typ: 'einfach'
-  optionen: readonly string[]
-  /** Index into `optionen`. */
-  richtig: number
-  /** Options in a new order per attempt (default true); false keeps e.g. "keine davon" last. */
-  mischen?: boolean
+export interface SingleChoiceQuiz extends Base {
+  type: 'single'
+  options: readonly Content[]
+  /** Index into `options`. */
+  correct: number
+  /** A new order per attempt (default true); false keeps e.g. "keine davon" last. */
+  shuffle?: boolean
 }
 
 /** Any number of right options, at least one. */
-export interface MehrfachQuiz extends Base {
-  typ: 'mehrfach'
-  optionen: readonly string[]
-  /** Indices into `optionen`. */
-  richtig: readonly number[]
-  mischen?: boolean
+export interface MultipleChoiceQuiz extends Base {
+  type: 'multiple'
+  options: readonly Content[]
+  /** Indices into `options`. */
+  correct: readonly number[]
+  shuffle?: boolean
 }
 
-/** Pairs to match: every left item gets its right partner, chosen from all right items (plus distractors). */
-export interface ZuordnungQuiz extends Base {
-  typ: 'zuordnung'
-  paare: readonly (readonly [string, string])[]
+/** Pairs to match: each left item gets its partner, dragged from all right items (plus distractors). */
+export interface MatchQuiz extends Base {
+  type: 'match'
+  pairs: readonly (readonly [Content, Content])[]
   /** Right items that belong to no left item. */
-  ablenker?: readonly string[]
+  distractors?: readonly Content[]
 }
 
 /** A number, checked against a target. */
-export interface ZahlQuiz extends Base {
-  typ: 'zahl'
-  ziel: number
+export interface NumberQuiz extends Base {
+  type: 'number'
+  target: number
   /** Absolute tolerance; default: exact to 6 significant digits. */
-  toleranz?: number
+  tolerance?: number
   /** The quantity asked for, e.g. "$x_5$"; shown before the field. */
-  groesse?: string
-  einheit?: string
+  quantity?: string
+  unit?: string
 }
 
-export type QuizDef = VorhersageQuiz | FindeQuiz | ErzeugeQuiz | AntwortQuiz | EinfachQuiz | MehrfachQuiz | ZuordnungQuiz | ZahlQuiz
-export type QuizTyp = QuizDef['typ']
+export type QuizDef = PredictionQuiz | FindQuiz | ConfigureQuiz | OpenQuiz | SingleChoiceQuiz | MultipleChoiceQuiz | MatchQuiz | NumberQuiz
+export type QuizType = QuizDef['type']
 
-type FindeInput = Omit<FindeQuiz, 'pruefer'> & ({ pruefer: Pruefer<any>; ziel?: never } | { ziel: number; pruefer?: never } | { ziel?: never; pruefer?: never })
+type FindInput = Omit<FindQuiz, 'checker'> & ({ checker: Checker<any>; target?: never } | { target: number; checker?: never } | { target?: never; checker?: never })
 
-/** Shorthand: `{ typ: 'finde', ziel: 3, toleranz: 0.05 }` builds the `schwelle` checker. */
-export function defineQuiz<P extends Params = Params>(def: Exclude<QuizDef, FindeQuiz> | FindeInput): QuizDef {
+/** Defines a question. `{ type: 'find', target: 3, tolerance: 0.05 }` builds the `threshold` checker. */
+export function defineQuiz<P extends Params = Params>(def: Exclude<QuizDef, FindQuiz> | FindInput): QuizDef {
   if (!/^[a-z0-9][a-z0-9_-]*$/i.test(def.id)) throw new Error(`Quiz id "${def.id}": letters, digits, '-' and '_' only.`)
-  pruefeDef(def as QuizDef)
-  if (def.typ === 'finde' && 'ziel' in def && def.ziel !== undefined) {
-    const { ziel, ...rest } = def
-    return { ...rest, pruefer: schwelle<P>({ ziel, toleranz: def.toleranz ?? 0 }) }
+  validate(def as QuizDef)
+  if (def.type === 'find' && 'target' in def && def.target !== undefined) {
+    const { target, ...rest } = def
+    return { ...rest, checker: threshold<P>({ target, tolerance: def.tolerance ?? 0 }) }
   }
   return def as QuizDef
 }
 
-/** Catches authoring mistakes when the definitions load, with the quiz named. */
-function pruefeDef(def: QuizDef): void {
-  const fehler = (m: string) => {
+/** Catches authoring mistakes when the definitions load, naming the question. */
+function validate(def: QuizDef): void {
+  const fail = (m: string) => {
     throw new Error(`Quiz "${def.id}": ${m}`)
   }
-  if (def.typ === 'einfach') {
-    if (def.optionen.length < 2) fehler('mindestens zwei Optionen.')
-    if (!Number.isInteger(def.richtig) || def.richtig < 0 || def.richtig >= def.optionen.length) fehler('`richtig` ist kein Index in `optionen`.')
+  const key = (c: Content) => (typeof c === 'string' ? c : JSON.stringify(c))
+  if (def.type === 'single') {
+    if (def.options.length < 2) fail('at least two options.')
+    if (!Number.isInteger(def.correct) || def.correct < 0 || def.correct >= def.options.length) fail('`correct` is not an index into `options`.')
   }
-  if (def.typ === 'mehrfach') {
-    if (def.optionen.length < 2) fehler('mindestens zwei Optionen.')
-    if (!def.richtig.length) fehler('mindestens eine richtige Option.')
-    if (def.richtig.some((i) => !Number.isInteger(i) || i < 0 || i >= def.optionen.length)) fehler('`richtig` enthält keinen Index in `optionen`.')
+  if (def.type === 'multiple') {
+    if (def.options.length < 2) fail('at least two options.')
+    if (!def.correct.length) fail('at least one correct option.')
+    if (def.correct.some((i) => !Number.isInteger(i) || i < 0 || i >= def.options.length)) fail('`correct` holds an index outside `options`.')
   }
-  if (def.typ === 'zuordnung') {
-    if (def.paare.length < 2) fehler('mindestens zwei Paare.')
-    const rechts = [...def.paare.map((p) => p[1]), ...(def.ablenker ?? [])]
-    if (new Set(rechts).size !== rechts.length) fehler('rechte Seiten (und Ablenker) müssen verschieden sein.')
+  if (def.type === 'match') {
+    if (def.pairs.length < 2) fail('at least two pairs.')
+    const right = [...def.pairs.map((p) => key(p[1])), ...(def.distractors ?? []).map(key)]
+    if (new Set(right).size !== right.length) fail('right items (and distractors) must differ.')
   }
-  if (def.typ === 'zahl' && !Number.isFinite(def.ziel)) fehler('`ziel` ist keine Zahl.')
+  if (def.type === 'number' && !Number.isFinite(def.target)) fail('`target` is not a number.')
 }
 
-export * from './wochenquiz'
-export { antwortText, bewerte, beantwortet, richtigeAntwort, rechteSeite, mischung, PRUEFBAR, type Bewertung } from './bewertung'
+export * from './weekly'
+export { AUTO_GRADED, answerText, correctAnswer, grade, isAnswered, rightItems, shuffleOrder, type Grade } from './grading'

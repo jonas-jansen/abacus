@@ -133,9 +133,9 @@ export const ITERATION_LIMITS: Limits = {
 
 /**
  * The number of iteration steps: slider up to `max`, typed values up to a million.
- * `schritte('Schritte N', { default: 25, max: 80 })`
+ * `steps('Schritte N', { default: 25, max: 80 })`
  */
-export const schritte = (label: string, o: { default: number; max?: number; min?: number; latex?: string }): Def<IntParam> => ({
+export const steps = (label: string, o: { default: number; max?: number; min?: number; latex?: string }): Def<IntParam> => ({
   kind: 'int',
   label,
   latex: o.latex,

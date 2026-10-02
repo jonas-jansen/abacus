@@ -1,26 +1,26 @@
 ---
-import { fensterText, regelnText, renderMathText } from '@abacus/quiz'
-import { wochenquizze } from '@abacus/quizzes'
-import { WochenquizStatusIsland } from '../../islands'
+import { renderMathText, rulesText, windowText } from '@abacus/quiz'
+import { weeklyQuizzes } from '@abacus/quizzes'
+import { WeeklyQuizStatusIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { scope, url } from '../../config'
 ---
-<Seite titel="Quizze" aktiv="quiz" breite="schmal">
+<Seite title="Quizze" active="quiz" width="medium">
   <h1>Quizze</h1>
   <p class="lead">Zur Vorlesung: kurze Quizze zu jeder Woche. Ihre Antworten bleiben auf diesem Gerät, im Notizbuch.</p>
   <ol class="quiz-list">
     {
-      wochenquizze.map((w) => (
+      weeklyQuizzes.map((w) => (
         <li>
           <a href={url(`/quiz/${w.id}`)}>
-            <span class="course-week">{w.woche !== undefined ? `Woche ${w.woche}` : 'Quiz'}</span>
-            <strong>{w.titel}</strong>
-            {w.beschreibung && <span class="course-kurz" set:html={renderMathText(w.beschreibung)} />}
+            <span class="course-week">{w.week !== undefined ? `Woche ${w.week}` : 'Quiz'}</span>
+            <strong>{w.title}</strong>
+            {w.description && <span class="course-kurz" set:html={renderMathText(w.description)} />}
             <span class="quiz-meta">
-              {fensterText(w) && <span>{fensterText(w)}</span>}
-              <span>{w.fragen.length} Fragen · {regelnText(w)}</span>
+              {windowText(w) && <span>{windowText(w)}</span>}
+              <span>{w.questions.length} Fragen · {rulesText(w)}</span>
             </span>
-            <WochenquizStatusIsland client:only="react" id={w.id} scope={scope} />
+            <WeeklyQuizStatusIsland client:only="react" id={w.id} scope={scope} />
           </a>
         </li>
       ))

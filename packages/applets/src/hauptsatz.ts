@@ -2,19 +2,19 @@
 // under f from a to x (below the axis it counts negative). Move x and watch F grow — at the
 // rate f(x): F′(x) = f(x). The tangent to F at x has exactly the height of f there as slope.
 
-import { choice, closedForm, real, sample, zahl, type Series } from '@abacus/applet-core'
+import { choice, closedForm, real, sample, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
-import { FUNKTIONEN, funktionOptionen, inDomain, type FunktionId } from './funktionen'
+import { FUNCTIONS, functionChoices, inDomain, type FunctionId } from './functions'
 
-const IDS = ['lin', 'x2', 'sin', 'exp', 'inv', 'sqrt'] as const satisfies readonly FunktionId[]
-type P = { f: FunktionId; a: number; x: number }
+const IDS = ['lin', 'x2', 'sin', 'exp', 'inv', 'sqrt'] as const satisfies readonly FunctionId[]
+type P = { f: FunctionId; a: number; x: number }
 
-const Fa = (p: P, x: number) => FUNKTIONEN[p.f].F(x) - FUNKTIONEN[p.f].F(p.a)
+const Fa = (p: P, x: number) => FUNCTIONS[p.f].F(x) - FUNCTIONS[p.f].F(p.a)
 
 const model = closedForm({
   id: 'hauptsatz',
   params: {
-    f: choice('Funktion', funktionOptionen(IDS), 'lin'),
+    f: choice('Funktion', functionChoices(IDS), 'lin'),
     a: real('untere Grenze', { latex: 'a', min: -3, max: 3, step: 0.05, default: 0 }),
     x: real('obere Grenze', { latex: 'x', min: -3, max: 4, step: 0.01, default: 2.5 }),
   },
@@ -24,13 +24,13 @@ const model = closedForm({
     return a === p.a && x === p.x ? p : { ...p, a, x }
   },
   constraintNote: 'a und x liegen im Definitionsbereich von f',
-  domain: (p) => FUNKTIONEN[p.f].domain,
+  domain: (p) => FUNCTIONS[p.f].domain,
   curves: {
-    f: { label: 'f(t)', f: (t, p) => FUNKTIONEN[p.f].f(t) },
+    f: { label: 'f(t)', f: (t, p) => FUNCTIONS[p.f].f(t) },
     F: { label: 'F(x)', name: 'Flächenfunktion', role: 'secondary', f: (t, p) => Fa(p, t) },
   },
   extraSeries: ({ p }) => {
-    const F = FUNKTIONEN[p.f]
+    const F = FUNCTIONS[p.f]
     // the area from a to x, split at the axis: above counts positive, below negative
     const s = sample(F.f, Math.min(p.a, p.x), Math.max(p.a, p.x), 160)
     const part = (keep: (v: number) => number): Float64Array => Float64Array.from([0, ...s.y.map(keep), 0])
@@ -55,11 +55,11 @@ const model = closedForm({
     return [up, down, tangente]
   },
   observables: ({ p }) => {
-    const F = FUNKTIONEN[p.f]
+    const F = FUNCTIONS[p.f]
     const Fx = Fa(p, p.x)
     return {
-      F: zahl('Fläche $F(x)$', Fx, { marks: [{ kind: 'point', x: p.x, y: Fx, in: 'map' }] }),
-      f: zahl('Steigung $F\'(x) = f(x)$', F.f(p.x), { marks: [{ kind: 'line', x: p.x, y: Fx, slope: F.f(p.x), in: 'map' }] }),
+      F: quantity('Fläche $F(x)$', Fx, { marks: [{ kind: 'point', x: p.x, y: Fx, in: 'map' }] }),
+      f: quantity('Steigung $F\'(x) = f(x)$', F.f(p.x), { marks: [{ kind: 'line', x: p.x, y: Fx, slope: F.f(p.x), in: 'map' }] }),
     }
   },
 })
@@ -67,7 +67,7 @@ const model = closedForm({
 export default defineApplet({
   id: 'hauptsatz',
   model,
-  formeln: [
+  formulas: [
     { label: 'Funktion', tex: String.raw`f(x) = {{f}}` },
     { label: 'Flächenfunktion', tex: String.raw`F({{x}}) = \int_{{{a}}}^{{{x}}} f(t)\,dt` },
     { label: 'Hauptsatz', tex: String.raw`F'(x) = f(x)` },
@@ -91,5 +91,5 @@ export default defineApplet({
       drag: [{ param: 'x', axis: 'x', at: (p) => [p.x, Fa(p, p.x)], set: (x) => ({ x }) }],
     },
   ],
-  anzeige: ['F', 'f'],
+  readouts: ['F', 'f'],
 })

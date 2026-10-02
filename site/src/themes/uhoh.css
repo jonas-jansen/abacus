@@ -9,25 +9,25 @@
   /* UHOH Blau #003F75 · Himmel #74B8C7 · Beere #70295A · Sand #C1A24A · Apfel #AFCA0A
      Tanne #56752B · Anthrazit #444444 · Lichtgrau #ECF1F1 */
 
-  --ci-akzent: #003f75; /* Blau */
-  --ci-reihe-1: #003f75; /* Blau */
-  --ci-reihe-2: #70295a; /* Beere */
-  --ci-reihe-3: #56752b; /* Tanne */
-  --ci-gut: #3d8fa1; /* Himmel, darker for thin marks and small icons on white */
-  --ci-warnung: color-mix(in srgb, #c1a24a 55%, #000); /* Sand, darkened for text */
+  --ci-accent: #003f75; /* Blau */
+  --ci-series-1: #003f75; /* Blau */
+  --ci-series-2: #70295a; /* Beere */
+  --ci-series-3: #56752b; /* Tanne */
+  --ci-good: #3d8fa1; /* Himmel, darker for thin marks and small icons on white */
+  --ci-warning: color-mix(in srgb, #c1a24a 55%, #000); /* Sand, darkened for text */
   --ci-text: color-mix(in srgb, #444444 70%, #000); /* Anthrazit, a little deeper for body text */
-  --ci-flaeche: #ffffff;
-  --ci-seite: #ecf1f1; /* Lichtgrau */
+  --ci-surface: #ffffff;
+  --ci-page: #ecf1f1; /* Lichtgrau */
 
   /* Dark: the same hues, lighter and more saturated (OKLCH: hue kept, lightness ~0.74–0.84),
      so they shine on the dark ground instead of looking washed out. Apfel is bright as it is. */
-  --ci-akzent-dunkel: #69affa; /* Blau, bright */
-  --ci-reihe-1-dunkel: #69affa; /* Blau, bright */
-  --ci-reihe-2-dunkel: #e982c7; /* Beere, bright */
-  --ci-reihe-3-dunkel: #afca0a; /* Apfel */
-  --ci-gut-dunkel: #5ad0e8; /* Himmel, bright */
-  --ci-warnung-dunkel: #eac769; /* Sand, bright */
-  --ci-text-dunkel: #f1f5f5; /* Lichtgrau, a touch lighter */
-  --ci-flaeche-dunkel: #0b1826; /* a deep night in Blau */
-  --ci-seite-dunkel: #050e18;
+  --ci-accent-dark: #69affa; /* Blau, bright */
+  --ci-series-1-dark: #69affa; /* Blau, bright */
+  --ci-series-2-dark: #e982c7; /* Beere, bright */
+  --ci-series-3-dark: #afca0a; /* Apfel */
+  --ci-good-dark: #5ad0e8; /* Himmel, bright */
+  --ci-warning-dark: #eac769; /* Sand, bright */
+  --ci-text-dark: #f1f5f5; /* Lichtgrau, a touch lighter */
+  --ci-surface-dark: #0b1826; /* a deep night in Blau */
+  --ci-page-dark: #050e18;
 }

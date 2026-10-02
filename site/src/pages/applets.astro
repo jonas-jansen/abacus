@@ -1,13 +1,13 @@
 ---
-import { kapitel } from '@abacus/applets'
+import { chapters } from '@abacus/applets'
 import Seite from '../layouts/Seite.astro'
 import { url } from '../config'
 import { previewSvg } from '../preview'
 
 // listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
-const kapitelListe = kapitel({ alle: import.meta.env.DEV })
+const kapitelListe = chapters({ all: import.meta.env.DEV })
 ---
-<Seite titel="Applets" aktiv="applets">
+<Seite title="Applets" active="applets">
   <h1>Applets</h1>
   <p class="lead">Zum Ausprobieren: jedes Modell der Vorlesung zum Anfassen, nach Kapiteln geordnet.</p>
   <div class="gallery-search">
@@ -19,23 +19,23 @@ const kapitelListe = kapitel({ alle: import.meta.env.DEV })
   </div>
   <p id="keine-treffer" class="muted" hidden>Kein Applet passt dazu.</p>
   <nav class="chapter-nav" aria-label="Kapitel">
-    {kapitelListe.map((k) => <a href={`#kapitel-${k.id}`}>{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</a>)}
+    {kapitelListe.map((k) => <a href={`#kapitel-${k.id}`}>{k.id === 'Appendix' ? 'Anhang' : `Kapitel ${k.id}`}</a>)}
   </nav>
   {
     kapitelListe.map((k) => (
       <section class="chapter" id={`kapitel-${k.id}`}>
         <h3 class="chapter-title">
-          <span class="chapter-no">{k.id === 'Anhang' ? 'Anhang' : `Kapitel ${k.id}`}</span>
-          {k.titel}
+          <span class="chapter-no">{k.id === 'Appendix' ? 'Anhang' : `Kapitel ${k.id}`}</span>
+          {k.title}
         </h3>
         <div class="gallery">
           {k.applets.map((a) => (
-            <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.titel} ${a.kurz} ${k.titel} Kapitel ${k.id} ${a.id}`}>
+            <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.title} ${a.summary} ${k.title} Kapitel ${k.id} ${a.id}`}>
               <div class="card-preview" set:html={previewSvg(a)} />
               <div class="card-body">
-                {a.sichtbar === false && <span class="nicht-gelistet">nicht gelistet</span>}
-                <strong>{a.titel}</strong>
-                <span>{a.kurz}</span>
+                {a.visible === false && <span class="nicht-gelistet">nicht gelistet</span>}
+                <strong>{a.title}</strong>
+                <span>{a.summary}</span>
               </div>
             </a>
           ))}

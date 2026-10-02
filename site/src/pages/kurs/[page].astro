@@ -9,21 +9,21 @@ import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
 
 export async function getStaticPaths() {
-  const seiten = await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)
-  return seiten.map((seite) => ({ params: { seite: seite.id }, props: { seite } }))
+  const pages = await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)
+  return pages.map((page) => ({ params: { page: page.id }, props: { page } }))
 }
 
-const { seite } = Astro.props
-const { data } = seite
+const { page } = Astro.props
+const { data } = page
 Astro.locals.applet = data.applet
 const def = getApplet(data.applet)
-const { Content } = await render(seite)
+const { Content } = await render(page)
 ---
-<Seite titel={data.titel} kurz={data.kurz} aktiv="kurs">
+<Seite title={data.title} summary={data.summary} active="kurs">
   <header class="course-head">
-    <p class="eyebrow">Woche {data.woche}</p>
-    <h1>{data.titel}</h1>
-    <p class="lead">{data.kurz}</p>
+    <p class="eyebrow">Woche {data.week}</p>
+    <h1>{data.title}</h1>
+    <p class="lead">{data.summary}</p>
   </header>
   <div class="course">
     <article class="course-text prose">
@@ -34,9 +34,9 @@ const { Content } = await render(seite)
         <AppletIsland
           client:load
           id={def.id}
-          zustand={data.zustand}
-          gesperrt={data.gesperrt}
-          vollbildHref={url(`/applet/${def.id}`)}
+          initialState={data.state}
+          startLocked={data.locked}
+          pageHref={url(`/applet/${def.id}`)}
         />
       </div>
     </div>

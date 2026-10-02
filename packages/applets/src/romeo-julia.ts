@@ -2,7 +2,7 @@
 // R' = a₁₁ R + a₁₂ J, J' = a₂₁ R + a₂₂ J. The signs say who reacts how: a₁₂ > 0 — Romeo loves
 // more the more Julia loves him; a₂₁ < 0 — Julia backs off when Romeo gets keen.
 
-import { classify, eigenReadout, klasse, ode, ORIGIN, point, real, zahl } from '@abacus/applet-core'
+import { classify, eigenReadout, category, ode, ORIGIN, point, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const entry = (label: string, latex: string, def: number) => real(label, { latex, min: -1, max: 1, step: 0.01, default: def })
@@ -41,9 +41,9 @@ const model = ode({
     const typ = classify(tr, det)
     return {
       eigenwerte: eigenReadout(p.a, p.b, p.c, p.d),
-      typ: klasse('Typ', typ, { marks: [ORIGIN] }),
-      geschichte: klasse('Die Geschichte', STORY[typ] ?? null),
-      spur: zahl('Spur', tr),
+      typ: category('Typ', typ, { marks: [ORIGIN] }),
+      geschichte: category('Die Geschichte', STORY[typ] ?? null),
+      spur: quantity('Spur', tr),
     }
   },
 })
@@ -51,8 +51,8 @@ const model = ode({
 export default defineApplet({
   id: 'romeo-julia',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'System', tex: String.raw`R' = {{a}}{{*}}R {{+b}}{{*}}J \\ J' = {{c}}{{*}}R {{+d}}{{*}}J` },
     { label: 'Start', tex: String.raw`(R, J)(0) = {{#start}}` },
   ],
@@ -61,5 +61,5 @@ export default defineApplet({
     { type: 'phasePlane', xSeries: 'R', ySeries: 'J', xLabel: 'R', yLabel: 'J', x: [-2, 2], y: [-2, 2], field: true, bahnen: true, nullclines: true, drag: { param: 'start', axis: 'xy' } },
   ],
   layout: { main: ['a', 'b', 'c', 'd'] },
-  anzeige: ['typ', 'geschichte', 'eigenwerte'],
+  readouts: ['typ', 'geschichte', 'eigenwerte'],
 })

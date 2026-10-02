@@ -3,7 +3,7 @@
 // centre without); upright (±π, 0) is a saddle. Swinging far, the period is longer than the
 // 2π√(l/g) of small oscillations; with enough speed the pendulum goes over the top.
 
-import { equilibria2, formatNumber, klasse, liste, ode, periodOf, point, real, zahl, type Mark } from '@abacus/applet-core'
+import { equilibria2, formatNumber, category, list, ode, periodOf, point, real, quantity, type Mark } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const G = 9.81
@@ -43,16 +43,16 @@ const model = ode({
     const T0 = 2 * Math.PI * Math.sqrt(p.l / G)
     const ueber = a.y.some((v) => Math.abs(v) > Math.PI)
     return {
-      unten: klasse('Ruhelage unten $(0, 0)$', unten?.typ ?? null, { marks: unten ? [mark(unten.x)] : [] }),
-      oben: klasse('Ruhelage oben $(\\pm\\pi, 0)$', oben[0]?.typ ?? null, { marks: oben.map((e) => mark(e.x)) }),
-      periode: zahl('Schwingungsdauer (gemessen)', ueber ? null : (per?.period ?? null), {
+      unten: category('Ruhelage unten $(0, 0)$', unten?.typ ?? null, { marks: unten ? [mark(unten.x)] : [] }),
+      oben: category('Ruhelage oben $(\\pm\\pi, 0)$', oben[0]?.typ ?? null, { marks: oben.map((e) => mark(e.x)) }),
+      periode: quantity('Schwingungsdauer (gemessen)', ueber ? null : (per?.period ?? null), {
         digits: 3,
         note: ueber ? 'das Pendel überschlägt sich' : per ? undefined : 'keine gleichmäßige Schwingung im Zeitfenster',
         marks: per ? per.crossings.map((t) => ({ kind: 'time' as const, t })) : [],
       }),
-      klein: zahl('kleine Auslenkung: $2\\pi\\sqrt{l/g}$', T0, { digits: 3 }),
+      klein: quantity('kleine Auslenkung: $2\\pi\\sqrt{l/g}$', T0, { digits: 3 }),
       // multiples of π: −2π, −π, 0, π, 2π
-      gleichgewichte: liste('Gleichgewichte $\\alpha^*$', eq.map((e) => vielfachesPi(e.x[0])), { marks: eq.map((e, item) => ({ ...mark(e.x), item })) }),
+      gleichgewichte: list('Gleichgewichte $\\alpha^*$', eq.map((e) => vielfachesPi(e.x[0])), { marks: eq.map((e, item) => ({ ...mark(e.x), item })) }),
     }
   },
 })
@@ -60,8 +60,8 @@ const model = ode({
 export default defineApplet({
   id: 'pendel',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'Gleichung', tex: String.raw`\alpha'' = -{{d}}\,\alpha' - \frac{g}{{{l}}}\,\sin\alpha` },
     { label: 'System', tex: String.raw`x_1' = x_2 \\ x_2' = -{{d}}\,x_2 - \frac{g}{{{l}}}\,\sin x_1` },
     { label: 'Start', tex: String.raw`(x_1, x_2)(0) = {{#start}}` },
@@ -82,8 +82,8 @@ export default defineApplet({
       drag: { param: 'start', axis: 'xy' },
     },
   ],
-  anzeige: ['unten', 'oben', 'periode', 'klein', 'gleichgewichte'],
-  szenarien: [
+  readouts: ['unten', 'oben', 'periode', 'klein', 'gleichgewichte'],
+  scenarios: [
     { label: 'kleine Auslenkung', text: 'α₀ = 0,2: fast wie eine Sinusschwingung', params: { start: [0.2, 0] } },
     { label: 'ohne Dämpfung', text: 'b/m = 0: die Bahn schließt sich, das Pendel schwingt ewig', params: { d: 0, start: [2.5, 0] } },
     { label: 'Überschlag', text: 'kräftig angestoßen: über den höchsten Punkt, dann Schwingen um die nächste Ruhelage', params: { start: [0, 8] } },

@@ -3,21 +3,21 @@ import { getCollection } from 'astro:content'
 import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
 
-const seiten = (await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)).sort(
-  (a, b) => a.data.woche - b.data.woche || a.data.titel.localeCompare(b.data.titel, 'de'),
+const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort(
+  (a, b) => a.data.week - b.data.week || a.data.title.localeCompare(b.data.title, 'de'),
 )
 ---
-<Seite titel="Kurs" aktiv="kurs" breite="schmal">
+<Seite title="Kurs" active="kurs" width="narrow">
   <h1>Kurs</h1>
   <p class="lead">Geführte Seiten: eine Frage pro Woche, mit Papier, Applet und kleinen Aufgaben zum Verstehen.</p>
   <ol class="course-list">
     {
-      seiten.map((s) => (
+      pages.map((s) => (
         <li>
           <a href={url(`/kurs/${s.id}`)}>
-            <span class="course-week">Woche {s.data.woche}</span>
-            <strong>{s.data.titel}</strong>
-            <span class="course-kurz">{s.data.kurz}</span>
+            <span class="course-week">Woche {s.data.week}</span>
+            <strong>{s.data.title}</strong>
+            <span class="course-kurz">{s.data.summary}</span>
           </a>
         </li>
       ))

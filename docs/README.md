@@ -27,8 +27,8 @@ pnpm build                                # static site in site/dist
 ```
 
 - One applet is one file in `packages/applets/src/`, plus one line in
-  `packages/applets/applets.json` (title, chapter, slides, `sichtbar`).
-- One course page is one MDX file in `site/src/content/seiten/`.
-- One weekly quiz is one file in `packages/quizzes/src/wochen/`.
+  `packages/applets/applets.json` (title, summary, chapter, slides, `visible`).
+- One course page is one MDX file in `site/src/content/course/`.
+- One weekly quiz is one file in `packages/quizzes/src/weekly/`.
 - One colour scheme is one CSS file in `site/src/themes/`, chosen in `site/src/styles/thema.css`.
 - Every push to `main` is checked and published to GitHub Pages.

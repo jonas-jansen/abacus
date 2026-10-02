@@ -10,11 +10,11 @@
  * hydration, content loaded afterwards) still sees the current state.
  */
 
-export type Status = 'richtig' | 'nah' | 'falsch' | 'gespeichert'
+export type Status = 'correct' | 'close' | 'wrong' | 'saved'
 
 export interface ObservableSnapshot {
   label: string
-  kind: 'zahl' | 'index' | 'klasse' | 'liste'
+  kind: 'quantity' | 'index' | 'category' | 'list'
   value: number | string | readonly number[] | readonly string[] | null
   note?: string
 }

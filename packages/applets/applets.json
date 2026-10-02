@@ -1,325 +1,325 @@
 {
-  "hinweis": "Alle Applets, ein Eintrag je Applet. \"sichtbar\": false nimmt ein Applet aus der Übersicht; seine Adresse /applet/<id> funktioniert weiter (zum Teilen). Die Reihenfolge hier ist die Reihenfolge in der Übersicht (innerhalb eines Kapitels). kapitel: I, II, III, IV oder Anhang.",
+  "note": "All applets, one entry each. \"visible\": false takes an applet out of the overview; its address /applet/<id> keeps working (to share). The order here is the order in the overview (within a chapter). chapter: I, II, III, IV or Appendix.",
   "applets": [
     {
       "id": "arithmetic",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "22–23",
-      "titel": "Arithmetische Folge",
-      "kurz": "Jeder Schritt addiert denselben Betrag."
+      "visible": true,
+      "chapter": "I",
+      "slides": "22–23",
+      "title": "Arithmetische Folge",
+      "summary": "Jeder Schritt addiert denselben Betrag."
     },
     {
       "id": "geometric",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "24–25, 30–31",
-      "titel": "Geometrische Folge",
-      "kurz": "Jeder Wert ist das a-fache des vorigen."
+      "visible": true,
+      "chapter": "I",
+      "slides": "24–25, 30–31",
+      "title": "Geometrische Folge",
+      "summary": "Jeder Wert ist das a-fache des vorigen."
     },
     {
       "id": "heron",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "10–12, 58–64",
-      "titel": "Heron-Verfahren für √2",
-      "kurz": "Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich."
+      "visible": true,
+      "chapter": "I",
+      "slides": "10–12, 58–64",
+      "title": "Heron-Verfahren für √2",
+      "summary": "Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich."
     },
     {
       "id": "newton",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "57–64",
-      "titel": "Newton-Verfahren",
-      "kurz": "Die Tangente statt der Kurve: ihre Nullstelle ist der nächste Schritt."
+      "visible": true,
+      "chapter": "I",
+      "slides": "57–64",
+      "title": "Newton-Verfahren",
+      "summary": "Die Tangente statt der Kurve: ihre Nullstelle ist der nächste Schritt."
     },
     {
       "id": "newton-cooling",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "27–28",
-      "titel": "Newtonsches Abkühlen",
-      "kurz": "Der Tee nähert sich der Raumtemperatur – wenn die Schritte nicht zu groß sind."
+      "visible": true,
+      "chapter": "I",
+      "slides": "27–28",
+      "title": "Newtonsches Abkühlen",
+      "summary": "Der Tee nähert sich der Raumtemperatur – wenn die Schritte nicht zu groß sind."
     },
     {
       "id": "updatefunction",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "18–20, 32–33",
-      "titel": "Die Update-Funktion",
-      "kurz": "Erst die Funktion, dann die Folge: Nullstellen, Fixpunkte, Steigung."
+      "visible": true,
+      "chapter": "I",
+      "slides": "18–20, 32–33",
+      "title": "Die Update-Funktion",
+      "summary": "Erst die Funktion, dann die Folge: Nullstellen, Fixpunkte, Steigung."
     },
     {
       "id": "logistic-cobweb",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "43–56",
-      "titel": "Spinnwebdiagramm der logistischen Abbildung",
-      "kurz": "Vom Graphen zur Diagonale und zurück: so entsteht die Folge."
+      "visible": true,
+      "chapter": "I",
+      "slides": "43–56",
+      "title": "Spinnwebdiagramm der logistischen Abbildung",
+      "summary": "Vom Graphen zur Diagonale und zurück: so entsteht die Folge."
     },
     {
       "id": "logistic-rk",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "32–36",
-      "titel": "Diskretes logistisches Wachstum",
-      "kurz": "Wachstumsrate r und Kapazität K – welcher Parameter entscheidet über Ruhe oder Chaos?"
+      "visible": true,
+      "chapter": "I",
+      "slides": "32–36",
+      "title": "Diskretes logistisches Wachstum",
+      "summary": "Wachstumsrate r und Kapazität K – welcher Parameter entscheidet über Ruhe oder Chaos?"
     },
     {
       "id": "logistic-bifurcation",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "37–40",
-      "titel": "Verzweigungsdiagramm der logistischen Abbildung",
-      "kurz": "Von der Ruhe über Zyklen der Länge 2, 4, 8 … ins Chaos."
+      "visible": true,
+      "chapter": "I",
+      "slides": "37–40",
+      "title": "Verzweigungsdiagramm der logistischen Abbildung",
+      "summary": "Von der Ruhe über Zyklen der Länge 2, 4, 8 … ins Chaos."
     },
     {
       "id": "logistic-perturbation",
-      "sichtbar": true,
-      "kapitel": "I",
-      "folien": "41, 50–55",
-      "titel": "Stabil oder instabil?",
-      "kurz": "Die Folge startet genau im Fixpunkt – dann kommen kleine Stöße."
+      "visible": true,
+      "chapter": "I",
+      "slides": "41, 50–55",
+      "title": "Stabil oder instabil?",
+      "summary": "Die Folge startet genau im Fixpunkt – dann kommen kleine Stöße."
     },
     {
       "id": "predator-prey",
-      "sichtbar": true,
-      "kapitel": "II",
-      "folien": "8–13",
-      "titel": "Räuber und Beute",
-      "kurz": "Zwei Populationen, die voneinander leben – Gleichgewicht, Schwingung oder Aussterben."
+      "visible": true,
+      "chapter": "II",
+      "slides": "8–13",
+      "title": "Räuber und Beute",
+      "summary": "Zwei Populationen, die voneinander leben – Gleichgewicht, Schwingung oder Aussterben."
     },
     {
       "id": "predator-prey-map",
-      "sichtbar": true,
-      "kapitel": "II",
-      "folien": "14",
-      "titel": "Räuber-Beute: die Update-Funktion als Fläche",
-      "kurz": "Wo wächst die Beute, wo schrumpft sie? Eine Fläche über der Ebene zeigt es."
+      "visible": true,
+      "chapter": "II",
+      "slides": "14",
+      "title": "Räuber-Beute: die Update-Funktion als Fläche",
+      "summary": "Wo wächst die Beute, wo schrumpft sie? Eine Fläche über der Ebene zeigt es."
     },
     {
       "id": "sir",
-      "sichtbar": true,
-      "kapitel": "II",
-      "folien": "40–58",
-      "titel": "Epidemie-Modell",
-      "kurz": "Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?"
+      "visible": true,
+      "chapter": "II",
+      "slides": "40–58",
+      "title": "Epidemie-Modell",
+      "summary": "Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?"
     },
     {
       "id": "sir-stabilitaet",
-      "sichtbar": false,
-      "kapitel": "II",
-      "folien": "44–58",
-      "titel": "Epidemie: Gleichgewichte und Stabilität",
-      "kurz": "Krankheitsfrei oder endemisch – die Basisreproduktionszahl R und die Jacobi-Matrix entscheiden."
+      "visible": false,
+      "chapter": "II",
+      "slides": "44–58",
+      "title": "Epidemie: Gleichgewichte und Stabilität",
+      "summary": "Krankheitsfrei oder endemisch – die Basisreproduktionszahl R und die Jacobi-Matrix entscheiden."
     },
     {
       "id": "krebs",
-      "sichtbar": false,
-      "kapitel": "II",
-      "folien": "19–25",
-      "titel": "Krebserkrankung: drei Gruppen",
-      "kurz": "Gesund, leicht und schwer erkrankt – niemand geht verloren, und die Anteile pendeln sich ein."
+      "visible": false,
+      "chapter": "II",
+      "slides": "19–25",
+      "title": "Krebserkrankung: drei Gruppen",
+      "summary": "Gesund, leicht und schwer erkrankt – niemand geht verloren, und die Anteile pendeln sich ein."
     },
     {
       "id": "aktionspotential",
-      "sichtbar": false,
-      "kapitel": "II",
-      "folien": "61–65",
-      "titel": "Aktionspotential einer Herzzelle",
-      "kurz": "Zwei Zahlen pro Schritt: das Potential und seine Erholung – regelmäßig, chaotisch oder in Ruhe."
+      "visible": false,
+      "chapter": "II",
+      "slides": "61–65",
+      "title": "Aktionspotential einer Herzzelle",
+      "summary": "Zwei Zahlen pro Schritt: das Potential und seine Erholung – regelmäßig, chaotisch oder in Ruhe."
     },
     {
       "id": "zellring",
-      "sichtbar": false,
-      "kapitel": "II",
-      "folien": "66–72",
-      "titel": "Ring aus 50 Herzzellen",
-      "kurz": "Eine Erregungswelle läuft um den Ring – ein zweiter Reiz zur falschen Zeit lässt sie ewig kreisen."
+      "visible": false,
+      "chapter": "II",
+      "slides": "66–72",
+      "title": "Ring aus 50 Herzzellen",
+      "summary": "Eine Erregungswelle läuft um den Ring – ein zweiter Reiz zur falschen Zeit lässt sie ewig kreisen."
     },
     {
       "id": "leslie",
-      "sichtbar": false,
-      "kapitel": "II",
-      "folien": "26–37",
-      "titel": "Leslie-Modell: Altersklassen",
-      "kurz": "Geburten und Überleben in drei Altersklassen – der Spektralradius entscheidet über Wachstum oder Aussterben."
+      "visible": false,
+      "chapter": "II",
+      "slides": "26–37",
+      "title": "Leslie-Modell: Altersklassen",
+      "summary": "Geburten und Überleben in drei Altersklassen – der Spektralradius entscheidet über Wachstum oder Aussterben."
     },
     {
       "id": "linearsystem-discrete",
-      "sichtbar": true,
-      "kapitel": "II",
-      "folien": "17–19, 31–36",
-      "titel": "Lineare Abbildung in der Ebene",
-      "kurz": "Immer wieder mit derselben Matrix multiplizieren: Spirale, Sprung oder Gerade."
+      "visible": true,
+      "chapter": "II",
+      "slides": "17–19, 31–36",
+      "title": "Lineare Abbildung in der Ebene",
+      "summary": "Immer wieder mit derselben Matrix multiplizieren: Spirale, Sprung oder Gerade."
     },
     {
       "id": "exp-ivp",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "24–31",
-      "titel": "Exponentielles Wachstum",
-      "kurz": "Die Änderung ist proportional zum Bestand."
+      "visible": true,
+      "chapter": "III",
+      "slides": "24–31",
+      "title": "Exponentielles Wachstum",
+      "summary": "Die Änderung ist proportional zum Bestand."
     },
     {
       "id": "linear-family",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "8–12",
-      "titel": "Allgemeine Lösung einer linearen Gleichung",
-      "kurz": "Eine Differentialgleichung, unendlich viele Lösungen – die Konstante C wählt eine aus."
+      "visible": true,
+      "chapter": "III",
+      "slides": "8–12",
+      "title": "Allgemeine Lösung einer linearen Gleichung",
+      "summary": "Eine Differentialgleichung, unendlich viele Lösungen – die Konstante C wählt eine aus."
     },
     {
       "id": "linear-ivp",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "17–19",
-      "titel": "Anfangswertproblem",
-      "kurz": "Der Anfangswert legt die Konstante fest – und damit genau eine Lösung."
+      "visible": true,
+      "chapter": "III",
+      "slides": "17–19",
+      "title": "Anfangswertproblem",
+      "summary": "Der Anfangswert legt die Konstante fest – und damit genau eine Lösung."
     },
     {
       "id": "log-ivp",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "35–41, 54–60",
-      "titel": "Logistisches Wachstum",
-      "kurz": "Wachstum, das an eine Kapazitätsgrenze stößt."
+      "visible": true,
+      "chapter": "III",
+      "slides": "35–41, 54–60",
+      "title": "Logistisches Wachstum",
+      "summary": "Wachstum, das an eine Kapazitätsgrenze stößt."
     },
     {
       "id": "logistic-vergleich",
-      "sichtbar": false,
-      "kapitel": "III",
-      "folien": "42–47, 71–72",
-      "titel": "Diskret oder kontinuierlich?",
-      "kurz": "Dasselbe logistische Wachstum – nur die diskrete Version kann über das Ziel hinausschießen."
+      "visible": false,
+      "chapter": "III",
+      "slides": "42–47, 71–72",
+      "title": "Diskret oder kontinuierlich?",
+      "summary": "Dasselbe logistische Wachstum – nur die diskrete Version kann über das Ziel hinausschießen."
     },
     {
       "id": "log-ivp-data",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "35–36",
-      "titel": "Logistisches Modell an Daten anpassen",
-      "kurz": "Drei Regler, 37 Messwerte: Wie gut lässt sich das Wachstum beschreiben?"
+      "visible": true,
+      "chapter": "III",
+      "slides": "35–36",
+      "title": "Logistisches Modell an Daten anpassen",
+      "summary": "Drei Regler, 37 Messwerte: Wie gut lässt sich das Wachstum beschreiben?"
     },
     {
       "id": "euler-heun",
-      "sichtbar": true,
-      "kapitel": "III",
-      "folien": "65–72",
-      "titel": "Euler- und Heun-Verfahren",
-      "kurz": "Zwei Näherungsverfahren gegen die exakte Lösung: Wie schnell wird der Fehler kleiner?"
+      "visible": true,
+      "chapter": "III",
+      "slides": "65–72",
+      "title": "Euler- und Heun-Verfahren",
+      "summary": "Zwei Näherungsverfahren gegen die exakte Lösung: Wie schnell wird der Fehler kleiner?"
     },
     {
       "id": "linearsystem-phase",
-      "sichtbar": true,
-      "kapitel": "IV",
-      "folien": "11–21",
-      "titel": "Lineares System in der Ebene",
-      "kurz": "Eine Matrix A, zwei Bilder: Zeitverlauf und Phasenporträt."
+      "visible": true,
+      "chapter": "IV",
+      "slides": "11–21",
+      "title": "Lineares System in der Ebene",
+      "summary": "Eine Matrix A, zwei Bilder: Zeitverlauf und Phasenporträt."
     },
     {
       "id": "romeo-julia",
-      "sichtbar": true,
-      "kapitel": "IV",
-      "folien": "11–21",
-      "titel": "Romeo und Julia",
-      "kurz": "Zwei Gefühle, die aufeinander reagieren – ein lineares System als Liebesgeschichte."
+      "visible": true,
+      "chapter": "IV",
+      "slides": "11–21",
+      "title": "Romeo und Julia",
+      "summary": "Zwei Gefühle, die aufeinander reagieren – ein lineares System als Liebesgeschichte."
     },
     {
       "id": "pendel",
-      "sichtbar": false,
-      "kapitel": "IV",
-      "folien": "5–7",
-      "titel": "Gedämpftes Pendel",
-      "kurz": "Eine Gleichung zweiter Ordnung als System: Auslenkung und Winkelgeschwindigkeit in der Phasenebene."
+      "visible": false,
+      "chapter": "IV",
+      "slides": "5–7",
+      "title": "Gedämpftes Pendel",
+      "summary": "Eine Gleichung zweiter Ordnung als System: Auslenkung und Winkelgeschwindigkeit in der Phasenebene."
     },
     {
       "id": "michaelis-menten",
-      "sichtbar": true,
-      "kapitel": "IV",
-      "folien": "23–28",
-      "titel": "Enzymkinetik nach Michaelis und Menten",
-      "kurz": "Substrat wird über einen Komplex zu Produkt – vier Stoffe, zwei Erhaltungsgrößen."
+      "visible": true,
+      "chapter": "IV",
+      "slides": "23–28",
+      "title": "Enzymkinetik nach Michaelis und Menten",
+      "summary": "Substrat wird über einen Komplex zu Produkt – vier Stoffe, zwei Erhaltungsgrößen."
     },
     {
       "id": "bioreaktor",
-      "sichtbar": false,
-      "kapitel": "IV",
-      "folien": "9, 27–28",
-      "titel": "Bakterien im Bioreaktor",
-      "kurz": "Nährstoff fließt zu, Kultur fließt ab – bei zu starkem Durchfluss wird sie ausgewaschen."
+      "visible": false,
+      "chapter": "IV",
+      "slides": "9, 27–28",
+      "title": "Bakterien im Bioreaktor",
+      "summary": "Nährstoff fließt zu, Kultur fließt ab – bei zu starkem Durchfluss wird sie ausgewaschen."
     },
     {
       "id": "herzzelle",
-      "sichtbar": false,
-      "kapitel": "IV",
-      "folien": "29–32",
-      "titel": "Aktionspotential: Schrittmacher und Muskelzelle",
-      "kurz": "Ein System aus vier Differentialgleichungen – periodisch von selbst oder im Takt eines Reizes."
+      "visible": false,
+      "chapter": "IV",
+      "slides": "29–32",
+      "title": "Aktionspotential: Schrittmacher und Muskelzelle",
+      "summary": "Ein System aus vier Differentialgleichungen – periodisch von selbst oder im Takt eines Reizes."
     },
     {
       "id": "folgen-grenzwert",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "5–8",
-      "titel": "Grenzwert einer Folge",
-      "kurz": "Zu jedem noch so schmalen ε-Band gibt es ein N, ab dem die Folge darin bleibt."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "5–8",
+      "title": "Grenzwert einer Folge",
+      "summary": "Zu jedem noch so schmalen ε-Band gibt es ein N, ab dem die Folge darin bleibt."
     },
     {
       "id": "differenzenquotient",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "18–26",
-      "titel": "Vom Differenzenquotienten zur Ableitung",
-      "kurz": "Die Sekante wird zur Tangente, wenn der zweite Punkt auf den ersten zuläuft."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "18–26",
+      "title": "Vom Differenzenquotienten zur Ableitung",
+      "summary": "Die Sekante wird zur Tangente, wenn der zweite Punkt auf den ersten zuläuft."
     },
     {
       "id": "lupe",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "25–27",
-      "titel": "Blick durch die Lupe",
-      "kurz": "Aus der Nähe betrachtet ist jede glatte Kurve eine Gerade: ihre Tangente."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "25–27",
+      "title": "Blick durch die Lupe",
+      "summary": "Aus der Nähe betrachtet ist jede glatte Kurve eine Gerade: ihre Tangente."
     },
     {
       "id": "hauptsatz",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "106–110",
-      "titel": "Hauptsatz: Fläche und Steigung",
-      "kurz": "Die Flächenfunktion F wächst genau so schnell, wie f an der oberen Grenze hoch ist."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "106–110",
+      "title": "Hauptsatz: Fläche und Steigung",
+      "summary": "Die Flächenfunktion F wächst genau so schnell, wie f an der oberen Grenze hoch ist."
     },
     {
       "id": "riemann",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "100–107",
-      "titel": "Integral als Grenzwert von Rechtecksummen",
-      "kurz": "Immer schmalere Rechtecke füllen die Fläche unter der Kurve immer genauer."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "100–107",
+      "title": "Integral als Grenzwert von Rechtecksummen",
+      "summary": "Immer schmalere Rechtecke füllen die Fläche unter der Kurve immer genauer."
     },
     {
       "id": "komplexe-zahlen",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "32–44",
-      "titel": "Komplexe Zahlen in der Ebene",
-      "kurz": "Addieren heißt Pfeile aneinanderlegen, Multiplizieren heißt drehen und strecken."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "32–44",
+      "title": "Komplexe Zahlen in der Ebene",
+      "summary": "Addieren heißt Pfeile aneinanderlegen, Multiplizieren heißt drehen und strecken."
     },
     {
       "id": "lgs",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "64–73",
-      "titel": "Lineare Gleichungssysteme als Geraden",
-      "kurz": "Zwei Gleichungen, zwei Geraden: ein Schnittpunkt, keiner oder unendlich viele."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "64–73",
+      "title": "Lineare Gleichungssysteme als Geraden",
+      "summary": "Zwei Gleichungen, zwei Geraden: ein Schnittpunkt, keiner oder unendlich viele."
     },
     {
       "id": "eigenvektoren",
-      "sichtbar": true,
-      "kapitel": "Anhang",
-      "folien": "56–57, 64, 80–91",
-      "titel": "Eigenvektoren: wann A v in dieselbe Richtung zeigt",
-      "kurz": "Drehen Sie v, bis A v parallel liegt – dann ist v ein Eigenvektor."
+      "visible": true,
+      "chapter": "Appendix",
+      "slides": "56–57, 64, 80–91",
+      "title": "Eigenvektoren: wann A v in dieselbe Richtung zeigt",
+      "summary": "Drehen Sie v, bis A v parallel liegt – dann ist v ein Eigenvektor."
     }
   ]
 }

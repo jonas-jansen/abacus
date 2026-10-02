@@ -1,14 +1,14 @@
 import katex from 'katex'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { formatNumber, type ParamSpec, type Params, type Point } from '@abacus/applet-core'
-import { expandFormula, formulaLines, splitRelation, type Formel, type FormulaMode } from './formula'
+import { expandFormula, formulaLines, splitRelation, type Formula, type FormulaMode } from './formula'
 
 const SCRUB_PX = 5
 /** Side by side only while the columns need at most this much shrinking; else they stack. */
 const STACK_BELOW = 0.75
 
 interface FormulaBarProps {
-  formeln: readonly Formel[]
+  formulas: readonly Formula[]
   specs: readonly ParamSpec[]
   params: Params
   /** Change one parameter (validated and explained like a slider change). */
@@ -67,7 +67,7 @@ interface Cell {
  * S′ = … and S(0) = … stand side by side. Every cell holds both versions — symbols and
  * values — on top of each other, so switching never changes a column's width.
  */
-export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusParam, hot }: FormulaBarProps) {
+export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusParam, hot }: FormulaBarProps) {
   const [mode, setMode] = useState<FormulaMode>('symbole')
   const root = useRef<HTMLDivElement>(null)
   const grid = useRef<HTMLDivElement>(null)
@@ -79,8 +79,8 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
     const out: Cell[] = []
     // narrow: the switch comes first (rows 1–2), then the formulas one below the other
     let narrowRow = 3
-    const rows = Math.max(1, ...formeln.map((f) => formulaLines(f.tex).length))
-    formeln.forEach((f, c) => {
+    const rows = Math.max(1, ...formulas.map((f) => formulaLines(f.tex).length))
+    formulas.forEach((f, c) => {
       const col = 4 * c + 1 // three sub-columns per formula, then a gap column
       if (f.label) out.push({ key: `${c}t`, cls: 'ab-eq-title', sym: f.label, num: f.label, wide: `${col} / span 3|1`, narrow: `1 / -1|${narrowRow++}` })
       const lines = formulaLines(f.tex)
@@ -116,8 +116,8 @@ export function FormulaBar({ formeln, specs, params, onChange, onHot, onFocusPar
         out.push({ key: `${c}.${i}s`, cls: 'ab-eq-rhs', ...both(rhs), wide: `${col + 2}|${wr}`, narrow: `3|${nr}` })
       })
     })
-    return { cells: out, columns: formeln.length }
-  }, [formeln, specs, params])
+    return { cells: out, columns: formulas.length }
+  }, [formulas, specs, params])
 
   // Fit: formulas wider than the box are set smaller rather than scrolled or cut off.
   const [width, setWidth] = useState(0)

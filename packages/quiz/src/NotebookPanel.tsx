@@ -1,6 +1,6 @@
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { formatNumber } from '@abacus/applet-core'
-import { Mathe } from './Mathe'
+import { MathText } from './MathText'
 import { exportMarkdown, notebook, parseKey } from './notebook'
 
 function download(name: string, type: string, content: string) {
@@ -80,7 +80,7 @@ export function NotebookOverview() {
       const e = store.get(k)
       return key && e ? [{ key, e }] : []
     })
-    .sort((a, b) => (b.e.eingaben.at(-1)?.ts ?? 0) - (a.e.eingaben.at(-1)?.ts ?? 0))
+    .sort((a, b) => (b.e.inputs.at(-1)?.ts ?? 0) - (a.e.inputs.at(-1)?.ts ?? 0))
 
   if (entries.length === 0) return <p className="qz-muted">Noch keine Einträge auf diesem Gerät.</p>
 
@@ -88,13 +88,13 @@ export function NotebookOverview() {
     <ul className="qz-notebook">
       {entries.map(({ key, e }) => (
         <li key={key.quiz}>
-          <p className="qz-notebook-frage">
-            <Mathe text={e.frage ?? key.quiz} />
+          <p className="qz-notebook-question">
+            <MathText text={e.question ?? key.quiz} />
           </p>
           <p className="qz-history">
-            {e.eingaben.map((x, i) => (
+            {e.inputs.map((x, i) => (
               <span key={i} data-status={x.status}>
-                {x.anzeige ? <Mathe text={x.anzeige} /> : typeof x.wert === 'number' ? formatNumber(x.wert, 8) : typeof x.wert === 'string' ? x.wert : 'Einstellung'}
+                {x.display ? <MathText text={x.display} /> : typeof x.value === 'number' ? formatNumber(x.value, 8) : typeof x.value === 'string' ? x.value : 'Einstellung'}
               </span>
             ))}
           </p>

@@ -4,7 +4,7 @@
 // E + C and S + C + P stay constant. With fast binding (large k₁) the system is stiff: the
 // Rosenbrock solver handles it where an explicit method would crawl.
 
-import { events, ode, real, zahl } from '@abacus/applet-core'
+import { events, ode, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = ode({
@@ -35,13 +35,13 @@ const model = ode({
     const half = events(sol, (_t, y) => y[3] - p.S0 / 2)[0] ?? null
     const KM = p.k1 > 0 ? (p.k2 + p.k3) / p.k1 : null
     return {
-      halb: zahl('halber Umsatz nach', half, {
+      halb: quantity('halber Umsatz nach', half, {
         note: 'nicht im Zeitfenster',
         marks: half === null ? [] : [{ kind: 'time', t: half }, { kind: 'point', x: half, y: p.S0 / 2, in: 'time' }],
       }),
-      KM: zahl('Michaelis-Konstante $K_M$', KM, { digits: 3 }),
-      vmax: zahl('Maximalrate $v_{max}$', p.k3 * p.E0, { digits: 3 }),
-      erhaltung: zahl('$E + C$ bleibt', p.E0, { marks: [{ kind: 'value', v: p.E0 }] }),
+      KM: quantity('Michaelis-Konstante $K_M$', KM, { digits: 3 }),
+      vmax: quantity('Maximalrate $v_{max}$', p.k3 * p.E0, { digits: 3 }),
+      erhaltung: quantity('$E + C$ bleibt', p.E0, { marks: [{ kind: 'value', v: p.E0 }] }),
     }
   },
 })
@@ -49,8 +49,8 @@ const model = ode({
 export default defineApplet({
   id: 'michaelis-menten',
   model,
-  horizont: 'T',
-  formeln: [
+  horizon: 'T',
+  formulas: [
     { label: 'System', tex: String.raw`S' = -{{k1}}{{*}}S\,E + {{k2}}{{*}}C \\ E' = -{{k1}}{{*}}S\,E + ({{k2}} + {{k3}})\,C \\ C' = {{k1}}{{*}}S\,E - ({{k2}} + {{k3}})\,C \\ P' = {{k3}}{{*}}C` },
     { label: 'Start', tex: String.raw`S(0) = {{#S0}} \\ E(0) = {{#E0}}` },
   ],
@@ -67,5 +67,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['k1', 'k2', 'k3'] },
-  anzeige: ['halb', 'KM', 'vmax', 'erhaltung'],
+  readouts: ['halb', 'KM', 'vmax', 'erhaltung'],
 })

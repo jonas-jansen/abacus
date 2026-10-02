@@ -3,7 +3,7 @@
 // digits roughly doubles per step (the slides' example g(x) = e^{−5x} − x from x₀ = 0,05);
 // far away it may jump to another root, cycle (x³ − 2x + 2 from 0) or run off (arctan).
 
-import { bisect, choice, detectPeriod, iteration, klasse, liste, real, sample, schritte, zahl, type Series } from '@abacus/applet-core'
+import { bisect, choice, detectPeriod, iteration, category, list, real, sample, steps, quantity, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 interface G {
@@ -56,7 +56,7 @@ const model = iteration({
       'e5',
     ),
     x0: real('Startwert', { latex: 'x_0', min: -3, max: 3, step: 0.01, default: 0.05 }),
-    N: schritte('Schritte', { latex: 'N', default: 6, max: 30 }),
+    N: steps('Schritte', { latex: 'N', default: 6, max: 30 }),
   },
   start: (p) => p.x0,
   step: (x, p) => {
@@ -91,7 +91,7 @@ const model = iteration({
       kind: 'continuous',
       x: Float64Array.from(q.x.length ? q.x : [NaN]),
       y: Float64Array.from(q.y.length ? q.y : [NaN]),
-      schritt: Float64Array.from(q.k.length ? q.k : [0]),
+      stepOf: Float64Array.from(q.k.length ? q.k : [0]),
       role,
       legend: false,
       ...extra,
@@ -101,15 +101,15 @@ const model = iteration({
       { id: 'graph', label: 'g(x)', kind: 'continuous', x: graph.x, y: graph.y, role: 'primary' },
       stepped('lot', 'g(x_n)', lot, 'reference', { labels: lot.l }),
       stepped('spur', 'x_n', spur, 'secondary'),
-      stepped('tangente', 't(x)', tangente, 'secondary', { name: 'Tangente', legend: true, schrittModus: 'aktuell', dash: [] }),
-      stepped('beruehr', 'g(x_n)', beruehr, 'primary', { kind: 'discrete', schrittModus: 'aktuell' }),
+      stepped('tangente', 't(x)', tangente, 'secondary', { name: 'Tangente', legend: true, stepMode: 'current', dash: [] }),
+      stepped('beruehr', 'g(x_n)', beruehr, 'primary', { kind: 'discrete', stepMode: 'current' }),
       {
         id: 'punkte',
         label: 'x_n',
         kind: 'discrete',
         x: x.map((v) => v),
         y: x.map(() => 0),
-        schritt: Float64Array.from(x, (_, k) => k),
+        stepOf: Float64Array.from(x, (_, k) => k),
         labels: [...x].map((_, k) => (k === 0 ? undefined : `x_{${k}}`)),
         role: 'secondary',
         legend: false,
@@ -135,9 +135,9 @@ const model = iteration({
       'noch unterwegs': 'mehr Schritte oder ein anderer Startwert',
     }
     return {
-      verhalten: klasse('Verhalten', verhalten, notes[verhalten] ? { note: notes[verhalten] } : {}),
-      nullstelle: zahl('Nullstelle $x^*$', r, { digits: 12, marks: [{ kind: 'point', x: r, y: 0, in: 'map' }] }),
-      stellen: liste('richtige Stellen je Schritt', [...x].map((v) => digits(v, r)), {
+      verhalten: category('Verhalten', verhalten, notes[verhalten] ? { note: notes[verhalten] } : {}),
+      nullstelle: quantity('Nullstelle $x^*$', r, { digits: 12, marks: [{ kind: 'point', x: r, y: 0, in: 'map' }] }),
+      stellen: list('richtige Stellen je Schritt', [...x].map((v) => digits(v, r)), {
         marks: [...x].map((v, item) => ({ kind: 'point', x: item, y: Math.max(Math.abs(v - r), Number.EPSILON), in: 'time', item })),
       }),
     }
@@ -147,10 +147,10 @@ const model = iteration({
 export default defineApplet({
   id: 'newton',
   model,
-  horizont: 'N',
+  horizon: 'N',
   // one step at a time: the timeline opens at the start
-  schritte: true,
-  formeln: [
+  stepwise: true,
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`x_{n+1} = x_n - \frac{g(x_n)}{g'(x_n)}` },
     { label: 'Funktion', tex: String.raw`g(x) = {{g}}` },
     { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
@@ -177,8 +177,8 @@ export default defineApplet({
       logHilfe: 'Jede Zehnerpotenz weiter unten ist eine richtige Stelle mehr. Nahe der Nullstelle fallen die Punkte immer steiler: die Zahl der richtigen Stellen verdoppelt sich ungefähr in jedem Schritt.',
     },
   ],
-  anzeige: ['verhalten', 'nullstelle', 'stellen'],
-  szenarien: [
+  readouts: ['verhalten', 'nullstelle', 'stellen'],
+  scenarios: [
     { label: 'Folie 64', text: 'g(x) = e⁻⁵ˣ − x ab x₀ = 0,05: rasche Konvergenz', params: { g: 'e5', x0: 0.05, N: 6 } },
     { label: 'Zyklus', text: 'x³ − 2x + 2 ab x₀ = 0: springt zwischen 0 und 1 hin und her', params: { g: 'kubisch', x0: 0, N: 12 } },
     { label: 'läuft davon', text: 'arctan x ab x₀ = 1,5: jeder Schritt wirft weiter hinaus', params: { g: 'arctan', x0: 1.5, N: 6 } },

@@ -2,128 +2,128 @@
  * Checking and feedback (§8). Checkers return a diagnosis, never a boolean: the student
  * hears "zu klein — bei a = 2,8 läuft die Folge immer noch auf einen Wert zu", not a red cross.
  *
- * Checkers are plain functions, so they live in the applet definition and are referenced
- * by name from MDX (`<Finde pruefer="stabilitaetsverlust">`) — props crossing into an
- * island must be serialisable, functions are not.
+ * Checkers are plain functions in the quiz definitions. They receive the answer and, for
+ * questions about an applet, its current parameters and readouts (from the channel).
  */
 
 import type { Observables } from './model'
 import { formatNumber } from './format'
 import { parseNumber, type Params } from './params'
 
-export interface Diagnose {
-  status: 'richtig' | 'nah' | 'falsch' | 'gespeichert'
-  richtung?: 'zu klein' | 'zu groß'
-  hinweis?: string
+export interface Diagnosis {
+  status: 'correct' | 'close' | 'wrong' | 'saved'
+  /** For numbers: which way the answer is off. */
+  direction?: 'too small' | 'too large'
+  /** Shown to the student (German), may contain $math$. */
+  hint?: string
 }
 
-export type Pruefer<P extends Params = Params> = (eingabe: unknown, p: P, o: Observables) => Diagnose
+export type Checker<P extends Params = Params> = (answer: unknown, p: P, o: Observables) => Diagnosis
 
 /** A hint may depend on the submitted value and the applet state it was submitted in. */
-export type Hinweis<P extends Params = Params> = string | ((wert: number, p: P, o: Observables) => string)
+export type HintText<P extends Params = Params> = string | ((value: number, p: P, o: Observables) => string)
 
-const hint = <P extends Params>(h: Hinweis<P> | undefined, v: number, p: P, o: Observables) =>
+const hintOf = <P extends Params>(h: HintText<P> | undefined, v: number, p: P, o: Observables) =>
   typeof h === 'function' ? h(v, p, o) : h
 
-export const KEINE_ZAHL: Diagnose = {
-  status: 'falsch',
-  hinweis: 'Bitte eine Zahl eingeben, z. B. 3,2.',
+export const NOT_A_NUMBER: Diagnosis = {
+  status: 'wrong',
+  hint: 'Bitte eine Zahl eingeben, z. B. 3,2.',
 }
 
-export interface SchwelleOptions<P extends Params> {
-  ziel: number
-  toleranz: number
-  /** Within this distance the answer is "nah". Default 3 × toleranz. */
-  nah?: number
-  zuKlein?: Hinweis<P>
-  zuGross?: Hinweis<P>
-  richtig?: Hinweis<P>
+export interface ThresholdOptions<P extends Params> {
+  target: number
+  tolerance: number
+  /** Within this distance the answer is "close". Default 3 × tolerance. */
+  close?: number
+  tooSmall?: HintText<P>
+  tooLarge?: HintText<P>
+  correct?: HintText<P>
 }
 
-/** A number in parameter space against a known target (question type "Schwelle"). */
-export function schwelle<P extends Params = Params>(o: SchwelleOptions<P>): Pruefer<P> {
-  const nah = o.nah ?? 3 * o.toleranz
-  return (eingabe, p, obs) => {
-    const v = parseNumber(eingabe)
-    if (v === undefined) return KEINE_ZAHL
-    const d = v - o.ziel
-    if (Math.abs(d) <= o.toleranz) return { status: 'richtig', hinweis: hint(o.richtig, v, p, obs) }
-    const richtung = d < 0 ? 'zu klein' : 'zu groß'
+/** A number against a known target, with the direction it is off. */
+export function threshold<P extends Params = Params>(o: ThresholdOptions<P>): Checker<P> {
+  const close = o.close ?? 3 * o.tolerance
+  return (answer, p, obs) => {
+    const v = parseNumber(answer)
+    if (v === undefined) return NOT_A_NUMBER
+    const d = v - o.target
+    if (Math.abs(d) <= o.tolerance) return { status: 'correct', hint: hintOf(o.correct, v, p, obs) }
     return {
-      status: Math.abs(d) <= nah ? 'nah' : 'falsch',
-      richtung,
-      hinweis: hint(d < 0 ? o.zuKlein : o.zuGross, v, p, obs),
+      status: Math.abs(d) <= close ? 'close' : 'wrong',
+      direction: d < 0 ? 'too small' : 'too large',
+      hint: hintOf(d < 0 ? o.tooSmall : o.tooLarge, v, p, obs),
     }
   }
 }
 
-export interface AblesenOptions<P extends Params> {
-  /** Observable id to compare against. For `liste` observables any element counts. */
+export interface ReadOffOptions<P extends Params> {
+  /** Readout id to compare against. For `list` readouts any element counts. */
   observable: string
   /** Integers (kind `index`) are always compared exactly. */
-  toleranz?: number
-  nah?: number
-  zuKlein?: Hinweis<P>
-  zuGross?: Hinweis<P>
+  tolerance?: number
+  close?: number
+  tooSmall?: HintText<P>
+  tooLarge?: HintText<P>
 }
 
-/** A value read off the applet in its current state (question type "Ablesen"). */
-export function ablesen<P extends Params = Params>(o: AblesenOptions<P>): Pruefer<P> {
-  return (eingabe, p, obs) => {
-    const v = parseNumber(eingabe)
-    if (v === undefined) return KEINE_ZAHL
+/** A value read off the applet in its current state. */
+export function readOff<P extends Params = Params>(o: ReadOffOptions<P>): Checker<P> {
+  return (answer, p, obs) => {
+    const v = parseNumber(answer)
+    if (v === undefined) return NOT_A_NUMBER
     const target = obs[o.observable]
     if (!target || target.value === null) {
       return {
-        status: 'gespeichert',
-        hinweis: target?.note ?? 'In der aktuellen Einstellung lässt sich diese Größe nicht bestimmen.',
+        status: 'saved',
+        hint: target?.note ?? 'In der aktuellen Einstellung lässt sich diese Größe nicht bestimmen.',
       }
     }
     const candidates = Array.isArray(target.value) ? target.value : [target.value]
     const nums = candidates.filter((c): c is number => typeof c === 'number')
-    if (nums.length === 0) return { status: 'gespeichert' }
+    if (nums.length === 0) return { status: 'saved' }
     const best = nums.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a))
     const exact = target.kind === 'index'
-    const tol = exact ? 0 : (o.toleranz ?? 0)
+    const tol = exact ? 0 : (o.tolerance ?? 0)
     const d = v - best
-    if (Math.abs(d) <= tol + (exact ? 0 : 1e-12)) return { status: 'richtig' }
-    const nah = exact ? 1 : (o.nah ?? 3 * tol)
+    if (Math.abs(d) <= tol + (exact ? 0 : 1e-12)) return { status: 'correct' }
+    const close = exact ? 1 : (o.close ?? 3 * tol)
     return {
-      status: Math.abs(d) <= nah ? 'nah' : 'falsch',
-      richtung: d < 0 ? 'zu klein' : 'zu groß',
-      hinweis: hint(d < 0 ? o.zuKlein : o.zuGross, v, p, obs),
+      status: Math.abs(d) <= close ? 'close' : 'wrong',
+      direction: d < 0 ? 'too small' : 'too large',
+      hint: hintOf(d < 0 ? o.tooSmall : o.tooLarge, v, p, obs),
     }
   }
 }
 
-/** One of a closed set, against a computed `klasse` observable ("Klassifizieren"). */
-export function klassifizieren<P extends Params = Params>(o: {
+/** One of a closed set, against a computed `category` readout. */
+export function inCategory<P extends Params = Params>(o: {
   observable: string
-  /** Nudge per wrong answer, keyed by the answer given. */
-  hinweise?: Readonly<Record<string, string>>
-}): Pruefer<P> {
-  return (eingabe, _p, obs) => {
+  /** A nudge per wrong answer, keyed by the answer given. */
+  hints?: Readonly<Record<string, string>>
+}): Checker<P> {
+  return (answer, _p, obs) => {
     const target = obs[o.observable]?.value
-    if (target === null || target === undefined) return { status: 'gespeichert' }
-    if (String(eingabe).trim() === String(target)) return { status: 'richtig' }
-    return { status: 'falsch', hinweis: o.hinweise?.[String(eingabe).trim()] }
+    if (target === null || target === undefined) return { status: 'saved' }
+    if (String(answer).trim() === String(target)) return { status: 'correct' }
+    return { status: 'wrong', hint: o.hints?.[String(answer).trim()] }
   }
 }
 
 /**
- * Predicate over parameters and observables ("Erzeuge"): configure the applet until it holds.
- * The predicate may return a full diagnosis to give a directed nudge.
+ * A condition on parameters and readouts: set the applet until it holds. The predicate may
+ * return a full diagnosis to give a directed nudge.
  */
-export function bedingung<P extends Params = Params>(
-  pred: (p: P, o: Observables) => boolean | Diagnose,
-  texte: { richtig?: string; falsch?: string } = {},
-): Pruefer<P> {
-  return (_eingabe, p, o) => {
+export function condition<P extends Params = Params>(
+  pred: (p: P, o: Observables) => boolean | Diagnosis,
+  texts: { correct?: string; wrong?: string } = {},
+): Checker<P> {
+  return (_answer, p, o) => {
     const r = pred(p, o)
     if (typeof r !== 'boolean') return r
-    return r ? { status: 'richtig', hinweis: texte.richtig } : { status: 'falsch', hinweis: texte.falsch }
+    return r ? { status: 'correct', hint: texts.correct } : { status: 'wrong', hint: texts.wrong }
   }
 }
 
-/** Formats a number for use inside hint strings. */
-export const zahlText = (v: number, digits = 4) => formatNumber(v, digits)
+/** Formats a number for use inside hint texts (German decimals). */
+export const numText = (v: number, digits = 4) => formatNumber(v, digits)

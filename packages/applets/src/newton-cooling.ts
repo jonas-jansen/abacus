@@ -2,7 +2,7 @@
 // of the distance to the room temperature. Monotone for α < 1, oscillating for 1 < α < 2,
 // divergent for α > 2 — the factor 1 − α decides.
 
-import { iteration, real, schritte, verhalten, zahl } from '@abacus/applet-core'
+import { iteration, real, steps, behaviour, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
 
 const model = iteration({
@@ -11,7 +11,7 @@ const model = iteration({
     alpha: real('Abkühlrate', { latex: '\\alpha', min: 0, max: 2.5, step: 0.01, default: 0.5 }),
     T0: real('Anfangstemperatur', { latex: 'T_0', min: 0, max: 60, step: 0.5, default: 35, unit: '°C' }),
     Tu: real('Raumtemperatur', { latex: 'T^u', min: 0, max: 40, step: 0.5, default: 23, unit: '°C' }),
-    N: schritte('Schritte', { latex: 'N', default: 20, max: 60 }),
+    N: steps('Schritte', { latex: 'N', default: 20, max: 60 }),
   },
   start: (p) => p.T0,
   step: (T, p) => T - p.alpha * (T - p.Tu),
@@ -24,12 +24,12 @@ const model = iteration({
     const q = 1 - p.alpha
     const L = p.T0 === p.Tu || Math.abs(q) < 1 ? p.Tu : q === 1 ? p.T0 : null
     return {
-      faktor: zahl('Faktor $1 - \\alpha$', q),
-      grenzwert: zahl('Grenzwert', L, {
+      faktor: quantity('Faktor $1 - \\alpha$', q),
+      grenzwert: quantity('Grenzwert', L, {
         note: q === -1 ? 'springt zwischen zwei Werten' : 'Abstand wächst',
         marks: L === null ? [] : [{ kind: 'value', v: L }],
       }),
-      verhalten: verhalten('Verhalten', x),
+      verhalten: behaviour('Verhalten', x),
     }
   },
 })
@@ -37,8 +37,8 @@ const model = iteration({
 export default defineApplet({
   id: 'newton-cooling',
   model,
-  horizont: 'N',
-  formeln: [
+  horizon: 'N',
+  formulas: [
     { label: 'Vorschrift', tex: String.raw`T_{n+1} = T_n + {{alpha}}\,({{Tu}} - T_n)` },
     { label: 'Start', tex: String.raw`T_0 = {{#T0}}` },
     { label: 'Lösung', tex: String.raw`T_n = ({{T0}} - {{Tu}})\,(1 - {{alpha}})^n + {{Tu}}` },
@@ -63,5 +63,5 @@ export default defineApplet({
     },
   ],
   layout: { main: ['alpha', 'T0', 'Tu'] },
-  anzeige: ['faktor', 'grenzwert', 'verhalten'],
+  readouts: ['faktor', 'grenzwert', 'verhalten'],
 })

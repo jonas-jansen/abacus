@@ -24,13 +24,13 @@ const snapshot = (o: Observables): Record<string, ObservableSnapshot> =>
   Object.fromEntries(Object.entries(o).map(([k, v]) => [k, { label: v.label, kind: v.kind, value: v.value, note: v.note }]))
 
 /**
- * Parameter state for one applet container. The opening state (`zustand`) is the base; the
+ * Parameter state for one applet container. The opening state (`initialState`) is the base; the
  * URL hash holds only differences from it. State goes out on the channel as `applet/state`;
  * `applet/command` messages come in.
  */
-export function useAppletState<P extends Params>(def: AppletDef<P>, zustand?: Readonly<Record<string, unknown>>): AppletState<P> {
+export function useAppletState<P extends Params>(def: AppletDef<P>, initialState?: Readonly<Record<string, unknown>>): AppletState<P> {
   const { model } = def
-  const initial = useMemo(() => updateParams(model, defaultParams(model), zustand ?? {}), [model, zustand])
+  const initial = useMemo(() => updateParams(model, defaultParams(model), initialState ?? {}), [model, initialState])
   const [params, setState] = useState(initial)
 
   const setParams = useCallback((patch: Readonly<Record<string, unknown>>) => setState((prev) => updateParams(model, prev, patch)), [model])

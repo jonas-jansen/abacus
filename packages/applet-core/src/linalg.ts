@@ -4,7 +4,7 @@
  * nonlinear systems with their Jacobian (stability by linearisation, slides II 49–55, IV 33–37).
  */
 
-import { liste } from './observables'
+import { list } from './observables'
 import { formatNumber } from './format'
 import type { Mark, Observable } from './model'
 
@@ -45,10 +45,10 @@ export function eigenvector(a: number, b: number, c: number, d: number, l: numbe
 export function eigenReadout(a: number, b: number, c: number, d: number, extra: Pick<Observable, 'note'> & { at?: readonly [number, number] } = {}): Observable {
   const { at = [0, 0], ...rest } = extra
   const e = eigen(a, b, c, d)
-  if (e.complex) return liste('Eigenwerte', [`${formatNumber(e.complex.re, 3)} ± ${formatNumber(e.complex.im, 3)} i`], { ...rest, namen: ['\\lambda_{1,2}'] })
-  return liste('Eigenwerte', e.real, {
+  if (e.complex) return list('Eigenwerte', [`${formatNumber(e.complex.re, 3)} ± ${formatNumber(e.complex.im, 3)} i`], { ...rest, names: ['\\lambda_{1,2}'] })
+  return list('Eigenwerte', e.real, {
     ...rest,
-    namen: ['\\lambda_1', '\\lambda_2'],
+    names: ['\\lambda_1', '\\lambda_2'],
     marks: e.real.map((l, item): Mark => {
       const [vx, vy] = eigenvector(a, b, c, d, l)
       return { kind: 'line', x: at[0], y: at[1], slope: vx === 0 ? Infinity : vy / vx, in: 'phase', item }

@@ -13,7 +13,7 @@ describe('registry', () => {
     const def = applets[id]
     const run = def.model.run(defaultParams(def.model))
     expect(run.series.length + (run.grids?.length ?? 0)).toBeGreaterThan(0)
-    for (const o of def.anzeige ?? []) expect(run.observables).toHaveProperty(o)
+    for (const o of def.readouts ?? []) expect(run.observables).toHaveProperty(o)
   })
 })
 
@@ -31,8 +31,8 @@ describe('answer key (§11.2)', () => {
   })
 
   it('behaviour is judged by the approach, not by a numerically settled tail', () => {
-    expect(observe('logistic-cobweb', { a: 2.8, N: 5000 }).verhalten.value).toBe('oszillierend')
-    expect(observe('logistic-cobweb', { a: 1.8, N: 5000 }).verhalten.value).toBe('monoton')
+    expect(observe('logistic-cobweb', { a: 2.8, N: 5000 }).verhalten.value).toBe('oscillating')
+    expect(observe('logistic-cobweb', { a: 1.8, N: 5000 }).verhalten.value).toBe('monotone')
     // shown with whether it converges; a lasting 2-cycle does not
     const show = (o: { value: unknown; format?: (v: never) => string }) => o.format!(o.value as never)
     expect(show(observe('logistic-cobweb', { a: 2.8, N: 200 }).verhalten)).toBe('oszillierend konvergent')
@@ -42,8 +42,8 @@ describe('answer key (§11.2)', () => {
   })
 
   it('geometric: constant at a = 1, oscillating for negative a', () => {
-    expect(observe('geometric', { a: 1 }).verhalten.value).toBe('monoton')
-    expect(observe('geometric', { a: -0.5 }).verhalten.value).toBe('oszillierend')
+    expect(observe('geometric', { a: 1 }).verhalten.value).toBe('monotone')
+    expect(observe('geometric', { a: -0.5 }).verhalten.value).toBe('oscillating')
   })
 
   it('log_IVP: inflection at x = K/2', () => {
@@ -76,16 +76,16 @@ const run = (id: string, patch: Record<string, unknown> = {}) => {
 
 describe('answer key, new applets (§11.2)', () => {
   it('newton_cooling: monotone below α = 1, oscillating up to α = 2, divergent beyond', () => {
-    expect(observe('newton-cooling', { alpha: 0.9 }).verhalten.value).toBe('monoton')
-    expect(observe('newton-cooling', { alpha: 1.5 }).verhalten.value).toBe('oszillierend')
+    expect(observe('newton-cooling', { alpha: 0.9 }).verhalten.value).toBe('monotone')
+    expect(observe('newton-cooling', { alpha: 1.5 }).verhalten.value).toBe('oscillating')
     expect(observe('newton-cooling', { alpha: 1.5 }).grenzwert.value).toBe(23)
     expect(observe('newton-cooling', { alpha: 2.1 }).grenzwert.value).toBeNull()
   })
 
   it('logistic_rK: thresholds r = 1 and r = 2, for every K', () => {
     for (const K of [2, 5, 7.5]) {
-      expect(observe('logistic-rk', { K, r: 0.9, N: 400 }).verhalten.value).toBe('monoton')
-      expect(observe('logistic-rk', { K, r: 1.5, N: 400 }).verhalten.value).toBe('oszillierend')
+      expect(observe('logistic-rk', { K, r: 0.9, N: 400 }).verhalten.value).toBe('monotone')
+      expect(observe('logistic-rk', { K, r: 1.5, N: 400 }).verhalten.value).toBe('oscillating')
       expect(observe('logistic-rk', { K, r: 1.95 }).periode.value).toBe(1)
       expect(observe('logistic-rk', { K, r: 2.05 }).periode.value).toBe(2)
     }
@@ -153,12 +153,12 @@ describe('answer key, new applets (§11.2)', () => {
 })
 
 describe('horizon at its smallest', () => {
-  it.each(Object.keys(applets).filter((id) => applets[id].horizont))('%s runs with the smallest allowed horizon', (id) => {
+  it.each(Object.keys(applets).filter((id) => applets[id].horizon))('%s runs with the smallest allowed horizon', (id) => {
     const def = applets[id]
-    const spec = def.model.params.find((s) => s.id === def.horizont)!
+    const spec = def.model.params.find((s) => s.id === def.horizon)!
     const lows = [spec.kind === 'int' || spec.kind === 'real' ? spec.min : 1, (spec as { limits?: { min?: number } }).limits?.min ?? 0]
     for (const v of lows) {
-      const p = updateParams(def.model, defaultParams(def.model), { [def.horizont!]: v })
+      const p = updateParams(def.model, defaultParams(def.model), { [def.horizon!]: v })
       const run = def.model.run(p)
       expect(run.series.length).toBeGreaterThan(0)
       for (const s of run.series) expect(s.x.length).toBeGreaterThan(0)
@@ -231,7 +231,7 @@ describe('zoomed detail', () => {
 describe('answer key of the new applets (values from the slides)', () => {
   const szenario = (id: string, label: string) => {
     const def = getApplet(id)
-    const s = def.szenarien!.find((x) => x.label === label)!
+    const s = def.scenarios!.find((x) => x.label === label)!
     return def.model.run({ ...defaultParams(def.model), ...s.params } as never).observables
   }
 
@@ -320,18 +320,18 @@ describe('catalog (applets.json)', () => {
     expect(katalog.map((e) => e.id).sort()).toEqual(Object.keys(applets).sort())
     for (const e of katalog) {
       const a = applets[e.id]
-      expect([a.titel, a.kurz, a.kapitel, a.sichtbar]).toEqual([e.titel, e.kurz, e.kapitel, e.sichtbar])
+      expect([a.title, a.summary, a.chapter, a.visible]).toEqual([e.title, e.summary, e.chapter, e.visible])
     }
   })
 
   it('names every mismatch between catalog and code', async () => {
-    const { verbinden } = await import('./index')
+    const { connect } = await import('./index')
     const mod = { ...applets.heron }
-    const e = { id: 'heron', sichtbar: true, kapitel: 'I' as const, folien: '', titel: 'H', kurz: 'k' }
-    expect(() => verbinden([e, e], [mod])).toThrow(/zweimal/)
-    expect(() => verbinden([{ ...e, id: 'herron' }], [mod])).toThrow(/kein Applet mit dieser id[\s\S]*"heron" fehlt/)
-    expect(() => verbinden([{ ...e, kapitel: 'V' as never }], [mod])).toThrow(/kapitel "V"/)
-    expect(() => verbinden([{ ...e, sichtbar: 'nein' as never }], [mod])).toThrow(/true oder false/)
-    expect(verbinden([e], [mod])[0].titel).toBe('H')
+    const e = { id: 'heron', visible: true, chapter: 'I' as const, slides: '', title: 'H', summary: 'k' }
+    expect(() => connect([e, e], [mod])).toThrow(/twice/)
+    expect(() => connect([{ ...e, id: 'herron' }], [mod])).toThrow(/no applet with this id[\s\S]*"heron" is missing/)
+    expect(() => connect([{ ...e, chapter: 'V' as never }], [mod])).toThrow(/no chapter "V"/)
+    expect(() => connect([{ ...e, visible: 'nein' as never }], [mod])).toThrow(/true or false/)
+    expect(connect([e], [mod])[0].title).toBe('H')
   })
 })

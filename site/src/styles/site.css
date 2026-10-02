@@ -238,10 +238,13 @@ h1 {
   margin: 0 auto;
   padding: 28px 16px 64px;
 }
-.main.breit {
+.main.wide {
   max-width: 1600px;
 }
-.main.schmal {
+.main.medium {
+  max-width: 920px;
+}
+.main.narrow {
   max-width: 760px;
 }
 

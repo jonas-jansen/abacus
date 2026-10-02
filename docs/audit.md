@@ -26,6 +26,16 @@ Sizes (lines, without tests): `applet-core` 2 480, `applet-plot` 2 000, `applet-
 - An unused import in `axes.ts`; a wrong path in `deployment.md`.
 - Documentation: from three files to a set ([README.md](README.md)).
 
+## Since the audit: one language for authors
+
+Everything an author writes is now English: the applet API (`formulas`, `readouts`,
+`scenarios`, `quantity()`, `category()` …), the catalog (`visible`, `chapter`, `slides`), course
+pages (`<Exercise>`, `<Claim>`, `<Proof>`, frontmatter `title`, `week`, `locked`), questions
+and weekly quizzes (`type: 'single'`, `options`, `correct`, `defineWeeklyQuiz`), checkers
+(`threshold`, `condition`) and the theme variables (`--ci-accent` …). Everything students read
+stays German. Some internal names are still German (e.g. `Werkzeuge.tsx`, `useVortrag`, the
+settings module); they are not part of what authors use, and can be renamed when touched.
+
 ## Recommendations, by value
 
 1. **One registry entry per plot type.** Today a plot type is spread over `plotDomains`,
