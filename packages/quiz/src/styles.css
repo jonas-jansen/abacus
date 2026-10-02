@@ -434,27 +434,12 @@ img.qz-image {
     box-shadow 0.12s,
     border-color 0.12s;
 }
-/* With plots: a 2 × 2 grid of cells (the label above, a slot as large as a card below), and
-   the pile as a grid of the same cells, so a plot fits its slot exactly. */
-.qz-match[data-pictures] .qz-match-rows,
+/* With plots: rows as for text (label → slot); the pile is a 2 × 2 grid. A slot holding a
+   plot hugs it – its outline fits the card, however wide the row. */
 .qz-match[data-pictures] .qz-pool {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-}
-.qz-match[data-pictures] .qz-match-row {
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  gap: 6px;
-}
-.qz-match[data-pictures] .qz-match-arrow {
-  display: none;
-}
-.qz-match[data-pictures] .qz-match-left {
-  padding: 6px 10px;
-}
-.qz-match[data-pictures] .qz-match-fix {
-  grid-column: 1;
 }
 .qz-match[data-pictures] .qz-card {
   width: 100%;
@@ -464,17 +449,14 @@ img.qz-image {
   flex: 1;
   min-width: 0;
 }
-.qz-match[data-pictures] .qz-slot:has(.qz-slot-empty) {
-  aspect-ratio: 400 / 275;
+.qz-match[data-pictures] .qz-slot:has(.qz-card) {
+  justify-self: start;
+  width: min(100%, 400px);
 }
 .qz-match[data-pictures] .qz-pool-empty {
   grid-column: 1 / -1;
 }
-/* in the result: an empty slot is one line, the right plot a smaller picture below */
-.qz-match[data-pictures] .qz-match-row[data-mark] .qz-slot:has(.qz-slot-empty) {
-  aspect-ratio: auto;
-  min-height: 40px;
-}
+/* in the result: the right plot as a smaller picture below the slot */
 .qz-match[data-pictures] .qz-match-fix {
   display: grid;
   gap: 2px;
@@ -518,7 +500,6 @@ img.qz-image {
 }
 @media (max-width: 560px) {
   .qz-options[data-pictures],
-  .qz-match[data-pictures] .qz-match-rows,
   .qz-match[data-pictures] .qz-pool {
     grid-template-columns: minmax(0, 1fr);
   }

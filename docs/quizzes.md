@@ -128,7 +128,8 @@ Each graded answer gets a badge: "Richtig" with a check in a green circle (it dr
 amber for partly right, a cross in red for wrong. The words depend on whether a retry follows:
 on course pages and while practising, "Fast" and "Noch nicht" invite the next attempt; in the
 result of a submitted quiz the verdict is final: "Teilweise · 0,5 Punkte" and "Falsch".
-Pictures as options and in matching are laid out two by two. In the result of a weekly
+Picture options are laid out two by two; in matching, the pile of pictures is two by two, and a
+slot holding a plot hugs it. In the result of a weekly
 quiz, right options are green with a check, a wrong choice red with a cross, a right option
 that was missed has a dashed green border; matching rows are green or red, with the right
 partner named. A ring shows the share of points.
