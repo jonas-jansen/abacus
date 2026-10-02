@@ -6,7 +6,12 @@ import { type DragHandle } from './define'
 import { localPoint } from './scale'
 
 /** Where a drag handle sits, in figure coordinates; null when it cannot be placed. */
-export function handlePosition(drag: DragHandle<any>, frame: Frame, params: Params): [number, number] | null {
+/**
+ * Where a handle sits, or null when its place is out of view. While it is dragged (`pinned`),
+ * it stays at the plot's edge instead: a handle that vanished mid-drag would never see the
+ * pointer let go, and the plot would stay frozen.
+ */
+export function handlePosition(drag: DragHandle<any>, frame: Frame, params: Params, pinned = false): [number, number] | null {
   let dx: number
   let dy: number
   if (drag.at) {
@@ -25,7 +30,11 @@ export function handlePosition(drag: DragHandle<any>, frame: Frame, params: Para
   const cy = frame.plot.y + frame.yScale(dy)
   // a handle outside the plot would be unreachable and float over the axes
   const inside = cx >= frame.plot.x - 1 && cx <= frame.plot.x + frame.plot.w + 1 && cy >= frame.plot.y - 1 && cy <= frame.plot.y + frame.plot.h + 1
-  return Number.isFinite(cx) && Number.isFinite(cy) && inside ? [cx, cy] : null
+  if (!Number.isFinite(cx) || !Number.isFinite(cy)) return null
+  if (inside) return [cx, cy]
+  if (!pinned) return null
+  const { x, y, w, h } = frame.plot
+  return [Math.min(x + w, Math.max(x, cx)), Math.min(y + h, Math.max(y, cy))]
 }
 
 /**

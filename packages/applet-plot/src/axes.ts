@@ -32,6 +32,7 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
   nodes.push({ tag: 'path', attrs: { d: `M${tipX} ${bottom}l-10 -4l2.8 4l-2.8 4z`, class: 'abacus-axis-arrow' } })
   nodes.push({ tag: 'path', attrs: { d: `M${plot.x} ${tipY}l-4 10l4 -2.8l4 2.8z`, class: 'abacus-axis-arrow' } })
 
+  for (const t of frame.xMinorTicks) nodes.push(line(X(t), bottom, X(t), bottom + TICK * 0.6, 'abacus-axis'))
   frame.xTicks.forEach((t, i) => {
     nodes.push(line(X(t), bottom, X(t), bottom + TICK, 'abacus-axis'))
     nodes.push({

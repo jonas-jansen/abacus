@@ -25,6 +25,8 @@ export interface Frame {
   yTicks: number[]
   xTickLabels: string[]
   yTickLabels: string[]
+  /** Short ticks without numbers between the labelled ones (e.g. every n), where there is room. */
+  xMinorTicks: number[]
   xDomain: Range
   yDomain: Range
   fontSize: number
@@ -53,6 +55,34 @@ export const TICK = 4
 /** How far the axes run past the plot, into their arrowheads. */
 export const AXIS_OVERHANG = 12
 export const PX_PER_X_TICK = 60
+/** Least distance between two numbers on the x axis. */
+const MIN_LABEL_GAP = 36
+/** Least distance between two short ticks. */
+const MIN_MINOR_GAP = 6
+
+/**
+ * Short ticks between the numbered ones: on an integer axis every integer, otherwise a fifth
+ * or a half of the step – whichever is finest and still at least MIN_MINOR_GAP apart.
+ */
+function minorTicks([lo, hi]: Range, step: number, pxPerUnit: number, integer: boolean): number[] {
+  const parts = integer ? [step] : [5, 2]
+  for (const n of parts) {
+    const minor = integer ? 1 : step / n
+    if (integer && step <= 1) return []
+    if (minor * pxPerUnit < MIN_MINOR_GAP) continue
+    const out: number[] = []
+    const first = Math.ceil(lo / minor - 1e-9)
+    const last = Math.floor(hi / minor + 1e-9)
+    if (last - first > 2000) return []
+    for (let k = first; k <= last; k++) {
+      const v = k * minor
+      // not where a number stands
+      if (Math.abs(v / step - Math.round(v / step)) > 1e-6) out.push(Number(v.toPrecision(12)))
+    }
+    return out
+  }
+  return []
+}
 export const PX_PER_Y_TICK = 40
 
 /** Never below 11 px (§5.6): drop labels rather than shrink. */
@@ -108,7 +138,16 @@ export function makeFrame(input: FrameInput): Frame {
   const top = Math.ceil(AXIS_OVERHANG + (input.yLabel ? fontSize * 1.2 : 4))
   const bottom = Math.ceil(fontSize + TICK + 6 + 2)
 
-  const xT = niceTicks(xDomain[0], xDomain[1], Math.max(2, Math.floor((width - left) / PX_PER_X_TICK)), input.xInteger)
+  // x numbers as dense as their width allows (at least MIN_LABEL_GAP apart): for n = 0 … 20
+  // every n is numbered. The plot's width is estimated here; the right margin follows below.
+  const roughW = Math.max(40, width - left - 40)
+  let xT = niceTicks(xDomain[0], xDomain[1], Math.max(2, Math.floor(roughW / MIN_LABEL_GAP)), input.xInteger)
+  for (let pass = 0; pass < 3; pass++) {
+    const widest = Math.max(...scaledLabels(xT.ticks, xT.step).labels.map((t) => estimateTextWidth(t, fontSize)))
+    const need = Math.max(MIN_LABEL_GAP, widest + 16)
+    if ((xT.step / (xDomain[1] - xDomain[0])) * roughW >= need) break
+    xT = niceTicks(xDomain[0], xDomain[1], Math.max(2, Math.floor(roughW / need)), input.xInteger)
+  }
   const xScaled = scaledLabels(xT.ticks, xT.step)
   const xTickLabels = xScaled.labels
   // the x variable (and its factor) sits right of the arrow tip
@@ -146,6 +185,7 @@ export function makeFrame(input: FrameInput): Frame {
     yTicks: yT.ticks,
     xTickLabels,
     yTickLabels,
+    xMinorTicks: minorTicks(xDomain, xT.step, sx, !!input.xInteger),
     xDomain,
     yDomain,
     fontSize,

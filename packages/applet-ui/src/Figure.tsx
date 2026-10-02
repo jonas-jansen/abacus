@@ -191,12 +191,46 @@ export function Figure<P extends Params>({
   const ghostRun = useMemo(() => (detailWanted && vergleichDetail ? vergleichDetail(detailWanted) : null), [detailWanted, vergleichDetail])
   const ghost = vergleich ? (ghostRun ?? vergleich.run) : null
 
+  // When the held window has to move or grow, the axes glide there (≈ 0,3 s) instead of
+  // jumping, so the change of scale is seen – and the curve moves with them.
+  const shown = useRef<{ x: Range; y: Range } | null>(null)
+  const [tween, setTween] = useState<{ x: Range; y: Range } | null>(null)
+  useEffect(() => {
+    const from = shown.current
+    const to = { x: full.x, y: full.y }
+    const same = (a: Range, b: Range) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) <= 1e-9 * (1 + Math.abs(b[1] - b[0]))
+    if (!from || zoom || dragging || (same(from.x, to.x) && same(from.y, to.y)) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setTween(null)
+      return
+    }
+    const log = spec.yScale === 'log'
+    const mix = (a: number, b: number, k: number, lg = false) => (lg && a > 0 && b > 0 ? 10 ** (Math.log10(a) + (Math.log10(b) - Math.log10(a)) * k) : a + (b - a) * k)
+    const t0 = performance.now()
+    let id = requestAnimationFrame(function step(now) {
+      const k = Math.min(1, (now - t0) / 300)
+      const e = 1 - (1 - k) ** 3
+      if (k >= 1) return setTween(null)
+      setTween({
+        x: [mix(from.x[0], to.x[0], e), mix(from.x[1], to.x[1], e)],
+        y: [mix(from.y[0], to.y[0], e, log), mix(from.y[1], to.y[1], e, log)],
+      })
+      id = requestAnimationFrame(step)
+    })
+    return () => cancelAnimationFrame(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [full.x[0], full.x[1], full.y[0], full.y[1], dragging])
+
   const frame = useMemo(() => {
-    const auto = dragging && frozen.current ? frozen.current : full
+    const target = tween && !zoom ? { ...full, ...tween } : full
+    const auto = dragging && frozen.current ? frozen.current : target
     const d = zoom ? { ...auto, x: zoom.x, y: zoom.y } : auto
     if (!dragging) frozen.current = d
     return makeFrame({ width: figW, height: figH, x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' })
-  }, [spec, full, figW, figH, dragging, zoom])
+  }, [spec, full, figW, figH, dragging, zoom, tween])
+  // what is on screen now: where the next glide starts (after the effect above has read it)
+  useEffect(() => {
+    if (!zoom) shown.current = { x: frame.xDomain, y: frame.yDomain }
+  })
 
   // Canvas data layer, redrawn on the next animation frame.
   useEffect(() => {
@@ -313,7 +347,7 @@ export function Figure<P extends Params>({
     onBahn([frame.xInvert(px), frame.yInvert(py)])
   }
 
-  const positions = hydrated ? handles.map((h) => handlePosition(h, frame, params)) : []
+  const positions = hydrated ? handles.map((h, i) => handlePosition(h, frame, params, active?.i === i && active.state === 'drag')) : []
   // Constructions that unfold step by step name the points of the current step.
   const pointLabels = stepLabels(spec, drawn, view)
     .map((l) => ({ ...l, x: frame.plot.x + frame.xScale(l.x), y: frame.plot.y + frame.yScale(l.y) }))

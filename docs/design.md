@@ -24,6 +24,11 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   larger rate as a steeper one – never as a rescaled picture. "Ganzes Bild" (also a double
   click), reset and the scenario chips fit the axes afresh; the button appears by itself when
   the window has become much larger than the curve (`packages/applet-plot/src/hold.ts`).
+  When the window has to move or grow, the axes glide there in about 0,3 s, so the change of
+  scale is seen. A handle dragged past the edge stays at the edge until it is let go.
+- **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
+  width allows (n = 0 … 20: every n); between them short ticks mark every n, or a fifth or half
+  of the step, while they are at least 6 px apart.
 - **Nothing jumps.** Controls that appear (zoom reset, delete trajectories) do not move
   others; the lin/log switch stays in the title row of every plot.
 

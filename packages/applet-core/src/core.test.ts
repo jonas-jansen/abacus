@@ -246,11 +246,24 @@ describe('frame (§5.6)', () => {
 
   it.each([320, 768, 1440])('tick density follows width %i', (width) => {
     const f = makeFrame({ width, height: width * 0.75, x: [0, 80], y: [-1, 1], xInteger: true, xLabel: 'n', yLabel: 'xₙ' })
-    expect(f.xTicks.length).toBeLessThanOrEqual(Math.floor(width / 60) + 2)
+    // numbers as dense as they fit, at least 36 px apart; short ticks for every n in between
+    const gaps = f.xTicks.slice(1).map((t, i) => f.xScale(t) - f.xScale(f.xTicks[i]))
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(35)
+    expect(f.xMinorTicks.every((t) => Number.isInteger(t) && !f.xTicks.includes(t))).toBe(true)
     expect(f.xScale(0)).toBe(0)
     expect(f.xScale(80)).toBeCloseTo(f.plot.w)
     expect(f.yInvert(f.yScale(0.3))).toBeCloseTo(0.3)
     expect(f.fontSize).toBeGreaterThanOrEqual(11)
+  })
+
+  it('numbers every n where there is room, short ticks for every n where there is not', () => {
+    const wide = makeFrame({ width: 900, height: 600, x: [0, 20], y: [0, 1], xInteger: true })
+    expect(wide.xTicks).toEqual(Array.from({ length: 21 }, (_, n) => n))
+    const dense = makeFrame({ width: 900, height: 600, x: [0, 60], y: [0, 1], xInteger: true })
+    expect(dense.xTicks.length).toBeLessThan(61)
+    expect([...dense.xTicks, ...dense.xMinorTicks].sort((a, b) => a - b)).toEqual(Array.from({ length: 61 }, (_, n) => n))
+    const far = makeFrame({ width: 400, height: 300, x: [0, 2000], y: [0, 1], xInteger: true })
+    expect(far.xMinorTicks.length).toBeLessThan(200)
   })
 
   it('is deterministic (SSR and client agree)', () => {
@@ -334,7 +347,7 @@ describe('axis labels with powers of ten', () => {
     expect(f.yExp).toBe(5)
     expect(f.yTickLabels.every((s) => s.length <= 4)).toBe(true)
     expect(f.xExp).toBe(-4)
-    expect(f.xTickLabels.at(-1)).toBe('5')
+    expect(f.xTickLabels.at(-1)).toMatch(/^5(,0)?$/)
   })
   it('ordinary ranges stay as they are', () => {
     const f = makeFrame({ width: 600, height: 400, x: [0, 40], y: [0, 1] })
