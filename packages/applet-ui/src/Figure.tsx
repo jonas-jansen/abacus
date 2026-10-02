@@ -4,6 +4,7 @@ import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, 
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
+import { cssColor } from './cssColor'
 import { localPoint } from './scale'
 import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
@@ -163,8 +164,8 @@ export function Figure<P extends Params>({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, frame.plot.w, frame.plot.h)
       const css = getComputedStyle(cv)
-      const color = (role: keyof typeof fallbackColors) => css.getPropertyValue(colorVar(role)).trim() || fallbackColors[role]
-      const surface = new CanvasSurface(ctx, color, css.getPropertyValue('--ab-bg').trim() || '#ffffff')
+      const color = (role: keyof typeof fallbackColors) => cssColor(css, colorVar(role), fallbackColors[role])
+      const surface = new CanvasSurface(ctx, color, cssColor(css, '--ab-bg', '#ffffff'))
       if (vergleich) {
         // the held state first, faint and complete (no timeline cut), then the current one
         drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true })

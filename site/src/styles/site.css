@@ -5,13 +5,9 @@
 }
 
 :root {
-  --page: #f3f4f6;
+  /* the page behind the cards: a brand colour (applet-ui's styles) */
+  --page: var(--ab-page);
   --topbar-h: 56px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0f1215;
-  }
 }
 
 html {

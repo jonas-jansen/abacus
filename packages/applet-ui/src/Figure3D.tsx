@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import type { Run } from '@abacus/applet-core'
 import { DEFAULT_VIEW, scene3d, sceneSvg, type PlotSpec, type Stroke, type View3D } from '@abacus/applet-plot'
 import { renderSvg } from './svgReact'
+import { cssColor } from './cssColor'
 import { localPoint } from './scale'
 import { TeX } from './TeX'
 
@@ -68,9 +69,9 @@ export function Figure3D({
       ctx.clearRect(0, 0, size, h)
       const css = getComputedStyle(cv)
       const stroke: Record<Stroke, string> = {
-        contour: css.getPropertyValue('--ab-text').trim() || '#15181c',
-        marker: css.getPropertyValue('--ab-text').trim() || '#15181c',
-        axis: css.getPropertyValue('--abacus-axis').trim() || '#a3aab4',
+        contour: cssColor(css, '--ab-text', '#15181c'),
+        marker: cssColor(css, '--ab-text', '#15181c'),
+        axis: cssColor(css, '--abacus-axis', '#a3aab4'),
       }
       ctx.lineCap = 'round'
       ctx.strokeStyle = stroke.axis
@@ -108,7 +109,7 @@ export function Figure3D({
         ctx.lineTo(m.x, m.y)
         ctx.stroke()
         ctx.setLineDash([])
-        ctx.fillStyle = css.getPropertyValue('--ab-bg').trim() || '#fff'
+        ctx.fillStyle = cssColor(css, '--ab-bg', '#fff')
         ctx.lineWidth = 2.5
         ctx.beginPath()
         ctx.arc(m.x, m.y, 5.5, 0, 2 * Math.PI)

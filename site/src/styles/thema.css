@@ -1,0 +1,6 @@
+/*
+ * The colour theme of the whole site: one line. Themes live in ../themes/; a new one is a
+ * copy of uhoh.css with other values (the --ci-* variables are explained in applet-ui's
+ * styles.css).
+ */
+@import '../themes/uhoh.css';

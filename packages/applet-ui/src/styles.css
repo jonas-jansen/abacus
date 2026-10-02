@@ -9,98 +9,117 @@
 
 @import 'katex/dist/katex.min.css';
 
+/*
+ * Colours in two layers.
+ *
+ * 1. The brand (--ci-*): the few colours a corporate identity fixes, for light and dark.
+ *    These defaults are the library's own look; a theme overrides them in a stylesheet loaded
+ *    after this one (site/src/styles/thema.css picks one from site/src/themes/).
+ * 2. Everything else is derived from them: lines, panels, muted text, soft tints, the curves'
+ *    neutral roles. Change a brand colour and the whole interface follows.
+ */
 :root {
-  --ab-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --ab-bg: #ffffff;
-  --ab-panel: #f6f7f9;
-  --ab-hover: #f1f3f6;
-  --ab-text: #15181c;
-  --ab-muted: #5f6873;
-  --ab-faint: #8b939d;
-  --ab-line: #e6e8ec;
-  --ab-line-strong: #cfd4da;
-  --ab-track: #e2e5ea;
-  --ab-accent: #1f5eea;
-  --ab-accent-soft: #e9f0fe;
-  --ab-mark: #0e9f6e;
-  --ab-mark-soft: rgb(14 159 110 / 0.16);
-  --ab-warn-soft: #fdf3e7;
-  --ab-warn: #8a4b08;
+  --ci-schrift: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+  /* light */
+  --ci-akzent: #1f5eea; /* buttons, links, the active state */
+  --ci-reihe-1: #1f5eea; /* curves: primary, secondary, tertiary role */
+  --ci-reihe-2: #e0620e;
+  --ci-reihe-3: #8b3fd1;
+  --ci-gut: #0e9f6e; /* marks in the plots, "copied" */
+  --ci-warnung: #8a4b08;
+  --ci-text: #15181c;
+  --ci-flaeche: #ffffff; /* the applet, cards */
+  --ci-seite: #f3f4f6; /* the page behind */
+
+  /* dark */
+  --ci-akzent-dunkel: #7eaaff;
+  --ci-reihe-1-dunkel: #7eaaff;
+  --ci-reihe-2-dunkel: #f39b5b;
+  --ci-reihe-3-dunkel: #c69be6;
+  --ci-gut-dunkel: #4fd1a1;
+  --ci-warnung-dunkel: #f5c38a;
+  --ci-text-dunkel: #e8eaed;
+  --ci-flaeche-dunkel: #16191d;
+  --ci-seite-dunkel: #0f1215;
+}
+
+/* the brand colours of the current mode */
+:root {
+  --marke-akzent: var(--ci-akzent);
+  --marke-reihe-1: var(--ci-reihe-1);
+  --marke-reihe-2: var(--ci-reihe-2);
+  --marke-reihe-3: var(--ci-reihe-3);
+  --marke-gut: var(--ci-gut);
+  --marke-warnung: var(--ci-warnung);
+  --marke-text: var(--ci-text);
+  --marke-flaeche: var(--ci-flaeche);
+  --marke-seite: var(--ci-seite);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --marke-akzent: var(--ci-akzent-dunkel);
+    --marke-reihe-1: var(--ci-reihe-1-dunkel);
+    --marke-reihe-2: var(--ci-reihe-2-dunkel);
+    --marke-reihe-3: var(--ci-reihe-3-dunkel);
+    --marke-gut: var(--ci-gut-dunkel);
+    --marke-warnung: var(--ci-warnung-dunkel);
+    --marke-text: var(--ci-text-dunkel);
+    --marke-flaeche: var(--ci-flaeche-dunkel);
+    --marke-seite: var(--ci-seite-dunkel);
+    --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
+  }
+}
+:root[data-theme='dark'] {
+  --marke-akzent: var(--ci-akzent-dunkel);
+  --marke-reihe-1: var(--ci-reihe-1-dunkel);
+  --marke-reihe-2: var(--ci-reihe-2-dunkel);
+  --marke-reihe-3: var(--ci-reihe-3-dunkel);
+  --marke-gut: var(--ci-gut-dunkel);
+  --marke-warnung: var(--ci-warnung-dunkel);
+  --marke-text: var(--ci-text-dunkel);
+  --marke-flaeche: var(--ci-flaeche-dunkel);
+  --marke-seite: var(--ci-seite-dunkel);
+  --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
+}
+
+/* Derived: neutrals are the text colour mixed into the surface, tints the colour into it. The
+   same mixtures serve light and dark. (Tokens are resolved where they are used, so these
+   follow the mode.) */
+:root {
+  --ab-font: var(--ci-schrift);
+  --ab-bg: var(--marke-flaeche);
+  --ab-text: var(--marke-text);
+  --ab-muted: color-mix(in srgb, var(--marke-text) 70%, var(--marke-flaeche));
+  --ab-faint: color-mix(in srgb, var(--marke-text) 50%, var(--marke-flaeche));
+  --ab-line: color-mix(in srgb, var(--marke-text) 10%, var(--marke-flaeche));
+  --ab-line-strong: color-mix(in srgb, var(--marke-text) 20%, var(--marke-flaeche));
+  --ab-track: color-mix(in srgb, var(--marke-text) 12%, var(--marke-flaeche));
+  --ab-panel: color-mix(in srgb, var(--marke-text) 3.5%, var(--marke-flaeche));
+  --ab-hover: color-mix(in srgb, var(--marke-text) 5.5%, var(--marke-flaeche));
+  --ab-accent: var(--marke-akzent);
+  --ab-accent-soft: color-mix(in srgb, var(--marke-akzent) 10%, var(--marke-flaeche));
+  --ab-mark: var(--marke-gut);
+  --ab-mark-soft: color-mix(in srgb, var(--marke-gut) 16%, transparent);
+  --ab-warn: var(--marke-warnung);
+  --ab-warn-soft: color-mix(in srgb, var(--marke-warnung) 10%, var(--marke-flaeche));
+  --ab-page: var(--marke-seite);
+
+  --abacus-primary: var(--marke-reihe-1);
+  --abacus-secondary: var(--marke-reihe-2);
+  --abacus-tertiary: var(--marke-reihe-3);
+  --abacus-reference: color-mix(in srgb, var(--marke-text) 78%, var(--marke-flaeche));
+  --abacus-ghost: color-mix(in srgb, var(--marke-text) 50%, var(--marke-flaeche));
+  --abacus-annotation: color-mix(in srgb, var(--marke-text) 75%, var(--marke-flaeche));
+  --abacus-grid: color-mix(in srgb, var(--marke-text) 6%, var(--marke-flaeche));
+  --abacus-data: color-mix(in srgb, var(--marke-text) 88%, var(--marke-flaeche));
+  --abacus-axis: color-mix(in srgb, var(--marke-text) 38%, var(--marke-flaeche));
+  --abacus-tick: color-mix(in srgb, var(--marke-text) 62%, var(--marke-flaeche));
+}
+:root {
   /* the corners of every box: cards, panels, boxes in the text, hints (round buttons stay round) */
   --ab-radius: 2px;
   --ab-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 18px 40px -18px rgb(16 24 40 / 0.18);
-
-  --abacus-primary: #1f5eea;
-  --abacus-secondary: #e0620e;
-  --abacus-tertiary: #8b3fd1;
-  --abacus-reference: #4a4f57;
-  --abacus-ghost: #8a929c;
-  --abacus-annotation: #4b5563;
-  --abacus-grid: #eef0f3;
-  --abacus-data: #2b3440;
-  --abacus-axis: #a3aab4;
-  --abacus-tick: #6b7480;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --ab-bg: #16191d;
-    --ab-panel: #1c2025;
-    --ab-hover: #22272d;
-    --ab-text: #e8eaed;
-    --ab-muted: #a2abb5;
-    --ab-faint: #7c8590;
-    --ab-line: #2a2f36;
-    --ab-line-strong: #3b424b;
-    --ab-track: #323840;
-    --ab-accent: #7eaaff;
-    --ab-accent-soft: #1e2b44;
-    --ab-mark: #4fd1a1;
-    --ab-mark-soft: rgb(79 209 161 / 0.2);
-    --ab-warn-soft: #3a2a17;
-    --ab-warn: #f5c38a;
-    --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
-
-    --abacus-primary: #7eaaff;
-    --abacus-secondary: #f39b5b;
-    --abacus-tertiary: #c69be6;
-    --abacus-reference: #b9bfc7;
-    --abacus-ghost: #7c8590;
-    --abacus-annotation: #b3bac3;
-    --abacus-grid: #22272d;
-    --abacus-data: #d5dae0;
-    --abacus-axis: #59616b;
-    --abacus-tick: #9aa3ae;
-  }
-}
-
-:root[data-theme='dark'] {
-  --ab-bg: #16191d;
-  --ab-panel: #1c2025;
-  --ab-hover: #22272d;
-  --ab-text: #e8eaed;
-  --ab-muted: #a2abb5;
-  --ab-faint: #7c8590;
-  --ab-line: #2a2f36;
-  --ab-line-strong: #3b424b;
-  --ab-track: #323840;
-  --ab-accent: #7eaaff;
-  --ab-accent-soft: #1e2b44;
-  --ab-mark: #4fd1a1;
-  --ab-mark-soft: rgb(79 209 161 / 0.2);
-  --ab-warn-soft: #3a2a17;
-  --ab-warn: #f5c38a;
-  --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.4);
-  --abacus-primary: #7eaaff;
-  --abacus-secondary: #f39b5b;
-  --abacus-tertiary: #c69be6;
-  --abacus-reference: #b9bfc7;
-  --abacus-ghost: #7c8590;
-  --abacus-annotation: #b3bac3;
-  --abacus-grid: #22272d;
-  --abacus-data: #d5dae0;
-  --abacus-axis: #59616b;
-  --abacus-tick: #9aa3ae;
 }
 
 /* ================================================================== card */
