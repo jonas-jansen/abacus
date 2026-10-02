@@ -1,0 +1,14 @@
+{
+  "hinweis": "Wann ist was für Studierende sichtbar? Werte: \"sofort\", \"verborgen\" oder ein Datum \"JJJJ-MM-TT\" (sichtbar ab diesem Tag). Ein Applet folgt seinem Kapitel, außer es steht unter \"applets\". Kursseiten folgen ihrer Woche, sobald \"semesterbeginn\" gesetzt ist; Ausnahmen unter \"seiten\". Übersicht: /freigabe",
+  "semesterbeginn": null,
+  "kapitel": {
+    "I": "sofort",
+    "II": "sofort",
+    "III": "sofort",
+    "IV": "sofort",
+    "Anhang": "sofort"
+  },
+  "applets": {},
+  "seiten": {},
+  "vorschau": true
+}

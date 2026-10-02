@@ -5,14 +5,18 @@ import { applets, getApplet } from '@abacus/applets'
 import { AppletIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
+import { appletSichtbar, seiteSichtbar } from '../../freigabe'
 
+// only released applets get a page (unreleased ones: /vorschau/<id>, see /freigabe)
 export function getStaticPaths() {
-  return Object.keys(applets).map((id) => ({ params: { id } }))
+  return Object.keys(applets)
+    .filter((id) => appletSichtbar(id))
+    .map((id) => ({ params: { id } }))
 }
 
 const { id } = Astro.params
 const def = getApplet(id!)
-const seiten = (await getCollection('seiten', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.entwurf))).sort(
+const seiten = (await getCollection('seiten', (s) => s.data.applet === id && seiteSichtbar(s))).sort(
   (a, b) => a.data.woche - b.data.woche,
 )
 ---

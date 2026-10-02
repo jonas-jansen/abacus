@@ -11,8 +11,10 @@ interface Props {
   /** Page width: 'breit' for applet and course pages, 'schmal' for text pages. */
   breite?: 'breit' | 'schmal'
   aktiv?: 'applets' | 'kurs' | 'notizbuch'
+  /** Pages for the admin only (release plan, previews): not in search engines. */
+  intern?: boolean
 }
-const { titel, kurz, breite = 'breit', aktiv } = Astro.props
+const { titel, kurz, breite = 'breit', aktiv, intern = false } = Astro.props
 ---
 <!doctype html>
 <html lang="de">
@@ -21,6 +23,7 @@ const { titel, kurz, breite = 'breit', aktiv } = Astro.props
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titel} · {kurs.titel}</title>
     {kurz && <meta name="description" content={kurz} />}
+    {intern && <meta name="robots" content="noindex, nofollow" />}
     <script is:inline set:html={EINSTELLUNGEN_SCRIPT} />
   </head>
   <body>

@@ -1,10 +1,15 @@
 # Builds the site and publishes it on GitHub Pages at https://<user>.github.io/<repo>/.
-# Runs on every push to main; tests and dependency rules must pass first.
+# Runs on every push to main and every morning (release plan); tests and dependency rules
+# must pass first.
 name: Pages
 
 on:
   push:
     branches: [main]
+  # every morning, so release dates in site/freigabe.json take effect without a push
+  # (03:30 UTC = 04:30/05:30 in Germany)
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions:

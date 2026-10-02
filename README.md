@@ -52,6 +52,14 @@ For students, every applet offers undo/redo, "vergleichen" (hold a state, drawn 
 zoom and pan (curves continue past N and T), shareable links, scenario chips from the slides,
 and hint cards that can be switched off for teaching (settings in the top bar).
 
+**Release plan (what students see when):** `site/freigabe.json` – per chapter and, where
+needed, per applet: `"sofort"`, `"verborgen"` or a date `"2026-11-03"`; course pages follow their
+week once `"semesterbeginn"` is set. Edit it on GitHub ("Commit changes"); the site rebuilds
+on every push and every morning, so dates take effect by themselves. `/freigabe` (unlisted)
+shows the plan with previews of what is not released yet; `pnpm dev` shows everything, marked.
+`ABACUS_HEUTE=2026-11-24 pnpm build` builds the site as of a day. Typos fail the tests. This
+hides, it does not protect: the site's JavaScript contains every applet.
+
 **A quiz:** add a `defineQuiz({...})` to a file in `packages/quizzes/src/`. Types: `vorhersage`,
 `finde` (`ziel` + `toleranz`, or a `pruefer`), `erzeuge` (predicate on the applet's live state),
 `antwort`. Text takes `$math$`. Checkers return a diagnosis with direction and hint.

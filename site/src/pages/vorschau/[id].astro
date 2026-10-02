@@ -1,0 +1,32 @@
+---
+// Preview of an applet that students do not see yet, for the admin to check it before its
+// release. Linked from /freigabe only; built when "vorschau" is on in site/freigabe.json.
+import { applets, getApplet } from '@abacus/applets'
+import { AppletIsland } from '../../islands'
+import Seite from '../../layouts/Seite.astro'
+import { url } from '../../config'
+import { appletFreigabe, appletSichtbar, freigabeText, PLAN } from '../../freigabe'
+
+export function getStaticPaths() {
+  if (!PLAN.vorschau) return []
+  return Object.keys(applets)
+    .filter((id) => import.meta.env.DEV || !appletSichtbar(id))
+    .map((id) => ({ params: { id } }))
+}
+
+const { id } = Astro.params
+const def = getApplet(id!)
+---
+<Seite titel={`Vorschau: ${def.titel}`} intern>
+  <p class="freigabe-warnung">
+    <strong>Vorschau</strong> – für Studierende {freigabeText(appletFreigabe(def.id))}. <a href={url('/freigabe')}>Zur Freigabe</a>
+  </p>
+  <div class="explore-head">
+    <div>
+      <p class="eyebrow chapter-badge">{def.kapitel === 'Anhang' ? 'Anhang' : `Kapitel ${def.kapitel}`}{def.folien && <span> · Folien {def.folien}</span>}</p>
+      <h1>{def.titel}</h1>
+      <p class="lead">{def.kurz}</p>
+    </div>
+  </div>
+  <AppletIsland client:load id={def.id} kopf={false} />
+</Seite>

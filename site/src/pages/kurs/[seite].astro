@@ -7,9 +7,11 @@ import { vocabulary } from '../../components'
 import { AppletIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
+import { seiteSichtbar } from '../../freigabe'
 
 export async function getStaticPaths() {
-  const seiten = await getCollection('seiten', (s) => import.meta.env.DEV || !s.data.entwurf)
+  // released pages only (drafts and pages of later weeks: see /freigabe)
+  const seiten = await getCollection('seiten', (s) => seiteSichtbar(s))
   return seiten.map((seite) => ({ params: { seite: seite.id }, props: { seite } }))
 }
 
