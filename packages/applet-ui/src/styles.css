@@ -28,7 +28,7 @@
   --ab-warn: #8a4b08;
   /* the corners of every box: cards, panels, boxes in the text, hints (round buttons stay round) */
   --ab-radius: 2px;
-  --ab-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -8px rgb(16 24 40 / 0.08);
+  --ab-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 18px 40px -18px rgb(16 24 40 / 0.18);
 
   --abacus-primary: #1f5eea;
   --abacus-secondary: #e0620e;
@@ -191,9 +191,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--ab-line);
-  background: var(--ab-panel);
 }
 .ab-panel-section {
   padding: 16px 20px 18px;
@@ -390,10 +389,21 @@
   padding: 0 2px 4px;
 }
 .ab-figtitle {
-  font-size: 14.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: var(--ab-text);
+}
+/* a dot in the accent colour before a plot's title */
+.ab-figtitle::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ab-accent);
 }
 /* Below each plot: the legend, centred and quiet, as a caption. */
 .ab-figlegend {

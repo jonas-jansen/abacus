@@ -22,7 +22,8 @@ html {
 }
 body {
   margin: 0;
-  background: var(--page);
+  /* a soft tint of the accent at the top, fading into the page colour */
+  background: var(--page) linear-gradient(180deg, color-mix(in srgb, var(--ab-accent) 7%, var(--page)) 0, var(--page) 420px) no-repeat;
   color: var(--ab-text);
 }
 a {
@@ -463,9 +464,18 @@ h1 {
 
 /* ------------------------------------------------------------------ prose */
 
-/* the sections of a course page (rehype-abschnitte.mjs): no box of their own by default */
+/* The sections of a course page (rehype-abschnitte.mjs): each a card of its own, with a
+   "Schritt n" badge before its title. */
 .abschnitt {
-  display: contents;
+  display: block;
+  margin: 0 0 22px;
+  padding: 24px 28px 12px;
+  background: var(--ab-bg);
+  border-radius: var(--ab-radius);
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 32px -16px rgb(16 24 40 / 0.14);
+}
+.abschnitt > h2:first-child {
+  margin-top: 0;
 }
 
 .prose {
@@ -691,4 +701,68 @@ details.box[open] > summary::after {
   color: var(--abacus-secondary);
   font-size: 0.72rem;
   font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ course: sections and boxes */
+
+.prose h2 {
+  font-size: 1.3rem;
+}
+.prose h2::before {
+  content: 'Schritt ' counter(schritt);
+  width: auto;
+  height: auto;
+  padding: 3px 10px;
+  border-radius: var(--ab-radius);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+/* boxes by their kind: colour instead of frames */
+.box,
+.aufgabe,
+.qz {
+  border: 0;
+  border-radius: var(--ab-radius);
+}
+.aufgabe {
+  background: color-mix(in srgb, var(--ab-accent) 6%, var(--ab-bg));
+  box-shadow: inset 0 3px 0 var(--ab-accent);
+}
+.aufgabe .qz {
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--ab-radius);
+  background: var(--ab-bg);
+}
+.qz {
+  background: var(--ab-panel);
+}
+.box-def {
+  background: color-mix(in srgb, var(--abacus-tertiary) 9%, var(--ab-bg));
+}
+.box-claim {
+  background: color-mix(in srgb, var(--ab-accent) 8%, var(--ab-bg));
+}
+.box-lie {
+  background: color-mix(in srgb, var(--abacus-secondary) 10%, var(--ab-bg));
+}
+.box-later {
+  background: var(--ab-panel);
+  border: 1px dashed var(--ab-line-strong);
+}
+.box-proof {
+  background: var(--ab-panel);
+}
+.box-def .box-label {
+  color: var(--abacus-tertiary);
+}
+.box-claim .box-label {
+  color: var(--ab-accent);
+}
+.box-lie .box-label {
+  color: var(--abacus-secondary);
+}
+.card {
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 30px -18px rgb(16 24 40 / 0.2);
 }

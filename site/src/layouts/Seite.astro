@@ -2,7 +2,6 @@
 import '@abacus/applet-ui/styles.css'
 import '@abacus/quiz/styles.css'
 import '../styles/site.css'
-import '../styles/stile.css'
 import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT } from '@abacus/applet-ui/settings'
 import { kurs, url } from '../config'
 
@@ -26,15 +25,6 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
     {kurz && <meta name="description" content={kurz} />}
     {ungelistet && <meta name="robots" content="noindex" />}
     <script is:inline set:html={EINSTELLUNGEN_SCRIPT} />
-    <script is:inline>
-      // style variants to compare (styles/stile.css): ?stil=a|b|c, remembered; ?stil= resets
-      try {
-        var q = new URLSearchParams(location.search).get('stil')
-        if (q !== null) q ? localStorage.setItem('abacus:stil', q) : localStorage.removeItem('abacus:stil')
-        var st = localStorage.getItem('abacus:stil')
-        if (st) document.documentElement.dataset.stil = st
-      } catch (e) {}
-    </script>
   </head>
   <body>
     <header class="topbar">
@@ -66,20 +56,6 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
               <input type="checkbox" role="switch" data-einstellung={name} checked />
             </label>
           ))}
-          {
-            import.meta.env.DEV && (
-              <div class="settings-row" style="display:block">
-                <span class="settings-label">Stil (Vorschau)</span>
-                <div class="stil-wahl" role="group" aria-label="Stil">
-                  {[['', 'jetzt'], ['a', 'A klar'], ['b', 'B ruhig'], ['c', 'C lebendig']].map(([v, t]) => (
-                    <button type="button" data-stil-wahl={v}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )
-          }
           <p class="settings-foot">Für den Unterricht mit Beamer: beide aus. Gilt für diesen Browser.</p>
         </div>
       </div>
@@ -94,21 +70,6 @@ const { titel, kurz, breite = 'breit', aktiv, ungelistet = false } = Astro.props
         box.checked = einstellung(name) !== 'aus'
         box.addEventListener('change', () => setEinstellung(name, box.checked ? 'an' : 'aus'))
       }
-      // dev: the style variants
-      const stilKnoepfe = document.querySelectorAll<HTMLButtonElement>('[data-stil-wahl]')
-      const zeigeStil = () => stilKnoepfe.forEach((b) => b.setAttribute('aria-pressed', String((document.documentElement.dataset.stil ?? '') === b.dataset.stilWahl)))
-      stilKnoepfe.forEach((b) =>
-        b.addEventListener('click', () => {
-          const v = b.dataset.stilWahl ?? ''
-          if (v) document.documentElement.dataset.stil = v
-          else delete document.documentElement.dataset.stil
-          try {
-            v ? localStorage.setItem('abacus:stil', v) : localStorage.removeItem('abacus:stil')
-          } catch {}
-          zeigeStil()
-        }),
-      )
-      zeigeStil()
     </script>
   </body>
 </html>
