@@ -55,18 +55,38 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
     nodes.push(mathText(labels.y, { x: plot.x + 9, y: yLabelY, 'text-anchor': 'start', class: 'abacus-axis-label' }))
   }
   if (labels.x) {
-    nodes.push(mathText(labels.x, { x: tipX + 5, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-axis-label' }))
+    // just above the axis at its tip, so the power-of-ten badge below the axis stays clear
+    nodes.push(mathText(labels.x, { x: tipX + 2, y: bottom - 6, 'text-anchor': 'start', class: 'abacus-axis-label' }))
   }
-  // A power of ten that scales all numbers of an axis stands with those numbers: on top of the
-  // y numbers, and after the last x number – where one reads them, not beside the label.
-  const factor = (e: number) => `\\cdot 10^{${e}}`
-  if (frame.yExp) {
-    nodes.push(mathText(factor(frame.yExp), { x: plot.x - TICK - 4, y: yLabelY, 'text-anchor': 'end', class: 'abacus-factor' }))
+  // A power of ten that scales all numbers of an axis stands with those numbers – above the
+  // y numbers, after the last x number – as a small badge "× 10⁴": a note about the whole axis.
+  const badge = (e: number, x: number, mitte: number, anchor: 'start' | 'end') => {
+    // in the tick numbers' font: "×10" and the exponent raised
+    const exp = String(e).replace('-', '−')
+    const w = estimateTextWidth('×10', fontSize) + estimateTextWidth(exp, fontSize * 0.75) + 12
+    const h = fontSize + 7
+    const left = anchor === 'start' ? x : x - w
+    nodes.push({
+      tag: 'g',
+      attrs: { class: 'abacus-factor' },
+      children: [
+        { tag: 'rect', attrs: { x: left, y: mitte - h / 2, width: w, height: h, rx: 5, class: 'abacus-factor-bg' } },
+        {
+          tag: 'text',
+          attrs: { x: left + w / 2, y: mitte + fontSize * 0.36, 'text-anchor': 'middle', class: 'abacus-factor-text' },
+          children: [
+            { tag: 'tspan', attrs: {}, text: '×10' },
+            { tag: 'tspan', attrs: { dy: '-0.45em', 'font-size': '75%' }, text: exp },
+          ],
+        },
+      ],
+    })
   }
+  if (frame.yExp) badge(frame.yExp, plot.x - TICK - 2, tipY + 2, 'end')
   if (frame.xExp && frame.xTicks.length) {
     const i = frame.xTicks.length - 1
     const rechts = X(frame.xTicks[i]) + estimateTextWidth(frame.xTickLabels[i], fontSize) / 2
-    nodes.push(mathText(factor(frame.xExp), { x: rechts + 6, y: bottom + TICK + 3 + fontSize * 0.82, 'text-anchor': 'start', class: 'abacus-factor' }))
+    badge(frame.xExp, rechts + 6, bottom + TICK + 3 + fontSize * 0.5, 'start')
   }
 
   return { tag: 'g', attrs: { 'font-size': fontSize }, children: nodes }

@@ -551,10 +551,15 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .abacus-axis-arrow {
   fill: var(--abacus-axis);
 }
-/* the power of ten that scales an axis' numbers: with them, and noticeably darker */
-.abacus-factor {
+/* the power of ten that scales an axis' numbers: a small badge with them */
+.abacus-factor-bg {
+  fill: var(--ab-panel);
+  stroke: var(--ab-line-strong);
+  stroke-width: 1;
+}
+.abacus-factor-text {
   fill: var(--ab-text);
-  font-size: 1.08em;
+  font-size: 1.05em;
   font-weight: 600;
 }
 .abacus-tick {

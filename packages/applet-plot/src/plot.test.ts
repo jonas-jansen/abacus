@@ -48,12 +48,13 @@ describe('plots', () => {
 })
 
 describe('axis factor', () => {
-  it('scaled tick labels come with ·10^k beside the axis label', async () => {
+  it('scaled tick labels come with a ×10^k badge above the numbers', async () => {
     const { makeFrame } = await import('@abacus/applet-core')
     const { axesNode, svgToString } = await import('./index')
     const svg = svgToString(axesNode(makeFrame({ width: 500, height: 300, x: [0, 80], y: [0, 100_000], yLabel: 'x' }), { y: 'x' }))
-    expect(svg).toContain('·')
-    expect(svg).not.toContain('cdot')
+    expect(svg).toMatch(/class="abacus-factor-bg"/)
+    expect(svg).toMatch(/×10<\/tspan><tspan[^>]*>5</)
+    expect(svg).not.toContain('times')
   })
 })
 

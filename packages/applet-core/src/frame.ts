@@ -64,8 +64,8 @@ export const estimateTextWidth = (text: string, fontSize: number) => text.length
 export const labelWidth = (tex: string, fontSize: number) =>
   estimateTextWidth(tex.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}_^]/g, ''), fontSize * 1.15)
 
-/** The ·10^k factor beside an axis label. */
-export const FACTOR_WIDTH = (fontSize: number) => estimateTextWidth('·10−00', fontSize)
+/** The ×10^k badge of an axis: text and its padding. */
+export const FACTOR_WIDTH = (fontSize: number) => estimateTextWidth('×10−00', fontSize) + 12
 
 /** Ticks on a 1–2–5 ladder, at most about `maxCount` of them. */
 export function niceTicks(lo: number, hi: number, maxCount: number, integer = false): { ticks: number[]; step: number } {
