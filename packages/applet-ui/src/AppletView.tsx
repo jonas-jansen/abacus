@@ -310,6 +310,8 @@ export function AppletView<P extends Params>({ def, zustand, gesperrt = false, s
                       <path d="M10 4l3.5 3.5L10 11M13 7.5H6.5a3.5 3.5 0 0 0 0 7H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
+                </span>
+                <span className="ab-aktionen" role="group" aria-label="Werkzeuge">
                   <button
                     type="button"
                     className="ab-tool"
@@ -568,30 +570,94 @@ const Glyph = {
   fwd: <path d="M5.5 3.5 10.5 8l-5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />,
 }
 
-/** Playback tempi, cycled by the button in the timeline; the choice is kept for the visit. */
+/**
+ * Playback tempo. A click on the button cycles ½× · 1× · 2× · 4×; dragging it sideways or the
+ * mouse wheel over it sets any tempo from 0,1× to 10× (the same gesture as for numbers in the
+ * panel) – there for those who look for it, out of the way for the rest. Kept for the visit.
+ */
 const TEMPI = [0.5, 1, 2, 4] as const
-type Tempo = (typeof TEMPI)[number]
-const tempoText = (t: Tempo) => (t === 0.5 ? '½×' : `${t}×`)
+const TEMPO_MIN = 0.1
+const TEMPO_MAX = 10
+const tempoText = (t: number) => (t === 0.5 ? '½×' : `${formatNumber(t, 2)}×`)
+/** Tempi on a log scale, rounded to two figures (0,1 · 0,13 · … · 1 · 1,2 · … · 10). */
+const tempoRund = (t: number) => Number(Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, t)).toPrecision(2))
 
-function useTempo(): [Tempo, (t: Tempo) => void] {
-  const [tempo, setTempo] = useState<Tempo>(1)
+function useTempo(): [number, (t: number) => void] {
+  const [tempo, setTempo] = useState(1)
   useEffect(() => {
     try {
       const t = Number(sessionStorage.getItem('abacus:tempo'))
-      if ((TEMPI as readonly number[]).includes(t)) setTempo(t as Tempo)
+      if (t >= TEMPO_MIN && t <= TEMPO_MAX) setTempo(t)
     } catch {
       // no storage: 1×
     }
   }, [])
-  const set = (t: Tempo) => {
-    setTempo(t)
+  const set = (t: number) => {
+    const r = tempoRund(t)
+    setTempo(r)
     try {
-      sessionStorage.setItem('abacus:tempo', String(t))
+      sessionStorage.setItem('abacus:tempo', String(r))
     } catch {
       // no storage: only this applet
     }
   }
   return [tempo, set]
+}
+
+/** The tempo button: click cycles the presets, drag sideways or wheel sets it finely. */
+function TempoKnopf({ tempo, onTempo }: { tempo: number; onTempo: (t: number) => void }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  const drag = useRef<{ x: number; t: number; moved: boolean } | null>(null)
+  // the wheel needs a non-passive listener to keep the page from scrolling
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault()
+      onTempo(tempo * 2 ** (-e.deltaY / 500))
+    }
+    el.addEventListener('wheel', wheel, { passive: false })
+    return () => el.removeEventListener('wheel', wheel)
+  })
+  const next = () => onTempo(TEMPI.find((t) => t > tempo + 1e-9) ?? TEMPI[0])
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className="ab-tempo"
+      data-scrub={drag.current?.moved ? 'active' : undefined}
+      onPointerDown={(e) => {
+        if (e.button !== 0) return
+        e.currentTarget.setPointerCapture(e.pointerId)
+        drag.current = { x: e.clientX, t: tempo, moved: false }
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current
+        if (!d) return
+        const dx = e.clientX - d.x
+        if (!d.moved && Math.abs(dx) < 3) return
+        d.moved = true
+        // 60 px to the right doubles the tempo
+        onTempo(d.t * 2 ** (dx / 60))
+      }}
+      onPointerUp={(e) => {
+        const d = drag.current
+        drag.current = null
+        e.currentTarget.releasePointerCapture(e.pointerId)
+        if (d && !d.moved) next()
+      }}
+      onKeyDown={(e) => {
+        // keyboard: Enter/Space cycle (as a click), arrows fine-tune
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') (e.preventDefault(), onTempo(tempo * 1.25))
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') (e.preventDefault(), onTempo(tempo / 1.25))
+        if (e.key === 'Enter' || e.key === ' ') (e.preventDefault(), next())
+      }}
+      aria-label={`Tempo ${tempoText(tempo)}`}
+      data-tip={'Klick | ½× · 1× · 2× · 4×\n{Ziehen} | stufenlos 0,1× bis 10×\n{Rad} | ebenso'}
+    >
+      {tempoText(tempo)}
+    </button>
+  )
 }
 
 /**
@@ -698,15 +764,7 @@ export function Timeline({
           {Glyph.fwd}
         </svg>
       </button>
-      <button
-        type="button"
-        className="ab-tempo"
-        onClick={() => setTempo(TEMPI[(TEMPI.indexOf(tempo) + 1) % TEMPI.length])}
-        aria-label={`Tempo ${tempoText(tempo)}, ändern`}
-        data-tip="Tempo: ½× · 1× · 2× · 4×"
-      >
-        {tempoText(tempo)}
-      </button>
+      <TempoKnopf tempo={tempo} onTempo={setTempo} />
       <output className="ab-timeline-n" aria-live="off">
         <span>
           {sym} = {show(k)}

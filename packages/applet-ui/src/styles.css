@@ -246,14 +246,34 @@
   color: var(--ab-muted);
 }
 
+/* The tools of the panel as two small toolbars: history (undo, redo) and actions (compare,
+   link, reset) – icons in equal cells, a fine frame around each group. */
 .ab-head-tools {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-}
-.ab-undo {
-  display: inline-flex;
+  gap: 8px;
   margin: -6px 0;
+}
+.ab-undo,
+.ab-aktionen {
+  display: inline-flex;
+  border: 1px solid var(--ab-line);
+  border-radius: var(--ab-radius);
+  background: var(--ab-bg);
+  overflow: hidden;
+}
+.ab-head-tools .ab-tool {
+  width: 30px;
+  height: 28px;
+  border-radius: 0;
+  color: var(--ab-muted);
+}
+.ab-head-tools .ab-tool + .ab-tool {
+  border-left: 1px solid var(--ab-line);
+}
+.ab-head-tools .ab-tool:hover:not(:disabled) {
+  background: var(--ab-hover);
+  color: var(--ab-text);
 }
 .ab-undo .ab-tool:disabled {
   opacity: 0.3;
@@ -307,7 +327,7 @@
 .ab-locked p {
   margin: 0;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
 }
 
@@ -434,7 +454,7 @@ button.ab-legend-item {
   height: 26px;
   padding: 0 8px 0 6px;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--ab-radius);
   background: transparent;
   transition: background 0.12s, opacity 0.12s;
 }
@@ -445,7 +465,7 @@ button.ab-legend-item {
   height: 26px;
   padding: 0 10px 0 8px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-panel);
   color: var(--ab-muted) !important;
   font-size: 12.5px !important;
@@ -487,6 +507,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 }
 .ab-axis-switch {
   position: relative;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -503,7 +524,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   height: 22px;
   padding: 0 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--ab-radius);
   background: transparent;
   color: var(--ab-muted) !important;
   font-size: 12px !important;
@@ -653,7 +674,7 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   z-index: 1;
   transform: translate(12px, calc(-100% - 6px));
   padding: 0 4px;
-  border-radius: 5px;
+  border-radius: var(--ab-radius);
   background: color-mix(in srgb, var(--ab-bg) 80%, transparent);
   color: var(--abacus-secondary);
   font-size: 13px;
@@ -842,11 +863,14 @@ html[data-werte='aus'] .ab-probe-step {
 
 /* The tempo of playback: a small text button in the timeline, ½× · 1× · 2× · 4× */
 .ab-tempo {
-  min-width: 34px;
+  min-width: 38px;
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--ab-line);
   border-radius: var(--ab-radius);
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
   background: var(--ab-bg);
   color: var(--ab-muted);
   font: 600 12px var(--ab-font);
@@ -1121,7 +1145,7 @@ html[data-werte='aus'] .ab-probe-step {
   width: 88px;
   height: 34px;
   padding: 3px;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   box-shadow: inset 0 0 0 1px var(--ab-line-strong);
 }
@@ -1131,7 +1155,7 @@ html[data-werte='aus'] .ab-probe-step {
   left: 3px;
   width: calc(50% - 3px);
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-accent);
   box-shadow: 0 1px 3px rgb(16 24 40 / 0.25);
   transition: transform 0.18s ease;
@@ -1294,7 +1318,7 @@ html[data-werte='aus'] .ab-probe-step {
   height: 24px;
   margin: 0 0 0 2px;
   padding: 0 6px;
-  border-radius: 6px;
+  border-radius: var(--ab-radius);
   background: var(--ab-accent-soft);
   color: var(--ab-accent);
   font-size: 13px;
@@ -1382,7 +1406,7 @@ html[data-werte='aus'] .ab-probe-step {
   height: 26px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--ab-radius);
   background: transparent;
   color: var(--ab-faint);
 }
@@ -1412,7 +1436,7 @@ html[data-werte='aus'] .ab-probe-step {
   padding: 0 6px;
   margin-right: -6px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--ab-radius);
   background: transparent;
   color: var(--ab-text);
   cursor: text;
@@ -1611,7 +1635,7 @@ html[data-hinweise='aus'] .ab-hint {
 .ab-choice label {
   flex: 1 1 auto;
   padding: 4px 10px;
-  border-radius: 7px;
+  border-radius: var(--ab-radius);
   text-align: center;
   white-space: nowrap;
   font-size: 13px;
@@ -1753,7 +1777,7 @@ html[data-hinweise='aus'] .ab-hint {
 }
 .ab-chip {
   padding: 2px 8px;
-  border-radius: 7px;
+  border-radius: var(--ab-radius);
   background: var(--ab-panel);
   font-size: 13.5px;
   font-weight: 600;

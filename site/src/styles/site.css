@@ -267,7 +267,7 @@ h1 {
 }
 .chapter-nav a {
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   box-shadow: inset 0 0 0 1px var(--ab-line);
   color: var(--ab-text);
@@ -415,7 +415,7 @@ h1 {
 .chip {
   padding: 5px 12px;
   border: 1px solid var(--ab-line-strong);
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: var(--ab-bg);
   font-size: 0.88rem;
   text-decoration: none;
@@ -686,7 +686,7 @@ details.box[open] > summary::after {
 .nicht-gelistet {
   align-self: flex-start;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--ab-radius);
   background: color-mix(in srgb, var(--abacus-secondary) 14%, transparent);
   color: var(--abacus-secondary);
   font-size: 0.72rem;

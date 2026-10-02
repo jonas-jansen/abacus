@@ -13,13 +13,21 @@ const LOG_HILFE =
  * The row above a plot: its title and, where offered, the lin/log switch – nothing else, so it
  * reads at a glance. Every figure has it, so figures side by side keep their plots level.
  */
-export function FigureHead({
-  title,
-  log,
-}: {
-  title?: string
-  log?: { on: boolean; set: (on: boolean) => void; hilfe?: string }
-}) {
+export function FigureHead({ title }: { title?: string }) {
+  if (!title) return null
+  return (
+    <div className="ab-fighead">
+      <span className="ab-figtitle">{title}</span>
+    </div>
+  )
+}
+
+/**
+ * The switch between a linear and a logarithmic y axis, with its "?" explanation. It has a
+ * fixed place: above the plot's right edge, in the row of the y label – the same in every
+ * plot, title or not.
+ */
+export function AxisSwitch({ log, style }: { log: { on: boolean; set: (on: boolean) => void; hilfe?: string }; style?: CSSProperties }) {
   const [help, setHelp] = useState(false)
   const helpRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -36,34 +44,27 @@ export function FigureHead({
     }
   }, [help])
 
-  // nothing to say above the plot: no empty row (plots side by side stay level at the bottom)
-  if (!title && !log) return null
   return (
-    <div className="ab-fighead">
-      {title && <span className="ab-figtitle">{title}</span>}
-      {log && (
-        <div className="ab-axis-switch" ref={helpRef}>
-          <div className="ab-seg" role="group" aria-label="y-Achse">
-            <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
-              linear
-            </button>
-            <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
-              log
-            </button>
-          </div>
-          <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
-            ?
-          </button>
-          {help && (
-            <div className="ab-help" role="note">
-              <strong>Logarithmische Achse</strong>
-              <p>{LOG_HILFE}</p>
-              {log.hilfe && (
-                <p>
-                  <MathLabel text={log.hilfe} />
-                </p>
-              )}
-            </div>
+    <div className="ab-axis-switch" ref={helpRef} style={style}>
+      <div className="ab-seg" role="group" aria-label="y-Achse">
+        <button type="button" aria-pressed={!log.on} onClick={() => log.set(false)} data-tip="lineare Achse">
+          linear
+        </button>
+        <button type="button" aria-pressed={log.on} onClick={() => log.set(true)} data-tip="logarithmische Achse">
+          log
+        </button>
+      </div>
+      <button type="button" className="ab-help-btn" aria-expanded={help} aria-label="Was ist eine logarithmische Achse?" onClick={() => setHelp(!help)}>
+        ?
+      </button>
+      {help && (
+        <div className="ab-help" role="note">
+          <strong>Logarithmische Achse</strong>
+          <p>{LOG_HILFE}</p>
+          {log.hilfe && (
+            <p>
+              <MathLabel text={log.hilfe} />
+            </p>
           )}
         </div>
       )}

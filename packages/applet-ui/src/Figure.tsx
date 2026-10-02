@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { AXIS_OVERHANG, clamp, formatNumber, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
+import { AXIS_OVERHANG, clamp, formatNumber, labelWidth, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
 import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
-import { FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
+import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
 import { useZoomPan } from './useZoomPan'
 import { magnification as magnificationOf, type Win } from './zoom'
@@ -213,6 +213,17 @@ export function Figure<P extends Params>({
     return { label: spec.zLabel ?? g.label, lo, hi }
   }, [spec, run])
   const { plot } = frame
+  // The row above the plot, on the line of the y label (its middle is the arrow tip): the
+  // lin/log switch ends at the plot's right edge; the plot's actions are centred above the x
+  // label at the right arrow tip. Both are placed the same in every plot, title or not.
+  const kopfzeile = plot.y - AXIS_OVERHANG
+  const nAktionen = (zoom ? 1 : 0) + (bahnen?.length ? 1 : 0)
+  const aktionenBreite = nAktionen * 24 + Math.max(0, nAktionen - 1) * 6 + (bahnen?.length ? 12 : 0)
+  const xLabelMitte = plot.x + plot.w + AXIS_OVERHANG + 2 + labelWidth(spec.xLabel ?? '', frame.fontSize) / 2
+  const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
+  // the switch moves left if the actions would reach it
+  const switchRechts = Math.max(figW - plot.x - plot.w, nAktionen ? figW - aktionenLinks + 8 : 0)
+
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
 
   const pointer = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -297,7 +308,7 @@ export function Figure<P extends Params>({
 
   return (
     <figure className="ab-figure" ref={outer} data-spot={markGeom.length > 0 || undefined}>
-      <FigureHead title={spec.title} log={entry.logToggle ? { on: logY, set: setLogY, hilfe: entry.logHilfe } : undefined} />
+      <FigureHead title={spec.title} />
       <div
         className="ab-figure-inner"
         role="img"
@@ -377,12 +388,13 @@ export function Figure<P extends Params>({
             ))}
           </div>
         )}
+        {entry.logToggle && (
+          <AxisSwitch log={{ on: logY, set: setLogY, hilfe: entry.logHilfe }} style={{ position: 'absolute', top: kopfzeile - 13, right: switchRechts }} />
+        )}
         <FigureActions
           zoomReset={zoom ? () => setZoom(null) : undefined}
           bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
-          // above the plot's right edge, centred on the line of the y label (whose middle is
-          // the arrow tip, AXIS_OVERHANG above the plot); the icons are 24 px high
-          style={{ top: Math.max(0, plot.y - AXIS_OVERHANG - 12), right: figW - plot.x - plot.w }}
+          style={{ top: kopfzeile - 12, left: aktionenLinks }}
         />
       </div>
       <FigureLegend
