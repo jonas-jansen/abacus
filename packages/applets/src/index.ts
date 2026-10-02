@@ -1,6 +1,6 @@
 /**
  * Registry of all applets: the code (the modules below) joined with the catalog
- * (../applets.json: title, description, chapter, slides, listed or not – one line per applet,
+ * (../applets.json: title, description, chapter, slides, listed or not – one entry per applet,
  * edited by hand). `pnpm new-applet <id>` adds both. The catalog's order is the order in the
  * overview, within each chapter.
  */

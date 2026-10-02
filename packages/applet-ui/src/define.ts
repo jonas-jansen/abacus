@@ -119,7 +119,7 @@ export interface Szenario<P = Params> {
 
 export type AnyAppletDef = AppletDef<any>
 
-/** The catalog fields: they live in packages/applets/applets.json, one line per applet. */
+/** The catalog fields: they live in packages/applets/applets.json, one entry per applet. */
 export type KatalogFeld = 'titel' | 'kurz' | 'kapitel' | 'folien' | 'sichtbar'
 
 /**

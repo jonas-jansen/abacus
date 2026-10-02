@@ -159,9 +159,9 @@ writeFileSync(
 
 // the catalog line: title, description, chapter, slides – and not listed until switched on
 const katalogFile = join(root, 'packages/applets/applets.json')
-const katalog = readFileSync(katalogFile, 'utf8')
-const zeile = `    ${JSON.stringify({ id, sichtbar: false, kapitel: 'I', folien: '', titel: 'TODO Titel', kurz: 'TODO ein Satz, was man hier sieht.' }).replace(/","/g, '", "').replace(/":/g, '": ').replace(/,"/g, ', "')}`
-writeFileSync(katalogFile, katalog.replace(/\n  \]\n\}\s*$/, `,\n${zeile}\n  ]\n}\n`))
+const katalog = JSON.parse(readFileSync(katalogFile, 'utf8'))
+katalog.applets.push({ id, sichtbar: false, kapitel: 'I', folien: '', titel: 'TODO Titel', kurz: 'TODO ein Satz, was man hier sieht.' })
+writeFileSync(katalogFile, JSON.stringify(katalog, null, 2) + '\n')
 
 console.log(`✓ packages/applets/src/${id}.ts (${kind})`)
 console.log('✓ in packages/applets/src/index.ts registriert')

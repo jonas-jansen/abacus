@@ -52,10 +52,10 @@ For students, every applet offers undo/redo, "vergleichen" (hold a state, drawn 
 zoom and pan (curves continue past N and T), shareable links, scenario chips from the slides,
 and hint cards that can be switched off for teaching (settings in the top bar).
 
-**Which applets are listed:** `packages/applets/applets.json` – one line per applet with its
+**Which applets are listed:** `packages/applets/applets.json` – one entry per applet with its
 title, description, chapter and slides, and `"sichtbar": true | false`. An unlisted applet is
 not in the overview, but its address `/applet/<id>` keeps working (to share; search engines
-are asked to leave it out). The line order is the order in the overview. `pnpm dev` shows all
+are asked to leave it out). The order of the entries is the order in the overview. `pnpm dev` shows all
 applets, unlisted ones marked. New applets start unlisted.
 
 **A quiz:** add a `defineQuiz({...})` to a file in `packages/quizzes/src/`. Types: `vorhersage`,

@@ -38,7 +38,7 @@ export default defineApplet({
 })
 ```
 
-Register it in `packages/applets/src/index.ts`, and give it its line in the catalog
+Register it in `packages/applets/src/index.ts`, and give it its entry in the catalog
 `packages/applets/applets.json` (the scaffold does both):
 
 ```json
@@ -46,8 +46,8 @@ Register it in `packages/applets/src/index.ts`, and give it its line in the cata
 ```
 
 Title, description, chapter and slides live only there; `sichtbar` decides whether the
-overview lists it (its address works either way), and the line order is the order within a
-chapter. A missing or extra line fails with a message naming it.
+overview lists it (its address works either way), and the order of the entries is the order within a
+chapter. A missing or extra entry fails with a message naming it.
 
 ## Models
 
