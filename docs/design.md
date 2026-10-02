@@ -18,6 +18,12 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   aligned equations (`λ₁ = …`), not as rows of chips.
 - **Feedback without text.** The toolbar never shows words: a copied link turns its cell
   green with a check.
+- **Axes tell the truth.** Axes computed from the data are held while parameters change: kept
+  while the curve fits, moved at the same scale when it has left, grown in steps of two when it
+  no longer fits, never shrunk on their own. A larger start value shows as a shifted line, a
+  larger rate as a steeper one – never as a rescaled picture. "Ganzes Bild" (also a double
+  click), reset and the scenario chips fit the axes afresh; the button appears by itself when
+  the window has become much larger than the curve (`packages/applet-plot/src/hold.ts`).
 - **Nothing jumps.** Controls that appear (zoom reset, delete trajectories) do not move
   others; the lin/log switch stays in the title row of every plot.
 

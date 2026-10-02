@@ -126,7 +126,9 @@ Series carry `label` (TeX symbol) and `name` (what it is: legend shows "y₁ Beu
 stand for something derived; `also` lists further parameters it changes; `label` overrides
 its TeX label. Axes hold still while dragging, values snap to the slider's precision.
 
-**Zoom and pan** are automatic. Time does not run before its start, and a quantity that is
+**Axes hold** across parameter changes, so a change shows as a different curve, not a
+rescaled picture ([design.md](design.md#rules)); an axis set in the plot (`y: [0, 1]` or a
+function of the parameters) is used as it is. **Zoom and pan** are automatic. Time does not run before its start, and a quantity that is
 never negative gets no room below 0.
 
 ## Readouts

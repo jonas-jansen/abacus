@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { AXIS_OVERHANG, clamp, formatNumber, labelWidth, makeFrame, type Detail, type Mark, type Params, type Run, type Series } from '@abacus/applet-core'
-import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, isSquare, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
+import { AXIS_OVERHANG, clamp, formatNumber, labelWidth, makeFrame, type Detail, type Mark, type Params, type Range, type Run, type Series } from '@abacus/applet-core'
+import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, holdRange, isSquare, roomy, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
@@ -56,6 +56,8 @@ interface FigureProps<P extends Params> {
   onBahnenLoeschen?: () => void
   /** Recompute the model in more detail for a zoomed window (null: nothing to add). */
   onDetail?: (d: Detail) => Run | null
+  /** Changes when the axes should fit the data afresh (reset, a scenario). */
+  viewEpoch?: number
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -90,6 +92,7 @@ export function Figure<P extends Params>({
   onBahn,
   onBahnenLoeschen,
   onDetail,
+  viewEpoch,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -143,8 +146,26 @@ export function Figure<P extends Params>({
   // A square plot (phase plane, complex plane, cobweb) in a wider box: rather than stretch it,
   // show more of the x axis, so a unit is as long as in the square and circles stay round.
   // A range that starts at 0 (a quantity never negative) grows to the right only.
+  // Axes computed from the data are held across parameter changes (holdRange): a new start
+  // value or rate shows as a different curve, not as a rescaled picture. Axes an applet sets
+  // itself, and time or parameter axes (which follow N, T or the range), are not held.
+  const held = useRef<{ key: string; x: Range | null; y: Range | null; roomy: boolean }>({ key: '', x: null, y: null, roomy: false })
+  const [refit, setRefit] = useState(0)
+  const heldKey = `${viewEpoch ?? 0}|${logY}|${refit}|${spec.type}`
   const full = useMemo(() => {
-    const d = plotDomains(spec, run)
+    const fit = plotDomains(spec, run)
+    const h = held.current
+    if (h.key !== heldKey) Object.assign(h, { key: heldKey, x: null, y: null })
+    const auto = (v: unknown) => v === undefined || v === 'auto'
+    const log = spec.yScale === 'log'
+    const holdY = auto(entry.y) && spec.type !== 'heatmap' && spec.type !== 'surface3d'
+    const holdX = auto(entry.x) && (spec.type === 'phasePlane' || spec.type === 'cobweb')
+    const y = holdY ? holdRange(h.y, fit.y, { log }) : fit.y
+    const x = holdX ? holdRange(h.x, fit.x) : fit.x
+    h.y = holdY ? y : null
+    h.x = holdX ? x : null
+    h.roomy = (holdY && roomy(y, fit.y, log)) || (holdX && roomy(x, fit.x))
+    const d = { ...fit, x, y }
     if (!square || figW <= figH + 1) return d
     const opts = { x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' }
     const sq = makeFrame({ ...opts, width: figH, height: figH }).plot
@@ -152,9 +173,9 @@ export function Figure<P extends Params>({
     const k = now.w / now.h / (sq.w / sq.h)
     if (!(k > 1.001)) return d
     const span = (d.x[1] - d.x[0]) * k
-    const x: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
-    return { ...d, x }
-  }, [spec, run, square, figW, figH])
+    const wide: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
+    return { ...d, x: wide }
+  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y])
   const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null
@@ -347,7 +368,11 @@ export function Figure<P extends Params>({
         onPointerCancel={zoomPan.end}
         onPointerLeave={leave}
         // in a phase portrait a double click would also add two trajectories; there the pill resets
-        onDoubleClick={() => !onBahn && setZoom(null)}
+        onDoubleClick={() => {
+          if (onBahn) return
+          setZoom(null)
+          setRefit((r) => r + 1)
+        }}
         data-tip={zoomable ? ZOOM_TIP + (onBahn ? '' : '\n{Doppelklick} | zurück zum ganzen Bild') : undefined}
         data-tip-at="pointer"
         style={{ width: figW, height: figH, cursor: onBahn ? 'crosshair' : undefined, touchAction: zoomable ? 'pan-x pan-y' : undefined }}
@@ -414,7 +439,14 @@ export function Figure<P extends Params>({
           </div>
         )}
         <FigureActions
-          zoomReset={zoom ? () => setZoom(null) : undefined}
+          zoomReset={
+            zoom || held.current.roomy
+              ? () => {
+                  setZoom(null)
+                  setRefit((r) => r + 1)
+                }
+              : undefined
+          }
           bahnen={onBahn ? { n: bahnen?.length ?? 0, loeschen: onBahnenLoeschen } : undefined}
           style={{ top: kopfzeile - 12, left: aktionenLinks }}
         />

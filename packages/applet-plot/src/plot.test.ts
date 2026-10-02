@@ -1,6 +1,6 @@
 import { defaultParams, iteration, makeFrame, real, int } from '@abacus/applet-core'
 import { describe, expect, it } from 'vitest'
-import { axesNode, drawPlot, panFloors, plotDomains, svgToString, SvgPathSurface, timeEnd, type PlotSpec } from './index'
+import { axesNode, drawPlot, holdRange, panFloors, roomy, plotDomains, svgToString, SvgPathSurface, timeEnd, type PlotSpec } from './index'
 
 const model = iteration({
   id: 'geo',
@@ -93,4 +93,29 @@ describe('zoom rules and drawing details', () => {
     const frame = makeFrame({ width: 400, height: 300, x: [0, 10], y: [0, 1], xLabel: 't', yLabel: 'x' })
     expect(svgToString(axesNode(frame, { x: 't', y: 'x' })).match(/abacus-axis-arrow/g)).toHaveLength(2)
   })
+})
+
+describe('held axes', () => {
+  it('keep the window while the data fits, so a new start value does not change the slope', () => {
+    expect(holdRange([0, 100], [0, 60])).toEqual([0, 100])
+    expect(holdRange([0, 100], [0, 99])).toEqual([0, 100])
+  })
+  it('move before they scale', () => {
+    expect(holdRange([-2, 2], [1, 4])).toEqual([0, 4])
+    expect(holdRange([-2, 2], [-5, -2])).toEqual([-5, -1])
+  })
+  it('grow in steps of two, keeping the side the data has not left, and keep 0 for quantities that are never negative', () => {
+    expect(holdRange([0, 100], [0, 130])).toEqual([0, 200])
+    expect(holdRange([0, 100], [0, 900])).toEqual([0, 800 * 2])
+    expect(holdRange([-2, 2], [-1, 9])).toEqual([-2, 14])
+  })
+  it('never shrink on their own, but say when a refit would help', () => {
+    expect(holdRange([0, 1000], [0, 10])).toEqual([0, 1000])
+    expect(roomy([0, 1000], [0, 10])).toBe(true)
+    expect(roomy([0, 100], [0, 40])).toBe(false)
+  })
+  it('on a log axis, work in powers of ten', () => {
+    expect(holdRange([1, 100], [10, 1000], { log: true })).toEqual([10, 1000])
+  })
+  it('start from the data', () => expect(holdRange(null, [3, 4])).toEqual([3, 4]))
 })

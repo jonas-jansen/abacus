@@ -35,7 +35,13 @@ interface Spot {
 }
 
 export function AppletView<P extends Params>({ def, initialState, startLocked = false, lockedText, showHeader = true, pageHref }: AppletViewProps<P>) {
-  const { params, setParams, reset, run, error } = useAppletState(def, initialState)
+  const { params, setParams, reset: resetParams, run, error } = useAppletState(def, initialState)
+  // reset and scenarios let the plots fit their axes afresh; other changes keep them (holdRange)
+  const [viewEpoch, setViewEpoch] = useState(0)
+  const reset = () => {
+    resetParams()
+    setViewEpoch((e) => e + 1)
+  }
   const history = useHistory(params, (p) => setParams(p))
 
   // Phase portrait: further trajectories, one per clicked start (the same model, another start).
@@ -276,6 +282,7 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                       onBahn={startParamOf(entry) ? (s) => setStarts((l) => [...l, s].slice(-MAX_BAHNEN)) : undefined}
                       onBahnenLoeschen={() => setStarts([])}
                       onDetail={detail}
+                      viewEpoch={viewEpoch}
                     />
                     ),
                   )}
@@ -360,7 +367,10 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                   const target: Record<string, unknown> = { ...defaultParams(def.model), ...s.params }
                   const active = Object.entries(target).every(([id, v]) => id === def.horizon || JSON.stringify(params[id]) === JSON.stringify(v))
                   return (
-                    <button key={s.label} type="button" className="ab-pill ab-szenario" aria-pressed={active} data-tip={s.text} onClick={() => setParams({ ...defaultParams(def.model), ...s.params })}>
+                    <button key={s.label} type="button" className="ab-pill ab-szenario" aria-pressed={active} data-tip={s.text} onClick={() => {
+                      setParams({ ...defaultParams(def.model), ...s.params })
+                      setViewEpoch((e) => e + 1)
+                    }}>
                       <MathLabel text={s.label} />
                     </button>
                   )
