@@ -1,6 +1,6 @@
 /** Bottom SVG layer (§5.2): grid, axes, ticks, tick labels, axis labels. */
 
-import { AXIS_OVERHANG, labelWidth, TICK, type Frame } from '@abacus/applet-core'
+import { AXIS_OVERHANG, estimateTextWidth, labelWidth, TICK, type Frame } from '@abacus/applet-core'
 import { mathText } from './mathText'
 import type { SvgNode } from './svg'
 
@@ -49,23 +49,24 @@ export function axesNode(frame: Frame, labels: { x?: string; y?: string } = {}):
     })
   })
 
-  // The variables at the arrow tips: y to the right of the upper tip, x under the right tip.
-  const factor = (e: number) => `\\cdot 10^{${e}}`
+  // The variables at the arrow tips: y to the right of the upper tip, x right of the right tip.
   const yLabelY = tipY + fontSize * 0.35
   if (labels.y) {
     nodes.push(mathText(labels.y, { x: plot.x + 9, y: yLabelY, 'text-anchor': 'start', class: 'abacus-axis-label' }))
   }
-  if (frame.yExp) {
-    const w = labelWidth(labels.y ?? '', fontSize)
-    nodes.push(mathText(factor(frame.yExp), { x: plot.x + 9 + w + 8, y: yLabelY, 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
-  }
-  const xLabelX = tipX + 5
   if (labels.x) {
-    nodes.push(mathText(labels.x, { x: xLabelX, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-axis-label' }))
+    nodes.push(mathText(labels.x, { x: tipX + 5, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-axis-label' }))
   }
-  if (frame.xExp) {
-    const w = labels.x ? labelWidth(labels.x, fontSize) + 6 : 0
-    nodes.push(mathText(factor(frame.xExp), { x: xLabelX + w, y: bottom, 'dominant-baseline': 'central', 'text-anchor': 'start', class: 'abacus-tick abacus-factor' }))
+  // A power of ten that scales all numbers of an axis stands with those numbers: on top of the
+  // y numbers, and after the last x number – where one reads them, not beside the label.
+  const factor = (e: number) => `\\cdot 10^{${e}}`
+  if (frame.yExp) {
+    nodes.push(mathText(factor(frame.yExp), { x: plot.x - TICK - 4, y: yLabelY, 'text-anchor': 'end', class: 'abacus-factor' }))
+  }
+  if (frame.xExp && frame.xTicks.length) {
+    const i = frame.xTicks.length - 1
+    const rechts = X(frame.xTicks[i]) + estimateTextWidth(frame.xTickLabels[i], fontSize) / 2
+    nodes.push(mathText(factor(frame.xExp), { x: rechts + 6, y: bottom + TICK + 3 + fontSize * 0.82, 'text-anchor': 'start', class: 'abacus-factor' }))
   }
 
   return { tag: 'g', attrs: { 'font-size': fontSize }, children: nodes }

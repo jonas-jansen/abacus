@@ -111,8 +111,11 @@ export function makeFrame(input: FrameInput): Frame {
   const xScaled = scaledLabels(xT.ticks, xT.step)
   const xTickLabels = xScaled.labels
   // the x variable (and its factor) sits right of the arrow tip
-  const tail = AXIS_OVERHANG + (input.xLabel ? 5 + labelWidth(input.xLabel, fontSize) : 4) + (xScaled.exp ? 6 + FACTOR_WIDTH(fontSize) : 0) + 2
-  const right = Math.ceil(Math.max(tail, estimateTextWidth('0,000', fontSize) / 2 + 2, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2 + 2)))
+  // right of the plot: the x variable after the arrow tip, and a factor after the last number
+  const tail = AXIS_OVERHANG + (input.xLabel ? 5 + labelWidth(input.xLabel, fontSize) : 4) + 2
+  const lastHalf = Math.max(0, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2))
+  const factorRoom = xScaled.exp ? lastHalf + 6 + FACTOR_WIDTH(fontSize) + 2 : 0
+  const right = Math.ceil(Math.max(tail, factorRoom, estimateTextWidth('0,000', fontSize) / 2 + 2, lastHalf + 2))
 
   const plot = {
     x: left,

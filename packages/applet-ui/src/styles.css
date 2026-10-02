@@ -551,6 +551,12 @@ button.ab-legend-item[aria-pressed='false'] .katex {
 .abacus-axis-arrow {
   fill: var(--abacus-axis);
 }
+/* the power of ten that scales an axis' numbers: with them, and noticeably darker */
+.abacus-factor {
+  fill: var(--ab-text);
+  font-size: 1.08em;
+  font-weight: 600;
+}
 .abacus-tick {
   fill: var(--abacus-tick);
   font-variant-numeric: tabular-nums;
