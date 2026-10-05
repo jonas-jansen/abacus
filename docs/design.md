@@ -31,6 +31,12 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   - A change of window glides in two steps – first the scale (about 0, or the edge nearest to
     it), then the position – about 0,85 s in all, so the change is seen.
   - A handle dragged past the edge stays at the edge until it is let go.
+- **Views you can retrace.** Every settled zoom or pan is remembered; "zurück zur vorigen
+  Ansicht" (next to "ganzes Bild") steps back, also from the whole picture to the last zoom.
+  Plots side by side over the same time axis share their x window: zoom one, the other follows.
+- **Phase planes:** small arrows along a trajectory show the direction of time; "frei | 1:1" in
+  the title row gives both axes the same unit length (circles stay circles), kept while zooming;
+  switching back fits the plot freely.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
   width allows (n = 0 … 20: every n); between them short ticks mark every n, or a fifth or half
   of the step, while they are at least 6 px apart.
@@ -115,6 +121,7 @@ The top bar's settings, kept per browser and applied before the first paint
 | Farben | Automatisch | Hell / Dunkel override the system; sets `<html data-theme>` |
 | Hinweise beim Zeigen | an | hint cards |
 | Werte am Mauszeiger | aus | value box and crosshair over plots |
+| Punkte von Folgen verbinden | an | off: sequences as points only (the cobweb keeps its lines) |
 | Achsen automatisch anpassen | aus | off: axes keep their scale (and still move into the data); a button at the top of the y axis, pulsing when the curve leaves the window, fits them with the same glide. On: they grow by themselves |
 
 ## Keyboard

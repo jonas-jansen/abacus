@@ -38,9 +38,14 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
   const { params, setParams, reset: resetParams, run, error } = useAppletState(def, initialState)
   // reset and scenarios let the plots fit their axes afresh; other changes keep them (holdRange)
   const [viewEpoch, setViewEpoch] = useState(0)
+  // plots over the same time axis share their x window (zoom one, the other follows)
+  const [sharedX, setSharedX] = useState<readonly [number, number] | null>(null)
+  const isTime = (e: PlotEntry<P>) => e.type === 'timeSeriesDiscrete' || e.type === 'timeSeriesContinuous'
+  const linkX = def.plots.filter(isTime).length >= 2
   const reset = () => {
     resetParams()
     setViewEpoch((e) => e + 1)
+    setSharedX(null)
   }
   const history = useHistory(params, (p) => setParams(p))
 
@@ -283,6 +288,7 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                       onBahnenLoeschen={() => setStarts([])}
                       onDetail={detail}
                       viewEpoch={viewEpoch}
+                      xLink={linkX && isTime(entry) ? { x: sharedX, set: setSharedX } : undefined}
                     />
                     ),
                   )}

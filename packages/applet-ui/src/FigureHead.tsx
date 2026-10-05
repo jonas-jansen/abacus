@@ -170,15 +170,18 @@ export function FigureLegend({
  * axis label: outside the data, and only there when they apply.
  */
 export function FigureActions({
+  zoomBack,
   zoomReset,
   bahnen,
   style,
 }: {
+  /** Back to the view before the last zoom or pan. */
+  zoomBack?: () => void
   zoomReset?: () => void
   bahnen?: { n: number; loeschen?: () => void }
   style?: CSSProperties
 }) {
-  if (!zoomReset && !(bahnen && bahnen.n > 0)) return null
+  if (!zoomBack && !zoomReset && !(bahnen && bahnen.n > 0)) return null
   return (
     <div className="ab-figactions" style={style}>
       {bahnen && bahnen.n > 0 && (
@@ -195,6 +198,13 @@ export function FigureActions({
           <span className="ab-figaction-n">{bahnen.n}</span>
         </button>
       )}
+      {zoomBack && (
+        <button type="button" className="ab-figaction" onClick={zoomBack} data-tip="zurück zur vorigen Ansicht" aria-label="zurück zur vorigen Ansicht">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+            <path d="M5.5 4 2.5 7l3 3M2.8 7h6.7a4 4 0 0 1 0 8H8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" transform="translate(0 -1.5)" />
+          </svg>
+        </button>
+      )}
       {zoomReset && (
         <button
           type="button"
@@ -208,6 +218,25 @@ export function FigureActions({
           </svg>
         </button>
       )}
+    </div>
+  )
+}
+
+/**
+ * Phase planes: free axes or one unit as long on both ("1:1", circles stay circles, angles
+ * stay angles). Zooming keeps whichever is chosen; switching fits the plot afresh.
+ */
+export function AspectSwitch({ equal, set }: { equal: boolean; set: (on: boolean) => void }) {
+  return (
+    <div className="ab-axis-switch">
+      <div className="ab-seg" role="group" aria-label="Achsenverhältnis">
+        <button type="button" aria-pressed={!equal} onClick={() => set(false)} data-tip="jede Achse so, dass die Bahn den Platz füllt">
+          frei
+        </button>
+        <button type="button" aria-pressed={equal} onClick={() => set(true)} data-tip="eine Einheit auf beiden Achsen gleich lang: Kreise bleiben Kreise, Winkel bleiben Winkel">
+          1:1
+        </button>
+      </div>
     </div>
   )
 }

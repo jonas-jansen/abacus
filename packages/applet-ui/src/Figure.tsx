@@ -7,7 +7,7 @@ import { TeX } from './TeX'
 import { cssColor, useFarbwechsel } from './cssColor'
 import { useSetting } from './useSetting'
 import { localPoint, scaleOf } from './scale'
-import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
+import { AspectSwitch, AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
 import { useZoomPan } from './useZoomPan'
 import { magnification as magnificationOf, type Win } from './zoom'
@@ -59,6 +59,11 @@ interface FigureProps<P extends Params> {
   onDetail?: (d: Detail) => Run | null
   /** Changes when the axes should fit the data afresh (reset, a scenario). */
   viewEpoch?: number
+  /**
+   * Plots side by side over the same time axis share their x window: zooming or panning one
+   * moves the other (each keeps its own y axis).
+   */
+  xLink?: { x: Range | null; set: (x: Range | null) => void }
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -76,7 +81,7 @@ export function Figure<P extends Params>({
   entry,
   params,
   run,
-  view,
+  view: viewProp,
   onParams,
   marks,
   probe = null,
@@ -94,6 +99,7 @@ export function Figure<P extends Params>({
   onBahnenLoeschen,
   onDetail,
   viewEpoch,
+  xLink,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -121,7 +127,12 @@ export function Figure<P extends Params>({
   }, [])
 
   const farbwechsel = useFarbwechsel()
+  // setting "Punkte von Folgen verbinden": off draws sequences as points only
+  const connect = useSetting('verbinden') !== 'aus'
+  const view = useMemo(() => ({ ...viewProp, connect }), [viewProp, connect])
   const [logY, setLogY] = useState(entry.yScale === 'log')
+  // phase planes: free axes, or equal units on both ("1:1")
+  const [equal, setEqual] = useState(false)
   const spec = useMemo(() => ({ ...resolveSpec(entry, params), yScale: logY ? 'log' : 'linear' }) as PlotSpec, [entry, params, logY])
   const square = isSquare(spec)
   // Every plot fills its box's width. Side by side, every figure is as high as it is wide, so
@@ -135,8 +146,50 @@ export function Figure<P extends Params>({
   const frozen = useRef<ReturnType<typeof plotDomains> | null>(null)
   const [dragging, setDragging] = useState(false)
   // Zoomed or panned: the student's own window, until reset.
-  const [zoom, setZoom] = useState<{ x: readonly [number, number]; y: readonly [number, number] } | null>(null)
+  const [zoom, setZoomState] = useState<Win | null>(null)
+  const setZoom = (z: Win | null) => {
+    setZoomState(z)
+    xLink?.set(z ? z.x : null)
+  }
   useEffect(() => setZoom(null), [logY])
+  // a linked plot zoomed or panned: take its x window, keep this plot's y
+  useEffect(() => {
+    if (!xLink) return
+    const x = xLink.x
+    setZoomState((z) => {
+      if (!x) return null
+      if (z && z.x[0] === x[0] && z.x[1] === x[1]) return z
+      return { x, y: z?.y ?? shown.current?.y ?? full.y }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [xLink?.x])
+  // Every settled view (zoom or pan, after a short rest) goes on a stack: "zurück" returns to
+  // the one before – also from the whole picture back to the last zoom.
+  const views = useRef<{ stack: (Win | null)[]; last: Win | null; skip: boolean }>({ stack: [], last: null, skip: false })
+  const [, setViewCount] = useState(0)
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const v = views.current
+      const same = (a: Win | null, b: Win | null) => (a === null || b === null ? a === b : a.x[0] === b.x[0] && a.x[1] === b.x[1] && a.y[0] === b.y[0] && a.y[1] === b.y[1])
+      if (same(zoom, v.last)) return
+      if (v.skip) v.skip = false
+      else v.stack.push(v.last)
+      v.last = zoom
+      setViewCount(v.stack.length)
+    }, 400)
+    return () => window.clearTimeout(id)
+  }, [zoom])
+  useEffect(() => {
+    views.current = { stack: [], last: null, skip: false }
+    setViewCount(0)
+  }, [logY])
+  const zoomBack = () => {
+    const v = views.current
+    if (!v.stack.length) return
+    v.skip = true
+    setZoom(v.stack.pop() ?? null)
+    setViewCount(v.stack.length)
+  }
   // Zoomed in: once the window has settled, the model is asked for more detail in it —
   // curves sampled in the window, diagrams recomputed for it — and that is what is drawn.
   const [settled, setSettled] = useState(zoom)
@@ -154,7 +207,7 @@ export function Figure<P extends Params>({
   // setting "Achsen automatisch anpassen": off keeps the scale; a button on the y axis refits
   const autoAxes = useSetting('achsen') !== 'aus'
   const [refit, setRefit] = useState(0)
-  const heldKey = `${viewEpoch ?? 0}|${logY}|${refit}|${spec.type}`
+  const heldKey = `${viewEpoch ?? 0}|${logY}|${refit}|${spec.type}|${equal}`
   const full = useMemo(() => {
     const fit = plotDomains(spec, run)
     const h = held.current
@@ -170,6 +223,18 @@ export function Figure<P extends Params>({
     h.roomy = (holdY && roomy(y, fit.y, log)) || (holdX && roomy(x, fit.x))
     h.overflow = (holdY && overflows(y, fit.y)) || (holdX && overflows(x, fit.x))
     const d = { ...fit, x, y }
+    if (equal && spec.type === 'phasePlane') {
+      // one unit as long on both axes: the axis with more room per unit shows more
+      let out = d
+      for (let pass = 0; pass < 2; pass++) {
+        const p = makeFrame({ width: figW, height: figH, x: out.x, y: out.y, xLabel: spec.xLabel, yLabel: spec.yLabel }).plot
+        const kx = p.w / (d.x[1] - d.x[0])
+        const ky = p.h / (d.y[1] - d.y[0])
+        const grow = (r: Range, span: number): [number, number] => (r[0] === 0 ? [0, span] : [(r[0] + r[1]) / 2 - span / 2, (r[0] + r[1]) / 2 + span / 2])
+        out = kx > ky ? { ...d, x: grow(d.x, p.w / ky) } : { ...d, y: grow(d.y, p.h / kx) }
+      }
+      return out
+    }
     if (!square || figW <= figH + 1) return d
     const opts = { x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' }
     const sq = makeFrame({ ...opts, width: figH, height: figH }).plot
@@ -179,7 +244,7 @@ export function Figure<P extends Params>({
     const span = (d.x[1] - d.x[0]) * k
     const wide: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
     return { ...d, x: wide }
-  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y, autoAxes])
+  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y, autoAxes, equal])
   const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null
@@ -273,7 +338,7 @@ export function Figure<P extends Params>({
       const surface = new CanvasSurface(ctx, color, cssColor(css, '--ab-bg', '#ffffff'))
       if (vergleich) {
         // the held state first, faint and complete (no timeline cut), then the current one
-        drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true })
+        drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true, connect: view.connect })
         surface.fade(1)
       }
       for (const b of bahnen ?? []) drawBahn(surface, frame, spec, b)
@@ -323,7 +388,9 @@ export function Figure<P extends Params>({
   // The plot's actions stand on the line of the y label (its middle is the arrow tip), centred
   // above the x label at the right arrow tip.
   const kopfzeile = plot.y - AXIS_OVERHANG
-  const nAktionen = (zoom ? 1 : 0) + (bahnen?.length ? 1 : 0)
+  const showReset = !!zoom || (autoAxes && held.current.roomy)
+  const showBack = views.current.stack.length > 0
+  const nAktionen = (showReset ? 1 : 0) + (showBack ? 1 : 0) + (bahnen?.length ? 1 : 0)
   const aktionenBreite = nAktionen * 24 + Math.max(0, nAktionen - 1) * 6 + (bahnen?.length ? 12 : 0)
   const xLabelMitte = plot.x + plot.w + AXIS_OVERHANG + 2 + labelWidth(spec.xLabel ?? '', frame.fontSize) / 2
   const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
@@ -414,7 +481,18 @@ export function Figure<P extends Params>({
 
   return (
     <figure className="ab-figure" ref={outer} data-spot={markGeom.length > 0 || undefined}>
-      <FigureHead title={spec.title}>{entry.logToggle && <AxisSwitch log={{ on: logY, set: setLogY, hilfe: entry.logHilfe }} />}</FigureHead>
+      <FigureHead title={spec.title}>
+        {entry.logToggle && <AxisSwitch log={{ on: logY, set: setLogY, hilfe: entry.logHilfe }} />}
+        {spec.type === 'phasePlane' && (
+          <AspectSwitch
+            equal={equal}
+            set={(on) => {
+              setEqual(on)
+              setZoom(null)
+            }}
+          />
+        )}
+      </FigureHead>
       <div
         className="ab-figure-inner"
         role="img"
@@ -516,8 +594,9 @@ export function Figure<P extends Params>({
           </button>
         )}
         <FigureActions
+          zoomBack={showBack ? zoomBack : undefined}
           zoomReset={
-            zoom || (autoAxes && held.current.roomy)
+            showReset
               ? () => {
                   setZoom(null)
                   setRefit((r) => r + 1)

@@ -83,6 +83,8 @@ export interface PlotView {
   focus?: string | null
   /** Drawing a held comparison: no fields or other background, only the data. */
   ghost?: boolean
+  /** Connect the points of sequences with a faint line (page setting; default true). */
+  connect?: boolean
 }
 
 /** The series a plot shows: those it selects, minus the ones switched off. */
@@ -294,6 +296,38 @@ export function visible(s: Series, view: PlotView): number {
 }
 
 /** Where the timeline stands: a larger dot at the last visible sample. */
+/**
+ * Small arrowheads along a trajectory in the direction of time, evenly spaced on screen
+ * (about every 150 px, at most 6), so a phase portrait shows which way it runs.
+ */
+function trajectoryArrows(s: Surface, frame: Frame, xs: ArrayLike<number>, ys: ArrayLike<number>, count: number, role: Series['role']) {
+  const SPACING = 150
+  let next = SPACING * 0.45
+  let walked = 0
+  let drawn = 0
+  let [px, py] = [frame.xScale(xs[0]), frame.yScale(ys[0])]
+  s.begin({ role, dash: [] })
+  for (let i = 1; i < count && drawn < 6; i++) {
+    const [qx, qy] = [frame.xScale(xs[i]), frame.yScale(ys[i])]
+    if (!Number.isFinite(qx) || !Number.isFinite(qy) || !Number.isFinite(px) || !Number.isFinite(py)) {
+      ;[px, py] = [qx, qy]
+      continue
+    }
+    const d = Math.hypot(qx - px, qy - py)
+    // only where the point is in view: arrows outside would float over the axes
+    const inside = qx >= 0 && qx <= frame.plot.w && qy >= 0 && qy <= frame.plot.h
+    if (d > 0 && walked + d >= next && inside) {
+      const [ux, uy] = [(qx - px) / d, (qy - py) / d]
+      s.polygon(Float64Array.of(qx + ux * 5, qy + uy * 5, qx - ux * 4 - uy * 4, qy - uy * 4 + ux * 4, qx - ux * 4 + uy * 4, qy - uy * 4 - ux * 4))
+      drawn++
+      next += SPACING
+    }
+    walked += d
+    ;[px, py] = [qx, qy]
+  }
+  s.end()
+}
+
 function head(s: Surface, frame: Frame, x: number, y: number, role: Series['role']) {
   const X = frame.xScale(x)
   const Y = frame.yScale(y)
@@ -526,17 +560,7 @@ export function drawBahn(s: Surface, frame: Frame, spec: PlotSpec, run: Run) {
     s.begin({ role: 'primary', width: 1.5, dash: [] })
     polyline(s, frame, sx.y, sy.y)
     s.end()
-    // an arrowhead a third of the way along
-    const k = Math.max(1, Math.floor(sx.y.length / 3))
-    const [ax, ay] = [frame.xScale(sx.y[k]), frame.yScale(sy.y[k])]
-    const [dx, dy] = [ax - frame.xScale(sx.y[k - 1]), ay - frame.yScale(sy.y[k - 1])]
-    const m = Math.hypot(dx, dy)
-    if (m > 1e-9 && Number.isFinite(ax) && Number.isFinite(ay)) {
-      const [ux, uy] = [dx / m, dy / m]
-      s.begin({ role: 'primary' })
-      s.polygon(Float64Array.of(ax + ux * 5, ay + uy * 5, ax - ux * 4 - uy * 4, ay - uy * 4 + ux * 4, ax - ux * 4 + uy * 4, ay - uy * 4 - ux * 4))
-      s.end()
-    }
+    trajectoryArrows(s, frame, sx.y, sy.y, sx.y.length, 'primary')
   }
   s.begin({ role: 'primary', marker: 'circle' })
   s.dot(frame.xScale(sx.y[0]), frame.yScale(sy.y[0]), 3)
@@ -698,7 +722,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
       for (const series of shown(run, spec.series, view)) {
         s.fade(dim(series, view))
         const count = visible(series, view)
-        drawDiscrete(s, frame, series, count, spec.connect ?? series.connect ?? true)
+        drawDiscrete(s, frame, series, count, (view.connect ?? true) && (spec.connect ?? series.connect ?? true))
         if (timed(view) && series.kind === 'discrete' && count <= frame.plot.w) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
       s.fade(base(view))
@@ -717,7 +741,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
           continue
         }
         if (series.kind === 'discrete') {
-          drawDiscrete(s, frame, series, visible(series, view), series.connect ?? true, series.role !== 'data')
+          drawDiscrete(s, frame, series, visible(series, view), (view.connect ?? true) && (series.connect ?? true), series.role !== 'data')
           continue
         }
         // reference lines and the faint family stay whole; the solution itself runs with the timeline
@@ -781,6 +805,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         s.begin({ role: 'primary' })
         polyline(s, frame, sx.y, sy.y, count)
         s.end()
+        if (!view.ghost) trajectoryArrows(s, frame, sx.y, sy.y, count, 'primary')
       }
       if (spec.start !== false) {
         s.begin({ role: 'secondary', marker: 'square' })
