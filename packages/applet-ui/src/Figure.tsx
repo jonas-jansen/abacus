@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { AXIS_OVERHANG, clamp, estimateTextWidth, formatNumber, labelWidth, makeFrame, TICK, type Detail, type Mark, type Params, type Range, type Run, type Series } from '@abacus/applet-core'
 import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, holdRange, isSquare, overflows, roomy, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
@@ -195,29 +195,49 @@ export function Figure<P extends Params>({
   const ghostRun = useMemo(() => (detailWanted && vergleichDetail ? vergleichDetail(detailWanted) : null), [detailWanted, vergleichDetail])
   const ghost = vergleich ? (ghostRun ?? vergleich.run) : null
 
-  // When the held window has to move or grow, the axes glide there (≈ 0,3 s) instead of
-  // jumping, so the change of scale is seen – and the curve moves with them.
+  // When the held window has to move or grow, the axes glide there instead of jumping, so the
+  // change of scale is seen – and the curve moves with them. Two steps, one after the other:
+  // first the scale changes about 0 (or about the window's edge nearest to 0), then the window
+  // moves; a step that is not needed is left out.
   const shown = useRef<{ x: Range; y: Range } | null>(null)
   const [tween, setTween] = useState<{ x: Range; y: Range } | null>(null)
-  useEffect(() => {
+  // a layout effect: the first step is set before the new window is ever painted
+  useLayoutEffect(() => {
     const from = shown.current
     const to = { x: full.x, y: full.y }
-    const same = (a: Range, b: Range) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) <= 1e-9 * (1 + Math.abs(b[1] - b[0]))
+    const close = (a: number, b: number, span: number) => Math.abs(a - b) <= 1e-9 * (1 + span)
+    const same = (a: Range, b: Range) => close(a[0], b[0], b[1] - b[0]) && close(a[1], b[1], b[1] - b[0])
     if (!from || zoom || dragging || (same(from.x, to.x) && same(from.y, to.y)) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       setTween(null)
       return
     }
     const log = spec.yScale === 'log'
-    const mix = (a: number, b: number, k: number, lg = false) => (lg && a > 0 && b > 0 ? 10 ** (Math.log10(a) + (Math.log10(b) - Math.log10(a)) * k) : a + (b - a) * k)
+    // work in log₁₀ on a log axis, so the steps are even there too
+    const enc = (r: Range, lg: boolean): Range => (lg && r[0] > 0 && r[1] > 0 ? [Math.log10(r[0]), Math.log10(r[1])] : r)
+    const dec = (r: Range, lg: boolean): Range => (lg ? [10 ** r[0], 10 ** r[1]] : r)
+    const plan = (a: Range, b: Range, lg: boolean) => {
+      const [f, t] = [enc(a, lg), enc(b, lg)]
+      const k = (t[1] - t[0]) / (f[1] - f[0])
+      const pivot = lg ? f[0] : Math.min(f[1], Math.max(f[0], 0))
+      const mid: Range = [pivot + (f[0] - pivot) * k, pivot + (f[1] - pivot) * k]
+      return { f, mid, t, lg, scales: !close(k, 1, 1), moves: !close(mid[0], t[0], t[1] - t[0]) }
+    }
+    const px = plan(from.x, to.x, false)
+    const py = plan(from.y, to.y, log)
+    const SCALE = 450
+    const MOVE = 400
+    const t1 = px.scales || py.scales ? SCALE : 0
+    const t2 = px.moves || py.moves ? MOVE : 0
+    const ease = (k: number) => 1 - (1 - k) ** 3
+    const lerp = (a: Range, b: Range, e: number): Range => [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e]
+    const at = (p: ReturnType<typeof plan>, ms: number): Range =>
+      dec(ms < t1 ? lerp(p.f, p.mid, ease(ms / t1)) : lerp(p.mid, p.t, t2 ? ease(Math.min(1, (ms - t1) / t2)) : 1), p.lg)
+    setTween({ x: at(px, 0), y: at(py, 0) })
     const t0 = performance.now()
     let id = requestAnimationFrame(function step(now) {
-      const k = Math.min(1, (now - t0) / 300)
-      const e = 1 - (1 - k) ** 3
-      if (k >= 1) return setTween(null)
-      setTween({
-        x: [mix(from.x[0], to.x[0], e), mix(from.x[1], to.x[1], e)],
-        y: [mix(from.y[0], to.y[0], e, log), mix(from.y[1], to.y[1], e, log)],
-      })
+      const ms = now - t0
+      if (ms >= t1 + t2) return setTween(null)
+      setTween({ x: at(px, ms), y: at(py, ms) })
       id = requestAnimationFrame(step)
     })
     return () => cancelAnimationFrame(id)

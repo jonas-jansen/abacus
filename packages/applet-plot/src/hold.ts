@@ -40,7 +40,12 @@ export function holdRange(prev: Range | null, fit: Range, o: HoldOptions = {}): 
     const shift = nlo < plo ? nlo - plo : nhi - phi
     return [from(plo + shift), from(phi + shift)]
   }
-  if (o.grow === false) return prev
+  if (o.grow === false) {
+    // no growing: move as far into the data as the window allows, at the same scale
+    if (floor !== undefined) return prev
+    const lo = Math.min(Math.max(plo, nlo), nhi - span)
+    return [from(lo), from(lo + span)]
+  }
   // grow in steps, keeping the side the data has not left
   let size = span
   while (size < need - eps) size *= GROW

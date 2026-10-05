@@ -10,7 +10,7 @@ export const EINSTELLUNGEN = {
   /** the value box and crosshair that follow the pointer over a plot */
   werte: { label: 'Werte am Mauszeiger', standard: 'aus' },
   /** axes that grow by themselves when a curve no longer fits; off: a button on the y axis does it */
-  achsen: { label: 'Achsen automatisch anpassen', standard: 'an' },
+  achsen: { label: 'Achsen automatisch anpassen', standard: 'aus' },
 } as const satisfies Record<string, { label: string; standard: 'an' | 'aus' }>
 
 export type Einstellung = keyof typeof EINSTELLUNGEN

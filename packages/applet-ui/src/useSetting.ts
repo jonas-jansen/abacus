@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { einstellung, type Einstellung, type Wert } from './settings'
 
 export function useSetting(name: Einstellung): Wert {
-  const [value, setValue] = useState<Wert>(() => (typeof document === 'undefined' ? 'an' : einstellung(name)))
+  const [value, setValue] = useState<Wert>(() => einstellung(name))
   useEffect(() => {
     const sync = () => setValue(einstellung(name))
     sync()

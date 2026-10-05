@@ -118,4 +118,9 @@ describe('held axes', () => {
     expect(holdRange([1, 100], [10, 1000], { log: true })).toEqual([10, 1000])
   })
   it('start from the data', () => expect(holdRange(null, [3, 4])).toEqual([3, 4]))
+  it('without growing, keep the scale but move into the data', () => {
+    expect(holdRange([0, 40], [297, 363], { grow: false })).toEqual([297, 337])
+    expect(holdRange([0, 40], [-10, 70], { grow: false })).toEqual([0, 40])
+    expect(holdRange([0, 40], [0, 90], { grow: false })).toEqual([0, 40])
+  })
 })

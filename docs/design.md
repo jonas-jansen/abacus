@@ -19,15 +19,18 @@ typeset properly. The interface stays quiet so the mathematics can speak.
 - **Feedback without text.** The toolbar never shows words: a copied link turns its cell
   green with a check.
 - **Axes tell the truth.** Axes computed from the data are held while parameters change: kept
-  while the curve fits, moved at the same scale when it has left, grown in steps of two when it
-  no longer fits, never shrunk on their own. A larger start value shows as a shifted line, a
-  larger rate as a steeper one – never as a rescaled picture. "Ganzes Bild" (also a double
-  click), reset and the scenario chips fit the axes afresh; the button appears by itself when
-  the window has become much larger than the curve (`packages/applet-plot/src/hold.ts`).
-  With the setting "Achsen automatisch anpassen" off they do not grow at all: a button at the
-  top of the y axis appears when the curve leaves the window or the window is much too large.
-  When the window has to move or grow, the axes glide there in about 0,3 s, so the change of
-  scale is seen. A handle dragged past the edge stays at the edge until it is let go.
+  while the curve fits, moved at the same scale when it has left, never shrunk on their own. A
+  larger start value shows as a shifted line, a larger rate as a steeper one – never as a
+  rescaled picture (`packages/applet-plot/src/hold.ts`).
+  - With "Achsen automatisch anpassen" off (the default) they do not grow: a button at the top
+    of the y axis appears, pulsing, when the curve leaves the window, and also when the window
+    is much too large; a click fits the axes.
+  - With it on, they grow in steps of two by themselves; "Ganzes Bild" appears when the window
+    is much too large.
+  - Double click, reset and the scenario chips always fit the axes afresh.
+  - A change of window glides in two steps – first the scale (about 0, or the edge nearest to
+    it), then the position – about 0,85 s in all, so the change is seen.
+  - A handle dragged past the edge stays at the edge until it is let go.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
   width allows (n = 0 … 20: every n); between them short ticks mark every n, or a fifth or half
   of the step, while they are at least 6 px apart.
@@ -112,7 +115,7 @@ The top bar's settings, kept per browser and applied before the first paint
 | Farben | Automatisch | Hell / Dunkel override the system; sets `<html data-theme>` |
 | Hinweise beim Zeigen | an | hint cards |
 | Werte am Mauszeiger | aus | value box and crosshair over plots |
-| Achsen automatisch anpassen | an | off: axes keep their scale; a button on the y axis (pulsing when the curve leaves the window) fits them, with the same glide |
+| Achsen automatisch anpassen | aus | off: axes keep their scale (and still move into the data); a button at the top of the y axis, pulsing when the curve leaves the window, fits them with the same glide. On: they grow by themselves |
 
 ## Keyboard
 

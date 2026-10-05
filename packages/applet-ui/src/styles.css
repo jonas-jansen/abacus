@@ -630,7 +630,7 @@ button.ab-icon {
   color: var(--ab-bg);
 }
 .ab-axis-fit[data-overflow] {
-  animation: ab-axis-pulse 1.4s ease-out 2;
+  animation: ab-axis-pulse 1.4s ease-out 4;
 }
 @keyframes ab-axis-pulse {
   0% {
