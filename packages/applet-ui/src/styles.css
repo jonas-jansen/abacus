@@ -607,6 +607,44 @@ button.ab-icon {
   border-color: color-mix(in srgb, var(--ab-accent) 40%, var(--ab-line));
   background: var(--ab-accent-soft);
 }
+/* With "Achsen automatisch anpassen" off: a button on the y axis fits the axes to the curve
+   (with the same glide). It pulses when the curve reaches beyond the edge. */
+.ab-axis-fit {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1.5px solid var(--ab-accent);
+  border-radius: 50%;
+  background: var(--ab-bg);
+  color: var(--ab-accent);
+  box-shadow: 0 2px 8px -2px rgb(16 24 40 / 0.25);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+.ab-axis-fit:hover {
+  background: var(--ab-accent);
+  color: var(--ab-bg);
+}
+.ab-axis-fit[data-overflow] {
+  animation: ab-axis-pulse 1.4s ease-out 2;
+}
+@keyframes ab-axis-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ab-accent) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-axis-fit[data-overflow] {
+    animation: none;
+  }
+}
 .ab-figaction-n {
   font-size: 11px;
   font-weight: 650;

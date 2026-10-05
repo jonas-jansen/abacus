@@ -24,6 +24,8 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   larger rate as a steeper one – never as a rescaled picture. "Ganzes Bild" (also a double
   click), reset and the scenario chips fit the axes afresh; the button appears by itself when
   the window has become much larger than the curve (`packages/applet-plot/src/hold.ts`).
+  With the setting "Achsen automatisch anpassen" off they do not grow at all: a button at the
+  top of the y axis appears when the curve leaves the window or the window is much too large.
   When the window has to move or grow, the axes glide there in about 0,3 s, so the change of
   scale is seen. A handle dragged past the edge stays at the edge until it is let go.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
@@ -110,6 +112,7 @@ The top bar's settings, kept per browser and applied before the first paint
 | Farben | Automatisch | Hell / Dunkel override the system; sets `<html data-theme>` |
 | Hinweise beim Zeigen | an | hint cards |
 | Werte am Mauszeiger | aus | value box and crosshair over plots |
+| Achsen automatisch anpassen | an | off: axes keep their scale; a button on the y axis (pulsing when the curve leaves the window) fits them, with the same glide |
 
 ## Keyboard
 

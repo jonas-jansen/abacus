@@ -13,6 +13,8 @@ import type { Range } from '@abacus/applet-core'
 export interface HoldOptions {
   /** A logarithmic axis: moving and growing happen in powers of ten. */
   log?: boolean
+  /** Grow when the data no longer fits (default). Off: keep the scale; the caller offers a refit. */
+  grow?: boolean
 }
 
 /** Growth factor when the data no longer fits: big enough that it rarely happens twice in a row. */
@@ -38,6 +40,7 @@ export function holdRange(prev: Range | null, fit: Range, o: HoldOptions = {}): 
     const shift = nlo < plo ? nlo - plo : nhi - phi
     return [from(plo + shift), from(phi + shift)]
   }
+  if (o.grow === false) return prev
   // grow in steps, keeping the side the data has not left
   let size = span
   while (size < need - eps) size *= GROW
@@ -47,6 +50,12 @@ export function holdRange(prev: Range | null, fit: Range, o: HoldOptions = {}): 
   else if (nhi <= phi) lo = phi - size
   else lo = nlo - (size - need) / 2
   return [from(lo), from(lo + size)]
+}
+
+/** Whether the data reaches beyond the window (with axes that do not grow by themselves). */
+export function overflows(held: Range, fit: Range): boolean {
+  const eps = 1e-9 * Math.max(1, Math.abs(held[1] - held[0]))
+  return fit[0] < held[0] - eps || fit[1] > held[1] + eps
 }
 
 /** Whether a held window is much larger than the data needs (then a refit is offered). */

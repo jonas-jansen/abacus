@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { AXIS_OVERHANG, clamp, formatNumber, labelWidth, makeFrame, type Detail, type Mark, type Params, type Range, type Run, type Series } from '@abacus/applet-core'
-import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, holdRange, isSquare, roomy, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
+import { AXIS_OVERHANG, clamp, estimateTextWidth, formatNumber, labelWidth, makeFrame, TICK, type Detail, type Mark, type Params, type Range, type Run, type Series } from '@abacus/applet-core'
+import { axesNode, CanvasSurface, drawBahn, colorVar, drawPlot, fallbackColors, holdRange, isSquare, overflows, roomy, markNodes, panFloors, selected, stepLabels, plotDomains, timeEnd, probeFromPointer, probeNodes, SvgPathSurface, type Domain, type PlotSpec, type PlotView, type ProbeRow } from '@abacus/applet-plot'
 import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
 import { cssColor, useFarbwechsel } from './cssColor'
+import { useSetting } from './useSetting'
 import { localPoint, scaleOf } from './scale'
 import { AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
@@ -149,7 +150,9 @@ export function Figure<P extends Params>({
   // Axes computed from the data are held across parameter changes (holdRange): a new start
   // value or rate shows as a different curve, not as a rescaled picture. Axes an applet sets
   // itself, and time or parameter axes (which follow N, T or the range), are not held.
-  const held = useRef<{ key: string; x: Range | null; y: Range | null; roomy: boolean }>({ key: '', x: null, y: null, roomy: false })
+  const held = useRef<{ key: string; x: Range | null; y: Range | null; roomy: boolean; overflow: boolean }>({ key: '', x: null, y: null, roomy: false, overflow: false })
+  // setting "Achsen automatisch anpassen": off keeps the scale; a button on the y axis refits
+  const autoAxes = useSetting('achsen') !== 'aus'
   const [refit, setRefit] = useState(0)
   const heldKey = `${viewEpoch ?? 0}|${logY}|${refit}|${spec.type}`
   const full = useMemo(() => {
@@ -160,11 +163,12 @@ export function Figure<P extends Params>({
     const log = spec.yScale === 'log'
     const holdY = auto(entry.y) && spec.type !== 'heatmap' && spec.type !== 'surface3d'
     const holdX = auto(entry.x) && (spec.type === 'phasePlane' || spec.type === 'cobweb')
-    const y = holdY ? holdRange(h.y, fit.y, { log }) : fit.y
-    const x = holdX ? holdRange(h.x, fit.x) : fit.x
+    const y = holdY ? holdRange(h.y, fit.y, { log, grow: autoAxes }) : fit.y
+    const x = holdX ? holdRange(h.x, fit.x, { grow: autoAxes }) : fit.x
     h.y = holdY ? y : null
     h.x = holdX ? x : null
     h.roomy = (holdY && roomy(y, fit.y, log)) || (holdX && roomy(x, fit.x))
+    h.overflow = (holdY && overflows(y, fit.y)) || (holdX && overflows(x, fit.x))
     const d = { ...fit, x, y }
     if (!square || figW <= figH + 1) return d
     const opts = { x: d.x, y: d.y, xInteger: d.xInteger, xLabel: spec.xLabel, yLabel: spec.yLabel, yLog: spec.yScale === 'log' }
@@ -175,7 +179,7 @@ export function Figure<P extends Params>({
     const span = (d.x[1] - d.x[0]) * k
     const wide: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
     return { ...d, x: wide }
-  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y])
+  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y, autoAxes])
   const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null
@@ -305,6 +309,8 @@ export function Figure<P extends Params>({
   const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
 
   const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
+  const badgeW = frame.yExp ? estimateTextWidth('×10', frame.fontSize) + estimateTextWidth(String(frame.yExp), frame.fontSize * 0.75) + 12 + 6 : 0
+  const fitButtonX = plot.x - TICK - 10 - badgeW - 4
 
   const pointer = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!onProbe) return
@@ -472,9 +478,26 @@ export function Figure<P extends Params>({
             ))}
           </div>
         )}
+        {!autoAxes && !zoom && (held.current.overflow || held.current.roomy) && (
+          <button
+            type="button"
+            className="ab-axis-fit"
+            data-overflow={held.current.overflow || undefined}
+            // at the top end of the y axis, left of the tip (and of a ×10ᵏ badge there): the
+            // middle of the axis is where start-value handles sit
+            style={{ left: fitButtonX, top: frame.plot.y - AXIS_OVERHANG + 1 }}
+            onClick={() => setRefit((r) => r + 1)}
+            data-tip={held.current.overflow ? 'Die Kurve reicht über den Rand: Achse anpassen' : 'Achse an die Kurve anpassen'}
+            aria-label="Achse anpassen"
+          >
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+              <path d="M8 2.5v11M5.2 5.3 8 2.5l2.8 2.8M5.2 10.7 8 13.5l2.8-2.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
         <FigureActions
           zoomReset={
-            zoom || held.current.roomy
+            zoom || (autoAxes && held.current.roomy)
               ? () => {
                   setZoom(null)
                   setRefit((r) => r + 1)
