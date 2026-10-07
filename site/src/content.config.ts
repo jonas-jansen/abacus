@@ -15,7 +15,21 @@ const course = defineCollection({
     locked: z.boolean().default(false),
     prerequisites: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Order within a week (smaller first); then by title. */
+    order: z.number().default(0),
   }),
 })
 
-export const collections = { course }
+/**
+ * An applet's introduction: plain Markdown in src/content/intro/<applet-id>.md, written by
+ * hand. Shown below the applet on its own page and as the first section of its course pages.
+ */
+const intro = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/intro' }),
+  schema: z.object({
+    /** The small heading above the text. */
+    title: z.string().default('Worum es geht'),
+  }),
+})
+
+export const collections = { course, intro }

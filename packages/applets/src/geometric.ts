@@ -45,9 +45,11 @@ export default defineApplet({
       logHilfe: 'Eine geometrische Folge $x_n = a^n x_0$ ist auf dieser Achse eine Gerade: jeder Schritt multipliziert mit $a$. Negative Werte (bei $a < 0$) fehlen.',
       drag: [
         { param: 'x0', axis: 'y' },
-        // x₁ = a·x₀: dragging the second point sets the factor
-        { param: 'a', axis: 'y', at: (p) => (p.x0 === 0 || p.N < 1 ? null : [1, p.a * p.x0]), set: (_x, y, p) => ({ a: y / p.x0 }) },
+        // x₁ = a·x₀: dragging the second point sets the factor. It is named x₁; the guide shows
+        // a where it acts, as the step from x₀ to x₁.
+        { param: 'a', axis: 'y', label: 'x_1', at: (p) => (p.x0 === 0 || p.N < 1 ? null : [1, p.a * p.x0]), set: (_x, y, p) => ({ a: y / p.x0 }) },
       ],
+      guides: (p) => (p.x0 === 0 || p.N < 1 ? [] : [{ kind: 'factor', from: [0, p.x0], to: [1, p.a * p.x0], label: String.raw`\cdot a` }]),
     },
   ],
   readouts: ['grenzwert', 'verhalten'],

@@ -886,6 +886,39 @@ button.ab-legend-item[aria-pressed='false'] .katex {
     opacity: 0.55;
   }
 }
+/* Guides: where a parameter acts (slope triangle, factor arrow), in the handle's colour */
+.ab-guide {
+  fill: none;
+  stroke: var(--abacus-secondary);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.ab-guide-label {
+  position: absolute;
+  z-index: 1;
+  padding: 0 3px;
+  border-radius: var(--ab-radius);
+  background: color-mix(in srgb, var(--ab-bg) 85%, transparent);
+  color: var(--abacus-secondary);
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.ab-guide-label[data-side='right'] {
+  transform: translate(5px, -50%);
+}
+.ab-guide-label[data-side='left'] {
+  transform: translate(calc(-100% - 5px), -50%);
+}
+.ab-guide-label[data-side='below'] {
+  transform: translate(-50%, 3px);
+}
+.ab-guide-label[data-side='above'] {
+  transform: translate(-50%, calc(-100% - 3px));
+}
 .ab-handle-label {
   position: absolute;
   z-index: 1;

@@ -43,9 +43,14 @@ export default defineApplet({
       yLabel: 'x_n',
       drag: [
         { param: 'x0', axis: 'y' },
-        // the last point x_N = x₀ + b·N: dragging it tilts the whole line
-        { param: 'b', axis: 'y', at: (p) => (p.N < 1 ? null : [p.N, p.x0 + p.b * p.N]), set: (_x, y, p) => ({ b: (y - p.x0) / p.N }) },
+        // the last point x_N = x₀ + b·N: dragging it tilts the whole line. It is named for what
+        // it is (x_N); the guide shows b as the rise of one step, midway, clear of both handles.
+        { param: 'b', axis: 'y', label: (p) => `x_{${p.N}}`, at: (p) => (p.N < 1 ? null : [p.N, p.x0 + p.b * p.N]), set: (_x, y, p) => ({ b: (y - p.x0) / p.N }) },
       ],
+      guides: (p) => {
+        const k = Math.floor(p.N / 2)
+        return p.N < 2 ? [] : [{ kind: 'rise', from: [k, p.x0 + p.b * k], to: [k + 1, p.x0 + p.b * (k + 1)], label: 'b', run: '1' }]
+      },
     },
   ],
   readouts: ['zuwachs', 'verhalten', 'null'],

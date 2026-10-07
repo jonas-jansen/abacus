@@ -35,7 +35,7 @@ interface Spot {
 }
 
 export function AppletView<P extends Params>({ def, initialState, startLocked = false, lockedText, showHeader = true, pageHref }: AppletViewProps<P>) {
-  const { params, setParams, reset: resetParams, run, error } = useAppletState(def, initialState)
+  const { params, setParams, reset: resetParams, run, error, jumps } = useAppletState(def, initialState)
   // reset and scenarios let the plots fit their axes afresh; other changes keep them (holdRange)
   const [viewEpoch, setViewEpoch] = useState(0)
   // plots over the same time axis share their x window (zoom one, the other follows)
@@ -287,7 +287,7 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                       onBahn={startParamOf(entry) ? (s) => setStarts((l) => [...l, s].slice(-MAX_BAHNEN)) : undefined}
                       onBahnenLoeschen={() => setStarts([])}
                       onDetail={detail}
-                      viewEpoch={viewEpoch}
+                      viewEpoch={viewEpoch + jumps}
                       xLink={linkX && isTime(entry) ? { x: sharedX, set: setSharedX } : undefined}
                     />
                     ),

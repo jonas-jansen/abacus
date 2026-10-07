@@ -33,8 +33,12 @@ export interface DragHandle<P = Params> {
   set?: (x: number, y: number, p: P) => Readonly<Record<string, unknown>>
   /** Further parameters the drag changes, shown in the tooltip too. */
   also?: readonly string[]
-  /** TeX label next to the handle. Default: the parameter's symbol. */
-  label?: string
+  /**
+   * TeX label next to the handle. Default: the parameter's symbol – right for a handle that
+   * sits at the parameter's value (x₀). A handle on a derived point is named by that point
+   * (`p => \`x_{\${p.N}}\``), and a guide shows the parameter.
+   */
+  label?: string | ((p: P) => string)
 }
 
 /** A PlotSpec whose domains may depend on the parameters, plus optional handles. */
@@ -43,7 +47,22 @@ export type PlotEntry<P> = DistributiveOmit<PlotSpec, 'x' | 'y'> & {
   y?: Resolvable<Domain, P>
   /** One handle or several. */
   drag?: DragHandle<P> | readonly DragHandle<P>[]
+  /**
+   * Where a parameter acts, drawn in the plot – so a handle can be named by the point it
+   * sits on (x₁, x_N) while the parameter it changes is shown honestly beside it.
+   */
+  guides?: (p: P) => readonly Guide[]
 }
+
+/**
+ * A guide shows what a parameter is, in the picture (data coordinates):
+ * - `rise`: a slope triangle from `from` to `to` – along x first, then along y; `label` names
+ *   the rise (e.g. `b`), `run` the run (e.g. `1`);
+ * - `factor`: a curved arrow from `from` to `to`, labelled with the operation (e.g. `\cdot a`).
+ */
+export type Guide =
+  | { kind: 'rise'; from: readonly [number, number]; to: readonly [number, number]; label: string; run?: string }
+  | { kind: 'factor'; from: readonly [number, number]; to: readonly [number, number]; label: string }
 
 export const handlesOf = <P,>(entry: PlotEntry<P>): readonly DragHandle<P>[] =>
   entry.drag === undefined ? [] : Array.isArray(entry.drag) ? entry.drag : [entry.drag as DragHandle<P>]

@@ -4,7 +4,7 @@ import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
 
 const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort(
-  (a, b) => a.data.week - b.data.week || a.data.title.localeCompare(b.data.title, 'de'),
+  (a, b) => a.data.week - b.data.week || a.data.order - b.data.order || a.data.title.localeCompare(b.data.title, 'de'),
 )
 ---
 <Seite title="Kurs" active="kurs" width="narrow">

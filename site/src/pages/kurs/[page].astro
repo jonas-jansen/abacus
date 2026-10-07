@@ -1,7 +1,7 @@
 ---
 // Course page: text and quizzes in a reading column, the page's applet large and sticky beside
 // it. Narrow screens stack them, applet first.
-import { getCollection, render } from 'astro:content'
+import { getCollection, getEntry, render } from 'astro:content'
 import { getApplet } from '@abacus/applets'
 import { vocabulary } from '../../components'
 import { AppletIsland } from '../../islands'
@@ -18,6 +18,9 @@ const { data } = page
 Astro.locals.applet = data.applet
 const def = getApplet(data.applet)
 const { Content } = await render(page)
+// the applet's introduction (src/content/intro/<applet>.md) opens the page
+const intro = await getEntry('intro', data.applet)
+const Intro = intro ? (await render(intro)).Content : null
 ---
 <Seite title={data.title} summary={data.summary} active="kurs">
   <header class="course-head">
@@ -27,6 +30,14 @@ const { Content } = await render(page)
   </header>
   <div class="course">
     <article class="course-text prose">
+      {
+        Intro && (
+          <section class="abschnitt einfuehrung">
+            <p class="eyebrow">{intro!.data.title}</p>
+            <Intro />
+          </section>
+        )
+      }
       <Content components={vocabulary} />
     </article>
     <div class="course-applet">

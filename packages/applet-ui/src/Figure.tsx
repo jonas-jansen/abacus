@@ -465,6 +465,46 @@ export function Figure<P extends Params>({
     return out
   })()
 
+  // Guides: where a parameter acts (a slope triangle for an increment, an arrow for a factor),
+  // in figure pixels; left out when their points are out of view.
+  type GuideGeom = { id: string; d: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above' }[] }
+  const guideGeom: GuideGeom[] = (() => {
+    if (!entry.guides || spec.type === 'surface3d') return []
+    const P = (v: readonly [number, number]): [number, number] => [plot.x + frame.xScale(v[0]), plot.y + frame.yScale(v[1])]
+    const inView = (q: [number, number]) => Number.isFinite(q[0]) && Number.isFinite(q[1]) && q[0] >= plot.x - 1 && q[0] <= plot.x + plot.w + 1 && q[1] >= plot.y - 1 && q[1] <= plot.y + plot.h + 1
+    const out: GuideGeom[] = []
+    entry.guides(params).forEach((g, i) => {
+      const [a, c] = [P(g.from), P(g.to)]
+      if (!inView(a) || !inView(c)) return
+      if (g.kind === 'rise') {
+        const b: [number, number] = [c[0], a[1]]
+        if (Math.abs(c[1] - b[1]) < 3 && Math.abs(b[0] - a[0]) < 3) return
+        const labels: GuideGeom['labels'] = []
+        if (Math.abs(c[1] - b[1]) >= 6) labels.push({ tex: g.label, x: b[0], y: (b[1] + c[1]) / 2, side: b[0] > plot.x + plot.w - 40 ? 'left' : 'right' })
+        if (g.run && Math.abs(b[0] - a[0]) >= 8) labels.push({ tex: g.run, x: (a[0] + b[0]) / 2, y: a[1], side: c[1] < a[1] ? 'below' : 'above' })
+        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}H${b[0]}V${c[1]}`, labels })
+      } else {
+        const [dx, dy] = [c[0] - a[0], c[1] - a[1]]
+        const len = Math.hypot(dx, dy)
+        if (len < 6) return
+        // bulge to the right (or up, when the step is flat), away from the y axis numbers
+        let [nx, ny] = [-dy / len, dx / len]
+        if (nx < 0 || (Math.abs(nx) < 1e-6 && ny > 0)) [nx, ny] = [-nx, -ny]
+        const bend = Math.min(60, 0.35 * len + 10)
+        const k: [number, number] = [(a[0] + c[0]) / 2 + nx * bend, (a[1] + c[1]) / 2 + ny * bend]
+        // the arrowhead along the curve's end tangent, stopping short of the point's dot
+        const [tx, ty] = [c[0] - k[0], c[1] - k[1]]
+        const tl = Math.hypot(tx, ty) || 1
+        const [ux, uy] = [tx / tl, ty / tl]
+        const tip: [number, number] = [c[0] - ux * 7, c[1] - uy * 7]
+        const head = `M${tip[0] - ux * 7 - uy * 4} ${tip[1] - uy * 7 + ux * 4}L${tip[0]} ${tip[1]}L${tip[0] - ux * 7 + uy * 4} ${tip[1] - uy * 7 - ux * 4}`
+        const mid: [number, number] = [0.25 * a[0] + 0.5 * k[0] + 0.25 * tip[0], 0.25 * a[1] + 0.5 * k[1] + 0.25 * tip[1]]
+        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex: g.label, x: mid[0] + nx * 4, y: mid[1] + ny * 4, side: 'right' }] })
+      }
+    })
+    return out
+  })()
+
   let tip: { x: number; y: number; rows: ProbeRow[] } | null = null
   const at = active && positions[active.i]
   if (active && at) {
@@ -532,6 +572,12 @@ export function Figure<P extends Params>({
               <line x1={X(spanEnd)} y1={plot.y} x2={X(spanEnd)} y2={plot.y + plot.h} />
             </g>
           )}
+          {guideGeom.map((g) => (
+            <g key={g.id} className="ab-guide">
+              <path d={g.d} />
+              {g.head && <path d={g.head} />}
+            </g>
+          ))}
           {markGeom.map((n, i) => renderSvg(n, i))}
           {probeGeom?.nodes.map((n, i) => renderSvg(n, 1000 + i))}
           {handles.map((h, i) => {
@@ -543,7 +589,7 @@ export function Figure<P extends Params>({
         </svg>
         {handles.map((h, i) => {
           const pos = positions[i]
-          const tex = h.label ?? texOf?.(h.param)
+          const tex = (typeof h.label === 'function' ? h.label(params) : h.label) ?? texOf?.(h.param)
           if (!pos || !tex || active?.i === i) return null
           // the name of what can be dragged, beside it; to the left near the right edge
           const flip = pos[0] > figW - 60
@@ -555,6 +601,13 @@ export function Figure<P extends Params>({
             </span>
           )
         })}
+        {guideGeom.flatMap((g) =>
+          g.labels.map((l, j) => (
+            <span key={`${g.id}-${j}`} className="ab-guide-label" data-side={l.side} style={{ left: l.x, top: l.y }} aria-hidden="true">
+              <TeX tex={l.tex} />
+            </span>
+          )),
+        )}
         {pointLabels.map((a, i) => (
           <span key={`p${i}`} className="ab-handle-label ab-arrow-label" data-flip={a.left || a.x > figW - 60 || undefined} data-below={a.y < plot.y + 28 || undefined} style={{ left: a.x, top: a.y, color: `var(--abacus-${a.role})` }} aria-hidden="true">
             <TeX tex={a.tex} />

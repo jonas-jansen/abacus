@@ -12,6 +12,8 @@ import { publish, subscribe, type ObservableSnapshot } from '@abacus/channel'
 import type { AppletDef } from './define'
 
 export interface AppletState<P extends Params> {
+  /** Counts the states taken from the address (a link): plots fit their axes afresh then. */
+  jumps: number
   params: P
   /** Validated, merged and normalized centrally. */
   setParams: (patch: Readonly<Record<string, unknown>>) => void
@@ -32,6 +34,7 @@ export function useAppletState<P extends Params>(def: AppletDef<P>, initialState
   const { model } = def
   const initial = useMemo(() => updateParams(model, defaultParams(model), initialState ?? {}), [model, initialState])
   const [params, setState] = useState(initial)
+  const [jumps, setJumps] = useState(0)
 
   const setParams = useCallback((patch: Readonly<Record<string, unknown>>) => setState((prev) => updateParams(model, prev, patch)), [model])
   const reset = useCallback(() => setState(initial), [initial])
@@ -40,7 +43,9 @@ export function useAppletState<P extends Params>(def: AppletDef<P>, initialState
   useEffect(() => {
     const apply = () => {
       const patch = decodeApplet(window.location.hash, def.id, model.params)
-      if (Object.keys(patch).length) setState(updateParams(model, initial, patch))
+      if (!Object.keys(patch).length) return
+      setState(updateParams(model, initial, patch))
+      setJumps((j) => j + 1)
     }
     apply()
     window.addEventListener('hashchange', apply)
@@ -87,5 +92,5 @@ export function useAppletState<P extends Params>(def: AppletDef<P>, initialState
     if (run) publish('applet/state', { applet: def.id, params, observables: snapshot(run.observables) })
   }, [def.id, params, run])
 
-  return { params, setParams, reset, run, error }
+  return { params, setParams, reset, run, error, jumps }
 }

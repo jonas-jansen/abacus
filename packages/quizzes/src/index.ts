@@ -1,11 +1,12 @@
 /** Registry of all questions for course pages. Ids are global: a question can appear on any page. */
 
 import type { QuizDef } from '@abacus/quiz/define'
+import arithmetic from './arithmetic'
 import geometric from './geometric'
 import growth from './growth'
 import logistic from './logistic'
 
-const list: QuizDef[] = [...geometric, ...logistic, ...growth]
+const list: QuizDef[] = [...arithmetic, ...geometric, ...logistic, ...growth]
 
 export const quizzes: Readonly<Record<string, QuizDef>> = Object.fromEntries(list.map((q) => [q.id, q]))
 

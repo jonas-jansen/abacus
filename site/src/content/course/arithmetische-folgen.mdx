@@ -1,0 +1,34 @@
+---
+title: Immer derselbe Zuwachs
+summary: Arithmetische Folgen – gleichmäßig wachsen oder abnehmen.
+week: 1
+order: 1
+applet: arithmetic
+---
+
+## Mit Papier
+
+Für $x_0 = 20$ und $x_{n+1} = x_n + b$: Rechnen Sie $x_1, x_2, x_3$ für $b = 2$ und $b = -3$ aus.
+Welche Formel gibt $x_n$ direkt an, ohne alle Schritte dazwischen?
+
+<Quiz id="ari-modell" number={1} />
+
+## Aufgaben
+
+<Quiz id="ari-x10" number={2} />
+
+Stellen Sie im Applet ein: [b = −1](#arithmetic.b=-1), [b = 0](#arithmetic.b=0) und [b = 2](#arithmetic.b=2).
+Was passiert mit dem Steigungsdreieck?
+
+<Quiz id="ari-null" number={3} />
+
+## Vom Bild zur Behauptung
+
+<Claim>
+Die Punkte $(n, x_n)$ einer arithmetischen Folge liegen auf einer Geraden mit der Steigung $b$.
+</Claim>
+
+<Proof>
+Aus $x_{n+1} = x_n + b$ folgt per Induktion $x_n = x_0 + b\,n$. Das ist eine lineare Funktion von $n$
+mit der Steigung $b$ und dem Achsenabschnitt $x_0$.
+</Proof>

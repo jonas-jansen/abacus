@@ -121,6 +121,12 @@ Series carry `label` (TeX symbol) and `name` (what it is: legend shows "y₁ Beu
 `fill` (areas), `arrow` (vectors, labelled at the tip), `dash`, `legend: false`, and
 `stepOf` + `stepMode` (a construction that unfolds with the timeline, as in `newton.ts`).
 
+**Guides** – `guides: (p) => [...]` on a plot shows where a parameter acts: `{ kind: 'rise',
+from, to, label: 'b', run: '1' }` draws a slope triangle (b as the rise of one step),
+`{ kind: 'factor', from, to, label: '\\cdot a' }` a curved arrow (a as the factor from one point
+to the next). A handle on a derived point is named by that point (`label: (p) => \`x_{${p.N}}\``),
+not by the parameter it changes – the guide shows the parameter. See `arithmetic.ts`, `geometric.ts`.
+
 **Handles** – everything with a place in the picture should be draggable there:
 `drag: { param: 'x0', axis: 'y' }` drags a value; `at(p)` and `set(x, y, p)` let a handle
 stand for something derived; `also` lists further parameters it changes; `label` overrides

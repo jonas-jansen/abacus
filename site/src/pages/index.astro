@@ -8,7 +8,7 @@ import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
 
 const anzahlApplets = chapters({ all: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
-const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort((a, b) => a.data.week - b.data.week)
+const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort((a, b) => a.data.week - b.data.week || a.data.order - b.data.order)
 const listed = listedWeeklyQuizzes({ all: import.meta.env.DEV })
 const quizzes = listed.map((w) => ({ id: w.id, title: w.title, week: w.week, opens: w.opens ?? '', closes: w.closes ?? '' }))
 ---

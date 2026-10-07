@@ -23,7 +23,22 @@ Plain Markdown: lists, tables, $y_{n+1} = a\,y_n(1 - y_n)$, display math with $$
 ```
 
 Every `##` section becomes a card with a "Schritt n" badge (`site/rehype-abschnitte.mjs`);
-use `###` for headings inside a section.
+use `###` for headings inside a section. `order: 1, 2, …` sorts pages within a week.
+
+## An applet's introduction
+
+`site/src/content/intro/<applet-id>.md` – plain Markdown with `$math$`, written by hand:
+
+```md
+---
+title: Worum es geht   # the small heading above it (optional)
+---
+
+Manche Größen ändern sich in jedem Schritt um **denselben Betrag** …
+```
+
+It appears below the applet on its own page (a reading card; the applet stays the centre), and
+as the first section of every course page whose `applet` it is. Use `###` for headings in it.
 
 ### Components
 
