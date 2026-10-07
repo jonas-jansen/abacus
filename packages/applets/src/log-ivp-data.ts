@@ -78,6 +78,7 @@ export default defineApplet({
         { param: 'K', axis: 'y', at: (p) => [36, p.K] },
         {
           param: 'r',
+          label: 't^*',
           axis: 'x',
           at: (p) => {
             const t = Math.log((p.K - p.N0) / p.N0) / p.r

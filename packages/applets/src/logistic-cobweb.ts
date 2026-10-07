@@ -69,7 +69,7 @@ export default defineApplet({
       drag: [
         { param: 'y0', axis: 'x' },
         // the top of the parabola is at height a/4
-        { param: 'a', axis: 'y', at: (p) => [0.5, p.a / 4], set: (_x, y) => ({ a: 4 * y }) },
+        { param: 'a', label: String.raw`f(\tfrac12)`, axis: 'y', at: (p) => [0.5, p.a / 4], set: (_x, y) => ({ a: 4 * y }) },
       ],
     },
     { type: 'timeSeriesDiscrete', series: ['y'], xLabel: 'n', yLabel: 'y_n', y: [0, 1], aspect: 1, drag: { param: 'y0', axis: 'y' } },

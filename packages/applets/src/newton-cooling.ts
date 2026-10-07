@@ -55,6 +55,7 @@ export default defineApplet({
         // T₁ = T₀ − α (T₀ − Tᵘ): the first step shows the fraction α of the gap
         {
           param: 'alpha',
+          label: 'T_1',
           axis: 'y',
           at: (p) => (p.T0 === p.Tu || p.N < 1 ? null : [1, p.T0 - p.alpha * (p.T0 - p.Tu)]),
           set: (_x, y, p) => ({ alpha: (p.T0 - y) / (p.T0 - p.Tu) }),

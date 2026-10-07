@@ -70,12 +70,14 @@ export default defineApplet({
       y: domain,
       drag: [
         { param: 'b', axis: 'y', at: (p) => (p.form === 'linear' ? [0, p.b] : null) },
-        { param: 'a', axis: 'y', at: (p) => (p.form === 'linear' ? [3, 3 * p.a + p.b] : null), set: (_x, y, p) => ({ a: (y - p.b) / 3 }) },
+        { param: 'a', label: 'f(3)', axis: 'y', at: (p) => (p.form === 'linear' ? [3, 3 * p.a + p.b] : null), set: (_x, y, p) => ({ a: (y - p.b) / 3 }) },
         // f(K) = K: the capacity is a fixed point on the diagonal
         { param: 'K', axis: 'x', at: (p) => (p.form === 'quadratisch' ? [p.K, p.K] : null), set: (x) => ({ K: x }) },
         // f(K/2) = K/2 + r·K/4
-        { param: 'r', axis: 'y', at: (p) => (p.form === 'quadratisch' ? [p.K / 2, p.K / 2 + (p.r * p.K) / 4] : null), set: (_x, y, p) => ({ r: (4 * (y - p.K / 2)) / p.K }) },
+        { param: 'r', label: String.raw`f(\tfrac{K}{2})`, axis: 'y', at: (p) => (p.form === 'quadratisch' ? [p.K / 2, p.K / 2 + (p.r * p.K) / 4] : null), set: (_x, y, p) => ({ r: (4 * (y - p.K / 2)) / p.K }) },
       ],
+      // the slope a as the rise over one unit, as for the arithmetic progression
+      guides: (p) => (p.form === 'linear' ? [{ kind: 'rise', from: [1, p.a + p.b], to: [2, 2 * p.a + p.b], label: 'a', run: '1', param: 'a' }] : []),
     },
   ],
   layout: {

@@ -62,6 +62,7 @@ export default defineApplet({
         // the steepest point (t*, K/2) with t* = ln((K − x₀)/x₀)/r: sliding it sideways sets r
         {
           param: 'r',
+          label: 't^*',
           axis: 'x',
           at: (p) => {
             const t = Math.log((p.K - p.x0) / p.x0) / p.r

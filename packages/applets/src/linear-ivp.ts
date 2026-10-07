@@ -44,7 +44,7 @@ export default defineApplet({
       field: true,
       drag: [
         { param: 'x0', axis: 'y' },
-        { param: 'b', axis: 'y', at: (p) => (Math.abs(p.a) < 1e-9 ? null : [10, -p.b / p.a]), set: (_x, y, p) => ({ b: -p.a * y }) },
+        { param: 'b', label: 'x^*', axis: 'y', at: (p) => (Math.abs(p.a) < 1e-9 ? null : [10, -p.b / p.a]), set: (_x, y, p) => ({ b: -p.a * y }) },
       ],
     },
   ],

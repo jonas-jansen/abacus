@@ -54,9 +54,9 @@ export default defineApplet({
       field: true,
       drag: [
         // pick a member of the family by its start
-        { param: 'C', axis: 'y', at: (p) => [0, general(0, p.a, p.b, p.C)], set: (_x, y, p) => ({ C: Math.abs(p.a) < 1e-9 ? y : y + p.b / p.a }) },
+        { param: 'C', label: 'x(0)', axis: 'y', at: (p) => [0, general(0, p.a, p.b, p.C)], set: (_x, y, p) => ({ C: Math.abs(p.a) < 1e-9 ? y : y + p.b / p.a }) },
         // the equilibrium −b/a moves with b
-        { param: 'b', axis: 'y', at: (p) => (Math.abs(p.a) < 1e-9 ? null : [10, -p.b / p.a]), set: (_x, y, p) => ({ b: -p.a * y }) },
+        { param: 'b', label: 'x^*', axis: 'y', at: (p) => (Math.abs(p.a) < 1e-9 ? null : [10, -p.b / p.a]), set: (_x, y, p) => ({ b: -p.a * y }) },
       ],
     },
   ],

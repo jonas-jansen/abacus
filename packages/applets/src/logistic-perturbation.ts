@@ -68,7 +68,7 @@ export default defineApplet({
       yLabel: 'y_n',
       y: [0, 1],
       // y* = 1 − 1/a: raising the fixed point raises a
-      drag: [{ param: 'a', axis: 'y', at: (p) => [p.N, 1 - 1 / p.a], set: (_x, y) => ({ a: 1 / (1 - Math.min(y, 0.99)) }) }],
+      drag: [{ param: 'a', label: 'y^*', axis: 'y', at: (p) => [p.N, 1 - 1 / p.a], set: (_x, y) => ({ a: 1 / (1 - Math.min(y, 0.99)) }) }],
     },
     {
       type: 'cobweb',
@@ -78,7 +78,7 @@ export default defineApplet({
       yLabel: 'f(y)',
       x: [0, 1],
       y: [0, 1],
-      drag: [{ param: 'a', axis: 'y', at: (p) => [0.5, p.a / 4], set: (_x, y) => ({ a: 4 * y }) }],
+      drag: [{ param: 'a', label: String.raw`f(\tfrac12)`, axis: 'y', at: (p) => [0.5, p.a / 4], set: (_x, y) => ({ a: 4 * y }) }],
     },
   ],
   layout: { main: ['a', 'stoerung', 'eps'] },

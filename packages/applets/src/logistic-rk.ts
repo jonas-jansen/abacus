@@ -70,7 +70,7 @@ export default defineApplet({
         // f(K) = K: move the fixed point along the diagonal
         { param: 'K', axis: 'x', at: (p) => [p.K, p.K], set: (x) => ({ K: x }) },
         // f(K/2) = K/2 + r·K/4
-        { param: 'r', axis: 'y', at: (p) => [p.K / 2, p.K / 2 + (p.r * p.K) / 4], set: (_x, y, p) => ({ r: (4 * (y - p.K / 2)) / p.K }) },
+        { param: 'r', label: String.raw`f(\tfrac{K}{2})`, axis: 'y', at: (p) => [p.K / 2, p.K / 2 + (p.r * p.K) / 4], set: (_x, y, p) => ({ r: (4 * (y - p.K / 2)) / p.K }) },
       ],
     },
   ],

@@ -48,8 +48,8 @@ export default defineApplet({
       field: true,
       drag: [
         { param: 'N0', axis: 'y' },
-        // a point on the curve at t = 2: N(2) = N₀ e^{2r}
-        { param: 'r', axis: 'y', at: (p) => (p.N0 > 0 ? [2, p.N0 * Math.exp(2 * p.r)] : null), set: (_x, y, p) => ({ r: Math.log(Math.max(y, 1e-6) / p.N0) / 2 }) },
+        // a point on the curve at t = 2: N(2) = N₀ e^{2r}; named for the point, the tooltip shows r
+        { param: 'r', label: 'N(2)', axis: 'y', at: (p) => (p.N0 > 0 ? [2, p.N0 * Math.exp(2 * p.r)] : null), set: (_x, y, p) => ({ r: Math.log(Math.max(y, 1e-6) / p.N0) / 2 }) },
       ],
     },
   ],
