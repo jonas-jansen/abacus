@@ -97,6 +97,9 @@ line in the catalog `packages/quizzes/quizzes.json`:
 all, hidden ones marked. A quiz missing in the catalog, or an entry without a quiz, fails the
 tests with a message naming it. The list is ordered by `week`.
 
+**This term (WS 2026/27):** weekly quizzes have unlimited attempts and no closing date –
+leave out `attempts` and `closes` – unless a draft says otherwise.
+
 **New quizzes from Markdown:** drafts handed over as Markdown go into `uploads/` (not in the
 repository); they are turned into a file here. The tests check, for every quiz, that its own
 answer key grades as correct, and that number questions accept their tolerance.

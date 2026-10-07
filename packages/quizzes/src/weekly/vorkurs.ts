@@ -11,10 +11,8 @@ export default defineWeeklyQuiz({
   title: 'Wiederholung Vorkurs',
   description: 'Prozente, Logarithmen, Gleichungen, Ungleichungen, Ableitungen und Gleichungssysteme aus dem Vorkurs.',
   week: 0,
-  // placeholder window, to be agreed
+  // this term's default: open from the start of term, no closing date, as many attempts as wanted
   opens: '2026-10-07T08:00',
-  closes: '2026-10-26T23:59',
-  attempts: 3,
   solutions: 'after-submit',
   questions: [
     // Vorkurs Blatt 1, A6
