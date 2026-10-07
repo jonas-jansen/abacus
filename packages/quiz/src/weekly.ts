@@ -37,6 +37,8 @@ export interface WeeklyQuiz {
   questions: readonly QuizDef[]
   /** Bump when questions change meaning; earlier attempts then belong to the old version. */
   version?: number
+  /** Listed on /quiz and the start page – set from packages/quizzes/quizzes.json, not here. */
+  visible?: boolean
 }
 
 /** Questions a weekly quiz cannot hold: they need an applet on the page. */

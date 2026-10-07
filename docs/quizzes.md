@@ -85,8 +85,21 @@ The quiz package only knows the description; `site/src/islands.tsx` hands it a r
 
 ## Weekly quizzes
 
-One file per quiz in `packages/quizzes/src/weekly/`, registered in `weekly/index.ts`. It is
-published at `/quiz/<id>`, and listed on `/quiz` and on the start page while it is open.
+One file per quiz in `packages/quizzes/src/weekly/`, registered in `weekly/index.ts`, and one
+line in the catalog `packages/quizzes/quizzes.json`:
+
+```json
+{ "id": "vorkurs", "visible": true }
+```
+
+`visible: false` takes a quiz out of the list on `/quiz` and the start page; its address
+`/quiz/<id>` keeps working (to share; search engines are asked to skip it). `pnpm dev` lists
+all, hidden ones marked. A quiz missing in the catalog, or an entry without a quiz, fails the
+tests with a message naming it. The list is ordered by `week`.
+
+**New quizzes from Markdown:** drafts handed over as Markdown go into `uploads/` (not in the
+repository); they are turned into a file here. The tests check, for every quiz, that its own
+answer key grades as correct, and that number questions accept their tolerance.
 
 ```ts
 export default defineWeeklyQuiz({

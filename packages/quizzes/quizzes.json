@@ -1,0 +1,9 @@
+{
+  "note": "The weekly quizzes, one entry each. \"visible\": false takes a quiz out of the list and the start page; its address /quiz/<id> keeps working (to share). pnpm dev shows all, hidden ones marked. Their order in the list comes from \"week\" in each quiz.",
+  "weekly": [
+    { "id": "vorkurs", "visible": true },
+    { "id": "woche-01", "visible": false },
+    { "id": "woche-02", "visible": false },
+    { "id": "woche-03", "visible": false }
+  ]
+}

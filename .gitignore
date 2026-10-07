@@ -6,3 +6,5 @@ dist/
 apps/
 # lecture slides: reference only, not for the public repository
 slides/
+# Markdown drafts for new quizzes, handed over for implementation: not published
+uploads/

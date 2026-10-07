@@ -17,4 +17,4 @@ export function getQuiz(id: string): QuizDef {
   return q
 }
 
-export { weeklyQuizzes, getWeeklyQuiz } from './weekly'
+export { weeklyQuizzes, listedWeeklyQuizzes, getWeeklyQuiz, connectWeekly, type WeeklyCatalogEntry } from './weekly'

@@ -11,7 +11,7 @@ export function getStaticPaths() {
 }
 const { w } = Astro.props
 ---
-<Seite title={w.title} summary={w.description} active="quiz" width="medium">
+<Seite title={w.title} summary={w.description} active="quiz" width="medium" unlisted={w.visible === false}>
   <p class="eyebrow"><a href={url('/quiz')}>Quizze</a>{w.week !== undefined && <> · Woche {w.week}</>}</p>
   <h1>{w.title}</h1>
   {w.description && <p class="lead" set:html={renderMathText(w.description)} />}

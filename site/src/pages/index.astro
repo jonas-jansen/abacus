@@ -3,13 +3,14 @@
 // browser (the page is static and knows no time).
 import { getCollection } from 'astro:content'
 import { chapters } from '@abacus/applets'
-import { weeklyQuizzes } from '@abacus/quizzes'
+import { listedWeeklyQuizzes } from '@abacus/quizzes'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
 
 const anzahlApplets = chapters({ all: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
 const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort((a, b) => a.data.week - b.data.week)
-const quizzes = weeklyQuizzes.map((w) => ({ id: w.id, title: w.title, week: w.week, opens: w.opens ?? '', closes: w.closes ?? '' }))
+const listed = listedWeeklyQuizzes({ all: import.meta.env.DEV })
+const quizzes = listed.map((w) => ({ id: w.id, title: w.title, week: w.week, opens: w.opens ?? '', closes: w.closes ?? '' }))
 ---
 <Seite title="Start" active="start">
   <header class="start-kopf">
@@ -42,7 +43,7 @@ const quizzes = weeklyQuizzes.map((w) => ({ id: w.id, title: w.title, week: w.we
       </span>
       <strong>Quizze</strong>
       <span>Kurze Quizze zu jeder Woche der Vorlesung, mit Lösungen und mehreren Versuchen.</span>
-      <span class="bereich-detail" id="quiz-aktuell">{weeklyQuizzes.length} Quizze</span>
+      <span class="bereich-detail" id="quiz-aktuell">{listed.length} {listed.length === 1 ? 'Quiz' : 'Quizze'}</span>
     </a>
 
     <a class="bereich" href={url('/notizbuch')}>

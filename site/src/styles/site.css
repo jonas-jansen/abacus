@@ -886,3 +886,8 @@ details.box[open] > summary::after {
   display: block;
   margin-top: 6px;
 }
+.quiz-list .nicht-gelistet {
+  margin-left: 8px;
+  vertical-align: 2px;
+  font-weight: 600;
+}
