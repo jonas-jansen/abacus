@@ -521,6 +521,15 @@ button.ab-icon {
   border: 1px solid var(--ab-line);
   border-radius: var(--ab-radius);
 }
+/* Until the browser has measured the plot and applied the state from the address, it stays
+   invisible (the server's version is a guess), then fades in. Without JavaScript the server's
+   version shows. */
+html.js .ab-figure-inner:not([data-ready]) > * {
+  opacity: 0;
+}
+.ab-figure-inner > * {
+  transition: opacity 0.15s ease-out;
+}
 .ab-figure-inner {
   position: relative;
   margin: 0 auto;

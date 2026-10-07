@@ -26,6 +26,7 @@ const { title, summary, width = 'wide', active, unlisted = false } = Astro.props
     {summary && <meta name="description" content={summary} />}
     {unlisted && <meta name="robots" content="noindex" />}
     <script is:inline set:html={EINSTELLUNGEN_SCRIPT} />
+    <script is:inline>document.documentElement.classList.add('js')</script>
   </head>
   <body>
     <header class="topbar">

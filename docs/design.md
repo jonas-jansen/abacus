@@ -37,6 +37,11 @@ typeset properly. The interface stays quiet so the mathematics can speak.
 - **Phase planes:** small arrows along a trajectory show the direction of time; "frei | 1:1" in
   the title row gives both axes the same unit length (circles stay circles), kept while zooming;
   switching back fits the plot freely.
+- **Values where they belong.** A dragged value is shown in the picture, not in a tooltip: in
+  the handle's label ("x₀ = 23") or at the guide that shows the parameter ("b = 1,5" at the
+  slope triangle). Tooltips remain only for handles that change several parameters at once.
+- **No jumps on loading.** The server draws a plot at a guessed size and the default state; the
+  browser shows it only once it has its real size and the state from the address, fading in.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
   width allows (n = 0 … 20: every n); between them short ticks mark every n, or a fifth or half
   of the step, while they are at least 6 px apart.

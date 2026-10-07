@@ -49,7 +49,7 @@ export default defineApplet({
         // a where it acts, as the step from x₀ to x₁.
         { param: 'a', axis: 'y', label: 'x_1', at: (p) => (p.x0 === 0 || p.N < 1 ? null : [1, p.a * p.x0]), set: (_x, y, p) => ({ a: y / p.x0 }) },
       ],
-      guides: (p) => (p.x0 === 0 || p.N < 1 ? [] : [{ kind: 'factor', from: [0, p.x0], to: [1, p.a * p.x0], label: String.raw`\cdot a` }]),
+      guides: (p) => (p.x0 === 0 || p.N < 1 ? [] : [{ kind: 'factor', from: [0, p.x0], to: [1, p.a * p.x0], label: String.raw`\cdot a`, param: 'a' }]),
     },
   ],
   readouts: ['grenzwert', 'verhalten'],

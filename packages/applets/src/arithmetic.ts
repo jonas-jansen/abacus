@@ -49,7 +49,7 @@ export default defineApplet({
       ],
       guides: (p) => {
         const k = Math.floor(p.N / 2)
-        return p.N < 2 ? [] : [{ kind: 'rise', from: [k, p.x0 + p.b * k], to: [k + 1, p.x0 + p.b * (k + 1)], label: 'b', run: '1' }]
+        return p.N < 2 ? [] : [{ kind: 'rise', from: [k, p.x0 + p.b * k], to: [k + 1, p.x0 + p.b * (k + 1)], label: 'b', run: '1', param: 'b' }]
       },
     },
   ],

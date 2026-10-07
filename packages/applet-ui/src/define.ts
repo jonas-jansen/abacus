@@ -59,10 +59,15 @@ export type PlotEntry<P> = DistributiveOmit<PlotSpec, 'x' | 'y'> & {
  * - `rise`: a slope triangle from `from` to `to` – along x first, then along y; `label` names
  *   the rise (e.g. `b`), `run` the run (e.g. `1`);
  * - `factor`: a curved arrow from `from` to `to`, labelled with the operation (e.g. `\cdot a`).
+ * With `param`, the parameter's current value stands beside the label.
  */
-export type Guide =
+export type Guide = (
   | { kind: 'rise'; from: readonly [number, number]; to: readonly [number, number]; label: string; run?: string }
   | { kind: 'factor'; from: readonly [number, number]; to: readonly [number, number]; label: string }
+) & {
+  /** The parameter the guide shows: its value is written beside it ("b = 1,5"), and the handle that changes it needs no tooltip. */
+  param?: string
+}
 
 export const handlesOf = <P,>(entry: PlotEntry<P>): readonly DragHandle<P>[] =>
   entry.drag === undefined ? [] : Array.isArray(entry.drag) ? entry.drag : [entry.drag as DragHandle<P>]

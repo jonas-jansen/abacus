@@ -5,6 +5,7 @@ import { handlesOf, type PlotEntry } from './define'
 import { renderSvg } from './svgReact'
 import { TeX } from './TeX'
 import { cssColor, useFarbwechsel } from './cssColor'
+import { texNumber } from './formula'
 import { useSetting } from './useSetting'
 import { localPoint, scaleOf } from './scale'
 import { AspectSwitch, AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
@@ -107,11 +108,21 @@ export function Figure<P extends Params>({
   // how high a plot may be: a share of the screen, in the applet's own pixels (lecture mode scales)
   const [maxH, setMaxH] = useState(SSR_HEIGHT)
   const [hydrated, setHydrated] = useState(false)
+  // when the page came up: what happens while it loads (the state from the address, the first
+  // measurement of the size) is shown at once, not as a glide
+  const loadedAt = useRef(0)
+  const lastSize = useRef<[number, number] | null>(null)
+  // The server draws at a guessed size and the default state; the browser knows better a moment
+  // later. Until then the plot is invisible (its space kept), so it never visibly jumps.
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     setHydrated(true)
+    loadedAt.current = performance.now()
+    // shown once the real size is measured and the state from the address applied (two frames)
+    let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => setReady(true))))
     const el = outer.current
-    if (!el) return
+    if (!el) return () => cancelAnimationFrame(id)
     const measure = () => setMaxH(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round((window.innerHeight / scaleOf(el)) * SCREEN_SHARE))))
     const ro = new ResizeObserver(([e]) => {
       const w = Math.round(e.contentRect.width)
@@ -121,6 +132,7 @@ export function Figure<P extends Params>({
     ro.observe(el)
     window.addEventListener('resize', measure)
     return () => {
+      cancelAnimationFrame(id)
       ro.disconnect()
       window.removeEventListener('resize', measure)
     }
@@ -272,7 +284,10 @@ export function Figure<P extends Params>({
     const to = { x: full.x, y: full.y }
     const close = (a: number, b: number, span: number) => Math.abs(a - b) <= 1e-9 * (1 + span)
     const same = (a: Range, b: Range) => close(a[0], b[0], b[1] - b[0]) && close(a[1], b[1], b[1] - b[0])
-    if (!from || zoom || dragging || (same(from.x, to.x) && same(from.y, to.y)) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    const resized = !!lastSize.current && (lastSize.current[0] !== figW || lastSize.current[1] !== figH)
+    lastSize.current = [figW, figH]
+    const loading = !loadedAt.current || performance.now() - loadedAt.current < 700
+    if (!from || zoom || dragging || resized || loading || (same(from.x, to.x) && same(from.y, to.y)) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       setTween(null)
       return
     }
@@ -307,7 +322,7 @@ export function Figure<P extends Params>({
     })
     return () => cancelAnimationFrame(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [full.x[0], full.x[1], full.y[0], full.y[1], dragging])
+  }, [full.x[0], full.x[1], full.y[0], full.y[1], dragging, figW, figH])
 
   const frame = useMemo(() => {
     const target = tween && !zoom ? { ...full, ...tween } : full
@@ -473,14 +488,16 @@ export function Figure<P extends Params>({
     const P = (v: readonly [number, number]): [number, number] => [plot.x + frame.xScale(v[0]), plot.y + frame.yScale(v[1])]
     const inView = (q: [number, number]) => Number.isFinite(q[0]) && Number.isFinite(q[1]) && q[0] >= plot.x - 1 && q[0] <= plot.x + plot.w + 1 && q[1] >= plot.y - 1 && q[1] <= plot.y + plot.h + 1
     const out: GuideGeom[] = []
+    const valueOf = (id: string | undefined) => (id !== undefined && typeof params[id] === 'number' ? texNumber(params[id] as number, 3) : null)
     entry.guides(params).forEach((g, i) => {
+      const v = valueOf(g.param)
       const [a, c] = [P(g.from), P(g.to)]
       if (!inView(a) || !inView(c)) return
       if (g.kind === 'rise') {
         const b: [number, number] = [c[0], a[1]]
         if (Math.abs(c[1] - b[1]) < 3 && Math.abs(b[0] - a[0]) < 3) return
         const labels: GuideGeom['labels'] = []
-        if (Math.abs(c[1] - b[1]) >= 6) labels.push({ tex: g.label, x: b[0], y: (b[1] + c[1]) / 2, side: b[0] > plot.x + plot.w - 40 ? 'left' : 'right' })
+        if (Math.abs(c[1] - b[1]) >= 6) labels.push({ tex: v ? `${g.label} = ${v}` : g.label, x: b[0], y: (b[1] + c[1]) / 2, side: b[0] > plot.x + plot.w - 60 ? 'left' : 'right' })
         if (g.run && Math.abs(b[0] - a[0]) >= 8) labels.push({ tex: g.run, x: (a[0] + b[0]) / 2, y: a[1], side: c[1] < a[1] ? 'below' : 'above' })
         out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}H${b[0]}V${c[1]}`, labels })
       } else {
@@ -499,7 +516,9 @@ export function Figure<P extends Params>({
         const tip: [number, number] = [c[0] - ux * 7, c[1] - uy * 7]
         const head = `M${tip[0] - ux * 7 - uy * 4} ${tip[1] - uy * 7 + ux * 4}L${tip[0]} ${tip[1]}L${tip[0] - ux * 7 + uy * 4} ${tip[1] - uy * 7 - ux * 4}`
         const mid: [number, number] = [0.25 * a[0] + 0.5 * k[0] + 0.25 * tip[0], 0.25 * a[1] + 0.5 * k[1] + 0.25 * tip[1]]
-        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex: g.label, x: mid[0] + nx * 4, y: mid[1] + ny * 4, side: 'right' }] })
+        // beside the arrow; for a short one, clear of the handles' own labels (right of the points)
+        const tex = v ? `${g.label}\\quad {\\small ${texOf?.(g.param!) ?? g.param} = ${v}}` : g.label
+        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, x: len < 90 ? Math.max(mid[0] + nx * 4, Math.max(a[0], c[0]) + 48) : mid[0] + nx * 4, y: mid[1] + ny * 4, side: 'right' }] })
       }
     })
     return out
@@ -507,7 +526,14 @@ export function Figure<P extends Params>({
 
   let tip: { x: number; y: number; rows: ProbeRow[] } | null = null
   const at = active && positions[active.i]
-  if (active && at) {
+  // A dragged handle names its value where it is: a guide shows its parameter, or – for a handle
+  // that sits at its own value (x₀) – its label reads "x₀ = 23". Only handles that change
+  // several parameters, or a derived one without a guide, still get the tooltip.
+  const h0 = active ? handles[active.i] : undefined
+  const shownByGuide = !!h0 && !h0.also?.length && (entry.guides?.(params) ?? []).some((g) => g.param === h0.param)
+  const ownValue = !!h0 && !h0.at && !h0.also?.length && typeof params[h0.param] === 'number'
+  const handleTip = !!active && !!at && !shownByGuide && !(ownValue && active.state === 'drag')
+  if (active && at && handleTip) {
     const h = handles[active.i]
     const row = (id: string): ProbeRow => {
       const v = params[id]
@@ -535,6 +561,7 @@ export function Figure<P extends Params>({
       </FigureHead>
       <div
         className="ab-figure-inner"
+        data-ready={ready || undefined}
         role="img"
         aria-label={spec.title ?? [spec.yLabel, spec.xLabel].filter(Boolean).join(' über ')}
         ref={inner}
@@ -589,8 +616,10 @@ export function Figure<P extends Params>({
         </svg>
         {handles.map((h, i) => {
           const pos = positions[i]
-          const tex = (typeof h.label === 'function' ? h.label(params) : h.label) ?? texOf?.(h.param)
-          if (!pos || !tex || active?.i === i) return null
+          const named = (typeof h.label === 'function' ? h.label(params) : h.label) ?? texOf?.(h.param)
+          const dragged = active?.i === i && active.state === 'drag' && !h.at && !h.also?.length && typeof params[h.param] === 'number'
+          const tex = named && dragged ? `${named} = ${texNumber(params[h.param] as number, 4)}` : named
+          if (!pos || !tex || (active?.i === i && handleTip)) return null
           // the name of what can be dragged, beside it; to the left near the right edge
           const flip = pos[0] > figW - 60
           // the label (about 26 px above the handle) would reach the axis label over the plot

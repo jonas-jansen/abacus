@@ -125,7 +125,10 @@ Series carry `label` (TeX symbol) and `name` (what it is: legend shows "y₁ Beu
 from, to, label: 'b', run: '1' }` draws a slope triangle (b as the rise of one step),
 `{ kind: 'factor', from, to, label: '\\cdot a' }` a curved arrow (a as the factor from one point
 to the next). A handle on a derived point is named by that point (`label: (p) => \`x_{${p.N}}\``),
-not by the parameter it changes – the guide shows the parameter. See `arithmetic.ts`, `geometric.ts`.
+not by the parameter it changes – the guide shows the parameter. With `param: 'b'` the guide
+writes the current value beside it ("b = 1,5"); dragging then needs no tooltip. A handle that
+sits at its own value shows it in its label while dragged ("x₀ = 23"). See `arithmetic.ts`,
+`geometric.ts`.
 
 **Handles** – everything with a place in the picture should be draggable there:
 `drag: { param: 'x0', axis: 'y' }` drags a value; `at(p)` and `set(x, y, p)` let a handle
