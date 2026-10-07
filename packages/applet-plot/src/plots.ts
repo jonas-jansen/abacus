@@ -392,9 +392,8 @@ function drawLine(s: Surface, frame: Frame, series: Series, count = series.x.len
   }
 }
 
-/** Opacity factor for a series while another one is pointed at in the legend. */
-/** How strongly a held state (vergleichen) is drawn under the current one. */
-export const GHOST_FADE = 0.28
+/** How strongly a held state (vergleichen) is drawn under the current one: clearly visible, yet behind it. */
+export const GHOST_FADE = 0.45
 const base = (view: PlotView) => (view.ghost ? GHOST_FADE : 1)
 /** Series other than the one pointed at in the legend step back — on top of the ghost's fade. */
 const dim = (series: Series, view: PlotView) => base(view) * (view.focus && view.focus !== series.id ? 0.15 : 1)

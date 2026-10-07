@@ -126,7 +126,8 @@ from, to, label: 'b', run: '1' }` draws a slope triangle (b as the rise of one s
 `{ kind: 'factor', from, to, label: '\\cdot a' }` a curved arrow (a as the factor from one point
 to the next). A handle on a derived point is named by that point (`label: (p) => \`x_{${p.N}}\``),
 not by the parameter it changes – the guide shows the parameter. With `param: 'b'` the guide
-writes the current value beside it ("b = 1.5"); dragging then needs no tooltip. A handle that
+writes the current value as a chip beside it ("b = 1.5", "·a = 0.8"), and the guide stands out while
+its parameter is pointed at in the formulas or its handle is held; dragging then needs no tooltip. A handle that
 sits at its own value shows it in its label while dragged ("x₀ = 23"). See `arithmetic.ts`,
 `geometric.ts`.
 

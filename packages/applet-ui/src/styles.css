@@ -903,18 +903,41 @@ button.ab-legend-item[aria-pressed='false'] .katex {
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.85;
+  transition: opacity 0.15s, stroke-width 0.15s;
 }
+/* the triangle as a faint area, so it reads as one shape with the curve's step */
+.ab-guide-fill {
+  fill: color-mix(in srgb, var(--abacus-secondary) 10%, transparent);
+  stroke: none;
+}
+.ab-guide[data-hot] {
+  opacity: 1;
+  stroke-width: 2.25;
+}
+.ab-guide[data-hot] .ab-guide-fill {
+  fill: color-mix(in srgb, var(--abacus-secondary) 18%, transparent);
+}
+/* the value as a chip in the handle's colour, like the parameter in the formulas */
 .ab-guide-label {
   position: absolute;
   z-index: 1;
-  padding: 0 3px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--abacus-secondary) 28%, transparent);
   border-radius: var(--ab-radius);
-  background: color-mix(in srgb, var(--ab-bg) 85%, transparent);
+  background: color-mix(in srgb, var(--abacus-secondary) 7%, var(--ab-bg));
   color: var(--abacus-secondary);
+  transition: background 0.15s;
   font-size: 13px;
   line-height: 1.3;
   white-space: nowrap;
   pointer-events: none;
+}
+.ab-guide-label[data-plain] {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--ab-bg) 85%, transparent);
+}
+.ab-guide-label[data-hot] {
+  background: color-mix(in srgb, var(--abacus-secondary) 16%, var(--ab-bg));
 }
 .ab-guide-label[data-side='right'] {
   transform: translate(5px, -50%);

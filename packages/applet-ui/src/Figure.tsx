@@ -274,8 +274,10 @@ export function Figure<P extends Params>({
 
   // When the held window has to move or grow, the axes glide there instead of jumping, so the
   // change of scale is seen – and the curve moves with them. Two steps, one after the other:
-  // first the scale changes about 0 (or about the window's edge nearest to 0), then the window
-  // moves; a step that is not needed is left out.
+  // growing, the scale changes first (about 0, or about the window's edge nearest to 0) and the
+  // window then moves; shrinking, it first moves and then closes in on the new window (about 0
+  // or its edge nearest to 0) – so the data never leaves the picture in between. A step that is
+  // not needed is left out.
   const shown = useRef<{ x: Range; y: Range } | null>(null)
   const [tween, setTween] = useState<{ x: Range; y: Range } | null>(null)
   // a layout effect: the first step is set before the new window is ever painted
@@ -298,16 +300,28 @@ export function Figure<P extends Params>({
     const plan = (a: Range, b: Range, lg: boolean) => {
       const [f, t] = [enc(a, lg), enc(b, lg)]
       const k = (t[1] - t[0]) / (f[1] - f[0])
-      const pivot = lg ? f[0] : Math.min(f[1], Math.max(f[0], 0))
-      const mid: Range = [pivot + (f[0] - pivot) * k, pivot + (f[1] - pivot) * k]
-      return { f, mid, t, lg, scales: !close(k, 1, 1), moves: !close(mid[0], t[0], t[1] - t[0]) }
+      const scales = !close(k, 1, 1)
+      if (k >= 1 || !scales) {
+        // grow about the old window's point nearest 0, then move
+        const pivot = lg ? f[0] : Math.min(f[1], Math.max(f[0], 0))
+        const mid: Range = [pivot + (f[0] - pivot) * k, pivot + (f[1] - pivot) * k]
+        // a move too small to see (padding) is not a step of its own
+        if (scales && Math.abs(mid[0] - t[0]) < 0.02 * (t[1] - t[0])) return { f, mid: t, t, lg, shrink: false, first: true, second: false }
+        return { f, mid, t, lg, shrink: false, first: scales, second: !close(mid[0], t[0], t[1] - t[0]) }
+      }
+      // move the old window (same span) to where shrinking about the new one's point nearest 0 ends
+      const pivot = lg ? t[0] : Math.min(t[1], Math.max(t[0], 0))
+      const mid: Range = [pivot + (t[0] - pivot) / k, pivot + (t[1] - pivot) / k]
+      if (Math.abs(mid[0] - f[0]) < 0.02 * (f[1] - f[0])) return { f, mid: f, t, lg, shrink: true, first: false, second: true }
+      return { f, mid, t, lg, shrink: true, first: true, second: true }
     }
     const px = plan(from.x, to.x, false)
     const py = plan(from.y, to.y, log)
     const SCALE = 450
     const MOVE = 400
-    const t1 = px.scales || py.scales ? SCALE : 0
-    const t2 = px.moves || py.moves ? MOVE : 0
+    // the first step: a growth (scale) or, when shrinking, the move; the second the other one
+    const t1 = (px.first && !px.shrink) || (py.first && !py.shrink) ? SCALE : px.first || py.first ? MOVE : 0
+    const t2 = (px.second && px.shrink) || (py.second && py.shrink) ? SCALE : px.second || py.second ? MOVE : 0
     const ease = (k: number) => 1 - (1 - k) ** 3
     const lerp = (a: Range, b: Range, e: number): Range => [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e]
     const at = (p: ReturnType<typeof plan>, ms: number): Range =>
@@ -482,7 +496,7 @@ export function Figure<P extends Params>({
 
   // Guides: where a parameter acts (a slope triangle for an increment, an arrow for a factor),
   // in figure pixels; left out when their points are out of view.
-  type GuideGeom = { id: string; d: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above' }[] }
+  type GuideGeom = { id: string; param?: string; d: string; fill?: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above'; plain?: boolean }[] }
   const guideGeom: GuideGeom[] = (() => {
     if (!entry.guides || spec.type === 'surface3d') return []
     const P = (v: readonly [number, number]): [number, number] => [plot.x + frame.xScale(v[0]), plot.y + frame.yScale(v[1])]
@@ -497,9 +511,9 @@ export function Figure<P extends Params>({
         const b: [number, number] = [c[0], a[1]]
         if (Math.abs(c[1] - b[1]) < 3 && Math.abs(b[0] - a[0]) < 3) return
         const labels: GuideGeom['labels'] = []
-        if (Math.abs(c[1] - b[1]) >= 6) labels.push({ tex: v ? `${g.label} = ${v}` : g.label, x: b[0], y: (b[1] + c[1]) / 2, side: b[0] > plot.x + plot.w - 60 ? 'left' : 'right' })
-        if (g.run && Math.abs(b[0] - a[0]) >= 8) labels.push({ tex: g.run, x: (a[0] + b[0]) / 2, y: a[1], side: c[1] < a[1] ? 'below' : 'above' })
-        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}H${b[0]}V${c[1]}`, labels })
+        if (Math.abs(c[1] - b[1]) >= 6) labels.push({ tex: v ? `${g.label} = ${v}` : g.label, plain: !v, x: b[0], y: (b[1] + c[1]) / 2, side: b[0] > plot.x + plot.w - 60 ? 'left' : 'right' })
+        if (g.run && Math.abs(b[0] - a[0]) >= 8) labels.push({ tex: g.run, plain: true, x: (a[0] + b[0]) / 2, y: a[1], side: c[1] < a[1] ? 'below' : 'above' })
+        out.push({ id: `g${i}`, param: g.param, d: `M${a[0]} ${a[1]}H${b[0]}V${c[1]}`, fill: `M${a[0]} ${a[1]}H${b[0]}V${c[1]}Z`, labels })
       } else {
         const [dx, dy] = [c[0] - a[0], c[1] - a[1]]
         const len = Math.hypot(dx, dy)
@@ -508,6 +522,9 @@ export function Figure<P extends Params>({
         let [nx, ny] = [-dy / len, dx / len]
         if (nx < 0 || (Math.abs(nx) < 1e-6 && ny > 0)) [nx, ny] = [-nx, -ny]
         const bend = Math.min(60, 0.35 * len + 10)
+        // …but never out of the plot (a step along the bottom edge bulges up)
+        const outside = (n: number, m: number) => { const y = (a[1] + c[1]) / 2 + m * bend, x = (a[0] + c[0]) / 2 + n * bend; return y > plot.y + plot.h || y < plot.y || x < plot.x }
+        if (outside(nx, ny) && !outside(-nx, -ny)) [nx, ny] = [-nx, -ny]
         const k: [number, number] = [(a[0] + c[0]) / 2 + nx * bend, (a[1] + c[1]) / 2 + ny * bend]
         // the arrowhead along the curve's end tangent, stopping short of the point's dot
         const [tx, ty] = [c[0] - k[0], c[1] - k[1]]
@@ -516,13 +533,16 @@ export function Figure<P extends Params>({
         const tip: [number, number] = [c[0] - ux * 7, c[1] - uy * 7]
         const head = `M${tip[0] - ux * 7 - uy * 4} ${tip[1] - uy * 7 + ux * 4}L${tip[0]} ${tip[1]}L${tip[0] - ux * 7 + uy * 4} ${tip[1] - uy * 7 - ux * 4}`
         const mid: [number, number] = [0.25 * a[0] + 0.5 * k[0] + 0.25 * tip[0], 0.25 * a[1] + 0.5 * k[1] + 0.25 * tip[1]]
-        // beside the arrow; for a short one, clear of the handles' own labels (right of the points)
-        const tex = v ? `${g.label}\\quad {\\small ${texOf?.(g.param!) ?? g.param} = ${v}}` : g.label
-        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, x: len < 90 ? Math.max(mid[0] + nx * 4, Math.max(a[0], c[0]) + 48) : mid[0] + nx * 4, y: mid[1] + ny * 4, side: 'right' }] })
+        // beside the arrow ("·a = 0.8"); for a short one, clear of the handles' own labels (right of the points)
+        const tex = v ? `${g.label} = ${v}` : g.label
+        out.push({ id: `g${i}`, param: g.param, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, plain: !v, x: len < 90 ? Math.max(mid[0] + nx * 4, Math.max(a[0], c[0]) + 48) : mid[0] + nx * 4, y: Math.min(plot.y + plot.h - 14, Math.max(plot.y + 12, mid[1] + ny * 4)), side: 'right' }] })
       }
     })
     return out
   })()
+
+  // a guide stands out while its parameter is pointed at in the formulas or its handle is held
+  const hotGuide = (g: GuideGeom) => !!g.param && (g.param === hotParam || (!!active && handles[active.i]?.param === g.param))
 
   let tip: { x: number; y: number; rows: ProbeRow[] } | null = null
   const at = active && positions[active.i]
@@ -600,7 +620,8 @@ export function Figure<P extends Params>({
             </g>
           )}
           {guideGeom.map((g) => (
-            <g key={g.id} className="ab-guide">
+            <g key={g.id} className="ab-guide" data-hot={hotGuide(g) || undefined}>
+              {g.fill && <path className="ab-guide-fill" d={g.fill} />}
               <path d={g.d} />
               {g.head && <path d={g.head} />}
             </g>
@@ -632,7 +653,7 @@ export function Figure<P extends Params>({
         })}
         {guideGeom.flatMap((g) =>
           g.labels.map((l, j) => (
-            <span key={`${g.id}-${j}`} className="ab-guide-label" data-side={l.side} style={{ left: l.x, top: l.y }} aria-hidden="true">
+            <span key={`${g.id}-${j}`} className="ab-guide-label" data-side={l.side} data-plain={l.plain || undefined} data-hot={(!l.plain && hotGuide(g)) || undefined} style={{ left: l.x, top: l.y }} aria-hidden="true">
               <TeX tex={l.tex} />
             </span>
           )),

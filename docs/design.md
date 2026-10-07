@@ -31,8 +31,9 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   - With it on, they grow in steps of two by themselves; "Ganzes Bild" appears when the window
     is much too large.
   - Double click, reset and the scenario chips always fit the axes afresh.
-  - A change of window glides in two steps – first the scale (about 0, or the edge nearest to
-    it), then the position – about 0.85 s in all, so the change is seen.
+  - A change of window glides in two steps, about 0.85 s in all, so the change is seen. A
+    growing window first scales (about 0, or the edge nearest to it), then moves; a shrinking
+    one first moves, then closes in – so what is shown never leaves the picture on the way.
   - A handle dragged past the edge stays at the edge until it is let go.
 - **Views you can retrace.** Every settled zoom or pan is remembered; "zurück zur vorigen
   Ansicht" (next to "ganzes Bild") steps back, also from the whole picture to the last zoom.
@@ -42,7 +43,12 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   switching back fits the plot freely.
 - **Values where they belong.** A dragged value is shown in the picture, not in a tooltip: in
   the handle's label ("x₀ = 23") or at the guide that shows the parameter ("b = 1.5" at the
-  slope triangle). Tooltips remain only for handles that change several parameters at once.
+  slope triangle, "·a = 0.8" at the factor arrow – the name once, then the value), as a chip in
+  the handle's colour like the parameter in the formulas; the guide stands out while its
+  parameter is pointed at or dragged. Tooltips remain only for handles that change several
+  parameters at once.
+- **A held state stays readable.** "Festhalten" draws the held curve in its own colours at
+  45 % behind the current one: clearly there, clearly not the current state.
 - **No jumps on loading.** The server draws a plot at a guessed size and the default state; the
   browser shows it only once it has its real size and the state from the address, fading in.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their
