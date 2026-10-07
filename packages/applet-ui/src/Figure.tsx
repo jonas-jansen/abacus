@@ -537,7 +537,7 @@ export function Figure<P extends Params>({
     const h = handles[active.i]
     const row = (id: string): ProbeRow => {
       const v = params[id]
-      const value = Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join('; ')})` : typeof v === 'number' ? formatNumber(v, 3) : String(v)
+      const value = Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join(', ')})` : typeof v === 'number' ? formatNumber(v, 3) : String(v)
       return { tex: texOf?.(id) ?? id, value }
     }
     tip = { x: at[0], y: at[1], rows: [h.param, ...(h.also ?? [])].map(row) }

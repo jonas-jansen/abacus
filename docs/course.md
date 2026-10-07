@@ -54,7 +54,7 @@ as the first section of every course page whose `applet` it is. Use `###` for he
 | `<Hint>…</Hint>` | a folded hint |
 | `<Applet id="…" state={{…}} />` | a further applet inside the text |
 
-**Links that set the applet:** `[a = 3,2](#logistic-cobweb.a=3.2)` sets `a` and keeps the
+**Links that set the applet:** `[a = 3.2](#logistic-cobweb.a=3.2)` sets `a` and keeps the
 rest; several values with `&`, each with the applet's id: `#sir.beta=0.3&sir.gamma=0.1`. A
 point is `x~y`.
 

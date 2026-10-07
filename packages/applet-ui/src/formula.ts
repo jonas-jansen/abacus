@@ -3,10 +3,10 @@
  *
  *   'x_{n+1} = {{a}}\\,x_n'            → a live symbol a (or its value, with numbers shown)
  *   'x_{n+1} = x_n {{+b}}'             → "+ b"; with numbers "+ 1" or "− 1": the sign joins the operator
- *   'x_n = {{(a)}}^n\\,{{x0}}'         → parentheses around a negative value, e.g. (−0,5)^n
+ *   'x_n = {{(a)}}^n\\,{{x0}}'         → parentheses around a negative value, e.g. (−0.5)^n
  *   'x_0 = {{#x0}}'                    → always the value: a start value, where "x₀ = x₀" would say nothing
  *   'y(0) = {{#start}}'                → a point as a column vector, each entry its own chip; {{start.0}} is one entry
- *   '{{a}}{{*}}x'                      → a product: a x with symbols, 0,8 · x with numbers
+ *   '{{a}}{{*}}x'                      → a product: a x with symbols, 0.8 · x with numbers
  *   '{{stoerung}}'                     → a switch or choice shows its state ("an"); a click changes it
  *   '{{#z.0}} {{#+z.1}}\\,i'           → modifiers combine: 3 − 2 i, each part draggable
  *
@@ -30,29 +30,28 @@ export type FormulaMode = 'symbole' | 'zahlen'
 
 const PLACEHOLDER = /\{\{\s*([+(#]*)\s*([A-Za-z_][A-Za-z0-9_]*)(?:\.([01]))?\s*\)?\s*\}\}/g
 
-/** A number as TeX, German style: 0{,}8 · −1{,}25 · 1{,}2 \cdot 10^{-6}. */
+/** A number as TeX, with a decimal point: 0.8 · −1.25 · 1.2 \cdot 10^{-6}. */
 export function texNumber(v: number, digits = 4): string {
   if (!Number.isFinite(v)) return v > 0 ? '\\infty' : v < 0 ? '-\\infty' : '\\text{—}'
   if (v === 0) return '0'
   const abs = Math.abs(v)
-  const comma = (s: string) => s.replace('.', '{,}')
   // whole numbers such as a population of 100 000 are written out; others as powers of ten
   if ((abs >= 1e5 && !(Number.isInteger(v) && abs < 1e7)) || abs < 1e-3) {
     const [m, e] = v.toExponential(digits - 1).split('e')
-    return `${comma(String(Number(m)))} \\cdot 10^{${Number(e)}}`
+    return `${Number(m)} \\cdot 10^{${Number(e)}}`
   }
   const s = String(Number(v.toPrecision(digits)))
   // group thousands from five digits on, as elsewhere
   const [int, frac] = s.replace('-', '').split('.')
   const grouped = int.length >= 5 ? int.replace(/\B(?=(\d{3})+$)/g, '\\,') : int
-  return (v < 0 ? '-' : '') + grouped + (frac ? `{,}${frac}` : '')
+  return (v < 0 ? '-' : '') + grouped + (frac ? `.${frac}` : '')
 }
 
 const chip = (id: string, body: string, idx?: number) => `\\htmlData{param=${id}${idx === undefined ? '' : `, idx=${idx}`}}{${body}}`
 
 /** Expands the placeholders of a template for one display mode. Unknown ids are left as they are. */
 export function expandFormula(tex: string, specs: readonly ParamSpec[], params: Params, mode: FormulaMode): string {
-  // juxtaposition reads as a product between symbols, not between numbers: 0,8 5
+  // juxtaposition reads as a product between symbols, not between numbers: 0.8 5
   return tex.replaceAll('{{*}}', mode === 'symbole' ? '\\,' : ' \\cdot ').replace(PLACEHOLDER, (whole, mod: string, id: string, index?: string) => {
     const spec = specs.find((s) => s.id === id)
     if (!spec) return whole

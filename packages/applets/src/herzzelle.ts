@@ -1,12 +1,12 @@
 // Cardiac action potential as a system of ODEs (slides IV 29–32), Hodgkin–Huxley type: the
 // Purkinje-fibre model of Noble (1962). Membrane potential V (mV) and three gates m, h, n:
-//   C_m V' = −(g_Na m³h + 0,14)(V − 40) − g_L (V − V_L)
-//            − (1,2 e^{(−V−90)/50} + 0,015 e^{(V+90)/60} + g_K n⁴)(V + 100) + I_stim(t),
+//   C_m V' = −(g_Na m³h + 0.14)(V − 40) − g_L (V − V_L)
+//            − (1.2 e^{(−V−90)/50} + 0.015 e^{(V+90)/60} + g_K n⁴)(V + 100) + I_stim(t),
 //   x' = (x_∞(V) − x)/τ_x(V)  for x = m, h, n.
-// The slides don't list the gate functions x_∞, τ_x; they are Noble's. With g_L = 0,075,
-// V_L = −60 mV the cell is a pacemaker: a periodic solution with period ≈ 0,56 s between
-// −80 and +20 mV (IV 30). With g_L = 0,2, V_L = −85 mV it rests and fires only when
-// stimulated, here every 0,7 s (IV 32). Time runs in seconds; the rates are per ms.
+// The slides don't list the gate functions x_∞, τ_x; they are Noble's. With g_L = 0.075,
+// V_L = −60 mV the cell is a pacemaker: a periodic solution with period ≈ 0.56 s between
+// −80 and +20 mV (IV 30). With g_L = 0.2, V_L = −85 mV it rests and fires only when
+// stimulated, here every 0.7 s (IV 32). Time runs in seconds; the rates are per ms.
 
 import { category, ode, periodOf, real, quantity } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
@@ -84,7 +84,7 @@ export default defineApplet({
   formulas: [
     {
       label: 'Membran',
-      tex: String.raw`C_m V' = -({{gNa}}\,m^3 h + 0{,}14)(V - 40) - {{gL}}\,(V - {{VL}}) \\ \qquad - \bigl(1{,}2\,e^{\frac{-V-90}{50}} + 0{,}015\,e^{\frac{V+90}{60}} + {{gK}}\,n^4\bigr)(V + 100) + I_{stim}(t)`,
+      tex: String.raw`C_m V' = -({{gNa}}\,m^3 h + 0.14)(V - 40) - {{gL}}\,(V - {{VL}}) \\ \qquad - \bigl(1.2\,e^{\frac{-V-90}{50}} + 0.015\,e^{\frac{V+90}{60}} + {{gK}}\,n^4\bigr)(V + 100) + I_{stim}(t)`,
     },
     { label: 'Tore', tex: String.raw`m' = \frac{m_\infty(V) - m}{\tau_m(V)}, \; \text{ebenso } h, n \\ I_{stim} = {{I}} \text{ all } {{Ts}}\,\text{s für 2 ms}` },
   ],
@@ -95,8 +95,8 @@ export default defineApplet({
   layout: { main: ['gL', 'VL', 'I'] },
   readouts: ['art', 'periode', 'spitze', 'ruhe'],
   scenarios: [
-    { label: 'Schrittmacherzelle', text: 'g_L = 0,075, V_L = −60 mV, kein Reiz: feuert von selbst (Folie 30)', params: {} },
-    { label: 'Muskelzelle', text: 'g_L = 0,2, V_L = −85 mV, Reiz alle 0,7 s: feuert im Takt (Folie 32)', params: { gL: 0.2, VL: -85, I: 150, Ts: 0.7, T: 2.2 } },
+    { label: 'Schrittmacherzelle', text: 'g_L = 0.075, V_L = −60 mV, kein Reiz: feuert von selbst (Folie 30)', params: {} },
+    { label: 'Muskelzelle', text: 'g_L = 0.2, V_L = −85 mV, Reiz alle 0.7 s: feuert im Takt (Folie 32)', params: { gL: 0.2, VL: -85, I: 150, Ts: 0.7, T: 2.2 } },
     { label: 'Muskelzelle ohne Reiz', text: 'dieselbe Zelle ohne Reiz: sie ruht', params: { gL: 0.2, VL: -85, I: 0, T: 2.2 } },
   ],
 })

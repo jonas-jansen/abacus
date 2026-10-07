@@ -90,7 +90,7 @@ export const fontSizeFor = (width: number) => (width < 400 ? 11 : 12)
 
 export const estimateTextWidth = (text: string, fontSize: number) => text.length * fontSize * 0.6
 
-/** Rough width of a TeX-lite axis label (drawn at 1,15 × the tick size). */
+/** Rough width of a TeX-lite axis label (drawn at 1.15 × the tick size). */
 export const labelWidth = (tex: string, fontSize: number) =>
   estimateTextWidth(tex.replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}_^]/g, ''), fontSize * 1.15)
 
@@ -130,7 +130,7 @@ export function makeFrame(input: FrameInput): Frame {
   const yScaled = log ? { labels: yT.ticks.map(powerLabel), exp: 0 } : scaledLabels(yT.ticks, yT.step)
   const yTickLabels = yScaled.labels
   // a fixed minimum width, so the plot does not shift sideways while zooming or dragging
-  const yLabelWidth = Math.max(estimateTextWidth('−0,000', fontSize), ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
+  const yLabelWidth = Math.max(estimateTextWidth('−0.000', fontSize), ...yTickLabels.map((s) => estimateTextWidth(s, fontSize)))
 
   // and room for the y axis's power-of-ten badge, left of the upper tip
   const left = Math.ceil(Math.max(yLabelWidth + TICK + 6 + 4, yScaled.exp ? TICK + 8 + FACTOR_WIDTH(fontSize) + 2 : 0))
@@ -156,7 +156,7 @@ export function makeFrame(input: FrameInput): Frame {
   const lastHalf = Math.max(0, ...xTickLabels.slice(-1).map((s) => estimateTextWidth(s, fontSize) / 2))
   // the x factor starts where the x variable does (just right of the tip), or after the last number
   const factorRoom = xScaled.exp ? Math.max(AXIS_OVERHANG + 2, lastHalf + 6) + FACTOR_WIDTH(fontSize) + 2 : 0
-  const right = Math.ceil(Math.max(tail, factorRoom, estimateTextWidth('0,000', fontSize) / 2 + 2, lastHalf + 2))
+  const right = Math.ceil(Math.max(tail, factorRoom, estimateTextWidth('0.000', fontSize) / 2 + 2, lastHalf + 2))
 
   const plot = {
     x: left,

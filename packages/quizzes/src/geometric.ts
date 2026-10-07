@@ -5,7 +5,7 @@ export default [
   defineQuiz({
     id: 'geo-vorhersage-negativ',
     type: 'prediction',
-    question: 'Was macht die Folge für $a = -0{,}9$ und $x_0 = 5$?',
+    question: 'Was macht die Folge für $a = -0.9$ und $x_0 = 5$?',
     options: ['Sie wächst über alle Grenzen.', 'Sie springt hin und her und wird kleiner.', 'Sie springt hin und her und wird größer.', 'Sie bleibt konstant.'],
   }),
   defineQuiz({
@@ -46,10 +46,10 @@ export default [
   defineQuiz({
     id: 'geo-unter-001',
     type: 'find',
-    question: 'Es sei $a = 0{,}5$ und $x_0 = 5$. Ab welchem $n$ ist $x_n < 0{,}01$? Erst rechnen, dann nachsehen.',
+    question: 'Es sei $a = 0.5$ und $x_0 = 5$. Ab welchem $n$ ist $x_n < 0.01$? Erst rechnen, dann nachsehen.',
     quantity: '$n$',
     target: 9,
-    hints: ['Lösen Sie $5 \\cdot 0{,}5^n < 0{,}01$ mit dem Logarithmus.'],
-    solution: '$0{,}5^n < 0{,}002 \\iff n > \\log 0{,}002 / \\log 0{,}5 \\approx 8{,}97$, also ab $n = 9$.',
+    hints: ['Lösen Sie $5 \\cdot 0.5^n < 0.01$ mit dem Logarithmus.'],
+    solution: '$0.5^n < 0.002 \\iff n > \\log 0.002 / \\log 0.5 \\approx 8.97$, also ab $n = 9$.',
   }),
 ]

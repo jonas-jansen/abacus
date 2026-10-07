@@ -96,7 +96,7 @@ solution), lines are separated by `\\` and align at their relation.
 | `{{z.0}}` | one entry of a point |
 
 The step count or time window named in `horizon` belongs to the timeline, not the formulas.
-Numbers are German (`0{,}6`); whole numbers below 10⁷ are written out (`100\,000`).
+Numbers have a decimal point (`0.6`, never `0,6`); whole numbers below 10⁷ are written out (`100\,000`).
 
 ## Plots
 
@@ -126,7 +126,7 @@ from, to, label: 'b', run: '1' }` draws a slope triangle (b as the rise of one s
 `{ kind: 'factor', from, to, label: '\\cdot a' }` a curved arrow (a as the factor from one point
 to the next). A handle on a derived point is named by that point (`label: (p) => \`x_{${p.N}}\``),
 not by the parameter it changes – the guide shows the parameter. With `param: 'b'` the guide
-writes the current value beside it ("b = 1,5"); dragging then needs no tooltip. A handle that
+writes the current value beside it ("b = 1.5"); dragging then needs no tooltip. A handle that
 sits at its own value shows it in its label while dragged ("x₀ = 23"). See `arithmetic.ts`,
 `geometric.ts`.
 

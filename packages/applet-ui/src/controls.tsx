@@ -38,7 +38,7 @@ function showInput(v: number): string {
   return formatNumber(v, 8)
 }
 
-/** Dragging a value sideways changes it: one step per 4 px, ×10 with Shift, ×0,1 with Alt. */
+/** Dragging a value sideways changes it: one step per 4 px, ×10 with Shift, ×0.1 with Alt. */
 const SCRUB_PX = 4
 
 export function NumberField({
@@ -73,7 +73,7 @@ export function NumberField({
     const v = parseNumber(text)
     if (v !== undefined) onCommit(v)
     else {
-      if (text.trim() !== showInput(value)) onInvalid?.(`„${text.trim()}“ ist keine Zahl. Zum Beispiel 3,2 oder −0,5 oder 1e-3.`)
+      if (text.trim() !== showInput(value)) onInvalid?.(`„${text.trim()}“ ist keine Zahl. Zum Beispiel 3.2 oder −0.5 oder 1e-3.`)
       setText(showInput(value))
     }
   }
@@ -160,7 +160,7 @@ function ParamLabel({ spec, htmlFor }: { spec: ParamSpec; htmlFor?: string }) {
   )
 }
 
-/** A round number at or beyond v, for stretching the slider range: 3,7 → 4 · 5 300 → 6 000. */
+/** A round number at or beyond v, for stretching the slider range: 3.7 → 4 · 5 300 → 6 000. */
 function niceBeyond(v: number, up: boolean): number {
   if (v === 0) return 0
   const mag = 10 ** Math.floor(Math.log10(Math.abs(v)))

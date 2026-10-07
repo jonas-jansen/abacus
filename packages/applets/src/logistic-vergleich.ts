@@ -90,10 +90,10 @@ export default defineApplet({
   layout: { main: ['r', 'rd', 'h'] },
   readouts: ['kontinuierlich', 'diskret', 'periode', 'abstand'],
   scenarios: [
-    { label: 'Folie 43', text: 'r = 0,55, r_d = 1,2 r: qualitativ ähnlich', params: { r: 0.55, rd: 0.66, N0: 0.2, K: 210, h: 1, T: 30 } },
+    { label: 'Folie 43', text: 'r = 0.55, r_d = 1.2 r: qualitativ ähnlich', params: { r: 0.55, rd: 0.66, N0: 0.2, K: 210, h: 1, T: 30 } },
     { label: 'Folie 44', text: 'r = r_d = 3: die diskrete Folge springt chaotisch', params: { r: 3, rd: 3, N0: 0.2, K: 210, h: 1, T: 30 } },
-    { label: 'Folie 45', text: 'r = r_d = 2,1: die diskrete Folge pendelt sich zwischen zwei Werten ein', params: { r: 2.1, rd: 2.1, N0: 0.2, K: 210, h: 1, T: 30 } },
+    { label: 'Folie 45', text: 'r = r_d = 2.1: die diskrete Folge pendelt sich zwischen zwei Werten ein', params: { r: 2.1, rd: 2.1, N0: 0.2, K: 210, h: 1, T: 30 } },
     { label: 'Folie 46', text: 'Start genau auf dem 2-Zyklus: periodisch von Anfang an', params: { r: 2.1, rd: 2.1, N0: Math.round(zyklus(2.1, 210, -1) * 1e4) / 1e4, K: 210, h: 1, T: 30 } },
-    { label: 'Euler, h = 0,1', text: 'kleine Schritte: die Punkte liegen auf der Kurve (Folie 72)', params: { r: 2.1, rd: 2.1, N0: 0.2, K: 210, h: 0.1, T: 30 } },
+    { label: 'Euler, h = 0.1', text: 'kleine Schritte: die Punkte liegen auf der Kurve (Folie 72)', params: { r: 2.1, rd: 2.1, N0: 0.2, K: 210, h: 0.1, T: 30 } },
   ],
 })

@@ -33,7 +33,7 @@ describe('grading', () => {
   it('numbers: German or English decimals, tolerance, direction', () => {
     expect(grade(zahl, '12,5').status).toBe('correct')
     expect(grade(zahl, 12.509).status).toBe('correct')
-    expect(grade(zahl, '12,52')).toMatchObject({ status: 'close', direction: 'too large' })
+    expect(grade(zahl, '12.52')).toMatchObject({ status: 'close', direction: 'too large' })
     expect(grade(zahl, '3')).toMatchObject({ status: 'wrong', direction: 'too small' })
     expect(grade(zahl, 'zwölf')).toMatchObject({ status: 'wrong', points: 0 })
   })
@@ -47,7 +47,7 @@ describe('grading', () => {
     expect(isAnswered(einfach, 0)).toBe(true)
     expect(isAnswered(mehrfach, [])).toBe(false)
     expect(isAnswered(zuordnung, [null, null, null])).toBe(false)
-    expect(isAnswered(zahl, '1,5')).toBe(true)
+    expect(isAnswered(zahl, '1.5')).toBe(true)
     expect(isAnswered(zahl, 'x')).toBe(false)
   })
 

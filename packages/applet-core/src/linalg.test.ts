@@ -40,7 +40,7 @@ describe('equilibria of planar systems', () => {
     expect(J[1][0]).toBeCloseTo(-2 / 3, 6)
   })
 
-  it('finds the fixed points of the SIR map with R = 2,5: disease-free unstable, endemic stable (II 49–55)', () => {
+  it('finds the fixed points of the SIR map with R = 2.5: disease-free unstable, endemic stable (II 49–55)', () => {
     const N = 100_000
     const [a, g, b] = [0.1, 0.1, 5e-6]
     const f = ([s, i]: readonly number[]) => [s - b * s * i + a * (N - s), (1 - g - a) * i + b * s * i]

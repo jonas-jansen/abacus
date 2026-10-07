@@ -1,6 +1,6 @@
 // Newton's method (slides I 57–64): x_{n+1} = x_n − g(x_n)/g'(x_n). Each step replaces g by
 // its tangent at x_n and takes the tangent's zero. Near a simple root the number of correct
-// digits roughly doubles per step (the slides' example g(x) = e^{−5x} − x from x₀ = 0,05);
+// digits roughly doubles per step (the slides' example g(x) = e^{−5x} − x from x₀ = 0.05);
 // far away it may jump to another root, cycle (x³ − 2x + 2 from 0) or run off (arctan).
 
 import { bisect, choice, detectPeriod, iteration, category, list, real, sample, steps, quantity, type Series } from '@abacus/applet-core'
@@ -179,8 +179,8 @@ export default defineApplet({
   ],
   readouts: ['verhalten', 'nullstelle', 'stellen'],
   scenarios: [
-    { label: 'Folie 64', text: 'g(x) = e⁻⁵ˣ − x ab x₀ = 0,05: rasche Konvergenz', params: { g: 'e5', x0: 0.05, N: 6 } },
+    { label: 'Folie 64', text: 'g(x) = e⁻⁵ˣ − x ab x₀ = 0.05: rasche Konvergenz', params: { g: 'e5', x0: 0.05, N: 6 } },
     { label: 'Zyklus', text: 'x³ − 2x + 2 ab x₀ = 0: springt zwischen 0 und 1 hin und her', params: { g: 'kubisch', x0: 0, N: 12 } },
-    { label: 'läuft davon', text: 'arctan x ab x₀ = 1,5: jeder Schritt wirft weiter hinaus', params: { g: 'arctan', x0: 1.5, N: 6 } },
+    { label: 'läuft davon', text: 'arctan x ab x₀ = 1.5: jeder Schritt wirft weiter hinaus', params: { g: 'arctan', x0: 1.5, N: 6 } },
   ],
 })

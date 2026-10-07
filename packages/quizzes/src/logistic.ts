@@ -5,7 +5,7 @@ export default [
   defineQuiz({
     id: 'log-vorhersage-32',
     type: 'prediction',
-    question: 'Bei $a = 2{,}8$ kommt die Folge zur Ruhe. Was erwarten Sie für $a = 3{,}2$?',
+    question: 'Bei $a = 2.8$ kommt die Folge zur Ruhe. Was erwarten Sie für $a = 3.2$?',
     options: ['Sie kommt auch zur Ruhe, nur langsamer.', 'Sie springt zwischen zwei Werten.', 'Sie wird völlig unregelmäßig.', 'Sie verlässt $[0, 1]$.'],
   }),
   defineQuiz({
@@ -34,7 +34,7 @@ export default [
   defineQuiz({
     id: 'log-grenzwert-25',
     type: 'find',
-    question: 'Lesen Sie für $a = 2{,}5$ den Grenzwert der Folge ab.',
+    question: 'Lesen Sie für $a = 2.5$ den Grenzwert der Folge ab.',
     quantity: '$y^*$',
     target: 0.6,
     tolerance: 0.01,
@@ -56,7 +56,7 @@ export default [
     id: 'log-spirale-treppe',
     type: 'open',
     question:
-      'Bei $a = 2{,}8$ nähert sich die Folge dem Fixpunkt abwechselnd von beiden Seiten, bei $a = 1{,}8$ von einer Seite. Woran sehen Sie das im Diagramm – und welche Rolle spielt das Vorzeichen von $f\'(y^*)$?',
-    solution: '$f\'(y^*) = 2 - a$ ist bei $a = 2{,}8$ negativ (Spirale), bei $a = 1{,}8$ positiv (Treppe).',
+      'Bei $a = 2.8$ nähert sich die Folge dem Fixpunkt abwechselnd von beiden Seiten, bei $a = 1.8$ von einer Seite. Woran sehen Sie das im Diagramm – und welche Rolle spielt das Vorzeichen von $f\'(y^*)$?',
+    solution: '$f\'(y^*) = 2 - a$ ist bei $a = 2.8$ negativ (Spirale), bei $a = 1.8$ positiv (Treppe).',
   }),
 ]

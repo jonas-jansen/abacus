@@ -1,7 +1,7 @@
 // Leslie model with three age classes (slides II 26–37): x(n+1) = L x(n), births b_i in the
 // first row, survival s_i below the diagonal. The spectral radius ρ(L) decides: the
 // population dies out for ρ < 1 and grows for ρ > 1 (II 36). The slides' example
-// (b₃ = 9, s₁ = 0,1, s₂ = 0,6) has three eigenvalues of the same modulus 3/∛50 < 1: it dies
+// (b₃ = 9, s₁ = 0.1, s₂ = 0.6) has three eigenvalues of the same modulus 3/∛50 < 1: it dies
 // out, and its age structure keeps cycling with period 3 instead of settling.
 
 import { eigenvalues, eigenvalueNames, eigenvalueTexts, iterationN, category, list, real, steps, spectralRadiusOf, quantity } from '@abacus/applet-core'
@@ -83,8 +83,8 @@ export default defineApplet({
   layout: { main: ['b3', 's1', 's2'] },
   readouts: ['rho', 'zukunft', 'eigenwerte', 'gesamt'],
   scenarios: [
-    { label: 'Folie 29', text: 'b₃ = 9, s₁ = 0,1, s₂ = 0,6: stirbt aus, die Altersstruktur kreist mit Periode 3', params: {} },
-    { label: 'wächst', text: 'b₃ = 20: ρ = ∛1,2 > 1', params: { b3: 20 } },
+    { label: 'Folie 29', text: 'b₃ = 9, s₁ = 0.1, s₂ = 0.6: stirbt aus, die Altersstruktur kreist mit Periode 3', params: {} },
+    { label: 'wächst', text: 'b₃ = 20: ρ = ∛1.2 > 1', params: { b3: 20 } },
     { label: 'stabile Struktur', text: 'auch die mittlere Klasse bekommt Nachwuchs: die Anteile stellen sich ein', params: { b2: 4, b3: 9 } },
   ],
 })

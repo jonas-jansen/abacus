@@ -74,7 +74,7 @@ export function detectPeriod(tail: ArrayLike<number>, { maxPeriod = 16, tol = 1e
 
 /**
  * Last value if the tail has settled within `tol`, else null. A limit that is zero up to
- * round-off relative to the sequence's size is reported as 0, not as 7,6·10⁻¹⁹⁴.
+ * round-off relative to the sequence's size is reported as 0, not as 7.6·10⁻¹⁹⁴.
  */
 export function limitOf(xs: ArrayLike<number>, { tol = 1e-6, window = 5 } = {}): number | null {
   const m = xs.length

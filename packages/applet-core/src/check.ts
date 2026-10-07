@@ -1,6 +1,6 @@
 /**
  * Checking and feedback (§8). Checkers return a diagnosis, never a boolean: the student
- * hears "zu klein — bei a = 2,8 läuft die Folge immer noch auf einen Wert zu", not a red cross.
+ * hears "zu klein — bei a = 2.8 läuft die Folge immer noch auf einen Wert zu", not a red cross.
  *
  * Checkers are plain functions in the quiz definitions. They receive the answer and, for
  * questions about an applet, its current parameters and readouts (from the channel).
@@ -28,7 +28,7 @@ const hintOf = <P extends Params>(h: HintText<P> | undefined, v: number, p: P, o
 
 export const NOT_A_NUMBER: Diagnosis = {
   status: 'wrong',
-  hint: 'Bitte eine Zahl eingeben, z. B. 3,2.',
+  hint: 'Bitte eine Zahl eingeben, z. B. 3.2.',
 }
 
 export interface ThresholdOptions<P extends Params> {
@@ -125,5 +125,5 @@ export function condition<P extends Params = Params>(
   }
 }
 
-/** Formats a number for use inside hint texts (German decimals). */
+/** Formats a number for use inside hint texts (decimal point: 0.5). */
 export const numText = (v: number, digits = 4) => formatNumber(v, digits)

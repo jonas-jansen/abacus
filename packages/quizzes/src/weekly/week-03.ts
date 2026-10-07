@@ -14,11 +14,11 @@ export default defineWeeklyQuiz({
     defineQuiz({
       id: 'verdopplung',
       type: 'number',
-      question: "Es sei $N' = 0{,}2\\,N$ mit $N(0) = 100$. Nach welcher Zeit hat sich $N$ verdoppelt? (auf zwei Nachkommastellen)",
+      question: "Es sei $N' = 0.2\\,N$ mit $N(0) = 100$. Nach welcher Zeit hat sich $N$ verdoppelt? (auf zwei Nachkommastellen)",
       quantity: '$t$',
       target: Math.log(2) / 0.2,
       tolerance: 0.01,
-      solution: '$e^{0{,}2\\,t} = 2 \\iff t = \\ln 2 / 0{,}2 \\approx 3{,}47$.',
+      solution: '$e^{0.2\\,t} = 2 \\iff t = \\ln 2 / 0.2 \\approx 3.47$.',
     }),
     defineQuiz({
       id: 'logistisch',

@@ -31,7 +31,7 @@ const render = (tex: string) =>
     trust: (ctx) => ctx.command === '\\htmlData',
   })
 
-/** A round step of about 1/100 of a span: 8 → 0,1; 0,02 → 0,0001. */
+/** A round step of about 1/100 of a span: 8 → 0.1; 0.02 → 0.0001. */
 const niceStep = (span: number) => 10 ** Math.floor(Math.log10(Math.max(span, 1e-12) / 100))
 
 /** The step a drag or arrow key moves a parameter (or one entry of a point) by. */
@@ -292,7 +292,7 @@ export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusPa
               <span className="ab-values-track" aria-hidden="true">
                 <span className="ab-values-knob" />
                 <span className="ab-values-opt ab-values-sym">a</span>
-                <span className="ab-values-opt ab-values-num">1,5</span>
+                <span className="ab-values-opt ab-values-num">1.5</span>
               </span>
             </button>
           </span>

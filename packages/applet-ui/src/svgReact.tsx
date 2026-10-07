@@ -20,7 +20,7 @@ export function renderSvg(node: SvgNode, key?: number): ReactNode {
   for (const [k, v] of Object.entries(node.attrs ?? {})) {
     if (v === undefined) continue
     // coordinates to 1/100 px: server and browser may differ in the last bit of a float
-    // (auto-scaled axes follow computed data), which would break hydration; nobody sees 0,01 px
+    // (auto-scaled axes follow computed data), which would break hydration; nobody sees 0.01 px
     props[propName(k)] = k === 'style' ? styleObject(String(v)) : typeof v === 'number' ? Math.round(v * 100) / 100 : v
   }
   const children = node.children?.map((c, i) => renderSvg(c, i))

@@ -25,7 +25,7 @@ const pfeil = (id: string, label: string, to: Point, role: Series['role'], from:
 })
 
 const text = ([a, b]: Point) => {
-  const f = (v: number) => (Math.round(v * 1000) / 1000).toString().replace('.', ',').replace('-', '−')
+  const f = (v: number) => (Math.round(v * 1000) / 1000).toString().replace('-', '−')
   return `${f(a)} ${b < 0 ? '−' : '+'} ${f(Math.abs(b))} i`
 }
 

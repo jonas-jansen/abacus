@@ -1,5 +1,5 @@
 /**
- * German number formatting, done by hand rather than through `Intl` so that server and
+ * Number formatting (decimal point: 0.5, minus sign −), done by hand rather than through `Intl` so that server and
  * client produce byte-identical output (SSR first paint must match hydration).
  */
 
@@ -11,16 +11,16 @@ function tidy(s: string): string {
   if (/^-0(\.0*)?$/.test(s)) s = s.slice(1)
   // Group thousands from five digits on: 12 500 · 1 000 000 (not 2026 or 1000).
   s = s.replace(/^(-?)(\d{5,})/, (_, sign: string, int: string) => sign + int.replace(/\B(?=(\d{3})+$)/g, NNBSP))
-  return s.replace('.', ',').replace('-', MINUS)
+  return s.replace('-', MINUS)
 }
 
-/** Fixed number of decimals: `formatFixed(0.5, 2)` → "0,50". */
+/** Fixed number of decimals: `formatFixed(0.5, 2)` → "0.50". */
 export function formatFixed(v: number, decimals: number): string {
   if (!Number.isFinite(v)) return v > 0 ? '∞' : v < 0 ? MINUS + '∞' : '—'
   return tidy(v.toFixed(Math.max(0, Math.min(20, decimals))))
 }
 
-/** Significant digits, trailing zeros removed: `formatNumber(3.14159, 3)` → "3,14". */
+/** Significant digits, trailing zeros removed: `formatNumber(3.14159, 3)` → "3.14". */
 export function formatNumber(v: number, digits = 4): string {
   if (!Number.isFinite(v)) return formatFixed(v, 0)
   if (v === 0) return '0'

@@ -1,8 +1,8 @@
 // Cardiac action potential as a map (slides II 61–65): potential y₁ and recovery variable y₂,
 //   y₁(n+1) = y₁(n)² e^{y₂(n) − y₁(n)} + k,   y₂(n+1) = a y₂(n) − b y₁(n) + c,
-// y₂ starting at its rest value c/(1 − a). With b = 0,26 the cell fires periodically; with
-// b = 0,18 extra small spikes appear between the action potentials — chaotic early
-// afterdepolarisations (EADs); with b = 0,6 and k = 0,02 it rests and answers one stimulus.
+// y₂ starting at its rest value c/(1 − a). With b = 0.26 the cell fires periodically; with
+// b = 0.18 extra small spikes appear between the action potentials — chaotic early
+// afterdepolarisations (EADs); with b = 0.6 and k = 0.02 it rests and answers one stimulus.
 
 import { detectPeriod, iterationN, category, index, real, steps } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
@@ -77,8 +77,8 @@ export default defineApplet({
   layout: { main: ['b', 'k'] },
   readouts: ['art', 'periode', 'anzahl'],
   scenarios: [
-    { label: 'spontan, b = 0,26', text: 'regelmäßige Aktionspotentiale (Folie 63 links)', params: {} },
-    { label: 'EADs, b = 0,18', text: 'chaotische frühe Nachdepolarisationen (Folie 63 rechts)', params: { b: 0.18, N: 210 } },
-    { label: 'aus der Ruhe', text: 'b = 0,6, k = 0,02: eine Anregung, dann wieder Ruhe (Folie 64)', params: { b: 0.6, k: 0.02, y10: 0.3, N: 30 } },
+    { label: 'spontan, b = 0.26', text: 'regelmäßige Aktionspotentiale (Folie 63 links)', params: {} },
+    { label: 'EADs, b = 0.18', text: 'chaotische frühe Nachdepolarisationen (Folie 63 rechts)', params: { b: 0.18, N: 210 } },
+    { label: 'aus der Ruhe', text: 'b = 0.6, k = 0.02: eine Anregung, dann wieder Ruhe (Folie 64)', params: { b: 0.6, k: 0.02, y10: 0.3, N: 30 } },
   ],
 })

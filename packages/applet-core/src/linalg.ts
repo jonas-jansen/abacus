@@ -140,7 +140,7 @@ export function spectralRadiusOf(A: Matrix): number {
   return Math.max(0, ...eigenvalues(A).map((l) => Math.hypot(l.re, l.im)))
 }
 
-/** An eigenvalue as text, e.g. "1,2" or "−0,3 ± 0,4 i" (conjugates are shown once). */
+/** An eigenvalue as text, e.g. "1.2" or "−0.3 ± 0.4 i" (conjugates are shown once). */
 export function complexText(l: Complex, digits = 3): string {
   return l.im === 0 ? formatNumber(l.re, digits) : `${formatNumber(l.re, digits)} ± ${formatNumber(Math.abs(l.im), digits)} i`
 }

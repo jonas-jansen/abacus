@@ -94,7 +94,7 @@ describe('containers on the channel', () => {
   it('Finde checks with its own checker and records every attempt', () => {
     const q = mount(<QuizView def={getQuiz('geo-konstant')} scope={scope} />)
     const input = q.querySelector('input') as HTMLInputElement
-    type(input, '1,1')
+    type(input, '1.1')
     submit(q.querySelector('form'))
     expect(q.textContent).toContain('zu groß')
     expect(q.querySelector('.katex')).not.toBeNull()
@@ -119,7 +119,7 @@ describe('containers on the channel', () => {
     click(button(q, 'Einstellung prüfen'))
     expect(q.textContent).toContain('kommt noch auf einem Punkt zur Ruhe')
     const aField = a.querySelector('input[aria-label="Wachstumsrate a"]') as HTMLInputElement
-    type(aField, '3,5')
+    type(aField, '3.5')
     act(() => aField.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     click(button(q, 'Einstellung prüfen'))
     expect(q.textContent).toContain('Richtig')
@@ -128,7 +128,7 @@ describe('containers on the channel', () => {
   it('applet/command sets parameters from outside', () => {
     const a = mount(<AppletView def={getApplet('geometric')} />)
     act(() => publish('applet/command', { applet: 'geometric', set: { a: -0.5 } }))
-    expect((a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement).value).toBe('−0,5')
+    expect((a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement).value).toBe('−0.5')
   })
 })
 
@@ -138,7 +138,7 @@ describe('applet container', () => {
     try {
       window.location.hash = '#geometric.a=-0.5&other.x=1'
       const a = mount(<AppletView def={getApplet('geometric')} />)
-      expect((a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement).value).toBe('−0,5')
+      expect((a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement).value).toBe('−0.5')
       const range = a.querySelector('input.ab-range') as HTMLInputElement
       act(() => range.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })))
       act(() => vi.advanceTimersByTime(300))
@@ -184,9 +184,9 @@ describe('applet container', () => {
     const range = a.querySelector('input.ab-range') as HTMLInputElement
     const field = a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement
     act(() => range.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })))
-    expect(field.value).toBe('0,51')
+    expect(field.value).toBe('0.51')
     act(() => range.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true, bubbles: true })))
-    expect(field.value).toBe('0,41')
+    expect(field.value).toBe('0.41')
     click(a.querySelector('button[aria-label="Feinmodus für Faktor a"]'))
     expect(Number(range.min)).toBeCloseTo(0.21)
     expect(Number(range.max)).toBeCloseTo(0.61)
@@ -204,19 +204,19 @@ describe('comfort', () => {
     try {
       const a = mount(<AppletView def={getApplet('geometric')} />)
       const field = () => a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement
-      commit(field(), '0,5')
+      commit(field(), '0.5')
       act(() => vi.advanceTimersByTime(500))
-      commit(field(), '1,2')
+      commit(field(), '1.2')
       act(() => vi.advanceTimersByTime(500))
       click(a.querySelector('button[aria-label="rückgängig"]'))
-      expect(field().value).toBe('0,5')
+      expect(field().value).toBe('0.5')
       click(a.querySelector('button[aria-label="rückgängig"]'))
-      expect(field().value).toBe('0,8')
+      expect(field().value).toBe('0.8')
       click(a.querySelector('button[aria-label="wiederholen"]'))
-      expect(field().value).toBe('0,5')
+      expect(field().value).toBe('0.5')
       // ⌘Z on the applet does the same
       act(() => a.querySelector('.ab-applet')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', metaKey: true, bubbles: true })))
-      expect(field().value).toBe('0,8')
+      expect(field().value).toBe('0.8')
     } finally {
       vi.useRealTimers()
     }
@@ -226,7 +226,7 @@ describe('comfort', () => {
     const a = mount(<AppletView def={getApplet('geometric')} />)
     // the pin among the tools of the panel
     click(a.querySelector('button[aria-label="vergleichen"]'))
-    type(a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement, '1,1')
+    type(a.querySelector('input[aria-label="Faktor a"]') as HTMLInputElement, '1.1')
     act(() => (a.querySelector('input[aria-label="Faktor a"]') as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
     expect(a.textContent).toContain('festgehalten')
     expect(a.querySelector('.ab-stat-before')?.textContent).toContain('vorher')
@@ -252,7 +252,7 @@ describe('weekly quizzes', () => {
     expect(host.querySelectorAll('.wq-question')).toHaveLength(w.questions.length)
 
     // the single choice question: pick the right option by its TeX source (options are shuffled)
-    const label = [...host.querySelectorAll('.wq-question')[0].querySelectorAll('label')].find((l) => l.textContent?.includes('1{,}05\\,x_n'))!
+    const label = [...host.querySelectorAll('.wq-question')[0].querySelectorAll('label')].find((l) => l.textContent?.includes('1.05\\,x_n'))!
     act(() => label.querySelector('input')!.click())
     // submit with open questions: asks first, then submits
     act(() => button('Abgeben').click())

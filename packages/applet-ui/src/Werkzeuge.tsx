@@ -232,7 +232,7 @@ export function HilfeKnopf({ bahnen, timeline }: { bahnen: boolean; timeline: bo
     ],
     ['Zahlen', '{Ziehen} | Zahl seitwärts ziehen: Wert ändern\nKlick | Zahl eintippen\nKlick | auf einen Messwert: im Bild markieren'],
     ...(timeline
-      ? ([['Zeitleiste', '{Leer} | abspielen, anhalten\nKlick | Tempo: ½× · 1× · 2× · 4×\n{Ziehen} | Tempo stufenlos, 0,1× bis 10×']] as [string, string][])
+      ? ([['Zeitleiste', '{Leer} | abspielen, anhalten\nKlick | Tempo: ½× · 1× · 2× · 4×\n{Ziehen} | Tempo stufenlos, 0.1× bis 10×']] as [string, string][])
       : []),
     ['Verlauf', '{Mod} + {Z} | rückgängig\n{Redo} | wiederholen'],
     ['Vortrag', '{Plus} {Minus} | größer, kleiner\n{Null} | passend zum Bildschirm\n{Esc} | beenden'],

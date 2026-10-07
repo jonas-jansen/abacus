@@ -21,7 +21,7 @@
 - **Compare two states:** the pin ("vergleichen") holds the current picture faintly; change
   a parameter and both are visible, with the readouts' earlier values beside the new ones.
 - **Step by step:** Space plays and pauses; the arrows next to the timeline step one at a
-  time; the tempo button cycles ½× to 4×, and dragging it sets any tempo from 0,1× to 10×.
+  time; the tempo button cycles ½× to 4×, and dragging it sets any tempo from 0.1× to 10×.
 - **Zoom:** ⌘/Strg + mouse wheel (or two fingers), Shift + drag to move, double-click for the
   whole picture. Curves continue past the horizon when you zoom out.
 

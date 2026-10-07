@@ -1,8 +1,8 @@
 // MATLAB: app_numdiffsol — Newton cooling in a room that cools down itself:
-//   T' = −0,6 (T − (293,5 − 1,35 t)),  T(0) = 315,  exact T(t) = 19,25 e^{−0,6t} − 1,35 t + 295,75.
+//   T' = −0.6 (T − (293.5 − 1.35 t)),  T(0) = 315,  exact T(t) = 19.25 e^{−0.6t} − 1.35 t + 295.75.
 // Euler (order 1) and Heun (order 2) with m steps on [0, 10]. Halving h should halve Euler's
-// error and quarter Heun's; Euler is stable only for h < 2/0,6 (m ≥ 4) and free of
-// oscillation for h < 1/0,6 (m ≥ 7).
+// error and quarter Heun's; Euler is stable only for h < 2/0.6 (m ≥ 4) and free of
+// oscillation for h < 1/0.6 (m ≥ 7).
 
 import { bool, defineModel, int, list, quantity, type Observable, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
@@ -103,9 +103,9 @@ export default defineApplet({
   id: 'euler-heun',
   model,
   formulas: [
-    { label: 'Gleichung', tex: String.raw`T' = -0{,}6\,\bigl(T - (293{,}5 - 1{,}35\,t)\bigr)` },
+    { label: 'Gleichung', tex: String.raw`T' = -0.6\,\bigl(T - (293.5 - 1.35\,t)\bigr)` },
     { label: 'Verfahren', tex: String.raw`h = \frac{10}{{{m}}} \\ T_{n+1} = T_n + h\,f(t_n, T_n) \quad \text{Euler: } {{euler}} \\ T_{n+1} = T_n + \tfrac{h}{2}\,\bigl(f(t_n, T_n) + f(t_{n+1}, T_n + h\,f(t_n, T_n))\bigr) \quad \text{Heun: } {{heun}}` },
-    { label: 'Lösung', tex: String.raw`T(t) = 19{,}25\,e^{-0{,}6\,t} - 1{,}35\,t + 295{,}75 \quad \text{zeigen: } {{exakt}}` },
+    { label: 'Lösung', tex: String.raw`T(t) = 19.25\,e^{-0.6\,t} - 1.35\,t + 295.75 \quad \text{zeigen: } {{exakt}}` },
   ],
   plots: [
     {

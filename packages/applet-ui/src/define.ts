@@ -65,7 +65,7 @@ export type Guide = (
   | { kind: 'rise'; from: readonly [number, number]; to: readonly [number, number]; label: string; run?: string }
   | { kind: 'factor'; from: readonly [number, number]; to: readonly [number, number]; label: string }
 ) & {
-  /** The parameter the guide shows: its value is written beside it ("b = 1,5"), and the handle that changes it needs no tooltip. */
+  /** The parameter the guide shows: its value is written beside it ("b = 1.5"), and the handle that changes it needs no tooltip. */
   param?: string
 }
 

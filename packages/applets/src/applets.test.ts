@@ -110,7 +110,7 @@ describe('answer key, new applets (§11.2)', () => {
   })
 
   it('SIR: the epidemic takes off iff β x₁(0) > γ + α', () => {
-    // threshold: β · 99 999 = γ + α = 0,2  ⇔  β ≈ 2,00002·10⁻⁶
+    // threshold: β · 99 999 = γ + α = 0.2  ⇔  β ≈ 2.00002·10⁻⁶
     for (const [beta, out] of [
       [1.9e-6, 'stirbt aus'],
       [2.1e-6, 'bricht aus'],
@@ -167,12 +167,12 @@ describe('horizon at its smallest', () => {
 })
 
 describe('Anhang: the numbers are right', () => {
-  it('ε–N: for 1/n and ε = 0,1 the sequence is in the band from n = 11 on', () => {
+  it('ε–N: for 1/n and ε = 0.1 the sequence is in the band from n = 11 on', () => {
     expect(observe('folgen-grenzwert', { folge: 'inv', eps: 0.1 }).ab.value).toBe(11)
-    expect(observe('folgen-grenzwert', { folge: 'quot', eps: 0.01 }).ab.value).toBe(200) // |2n/(n+1) − 2| = 2/(n+1) < 0,01 ⇔ n > 199
+    expect(observe('folgen-grenzwert', { folge: 'quot', eps: 0.01 }).ab.value).toBe(200) // |2n/(n+1) − 2| = 2/(n+1) < 0.01 ⇔ n > 199
   })
 
-  it('difference quotient of x² at 1 with h = 0,5 is 2,5; the derivative 2', () => {
+  it('difference quotient of x² at 1 with h = 0.5 is 2.5; the derivative 2', () => {
     const o = observe('differenzenquotient', { f: 'x2', a: 1, h: 0.5 })
     expect(o.quotient.value).toBeCloseTo(2.5, 12)
     expect(o.ableitung.value).toBe(2)
@@ -186,7 +186,7 @@ describe('Anhang: the numbers are right', () => {
   })
 
   it('linear system x₁ − 2x₂ = 1, 2x₁ + x₂ = 7 has the solution (3, 1); parallel lines none', () => {
-    expect(observe('lgs', {}).loesung.value).toBe('(3; 1)')
+    expect(observe('lgs', {}).loesung.value).toBe('(3, 1)')
     expect(observe('lgs', { a21: 2, a22: -4, b2: 5 }).art.value).toBe('keine (parallel)')
     expect(observe('lgs', { a21: 2, a22: -4, b2: 2 }).art.value).toBe('unendlich viele (dieselbe Gerade)')
   })
@@ -206,7 +206,7 @@ describe('Anhang: the numbers are right', () => {
     expect(ae).toBeCloseTo(az + aw, 9)
   })
 
-  it('fundamental theorem: F(x) for f(t) = t − 1 from 0 to 3 is 1,5', () => {
+  it('fundamental theorem: F(x) for f(t) = t − 1 from 0 to 3 is 1.5', () => {
     expect(observe('hauptsatz', { f: 'lin', a: 0, x: 3 }).F.value).toBeCloseTo(1.5, 12)
   })
 })
@@ -221,7 +221,7 @@ describe('zoomed detail', () => {
     for (const a of d.x) [lo, hi] = [Math.min(lo, a), Math.max(hi, a)]
     expect(lo).toBeGreaterThanOrEqual(3.55)
     expect(hi).toBeLessThanOrEqual(3.6)
-    // even a slice 0,001 high is filled: most values of a contribute many points
+    // even a slice 0.001 high is filled: most values of a contribute many points
     // (periodic windows contribute nothing to such a thin slice; the chaotic band does)
     expect(d.x.length).toBeGreaterThan(12_000)
     for (const v of d.y) expect(v >= 0.5 && v <= 0.501).toBe(true)
@@ -235,7 +235,7 @@ describe('answer key of the new applets (values from the slides)', () => {
     return def.model.run({ ...defaultParams(def.model), ...s.params } as never).observables
   }
 
-  it('Newton (I 64): from x₀ = 0,05 the digits double, x* = 0,265344933048…; the cycle and the runaway', () => {
+  it('Newton (I 64): from x₀ = 0.05 the digits double, x* = 0.265344933048…; the cycle and the runaway', () => {
     const o = szenario('newton', 'Folie 64')
     expect(o.nullstelle.value).toBeCloseTo(0.26534493304844, 12)
     expect((o.stellen.value as number[]).slice(0, 5)).toEqual([0, 1, 2, 4, 8])
@@ -274,9 +274,9 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(b.b.value).toMatch(/^stabil/)
   })
 
-  it('cardiac map (II 63–64): period 38 for b = 0,26, irregular for b = 0,18, rest for b = 0,6', () => {
-    expect(szenario('aktionspotential', 'spontan, b = 0,26').periode.value).toBe(38)
-    expect(szenario('aktionspotential', 'EADs, b = 0,18').art.value).toBe('unregelmäßig: EADs')
+  it('cardiac map (II 63–64): period 38 for b = 0.26, irregular for b = 0.18, rest for b = 0.6', () => {
+    expect(szenario('aktionspotential', 'spontan, b = 0.26').periode.value).toBe(38)
+    expect(szenario('aktionspotential', 'EADs, b = 0.18').art.value).toBe('unregelmäßig: EADs')
     expect(szenario('aktionspotential', 'aus der Ruhe').art.value).toBe('Ruhe')
   })
 
@@ -287,7 +287,7 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(szenario('zellring', 'Szenario III').erregung.value).toBe('kreist weiter (Reentry)')
   })
 
-  it('bioreactor (IV 27–28): the culture holds at (8,15, 0,92); a strong flow washes it out', () => {
+  it('bioreactor (IV 27–28): the culture holds at (8.15, 0.92); a strong flow washes it out', () => {
     const o = szenario('bioreaktor', 'Folie 27')
     const [b, n] = o.gleichgewicht.value as number[]
     expect(n).toBeCloseTo((0.1 * 12) / 1.3, 9)
@@ -303,7 +303,7 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(szenario('pendel', 'ohne Dämpfung').unten.value).toBe('Zentrum')
   })
 
-  it('cardiac cell (IV 30, 32): pacemaker with period ≈ 0,56 s, muscle cell in step with the stimulus', () => {
+  it('cardiac cell (IV 30, 32): pacemaker with period ≈ 0.56 s, muscle cell in step with the stimulus', () => {
     const s = szenario('herzzelle', 'Schrittmacherzelle')
     expect(s.art.value).toBe('feuert von selbst')
     expect(s.periode.value as number).toBeCloseTo(0.564, 2)

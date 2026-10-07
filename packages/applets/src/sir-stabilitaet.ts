@@ -91,7 +91,7 @@ export default defineApplet({
   layout: { main: ['beta', 'gamma', 'alpha'] },
   readouts: ['R', 'a', 'b', 'bStand', 'bedingung', 'spitze'],
   scenarios: [
-    { label: 'Szenario A', text: 'β = 1,2·10⁻⁶, x(0) = (70 000, 30 000): R = 0,6, die Krankheit verschwindet', params: { beta: 1.2e-6, gamma: 0.1, alpha: 0.1, I0: 30_000 } },
-    { label: 'Szenario B', text: 'β = 7,6·10⁻⁶, x(0) = (99 999, 1): R = 3,8, endemisch', params: { beta: 7.6e-6, gamma: 0.1, alpha: 0.1, I0: 1 } },
+    { label: 'Szenario A', text: 'β = 1.2·10⁻⁶, x(0) = (70 000, 30 000): R = 0.6, die Krankheit verschwindet', params: { beta: 1.2e-6, gamma: 0.1, alpha: 0.1, I0: 30_000 } },
+    { label: 'Szenario B', text: 'β = 7.6·10⁻⁶, x(0) = (99 999, 1): R = 3.8, endemisch', params: { beta: 7.6e-6, gamma: 0.1, alpha: 0.1, I0: 1 } },
   ],
 })

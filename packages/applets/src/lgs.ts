@@ -22,7 +22,7 @@ function segment(a: number, b: number, c: number, L = MAX_ZOOM_OUT * 2 * R): { x
 }
 
 /**
- * The two handles of a line: 2,5 units to either side of the point closest to the origin —
+ * The two handles of a line: 2.5 units to either side of the point closest to the origin —
  * away from the middle, where the lines usually cross. The first shifts, the second turns.
  */
 function griffe(a: number, b: number, c: number): [[number, number], [number, number]] | null {
@@ -83,11 +83,11 @@ const model = closedForm({
   observables: ({ p }) => {
     const l = loesung(p)
     const det = p.a11 * p.a22 - p.a12 * p.a21
-    const fmt = (v: number) => (Math.round(v * 1000) / 1000).toString().replace('.', ',').replace('-', '−')
+    const fmt = (v: number) => (Math.round(v * 1000) / 1000).toString().replace('-', '−')
     return {
       det: quantity('Determinante $\\det A$', det),
       art: category('Lösungen', l.art === 'eine' ? 'genau eine' : l.art === 'keine' ? 'keine (parallel)' : 'unendlich viele (dieselbe Gerade)'),
-      loesung: category('Lösung $(x_1, x_2)$', l.x ? `(${fmt(l.x[0])}; ${fmt(l.x[1])})` : null, {
+      loesung: category('Lösung $(x_1, x_2)$', l.x ? `(${fmt(l.x[0])}, ${fmt(l.x[1])})` : null, {
         note: l.art === 'keine' ? 'die Geraden schneiden sich nicht' : 'jeder Punkt der Geraden',
         marks: l.x ? [{ kind: 'point', x: l.x[0], y: l.x[1], in: 'phase' }] : [],
       }),

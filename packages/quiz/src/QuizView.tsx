@@ -245,7 +245,7 @@ function Find({ def, onSubmit }: { def: FindQuiz; onSubmit: (v: number) => void 
         {now ? 'Prüfen' : 'Festhalten'}
       </button>
       {now && def.tolerance ? <span className="qz-muted qz-small">auf {formatNumber(def.tolerance)} genau</span> : null}
-      {invalid && <span className="qz-small qz-invalid">Bitte eine Zahl, z. B. 3,2.</span>}
+      {invalid && <span className="qz-small qz-invalid">Bitte eine Zahl, z. B. 3.2.</span>}
     </form>
   )
 }

@@ -9,7 +9,7 @@ const A_MIN = 2.4
 
 /**
  * The diagram does not depend on the sliders. For each a, the values visited after a long
- * transient (from y₀ = 0,5; for a ≤ 4 the attractor is the same for almost every start).
+ * transient (from y₀ = 0.5; for a ≤ 4 the attractor is the same for almost every start).
  *
  * Zoomed in, it is recomputed for the visible window: for each a it iterates until enough
  * values have landed in the visible y range (or a budget is used up), so the picture stays

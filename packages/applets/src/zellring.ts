@@ -1,5 +1,5 @@
 // A ring of N = 50 heart cells (slides II 66–72). Each cell follows the action-potential map
-// of II 61 with b = 0,6 (at rest, but excitable); neighbours are coupled through f₁ with
+// of II 61 with b = 0.6 (at rest, but excitable); neighbours are coupled through f₁ with
 // strength d:
 //   y₁ⁱ(n+1) = (1 − d) f₁(yⁱ) + d/2 (f₁(yⁱ⁺¹) + f₁(yⁱ⁻¹)),   y₂ⁱ(n+1) = a y₂ⁱ − b y₁ⁱ + c.
 // Cell 1 is excited at n = 0: for d > 0 a wave runs both ways round the ring and dies where
@@ -109,7 +109,7 @@ export default defineApplet({
   readouts: ['erregung', 'aktiv'],
   scenarios: [
     { label: 'ohne Kopplung', text: 'd = 0: nur Zelle 1 feuert (Folie 68)', params: { d: 0 } },
-    { label: 'eine Welle', text: 'd = 0,4: die Welle läuft in beide Richtungen und erlischt (Folie 69)', params: {} },
+    { label: 'eine Welle', text: 'd = 0.4: die Welle läuft in beide Richtungen und erlischt (Folie 69)', params: {} },
     { label: 'Szenario I', text: 'zweiter Reiz bei n = 37: die Zellen sind noch refraktär (Folie 70)', params: { zweiter: true, n2: 37 } },
     { label: 'Szenario II', text: 'bei n = 45: eine zweite Welle, die ebenfalls erlischt (Folie 71)', params: { zweiter: true, n2: 45 } },
     { label: 'Szenario III', text: 'bei n = 41: die Welle läuft nur in eine Richtung – Reentry (Folie 72)', params: { zweiter: true, n2: 41 } },

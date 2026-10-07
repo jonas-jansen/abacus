@@ -44,7 +44,7 @@ defineQuiz({
   id: 'stabil',
   type: 'multiple',
   question: 'Für welche $a$ ist der Fixpunkt $y^* = 1 - 1/a$ anziehend?',
-  options: ['$a = 0{,}5$', '$a = 1{,}5$', '$a = 2{,}8$', '$a = 3{,}2$'],
+  options: ['$a = 0.5$', '$a = 1.5$', '$a = 2.8$', '$a = 3.2$'],
   correct: [1, 2],
   shuffle: false,
   solution: "$f'(y^*) = 2 - a$, also anziehend genau für $1 < a < 3$.",
@@ -57,7 +57,7 @@ Options, matching items and the question itself (`image`) can be pictures instea
 
 ```ts
 // a plot of an applet in a given state, drawn by the plot library exactly like in the applet
-{ applet: 'logistic-cobweb', state: { a: 3.2 }, plot: 1, alt: 'Zeitverlauf für a = 3,2' }
+{ applet: 'logistic-cobweb', state: { a: 3.2 }, plot: 1, alt: 'Zeitverlauf für a = 3.2' }
 // an image file under site/public/ (SVG, PNG, JPG)
 { src: 'bilder/zelle.svg', alt: 'Eine Zelle' }
 ```
@@ -72,11 +72,11 @@ defineQuiz({
   type: 'match',
   question: 'Ziehen Sie jeden Zeitverlauf $y_n$ zu seinem $a$.',
   pairs: [
-    ['$a = 0{,}8$', { applet: 'logistic-cobweb', state: { a: 0.8 }, plot: 1, alt: 'a = 0,8' }],
-    ['$a = 2{,}8$', { applet: 'logistic-cobweb', state: { a: 2.8 }, plot: 1, alt: 'a = 2,8' }],
-    ['$a = 3{,}2$', { applet: 'logistic-cobweb', state: { a: 3.2 }, plot: 1, alt: 'a = 3,2' }],
+    ['$a = 0.8$', { applet: 'logistic-cobweb', state: { a: 0.8 }, plot: 1, alt: 'a = 0.8' }],
+    ['$a = 2.8$', { applet: 'logistic-cobweb', state: { a: 2.8 }, plot: 1, alt: 'a = 2.8' }],
+    ['$a = 3.2$', { applet: 'logistic-cobweb', state: { a: 3.2 }, plot: 1, alt: 'a = 3.2' }],
   ],
-  distractors: [{ applet: 'logistic-cobweb', state: { a: 3.9 }, plot: 1, alt: 'a = 3,9' }],
+  distractors: [{ applet: 'logistic-cobweb', state: { a: 3.9 }, plot: 1, alt: 'a = 3.9' }],
 })
 ```
 
@@ -143,7 +143,7 @@ Anything that counts for admission needs the server below.
 Each graded answer gets a badge: "Richtig" with a check in a green circle (it draws itself),
 amber for partly right, a cross in red for wrong. The words depend on whether a retry follows:
 on course pages and while practising, "Fast" and "Noch nicht" invite the next attempt; in the
-result of a submitted quiz the verdict is final: "Teilweise · 0,5 Punkte" and "Falsch".
+result of a submitted quiz the verdict is final: "Teilweise · 0.5 Punkte" and "Falsch".
 Picture options are laid out two by two; in matching, the pile of pictures is two by two, and a
 slot holding a plot hugs it. In the result of a weekly
 quiz, right options are green with a check, a wrong choice red with a cross, a right option

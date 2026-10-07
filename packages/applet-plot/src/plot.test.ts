@@ -42,7 +42,7 @@ describe('plots', () => {
   it('axes serialise to SVG with German tick labels', () => {
     const frame = makeFrame({ width: 400, height: 300, x: [0, 1], y: [-1, 1] })
     const svg = svgToString(axesNode(frame, { x: 't', y: 'x(t)' }))
-    expect(svg).toContain('0,5')
+    expect(svg).toContain('0.5')
     expect(svg).toContain('−1')
   })
 })
@@ -63,7 +63,7 @@ describe('zoom rules and drawing details', () => {
     const spec: PlotSpec = { type: 'timeSeriesDiscrete', series: ['x'] }
     const f = panFloors(spec, run, plotDomains(spec, run))
     expect(f.x).toBe(0)
-    expect(f.y).toBe(0) // 0,5ⁿ is never negative
+    expect(f.y).toBe(0) // 0.5ⁿ is never negative
     const neg = model.run({ ...defaultParams(model), a: -0.5 })
     expect(panFloors(spec, neg, plotDomains(spec, neg)).y).toBe(-Infinity)
     expect(panFloors({ type: 'cobweb', f: 'f', orbit: 'x' }, run, plotDomains(spec, run))).toEqual({ x: -Infinity, y: -Infinity })

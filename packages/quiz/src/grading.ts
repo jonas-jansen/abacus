@@ -78,7 +78,7 @@ export function grade(def: QuizDef, answer: unknown): Grade {
     }
     case 'number': {
       const v = parseNumber(answer)
-      if (v === undefined) return { status: 'wrong', points: 0, max: 1, hint: 'Bitte eine Zahl, z. B. 3,2.' }
+      if (v === undefined) return { status: 'wrong', points: 0, max: 1, hint: 'Bitte eine Zahl, z. B. 3.2.' }
       const tol = def.tolerance ?? Math.abs(def.target) * 5e-7
       const d = v - def.target
       if (Math.abs(d) <= tol) return { status: 'correct', points: 1, max: 1 }

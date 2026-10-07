@@ -54,7 +54,7 @@ export interface FindQuiz extends Base {
   /** The quantity, e.g. "$a$" or "$t^*$". */
   quantity: string
   unit?: string
-  /** Stated to the student ("auf 0,05 genau"). */
+  /** Stated to the student ("auf 0.05 genau"). */
   tolerance?: number
   checker?: Checker<any>
   /** now: immediate diagnosis · later: kept, confronted with the proof later · never: recorded only. */

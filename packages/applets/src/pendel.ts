@@ -84,7 +84,7 @@ export default defineApplet({
   ],
   readouts: ['unten', 'oben', 'periode', 'klein', 'gleichgewichte'],
   scenarios: [
-    { label: 'kleine Auslenkung', text: 'α₀ = 0,2: fast wie eine Sinusschwingung', params: { start: [0.2, 0] } },
+    { label: 'kleine Auslenkung', text: 'α₀ = 0.2: fast wie eine Sinusschwingung', params: { start: [0.2, 0] } },
     { label: 'ohne Dämpfung', text: 'b/m = 0: die Bahn schließt sich, das Pendel schwingt ewig', params: { d: 0, start: [2.5, 0] } },
     { label: 'Überschlag', text: 'kräftig angestoßen: über den höchsten Punkt, dann Schwingen um die nächste Ruhelage', params: { start: [0, 8] } },
   ],

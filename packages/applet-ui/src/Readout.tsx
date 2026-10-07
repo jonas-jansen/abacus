@@ -10,7 +10,7 @@ import { texNumber } from './formula'
 import { MathLabel } from './MathLabel'
 import { TeX } from './TeX'
 
-/** A readout value as TeX, the German way: 0{,}819, -0{,}5 \pm 1\,i, 1{,}4 \cdot 10^{11}. */
+/** A readout value as TeX: 0.819, -0.5 \pm 1\,i, 1.4 \cdot 10^{11}. */
 function valueTex(o: Observable, x: number | string): string {
   if (typeof x === 'number') return (o.kind === 'index' ? String(x) : texNumber(x, o.digits ?? 4)) + (o.unit ?? '')
   const SUP: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
@@ -18,7 +18,6 @@ function valueTex(o: Observable, x: number | string): string {
     .replace(/± 1 i$/, '± i')
     .replace(/·10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_m, e: string) => `\\cdot 10^{${[...e].map((c) => SUP[c]).join('')}}`)
     .replace(/−/g, '-')
-    .replace(/,/g, '{,}')
     .replace(/±/g, '\\pm')
     .replace(/\s*i$/, '\\,i')
 }

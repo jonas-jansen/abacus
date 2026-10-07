@@ -16,14 +16,14 @@ const Glyph = {
 
 /**
  * Playback tempo. A click on the button cycles ½× · 1× · 2× · 4×; dragging it sideways or the
- * mouse wheel over it sets any tempo from 0,1× to 10× (the same gesture as for numbers in the
+ * mouse wheel over it sets any tempo from 0.1× to 10× (the same gesture as for numbers in the
  * panel) – there for those who look for it, out of the way for the rest. Kept for the visit.
  */
 const TEMPI = [0.5, 1, 2, 4] as const
 const TEMPO_MIN = 0.1
 const TEMPO_MAX = 10
 const tempoText = (t: number) => (t === 0.5 ? '½×' : `${formatNumber(t, 2)}×`)
-/** Tempi on a log scale, rounded to two figures (0,1 · 0,13 · … · 1 · 1,2 · … · 10). */
+/** Tempi on a log scale, rounded to two figures (0.1 · 0.13 · … · 1 · 1.2 · … · 10). */
 const tempoRund = (t: number) => Number(Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, t)).toPrecision(2))
 
 function useTempo(): [number, (t: number) => void] {
@@ -97,7 +97,7 @@ function TempoKnopf({ tempo, onTempo }: { tempo: number; onTempo: (t: number) =>
         if (e.key === 'Enter') (e.preventDefault(), next())
       }}
       aria-label={`Tempo ${tempoText(tempo)}`}
-      data-tip={'Klick | ½× · 1× · 2× · 4×\n{Ziehen} | stufenlos 0,1× bis 10×\n{Rad} | ebenso'}
+      data-tip={'Klick | ½× · 1× · 2× · 4×\n{Ziehen} | stufenlos 0.1× bis 10×\n{Rad} | ebenso'}
     >
       {tempoText(tempo)}
     </button>
@@ -148,7 +148,7 @@ export function Timeline({
   useEffect(() => {
     if (!playing) return
     const from = k >= max ? min : k
-    // At 1×: a step every 0,45 s, so each can be followed, but no run longer than 12 s; the
+    // At 1×: a step every 0.45 s, so each can be followed, but no run longer than 12 s; the
     // whole continuous time window in 10 s. The tempo button scales both.
     const duration = (continuous ? 10_000 * ((max - from) / (span || 1)) : Math.min(12_000, (max - from) * 450)) / tempo
     const t0 = performance.now()

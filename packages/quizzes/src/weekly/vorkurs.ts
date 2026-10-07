@@ -24,17 +24,17 @@ export default defineWeeklyQuiz({
       unit: '%',
       target: -6.83,
       tolerance: 0.01,
-      solution: String.raw`Der Gesamtfaktor ist $1{,}1^3 \cdot 0{,}7 = 0{,}9317$, also eine Abnahme um $6{,}83\,\%$. Prozentuale Änderungen werden multipliziert, nicht addiert: $3 \cdot 10\,\% - 30\,\% = 0$ ist falsch.`,
+      solution: String.raw`Der Gesamtfaktor ist $1.1^3 \cdot 0.7 = 0.9317$, also eine Abnahme um $6.83\,\%$. Prozentuale Änderungen werden multipliziert, nicht addiert: $3 \cdot 10\,\% - 30\,\% = 0$ ist falsch.`,
     }),
     // Vorkurs Blatt 3, A10–11; Blatt 4, A11
     defineQuiz({
       id: 'wachstum',
       type: 'number',
-      question: String.raw`Eine Bakterienkultur wächst nach $N(t) = 50 \cdot 1{,}2^t$ ($t$ in Stunden). Nach welcher Zeit sind es $1000$ Bakterien? (Auf zwei Nachkommastellen.)`,
+      question: String.raw`Eine Bakterienkultur wächst nach $N(t) = 50 \cdot 1.2^t$ ($t$ in Stunden). Nach welcher Zeit sind es $1000$ Bakterien? (Auf zwei Nachkommastellen.)`,
       quantity: '$t$',
       target: 16.43,
       tolerance: 0.01,
-      solution: String.raw`$1{,}2^t = 20 \iff t = \dfrac{\ln 20}{\ln 1{,}2} \approx 16{,}43$ Stunden.`,
+      solution: String.raw`$1.2^t = 20 \iff t = \dfrac{\ln 20}{\ln 1.2} \approx 16.43$ Stunden.`,
     }),
     // Vorkurs Blatt 3, A5
     defineQuiz({
@@ -50,7 +50,7 @@ export default defineWeeklyQuiz({
       id: 'betrag',
       type: 'multiple',
       question: String.raw`Für welche der folgenden Werte von $a$ gilt $|2 - a| < 1$?`,
-      options: ['$a = 0{,}5$', '$a = 1{,}5$', '$a = 2{,}5$', '$a = 3$', '$a = 3{,}5$'],
+      options: ['$a = 0.5$', '$a = 1.5$', '$a = 2.5$', '$a = 3$', '$a = 3.5$'],
       correct: [1, 2],
       shuffle: false,
       solution: String.raw`$|2 - a| < 1 \iff -1 < 2 - a < 1 \iff 1 < a < 3$. Der Randwert $a = 3$ gehört wegen des strikten $<$ nicht dazu.`,
@@ -63,7 +63,7 @@ export default defineWeeklyQuiz({
       quantity: '$x_1$',
       target: 1.5,
       tolerance: 0.001,
-      solution: String.raw`$g(1) = -1$ und $g'(1) = 2$. Die Tangente $y = -1 + 2\,(x - 1)$ hat die Nullstelle $x_1 = 1{,}5$. Sie liegt schon nahe an der Nullstelle $\sqrt 2 \approx 1{,}414$ von $g$.`,
+      solution: String.raw`$g(1) = -1$ und $g'(1) = 2$. Die Tangente $y = -1 + 2\,(x - 1)$ hat die Nullstelle $x_1 = 1.5$. Sie liegt schon nahe an der Nullstelle $\sqrt 2 \approx 1.414$ von $g$.`,
     }),
     // Vorkurs Blatt 6, A1 und A4
     defineQuiz({

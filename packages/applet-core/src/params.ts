@@ -160,7 +160,7 @@ export function defaultsOf(specs: readonly ParamSpec[]): Record<string, ParamVal
 
 export const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v)
 
-/** Parses a number the way a German student types it: "3,45", "3.45", "1e-3", " −2 ". */
+/** Parses a number as students type it (a decimal comma is read as a point): "3,45", "3.45", "1e-3", " −2 ". */
 export function parseNumber(raw: unknown): number | undefined {
   if (typeof raw === 'number') return Number.isFinite(raw) ? raw : undefined
   if (typeof raw !== 'string') return undefined

@@ -81,7 +81,7 @@ export default defineApplet({
   ],
   readouts: ['stationaer', 'summe', 'eigenwerte'],
   scenarios: [
-    { label: 'Folie 20', text: '0,3 % erkranken, 60 % gesunden, 35 % bessern sich', params: {} },
+    { label: 'Folie 20', text: '0.3 % erkranken, 60 % gesunden, 35 % bessern sich', params: {} },
     { label: 'bessere Behandlung', text: '80 % der leicht Erkrankten gesunden', params: { h: 0.8 } },
   ],
 })

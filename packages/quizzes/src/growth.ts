@@ -18,11 +18,11 @@ export default [
   defineQuiz({
     id: 'wachstum-wendepunkt',
     type: 'find',
-    question: 'Für $r = 0{,}8$, $K = 50$, $x_0 = 2$: Zu welcher Zeit $t^*$ ist die Kurve am steilsten?',
+    question: 'Für $r = 0.8$, $K = 50$, $x_0 = 2$: Zu welcher Zeit $t^*$ ist die Kurve am steilsten?',
     quantity: '$t^*$',
     target: 3.97,
     tolerance: 0.2,
-    solution: '$t^* = \\frac{1}{r}\\ln\\frac{K - x_0}{x_0} = \\frac{\\ln 24}{0{,}8} \\approx 3{,}97$.',
+    solution: '$t^* = \\frac{1}{r}\\ln\\frac{K - x_0}{x_0} = \\frac{\\ln 24}{0.8} \\approx 3.97$.',
   }),
   defineQuiz({
     id: 'wachstum-wendepunkt-5',

@@ -1,5 +1,5 @@
 // Static pictures of applet plots, rendered by the plot library: thumbnails in the overview,
-// and plots in quiz questions ("which plot belongs to a = 3,2?").
+// and plots in quiz questions ("which plot belongs to a = 3.2?").
 
 import { defaultParams, makeFrame, updateParams } from '@abacus/applet-core'
 import { axesNode, DEFAULT_VIEW, drawPlot, plotDomains, scene3d, sceneSvg, svgToString, SvgPathSurface, type PlotSpec, type SvgNode } from '@abacus/applet-plot'

@@ -12,8 +12,11 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   sections are cards. Hairlines separate, backgrounds don't.
 - **Corners: `--ab-radius` (2 px)** for every box. Round only what is meant to be round: the
   play button, icon buttons, switches.
-- **Typeset math everywhere.** KaTeX for symbols, vectors bold (`\mathbf{x}`), German numbers
-  (`0{,}5`, `100\,000`). No "·" as a separator in running text.
+- **Typeset math everywhere.** KaTeX for symbols, vectors bold (`\mathbf{x}`).
+- **Decimal point, not comma: `0.5`, never `0,5`** – in formulas, readouts, axis ticks,
+  quizzes, course text and scenario labels alike, although the text is German. Whole numbers
+  from five digits are grouped with a thin space (`100\,000`). Students may still *type*
+  `3,2`; it is read as 3.2. A comma separates only items: `(0.6, 0.4)`. No "·" as a separator in running text.
 - **Readouts are mathematics too.** Vectors appear as column vectors, several values as
   aligned equations (`λ₁ = …`), not as rows of chips.
 - **Feedback without text.** The toolbar never shows words: a copied link turns its cell
@@ -29,7 +32,7 @@ typeset properly. The interface stays quiet so the mathematics can speak.
     is much too large.
   - Double click, reset and the scenario chips always fit the axes afresh.
   - A change of window glides in two steps – first the scale (about 0, or the edge nearest to
-    it), then the position – about 0,85 s in all, so the change is seen.
+    it), then the position – about 0.85 s in all, so the change is seen.
   - A handle dragged past the edge stays at the edge until it is let go.
 - **Views you can retrace.** Every settled zoom or pan is remembered; "zurück zur vorigen
   Ansicht" (next to "ganzes Bild") steps back, also from the whole picture to the last zoom.
@@ -38,7 +41,7 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   the title row gives both axes the same unit length (circles stay circles), kept while zooming;
   switching back fits the plot freely.
 - **Values where they belong.** A dragged value is shown in the picture, not in a tooltip: in
-  the handle's label ("x₀ = 23") or at the guide that shows the parameter ("b = 1,5" at the
+  the handle's label ("x₀ = 23") or at the guide that shows the parameter ("b = 1.5" at the
   slope triangle). Tooltips remain only for handles that change several parameters at once.
 - **No jumps on loading.** The server draws a plot at a guessed size and the default state; the
   browser shows it only once it has its real size and the state from the address, fading in.

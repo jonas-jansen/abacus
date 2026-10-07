@@ -6,7 +6,7 @@ export default [
     id: 'ari-modell',
     type: 'single',
     question: 'Eine Kolonie gewinnt jedes Jahr $150$ Tiere dazu. Welche Folge beschreibt sie?',
-    options: ['$x_{n+1} = x_n + 150$', '$x_{n+1} = 150\\,x_n$', '$x_{n+1} = 1{,}5\\,x_n$', '$x_n = 150^n$'],
+    options: ['$x_{n+1} = x_n + 150$', '$x_{n+1} = 150\\,x_n$', '$x_{n+1} = 1.5\\,x_n$', '$x_n = 150^n$'],
     correct: 0,
     solution: 'Ein fester **Betrag** pro Schritt: Er wird addiert. Ein fester **Faktor** würde multipliziert (geometrische Folge).',
   }),
@@ -30,9 +30,9 @@ export default [
       if (Math.abs(x0 - 30) > 0.5) return { status: 'wrong', hint: 'Zuerst $x_0 = 30$ einstellen.' }
       if (N !== 20) return { status: 'wrong', hint: 'Lassen Sie $N = 20$.' }
       const end = x0 + b * N
-      if (Math.abs(end) <= 0.5) return { status: 'correct', hint: `Richtig: $b = ${(-x0 / N).toString().replace('.', '{,}')}$.` }
-      return { status: Math.abs(end) <= 3 ? 'close' : 'wrong', hint: `Die Folge endet bei $x_{20} \\approx ${end.toFixed(1).replace('.', '{,}')}$.` }
+      if (Math.abs(end) <= 0.5) return { status: 'correct', hint: `Richtig: $b = ${(-x0 / N).toString()}$.` }
+      return { status: Math.abs(end) <= 3 ? 'close' : 'wrong', hint: `Die Folge endet bei $x_{20} \\approx ${end.toFixed(1)}$.` }
     }),
-    solution: '$x_{20} = 30 + 20\\,b = 0$, also $b = -1{,}5$.',
+    solution: '$x_{20} = 30 + 20\\,b = 0$, also $b = -1.5$.',
   }),
 ]

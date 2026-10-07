@@ -275,8 +275,8 @@ describe('frame (§5.6)', () => {
 describe('checkers (§8.2)', () => {
   it('schwelle gives direction and nudge', () => {
     const check = threshold({ target: 3, tolerance: 0.05, tooSmall: (v) => `bei ${formatNumber(v)} noch Fixpunkt` })
-    expect(check('3,02', {}, {})).toEqual({ status: 'correct', hint: undefined })
-    expect(check('2,9', {}, {})).toMatchObject({ status: 'close', direction: 'too small', hint: 'bei 2,9 noch Fixpunkt' })
+    expect(check('3.02', {}, {})).toEqual({ status: 'correct', hint: undefined })
+    expect(check('2.9', {}, {})).toMatchObject({ status: 'close', direction: 'too small', hint: 'bei 2.9 noch Fixpunkt' })
     expect(check('4', {}, {})).toMatchObject({ status: 'wrong', direction: 'too large' })
     expect(check('drei', {}, {})).toMatchObject({ status: 'wrong' })
   })
@@ -293,7 +293,7 @@ describe('checkers (§8.2)', () => {
 })
 
 describe('misc', () => {
-  it('parses German numbers', () => {
+  it('parses numbers with a decimal comma or point', () => {
     expect(parseNumber('3,45')).toBe(3.45)
     expect(parseNumber('−2')).toBe(-2)
     // powers of ten as the fields show them
@@ -347,12 +347,12 @@ describe('axis labels with powers of ten', () => {
     expect(f.yExp).toBe(5)
     expect(f.yTickLabels.every((s) => s.length <= 4)).toBe(true)
     expect(f.xExp).toBe(-4)
-    expect(f.xTickLabels.at(-1)).toMatch(/^5(,0)?$/)
+    expect(f.xTickLabels.at(-1)).toMatch(/^5(\.0)?$/)
   })
   it('ordinary ranges stay as they are', () => {
     const f = makeFrame({ width: 600, height: 400, x: [0, 40], y: [0, 1] })
     expect(f.xExp).toBe(0)
-    expect(f.yTickLabels).toContain('0,5')
+    expect(f.yTickLabels).toContain('0.5')
   })
   it('the plot keeps its left edge when the labels change length', () => {
     const a = makeFrame({ width: 600, height: 400, x: [0, 1], y: [0, 1] })

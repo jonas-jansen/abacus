@@ -80,13 +80,13 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
   const vergleichDetail = useCallback((d: Detail) => (vergleich ? detailFor(vergleich.params, d) : null), [vergleich, detailFor])
   const vergleichText = useMemo(() => {
     if (!vergleich) return ''
-    // what differs from now, in symbols: "festgehalten: $a$ = 2,8"
+    // what differs from now, in symbols: "festgehalten: $a$ = 2.8"
     const diff = def.model.params
       .filter((s) => s.id !== def.horizon && JSON.stringify(vergleich.params[s.id]) !== JSON.stringify(params[s.id]))
       .slice(0, 2)
       .map((s) => {
         const v = vergleich.params[s.id]
-        const text = typeof v === 'number' ? formatNumber(v, 3) : Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join('; ')})` : String(v)
+        const text = typeof v === 'number' ? formatNumber(v, 3) : Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join(', ')})` : String(v)
         return 'latex' in s && s.latex ? `$${s.latex}$ = ${text}` : `${s.label} = ${text}`
       })
     return diff.length ? `festgehalten: ${diff.join(', ')}` : 'festgehalten'

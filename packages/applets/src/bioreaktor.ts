@@ -4,7 +4,7 @@
 // washed out at n_in — n* = D k₅₀ / (k_max − D), b* = (n_in − n*)/ν. Too high a flow rate D
 // washes the culture out.
 // b is counted in 10¹¹ bacteria per litre (as on the slides' axis), so b and n share a plot
-// and ν = 0,5·10⁻¹¹ g per bacterium becomes 0,5 g per 10¹¹ bacteria.
+// and ν = 0.5·10⁻¹¹ g per bacterium becomes 0.5 g per 10¹¹ bacteria.
 
 import { classify, eigenReadout, jacobian, category, list, ode, real, type Mark } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
@@ -104,8 +104,8 @@ export default defineApplet({
   layout: { main: ['D', 'nin', 'kmax'] },
   readouts: ['kultur', 'gleichgewicht', 'typ', 'eigenwerte'],
   scenarios: [
-    { label: 'Folie 27', text: 'D = 0,1/h: die Kultur stellt sich auf ein Gleichgewicht ein', params: {} },
-    { label: 'knapp', text: 'D = 0,4/h: knapp unter der Grenze k_max n_in/(k₅₀ + n_in) ≈ 0,41/h', params: { D: 0.4 } },
-    { label: 'Auswaschen', text: 'D = 0,5/h: schneller hinausgespült als nachgewachsen', params: { D: 0.5 } },
+    { label: 'Folie 27', text: 'D = 0.1/h: die Kultur stellt sich auf ein Gleichgewicht ein', params: {} },
+    { label: 'knapp', text: 'D = 0.4/h: knapp unter der Grenze k_max n_in/(k₅₀ + n_in) ≈ 0.41/h', params: { D: 0.4 } },
+    { label: 'Auswaschen', text: 'D = 0.5/h: schneller hinausgespült als nachgewachsen', params: { D: 0.5 } },
   ],
 })

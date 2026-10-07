@@ -43,10 +43,10 @@ describe('weekly quizzes', () => {
   })
   it('the vorkurs values from the sheets', () => {
     const q = (id: string) => getWeeklyQuiz('vorkurs').questions.find((x) => x.id === id)!
-    expect(grade(q('prozent'), '-6,83').status).toBe('correct')
+    expect(grade(q('prozent'), '-6.83').status).toBe('correct')
     expect(grade(q('prozent'), (1.1 ** 3 * 0.7 - 1) * 100).status).toBe('correct')
     expect(grade(q('wachstum'), Math.log(20) / Math.log(1.2)).status).toBe('correct')
-    expect(grade(q('tangente'), '1,5').status).toBe('correct')
+    expect(grade(q('tangente'), '1.5').status).toBe('correct')
   })
   it('only visible quizzes are listed; the dev server lists all', () => {
     expect(listedWeeklyQuizzes().every((w) => w.visible !== false)).toBe(true)
