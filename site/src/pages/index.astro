@@ -2,27 +2,76 @@
 // The landing page of the platform: its courses. Everyone sees all of them for now; which
 // courses a visitor sees, and whether one can join, is decided in the browser by courseAccess
 // (src/access.ts), so a login later needs no change here.
+import { chapters, getApplet } from '@abacus/applets'
+import { listedWeeklyQuizzes } from '@abacus/quizzes'
+import { getCollection } from 'astro:content'
 import Seite from '../layouts/Seite.astro'
 import { courseUrl, platform } from '../config'
-import { builtCourses } from '../release'
+import { builtCourses, included, release } from '../release'
+import { plotSvg } from '../preview'
+
+// what a course offers in this build (all courses share the content for now)
+const all = import.meta.env.DEV || !!release
+const applets = chapters({ all }).flatMap((k) => k.applets).filter((a) => included('applets', a.id))
+const quizzes = listedWeeklyQuizzes({ all }).filter((w) => included('quizzes', w.id))
+const pages = await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
+const stats = [
+  applets.length && count(applets.length, 'Applet', 'Applets'),
+  pages.length && count(pages.length, 'Kursseite', 'Kursseiten'),
+  quizzes.length && count(quizzes.length, 'Quiz', 'Quizze'),
+].filter(Boolean)
+
+const cover = (c: (typeof builtCourses)[number]) => {
+  const id = c.cover?.applet ?? applets[0]?.id
+  return id ? plotSvg(getApplet(id), { state: c.cover?.state, width: 300, height: 190 }) : ''
+}
+
+// the header's curves: growth to a capacity, a damped oscillation, a decaying sequence
+const W = 1200
+const H = 300
+const path = (f: (u: number) => number) =>
+  'M' + Array.from({ length: 121 }, (_, i) => `${((i / 120) * W).toFixed(1)} ${(H * (1 - f(i / 120))).toFixed(1)}`).join('L')
+const wachstum = path((u) => 0.12 + 0.72 / (1 + Math.exp(-11 * (u - 0.42))))
+const schwingung = path((u) => 0.46 + 0.3 * Math.exp(-3.2 * u) * Math.cos(15 * u))
+const folge = Array.from({ length: 23 }, (_, n) => ({ x: 26 + n * 52, y: H * (1 - (0.08 + 0.7 * 0.84 ** n)) }))
 ---
-<Seite title={platform.name} width="medium">
-  <h1>Kurse</h1>
+<Seite title={platform.name} width="medium" topbar={false}>
+  <header class="landing-hero" slot="hero">
+    <svg class="landing-kurven" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+      <path class="k1" d={wachstum} />
+      <path class="k2" d={schwingung} />
+      {/* dots as round caps of zero-length strokes: they stay round when the curves stretch */}
+      <path class="k3" d={folge.map((p) => `M${p.x} ${p.y.toFixed(1)}h0`).join('')} />
+    </svg>
+    <div class="landing-marke">
+      <svg viewBox="0 0 24 24" width="52" height="52" aria-hidden="true">
+        <path d="M3 20c3-12 6-12 9 0s6 0 9-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <span>{platform.name}</span>
+    </div>
+  </header>
+
+  <h2 class="landing-titel">Kurse</h2>
   <div class="kurse" id="kurse-mine">
     {
       builtCourses.map((c) => (
-        <a class="bereich kurs-karte" href={courseUrl(c)} data-course={c.id}>
-          <span class="bereich-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c3-12 6-12 9 0s6 0 9-14" /></svg>
-          </span>
-          <strong>{c.title}</strong>
-          <span class="bereich-detail">{c.term}</span>
+        <a class="kurs-karte" href={courseUrl(c)} data-course={c.id}>
+          <div class="kurs-bild" set:html={cover(c)} />
+          <div class="kurs-text">
+            <strong>{c.title}</strong>
+            <span class="kurs-semester">{c.term}</span>
+            {stats.length > 0 && <span class="kurs-inhalt">{stats.join(' · ')}</span>}
+          </div>
+          <svg class="kurs-pfeil" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </a>
       ))
     }
   </div>
   <section id="kurse-weitere" hidden>
-    <h2>Weitere Kurse</h2>
+    <h2 class="landing-titel">Weitere Kurse</h2>
     <div class="kurse"></div>
   </section>
 
@@ -48,7 +97,7 @@ import { builtCourses } from '../release'
             await courseAccess.join!(id)
             location.href = karte.href
           })
-          karte.append(knopf)
+          karte.querySelector('.kurs-text')!.append(knopf)
         }
       }
       weitere.hidden = ziel.childElementCount === 0

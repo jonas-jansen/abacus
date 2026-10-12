@@ -18,8 +18,10 @@ interface Props {
   unlisted?: boolean
   /** The course the page belongs to: its name and areas in the top bar. None on the landing page. */
   course?: Course
+  /** The top bar with nav and settings; the landing page has its own header instead. */
+  topbar?: boolean
 }
-const { title, summary, width = 'wide', active, unlisted = false, course } = Astro.props
+const { title, summary, width = 'wide', active, unlisted = false, course, topbar = true } = Astro.props
 const c = (path: string) => courseUrl(course!, path)
 ---
 <!doctype html>
@@ -34,6 +36,7 @@ const c = (path: string) => courseUrl(course!, path)
     <script is:inline>document.documentElement.classList.add('js')</script>
   </head>
   <body>
+    {topbar && (
     <header class="topbar">
       <div class="topbar-inner">
         <a class="brand" href={url('/')}>
@@ -73,6 +76,8 @@ const c = (path: string) => courseUrl(course!, path)
         </div>
       </div>
     </header>
+    )}
+    <slot name="hero" />
     <main class:list={['main', width]}>
       <slot />
     </main>

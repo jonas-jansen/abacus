@@ -16,6 +16,8 @@ export interface Course {
   semester: string
   /** Shown to students, e.g. "Wintersemester 2026/27". */
   term: string
+  /** The picture on the course's card: an applet's first plot (default: its first listed applet). */
+  cover?: { applet: string; state?: Record<string, unknown> }
 }
 
 export const courses: readonly Course[] = [
