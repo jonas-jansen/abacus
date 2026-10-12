@@ -47,7 +47,7 @@ the shared script bundle; only the pages of the others are missing.
 Once: copy `deploy/compose.yaml` to the server and start it.
 
 ```sh
-docker compose up -d                     # serves on 127.0.0.1:8080
+docker compose up -d                     # serves on 127.0.0.1:8080 (port 8080 inside the container too)
 ```
 
 To update to the newest version (after a push, once the "Docker" workflow is green):

@@ -10,4 +10,4 @@ services:
     restart: unless-stopped
     ports:
       # the uni's web server (Apache, Shibboleth later) forwards to this port
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8080:8080"
