@@ -56,6 +56,12 @@ typeset properly. The interface stays quiet so the mathematics can speak.
   test against the solver's dense output); readouts are computed on even samples.
 - **Plots on one scale zoom together.** Time plots side by side share their x window; when
   they also share one y scale (the same `y` in each), they share the y window too.
+- **Line styles.** Primary (Blau) and tertiary (Tanne) solid, secondary (Beere) dashed: Blau
+  and Beere are equally dark (1.09 : 1) and look alike to the red-green blind; Tanne is about
+  twice as light as either and stays apart. Reference lines are dashed grey.
+- **Scenario-only applets:** zooming out widens time, never y beyond the whole picture.
+- **Crisp on the projector.** The canvas is drawn with as many pixels as it covers on
+  screen, also when the presentation mode enlarges it.
 - **No jumps on loading.** The server draws a plot at a guessed size and the default state; the
   browser shows it only once it has its real size and the state from the address, fading in.
 - **Ticks as dense as they read.** x numbers stand at least 36 px apart and as close as their

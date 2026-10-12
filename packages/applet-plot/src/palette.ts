@@ -21,7 +21,9 @@ export interface RoleStyle {
 export const roleStyles: Record<SeriesRole, RoleStyle> = {
   primary: { width: 2, dash: [], marker: 'circle', alpha: 1 },
   secondary: { width: 2, dash: [7, 4], marker: 'square', alpha: 1 },
-  tertiary: { width: 2, dash: [2, 3], marker: 'triangle', alpha: 1 },
+  // solid: Tanne is clearly lighter than Blau and Beere, also for red-green blindness; only
+  // Blau and Beere are as dark as each other, so the second role alone is dashed
+  tertiary: { width: 2, dash: [], marker: 'triangle', alpha: 1 },
   reference: { width: 1.5, dash: [5, 4], marker: 'diamond', alpha: 1 },
   ghost: { width: 1.5, dash: [], marker: 'circle', alpha: 0.35 },
   annotation: { width: 1, dash: [], marker: 'none', alpha: 1 },

@@ -27,6 +27,8 @@ const SSR_HEIGHT = 520
 const SCREEN_SHARE = 0.68
 const MAX_HEIGHT = 1100
 const MAX_DPR = 2
+/** Device pixels per CSS pixel at most, also when the presentation mode enlarges the plot. */
+const MAX_SCALE = 4
 
 interface FigureProps<P extends Params> {
   entry: PlotEntry<P>
@@ -69,6 +71,8 @@ interface FigureProps<P extends Params> {
    */
   /** Plots linked in zoom and pan: the x window, and the y window too when they share one y scale. */
   xLink?: { x: Range | null; y: Range | null; withY: boolean; set: (x: Range | null, y: Range | null) => void }
+  /** Zooming out never shows more y than the whole picture (scenario-only applets). */
+  capY?: boolean
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -106,6 +110,7 @@ export function Figure<P extends Params>({
   onDetail,
   viewEpoch,
   xLink,
+  capY = false,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -356,6 +361,8 @@ export function Figure<P extends Params>({
     if (!zoom) shown.current = { x: frame.xDomain, y: frame.yDomain }
   })
 
+  // the canvas' width in device pixels, as last seen
+  const [screenSize, setScreenSize] = useState(0)
   // Canvas data layer, redrawn on the next animation frame.
   useEffect(() => {
     if (!hydrated) return
@@ -363,7 +370,10 @@ export function Figure<P extends Params>({
       const cv = canvas.current
       const ctx = cv?.getContext('2d')
       if (!cv || !ctx) return
-      const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
+      // as many pixels as the canvas covers on screen: the presentation mode enlarges it with
+      // CSS zoom, which would otherwise stretch a canvas drawn at the normal size
+      const shown = cv.getBoundingClientRect().width / (frame.plot.w + 2 * BLEED) || 1
+      const dpr = Math.min(MAX_SCALE, Math.min(MAX_DPR, window.devicePixelRatio || 1) * Math.max(1, shown))
       cv.width = Math.round((frame.plot.w + 2 * BLEED) * dpr)
       cv.height = Math.round((frame.plot.h + 2 * BLEED) * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, BLEED * dpr, BLEED * dpr)
@@ -397,7 +407,22 @@ export function Figure<P extends Params>({
       ctx.restore()
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel, full])
+  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel, full, screenSize])
+  // redraw when the canvas changes size on screen without a new layout (presentation zoom)
+  useEffect(() => {
+    const cv = canvas.current
+    if (!hydrated || !cv || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver((entries) => {
+      const box = entries[0]?.devicePixelContentBoxSize?.[0] ?? entries[0]?.borderBoxSize?.[0]
+      if (box) setScreenSize(Math.round(box.inlineSize))
+    })
+    try {
+      ro.observe(cv, { box: 'device-pixel-content-box' })
+    } catch {
+      ro.observe(cv)
+    }
+    return () => ro.disconnect()
+  }, [hydrated])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
@@ -470,7 +495,7 @@ export function Figure<P extends Params>({
   const zoomable = spec.type !== 'surface3d'
   const floors = useMemo(() => panFloors(spec, run, full), [spec, run, full])
   const inner = useRef<HTMLDivElement>(null)
-  const zoomPan = useZoomPan({ el: inner, frame, full, floors, enabled: zoomable, setZoom })
+  const zoomPan = useZoomPan({ el: inner, frame, full, floors, enabled: zoomable, capY, setZoom })
 
   // A click (not a drag, not on a handle) on empty plot space starts a new trajectory there.
   const press = useRef<{ x: number; y: number } | null>(null)

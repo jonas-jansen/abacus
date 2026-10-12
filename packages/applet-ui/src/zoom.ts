@@ -28,6 +28,15 @@ export function allowed(full: Win, z: Win, yLog: boolean): boolean {
   return magnification(full, z, yLog) <= MAX_ZOOM && !(out > MAX_ZOOM_OUT)
 }
 
+/**
+ * The y window no larger than the whole picture's (scenario-only applets): zooming out then
+ * shows more time, not a curve shrinking into a corner.
+ */
+export function cappedY(z: Win, full: Win, yLog: boolean): Win {
+  const t = ly(yLog)
+  return t(z.y[1]) - t(z.y[0]) > t(full.y[1]) - t(full.y[0]) ? { x: z.x, y: full.y } : z
+}
+
 /** Pushed back up where the window would go below an axis' floor (time before 0, …). */
 export function floored(z: Win, floors: { x: number; y: number }, yLog: boolean): Win {
   const fit = (r: readonly [number, number], lo: number) => (r[0] >= lo ? r : ([lo, lo + r[1] - r[0]] as const))
