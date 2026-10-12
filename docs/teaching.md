@@ -2,7 +2,7 @@
 
 ## Before the lecture
 
-- **Prepare states as links.** Every change is in the address (`…/applet/sir#sir.beta=0.3`).
+- **Prepare states as links.** Every change is in the address (`…/mathe-bio/applet/sir#sir.beta=0.3`).
   Set up a case, press the link button (it turns green), and paste the link into your notes
   or slides. Opening it shows exactly that state.
 - **Use the scenario chips.** Applets carry the settings from the slides as chips

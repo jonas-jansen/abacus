@@ -3,28 +3,32 @@
 import { getCollection, getEntry, render } from 'astro:content'
 import { applets, getApplet } from '@abacus/applets'
 import { chapterName } from '@abacus/applet-ui/define'
-import { AppletIsland } from '../../islands'
-import Seite from '../../layouts/Seite.astro'
-import { url } from '../../config'
-import { included } from '../../release'
+import { AppletIsland } from '../../../islands'
+import Seite from '../../../layouts/Seite.astro'
+import { scopeOf, type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { included, builtCourses } from '../../../release'
 
 export function getStaticPaths() {
-  return Object.keys(applets).filter((id) => included('applets', id)).map((id) => ({ params: { id } }))
+  const ids = Object.keys(applets).filter((id) => included('applets', id))
+  return builtCourses.flatMap((course) => ids.map((id) => ({ params: { course: course.id, id }, props: { course } })))
 }
+const { course } = Astro.props as { course: Course }
+Astro.locals.course = course
 
 const { id } = Astro.params
 const def = getApplet(id!)
 const intro = await getEntry('intro', id!)
 const Intro = intro ? (await render(intro)).Content : null
-const pages = (await getCollection('course', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.draft) && included('course', s.id))).sort(
+const pages = (await getCollection('course', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))).sort(
   (a, b) => a.data.week - b.data.week,
 )
 ---
-<Seite title={def.title} summary={def.summary} active="applets" unlisted={def.visible === false}>
+<Seite course={course} title={def.title} summary={def.summary} active="applets" unlisted={def.visible === false}>
   <div class="explore-head">
     <div>
       <p class="eyebrow chapter-badge">
-        <a href={url(`/applets#kapitel-${def.chapter}`)}>{chapterName(def.chapter)}</a>
+        <a href={courseUrl(course, `/applets#kapitel-${def.chapter}`)}>{chapterName(def.chapter)}</a>
         {def.slides && <span> · Folien {def.slides}</span>}
       </p>
       <h1>{def.title}</h1>
@@ -35,7 +39,7 @@ const pages = (await getCollection('course', (s) => s.data.applet === id && (imp
         <div class="explore-links">
           <span class="eyebrow">Im Kurs</span>
           {pages.map((s) => (
-            <a class="chip" href={url(`/kurs/${s.id}`)}>
+            <a class="chip" href={courseUrl(course, `/kurs/${s.id}`)}>
               {s.data.title} →
             </a>
           ))}

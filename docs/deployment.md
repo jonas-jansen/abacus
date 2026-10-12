@@ -19,10 +19,10 @@ Copy `site/dist/` to the server, e.g. `rsync -a --delete site/dist/ user@server:
 
 ## An upload with only some of it
 
-`site/releases.json` names what an upload contains – applets, weekly quizzes, course pages:
+`site/releases.json` names what an upload contains: courses, applets, weekly quizzes, guided pages.
 
 ```json
-"einfuehrung": { "applets": ["alcohol", "luo-rudy"], "quizzes": ["vorkurs"], "course": [] }
+"einfuehrung": { "courses": ["mathe-bio"], "applets": ["alcohol", "luo-rudy"], "quizzes": ["vorkurs"], "pages": [] }
 ```
 
 ```sh
@@ -69,8 +69,14 @@ is a web-server change only – no code changes are needed:
 
 Things to decide at that point:
 
+- **Who sees which course.** The landing page asks `courseAccess` (`site/src/access.ts`) for
+  the visitor's courses; today it answers "all". With Shibboleth in place, a small endpoint
+  can return them from ILIAS membership (or from courses joined on the platform), and
+  `join` enables a "Kurs beitreten" button. Only `access.ts` changes; the course pages stay
+  static, and access to them is a web-server rule per `/<course>/` path if ever needed.
+
 - **Public and protected at once?** Put the applets on one path and anything restricted on
-  another, e.g. `/applets/` public and `/applets/kurs/` behind `Require shib-session`.
+  another, e.g. the landing page public and `/<course>/` behind `Require shib-session`.
   Astro routes map one-to-one to directories, so this is a matter of where pages live.
 - **Server-side notebook.** Only needed if students should see their notebook on several
   devices. The UI talks to the `NotebookStore` interface (`packages/quiz/src/notebook.ts`),

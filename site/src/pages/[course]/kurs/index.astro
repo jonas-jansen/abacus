@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content'
+import Seite from '../../../layouts/Seite.astro'
+import { scopeOf, type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { included, builtCourses } from '../../../release'
+
+const pages = (await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))).sort(
+  (a, b) => a.data.week - b.data.week || a.data.order - b.data.order || a.data.title.localeCompare(b.data.title, 'de'),
+)
+export function getStaticPaths() {
+  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+}
+const { course } = Astro.props as { course: Course }
+Astro.locals.course = course
+---
+<Seite course={course} title="Kurs" active="kurs" width="narrow">
+  <h1>Kurs</h1>
+  {pages.length === 0 && <p class="muted">Die Kursseiten folgen im Lauf des Semesters.</p>}
+  <ol class="course-list">
+    {
+      pages.map((s) => (
+        <li>
+          <a href={courseUrl(course, `/kurs/${s.id}`)}>
+            <span class="course-week">Woche {s.data.week}</span>
+            <strong>{s.data.title}</strong>
+            <span class="course-kurz">{s.data.summary}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</Seite>

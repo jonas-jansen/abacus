@@ -1,8 +1,9 @@
 {
-  "note": "What an upload contains: `ABACUS_RELEASE=<name> pnpm build` builds only these applets, weekly quizzes and course pages (docs/deployment.md). Without ABACUS_RELEASE everything is built.",
+  "note": "What an upload contains: `ABACUS_RELEASE=<name> pnpm build` builds only these courses, applets, weekly quizzes and guided pages (docs/deployment.md). Without ABACUS_RELEASE everything is built.",
   "einfuehrung": {
+    "courses": ["mathe-bio"],
     "applets": ["alcohol", "luo-rudy"],
     "quizzes": ["vorkurs"],
-    "course": []
+    "pages": []
   }
 }

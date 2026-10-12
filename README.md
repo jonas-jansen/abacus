@@ -15,11 +15,15 @@ pnpm build                                # static site in site/dist
 
 ## Pages
 
-- `/` – start: the four areas
-- `/applets` – all applets by chapter; `/applet/<id>` – one applet, full width
-- `/kurs` – the guided pages; `/kurs/<page>` – text and exercises beside the applet
-- `/quiz` – weekly quizzes; `/quiz/<id>` – one quiz with its attempts
-- `/notizbuch` – all answers and attempts, with export and import
+abacus is a platform for several courses (`site/src/courses.ts`); everything of a course lives
+under its id, e.g. `mathe-bio`:
+
+- `/` – the landing page: the courses (who sees which: `site/src/access.ts`)
+- `/<course>/` – the course's start: its four areas
+- `/<course>/applets` – all applets by chapter; `/<course>/applet/<id>` – one applet, full width
+- `/<course>/kurs` – the guided pages; `/<course>/kurs/<page>` – text and exercises beside the applet
+- `/<course>/quiz` – weekly quizzes; `/<course>/quiz/<id>` – one quiz with its attempts
+- `/<course>/notizbuch` – the course's answers and attempts, with export and import
 
 ## Documentation
 

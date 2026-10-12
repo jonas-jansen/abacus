@@ -5,7 +5,7 @@
 //
 // Creates packages/applets/src/<id>.ts from a template, adds it to the registry, and with
 // --page also a page stub in site/src/content/course/<id>.mdx. The applet appears on
-// /applet/<id> immediately. The guide is docs/applets.md.
+// /<course>/applet/<id> immediately. The guide is docs/applets.md.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'

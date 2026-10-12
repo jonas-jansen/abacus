@@ -2,7 +2,7 @@
 // <Quiz id="log-schwelle" number={3} />            — any question from @abacus/quizzes
 // <Quiz id="log-vorhersage-32" unlocks />          — answering it unlocks the page's applet
 import { QuizIsland } from '../islands'
-import { scope } from '../config'
+import { scopeOf } from '../courses'
 
 interface Props {
   id: string
@@ -14,6 +14,8 @@ interface Props {
 }
 const { id, number, star, unlocks } = Astro.props
 const unlock = unlocks === true ? Astro.locals.applet : unlocks || undefined
+// answers are kept per course: the page sets its course
+const scope = scopeOf(Astro.locals.course!)
 ---
 {
   unlock ? (

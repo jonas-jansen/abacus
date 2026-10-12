@@ -1,0 +1,16 @@
+---
+import { NotebookBar, NotebookOverview } from '@abacus/quiz'
+import Seite from '../../layouts/Seite.astro'
+import { builtCourses } from '../../release'
+import { scopeOf, type Course } from '../../courses'
+export function getStaticPaths() {
+  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+}
+const { course } = Astro.props as { course: Course }
+Astro.locals.course = course
+---
+<Seite course={course} title="Notizbuch" width="narrow" active="notizbuch">
+  <h1>Notizbuch</h1>
+  <NotebookBar client:load />
+  <NotebookOverview client:only="react" scope={scopeOf(course)} />
+</Seite>

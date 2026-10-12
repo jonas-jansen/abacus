@@ -1,10 +1,11 @@
 ---
 import { chapters } from '@abacus/applets'
 import { chapterName } from '@abacus/applet-ui/define'
-import Seite from '../layouts/Seite.astro'
-import { url } from '../config'
-import { included, release } from '../release'
-import { previewSvg } from '../preview'
+import Seite from '../../layouts/Seite.astro'
+import { scopeOf, type Course } from '../../courses'
+import { courseUrl } from '../../config'
+import { included, release, builtCourses } from '../../release'
+import { previewSvg } from '../../preview'
 
 // listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
 // an upload (release profile) lists exactly what it contains
@@ -13,8 +14,13 @@ const kapitelListe = chapters({ all: import.meta.env.DEV || !!release })
   .filter((k) => k.applets.length > 0)
 // the search hint names what is there: a word from the first few titles
 const beispiele = kapitelListe.flatMap((k) => k.applets).slice(0, 3).map((a) => a.title.split(/[\s:,]/)[0]).join(', ')
+export function getStaticPaths() {
+  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+}
+const { course } = Astro.props as { course: Course }
+Astro.locals.course = course
 ---
-<Seite title="Applets" active="applets">
+<Seite course={course} title="Applets" active="applets">
   <h1>Applets</h1>
   <div class="gallery-search">
     <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
@@ -36,7 +42,7 @@ const beispiele = kapitelListe.flatMap((k) => k.applets).slice(0, 3).map((a) => 
         </h3>
         <div class="gallery">
           {k.applets.map((a) => (
-            <a class="card" href={url(`/applet/${a.id}`)} data-suche={`${a.title} ${a.summary} ${k.title} ${chapterName(k.id)} ${a.id}`}>
+            <a class="card" href={courseUrl(course, `/applet/${a.id}`)} data-suche={`${a.title} ${a.summary} ${k.title} ${chapterName(k.id)} ${a.id}`}>
               <div class="card-preview" set:html={previewSvg(a)} />
               <div class="card-body">
                 {a.visible === false && <span class="nicht-gelistet">nicht gelistet</span>}

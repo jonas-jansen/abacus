@@ -6,7 +6,7 @@ links, hints, chapter listing – comes with it.
 
 ```sh
 pnpm new-applet konkurrenz --kind ode      # or iteration | closedForm; --page adds a course page
-pnpm dev                                   # → http://localhost:4321/applet/konkurrenz
+pnpm dev                                   # → http://localhost:4321/mathe-bio/applet/konkurrenz
 pnpm test                                  # the checks below run for every applet
 ```
 

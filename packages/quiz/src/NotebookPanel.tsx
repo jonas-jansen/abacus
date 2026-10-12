@@ -1,5 +1,6 @@
 import { useRef, useState, useSyncExternalStore } from 'react'
 import { formatNumber } from '@abacus/applet-core'
+import type { NotebookScope } from './notebook'
 import { MathText } from './MathText'
 import { exportMarkdown, notebook, parseKey } from './notebook'
 
@@ -64,8 +65,8 @@ export function NotebookBar() {
   )
 }
 
-/** All recorded answers, newest quiz first. */
-export function NotebookOverview() {
+/** All recorded answers, newest quiz first; with `scope`, only those of that course and semester. */
+export function NotebookOverview({ scope }: { scope?: NotebookScope } = {}) {
   const store = notebook()
   const keys = useSyncExternalStore(
     (l) => store.subscribe(l),
@@ -78,7 +79,7 @@ export function NotebookOverview() {
     .flatMap((k) => {
       const key = parseKey(k)
       const e = store.get(k)
-      return key && e ? [{ key, e }] : []
+      return key && e && (!scope || (key.kurs === scope.kurs && key.semester === scope.semester)) ? [{ key, e }] : []
     })
     .sort((a, b) => (b.e.inputs.at(-1)?.ts ?? 0) - (a.e.inputs.at(-1)?.ts ?? 0))
 

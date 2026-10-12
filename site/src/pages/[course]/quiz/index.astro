@@ -1,18 +1,24 @@
 ---
 import { renderMathText, rulesText, windowText } from '@abacus/quiz'
 import { listedWeeklyQuizzes } from '@abacus/quizzes'
-import { WeeklyQuizStatusIsland } from '../../islands'
-import Seite from '../../layouts/Seite.astro'
-import { scope, url } from '../../config'
-import { included, release } from '../../release'
+import { WeeklyQuizStatusIsland } from '../../../islands'
+import Seite from '../../../layouts/Seite.astro'
+import { scopeOf, type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { included, release, builtCourses } from '../../../release'
+export function getStaticPaths() {
+  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+}
+const { course } = Astro.props as { course: Course }
+Astro.locals.course = course
 ---
-<Seite title="Quizze" active="quiz" width="medium">
+<Seite course={course} title="Quizze" active="quiz" width="medium">
   <h1>Quizze</h1>
   <ol class="quiz-list">
     {
       listedWeeklyQuizzes({ all: import.meta.env.DEV || !!release }).filter((w) => included('quizzes', w.id)).map((w) => (
         <li>
-          <a href={url(`/quiz/${w.id}`)}>
+          <a href={courseUrl(course, `/quiz/${w.id}`)}>
             <span class="course-week">{w.week !== undefined ? `Woche ${w.week}` : 'Quiz'}</span>
             <strong>{w.title}{w.visible === false && <span class="nicht-gelistet">nicht gelistet</span>}</strong>
             {w.description && <span class="course-kurz" set:html={renderMathText(w.description)} />}
@@ -20,7 +26,7 @@ import { included, release } from '../../release'
               {windowText(w) && <span>{windowText(w)}</span>}
               <span>{w.questions.length} Fragen · {rulesText(w)}</span>
             </span>
-            <WeeklyQuizStatusIsland client:only="react" id={w.id} scope={scope} />
+            <WeeklyQuizStatusIsland client:only="react" id={w.id} scope={scopeOf(course)} />
           </a>
         </li>
       ))

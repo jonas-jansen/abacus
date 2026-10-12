@@ -60,7 +60,6 @@ h1 {
 .topbar-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   height: 100%;
   max-width: 1600px;
@@ -87,6 +86,25 @@ h1 {
   gap: 4px;
   margin-left: auto;
 }
+/* the course after the platform's name: "abacus / Mathematik für Biowissenschaften" */
+.brand-course {
+  min-width: 0;
+  margin-left: -6px;
+  color: var(--ab-muted);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.brand-course::before {
+  content: '/';
+  margin-right: 10px;
+  color: color-mix(in srgb, var(--ab-muted) 50%, transparent);
+}
+.brand-course:hover {
+  color: var(--ab-text);
+}
 
 /* Settings: a quiet button at the right end of the bar, a small card under it. */
 .settings-btn {
@@ -94,12 +112,16 @@ h1 {
   place-items: center;
   width: 34px;
   height: 34px;
-  margin-left: -8px;
+  margin-left: auto;
   border: 0;
   border-radius: var(--ab-radius);
   background: none;
   color: var(--ab-muted);
   cursor: pointer;
+}
+/* after the course's nav, close to it; without a course (landing page) alone at the right end */
+.topbar nav + .settings-btn {
+  margin-left: -8px;
 }
 .settings-btn:hover {
   background: var(--ab-panel);
@@ -222,8 +244,24 @@ h1 {
   color: var(--ab-accent);
   background: var(--ab-accent-soft);
 }
+@media (max-width: 760px) {
+  /* the course's name gives way to its nav; the start page names the course */
+  .brand-course {
+    display: none;
+  }
+}
 @media (max-width: 520px) {
+  .topbar-inner {
+    gap: 8px;
+  }
+  .topbar nav {
+    gap: 0;
+  }
+  .topbar nav a {
+    padding: 6px 8px;
+  }
   .brand {
+    flex: none;
     font-size: 0;
     gap: 0;
   }
@@ -799,6 +837,18 @@ details.box[open] > summary::after {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
   gap: 16px;
   max-width: 960px;
+}
+/* the landing page: one card per course */
+.kurse {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.kurs-beitreten {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 8px;
 }
 .bereich {
   display: grid;

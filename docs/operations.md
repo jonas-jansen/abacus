@@ -12,7 +12,7 @@
 | `pnpm check:deps` | the import rules between packages ([architecture.md](architecture.md)) |
 | `pnpm build` | static site in `site/dist` |
 | `pnpm new-applet <id> --kind iteration\|closedForm\|ode [--page]` | a working applet (and course page), registered and in the catalog, unlisted |
-| `node scripts/shoot.mjs <dir> /applet/<id> [--width 390] [--dark]` | screenshots from the running dev server |
+| `node scripts/shoot.mjs <dir> /mathe-bio/applet/<id> [--width 390] [--dark]` | screenshots from the running dev server |
 
 ## Tests
 
@@ -48,7 +48,10 @@ stay reachable by address; course pages marked `draft: true` are not built at al
 `apps/` (original MATLAB applets) and `slides/` (lecture PDFs) are in `.gitignore` and must
 not be published.
 
-## Course identity
+## Courses
 
-`site/src/config.ts`: `kurs.id`, `kurs.semester` and `kurs.title`. Id and semester are part
-of every notebook key; changing them later orphans the answers students have stored.
+`site/src/courses.ts` lists the courses: `id` (the address, `/<id>/`), `title`, `semester`
+and `term`. Id and semester are part of every notebook key; changing them later orphans the
+answers students have stored. A new course is one more entry; its pages are built from the
+same applets, quizzes and guided pages (per-course content lists come when a second course
+needs them).

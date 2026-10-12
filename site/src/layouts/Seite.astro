@@ -4,8 +4,9 @@ import '@abacus/quiz/styles.css'
 import '../styles/site.css'
 import '../styles/thema.css'
 import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT, FARBEN } from '@abacus/applet-ui/settings'
-import { kurs, url } from '../config'
-import { withCourse } from '../release'
+import { courseUrl, platform, url } from '../config'
+import type { Course } from '../courses'
+import { withPages } from '../release'
 
 interface Props {
   title: string
@@ -15,15 +16,18 @@ interface Props {
   active?: 'start' | 'applets' | 'kurs' | 'quiz' | 'notizbuch'
   /** Reachable by its address, but not listed: kept out of search engines too. */
   unlisted?: boolean
+  /** The course the page belongs to: its name and areas in the top bar. None on the landing page. */
+  course?: Course
 }
-const { title, summary, width = 'wide', active, unlisted = false } = Astro.props
+const { title, summary, width = 'wide', active, unlisted = false, course } = Astro.props
+const c = (path: string) => courseUrl(course!, path)
 ---
 <!doctype html>
 <html lang="de">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} · {kurs.title}</title>
+    <title>{course ? `${title} · ${course.title}` : title}</title>
     {summary && <meta name="description" content={summary} />}
     {unlisted && <meta name="robots" content="noindex" />}
     <script is:inline set:html={EINSTELLUNGEN_SCRIPT} />
@@ -36,14 +40,17 @@ const { title, summary, width = 'wide', active, unlisted = false } = Astro.props
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
             <path d="M3 20c3-12 6-12 9 0s6 0 9-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          {kurs.title}
+          {platform.name}
         </a>
-        <nav>
-          <a href={url('/applets')} aria-current={active === 'applets' ? 'page' : undefined}>Applets</a>
-          {withCourse && <a href={url('/kurs')} aria-current={active === 'kurs' ? 'page' : undefined}>Kurs</a>}
-          <a href={url('/quiz')} aria-current={active === 'quiz' ? 'page' : undefined}>Quizze</a>
-          <a href={url('/notizbuch')} aria-current={active === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
-        </nav>
+        {course && <a class="brand-course" href={c('/')}>{course.title}</a>}
+        {course && (
+          <nav>
+            <a href={c('/applets')} aria-current={active === 'applets' ? 'page' : undefined}>Applets</a>
+            {withPages && <a href={c('/kurs')} aria-current={active === 'kurs' ? 'page' : undefined}>Kurs</a>}
+            <a href={c('/quiz')} aria-current={active === 'quiz' ? 'page' : undefined}>Quizze</a>
+            <a href={c('/notizbuch')} aria-current={active === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
+          </nav>
+        )}
         <button class="settings-btn" type="button" popovertarget="einstellungen" aria-label="Einstellungen">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" />

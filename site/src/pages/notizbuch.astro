@@ -1,9 +1,0 @@
----
-import { NotebookBar, NotebookOverview } from '@abacus/quiz'
-import Seite from '../layouts/Seite.astro'
----
-<Seite title="Notizbuch" width="narrow" active="notizbuch">
-  <h1>Notizbuch</h1>
-  <NotebookBar client:load />
-  <NotebookOverview client:only="react" />
-</Seite>

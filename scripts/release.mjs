@@ -23,5 +23,5 @@ if (!existsSync(join(out, 'index.html'))) throw new Error('The build produced no
 execFileSync('zip', ['-qr', `${name}.zip`, name], { cwd: join(root, 'release') })
 const p = profiles[name]
 console.log(`\n✓ release/${name}/ and release/${name}.zip`)
-console.log(`  applets: ${p.applets.join(', ') || '–'} · quizzes: ${p.quizzes.join(', ') || '–'} · course pages: ${p.course.join(', ') || '–'}`)
+console.log(`  courses: ${p.courses.join(', ')} · applets: ${p.applets.join(', ') || '–'} · quizzes: ${p.quizzes.join(', ') || '–'} · guided pages: ${p.pages.join(', ') || '–'}`)
 console.log(`  base path: ${process.env.ABACUS_BASE ?? '/'} (set ABACUS_BASE for a sub-path)`)

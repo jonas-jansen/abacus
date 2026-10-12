@@ -3,18 +3,20 @@
 // it. Narrow screens stack them, applet first.
 import { getCollection, getEntry, render } from 'astro:content'
 import { getApplet } from '@abacus/applets'
-import { vocabulary } from '../../components'
-import { AppletIsland } from '../../islands'
-import Seite from '../../layouts/Seite.astro'
-import { url } from '../../config'
-import { included } from '../../release'
+import { vocabulary } from '../../../components'
+import { AppletIsland } from '../../../islands'
+import Seite from '../../../layouts/Seite.astro'
+import { scopeOf, type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { included, builtCourses } from '../../../release'
 
 export async function getStaticPaths() {
-  const pages = await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('course', s.id))
-  return pages.map((page) => ({ params: { page: page.id }, props: { page } }))
+  const pages = await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))
+  return builtCourses.flatMap((course) => pages.map((page) => ({ params: { course: course.id, page: page.id }, props: { page, course } })))
 }
 
-const { page } = Astro.props
+const { page, course } = Astro.props as { page: Awaited<ReturnType<typeof getCollection<'course'>>>[number]; course: Course }
+Astro.locals.course = course
 const { data } = page
 Astro.locals.applet = data.applet
 const def = getApplet(data.applet)
@@ -23,7 +25,7 @@ const { Content } = await render(page)
 const intro = await getEntry('intro', data.applet)
 const Intro = intro ? (await render(intro)).Content : null
 ---
-<Seite title={data.title} summary={data.summary} active="kurs">
+<Seite course={course} title={data.title} summary={data.summary} active="kurs">
   <header class="course-head">
     <p class="eyebrow">Woche {data.week}</p>
     <h1>{data.title}</h1>
@@ -48,7 +50,7 @@ const Intro = intro ? (await render(intro)).Content : null
           id={def.id}
           initialState={data.state}
           startLocked={data.locked}
-          pageHref={url(`/applet/${def.id}`)}
+          pageHref={courseUrl(course, `/applet/${def.id}`)}
         />
       </div>
     </div>

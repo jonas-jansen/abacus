@@ -2,7 +2,7 @@
 
 ## A course page
 
-One MDX file in `site/src/content/course/<name>.mdx`, published at `/kurs/<name>`. The text
+One MDX file in `site/src/content/course/<name>.mdx`, published at `/<course>/kurs/<name>`. The text
 is on the left; the page's applet is on the right, large and sticky.
 
 ```mdx
@@ -86,8 +86,8 @@ should say which way to go, not only "wrong". Compare readouts by their **value*
 ## The notebook
 
 Every answer, prediction and quiz attempt is kept in the browser (`localStorage`), per course
-and semester (`site/src/config.ts`: `kurs.id`, `kurs.semester`; changing them orphans stored
-answers). `/notizbuch` lists everything, with export and import as a file. Nothing is sent
+and semester (`site/src/courses.ts`: `id`, `semester`; changing them orphans stored answers).
+`/<course>/notizbuch` lists the course's entries, with export and import as a file. Nothing is sent
 anywhere. A server-backed store can implement the `NotebookStore` interface
 (`packages/quiz/src/notebook.ts`), see [quizzes.md](quizzes.md#next-a-server-statistics-retakes-across-devices).
 
@@ -100,7 +100,7 @@ anywhere. A server-backed store can implement the `NotebookStore` interface
  "title": "Krebserkrankung: drei Gruppen", "summary": "Gesund, leicht und schwer erkrankt …"}
 ```
 
-- `visible: false` keeps an applet out of the overview. Its address `/applet/<id>` still
+- `visible: false` keeps an applet out of the overview. Its address `/<course>/applet/<id>` still
   works (for sharing), and search engines are asked to skip it.
 - `chapter` is `0` (shown as "Einführung"), `I`, `II`, `III`, `IV` or `Appendix` (shown as
   "Anhang").
