@@ -875,13 +875,13 @@ details.box[open] > summary::after {
   gap: 16px;
   margin-bottom: 36px;
 }
-/* a course: its picture, name, semester and what it holds; the whole card is the link */
+/* a course: its name and semester; the whole card is the link */
 .kurs-karte {
   display: grid;
-  grid-template-columns: 240px 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 24px;
-  padding: 16px 24px 16px 16px;
+  padding: 22px 26px;
   border: 1px solid var(--ab-line);
   border-radius: var(--ab-radius);
   background: var(--ab-bg);
@@ -893,14 +893,6 @@ details.box[open] > summary::after {
 .kurs-karte:hover {
   border-color: color-mix(in srgb, var(--ab-accent) 40%, var(--ab-line));
   transform: translateY(-2px);
-}
-.kurs-bild {
-  padding: 8px;
-  border-radius: var(--ab-radius);
-  background: var(--ab-panel);
-}
-.kurs-bild svg {
-  display: block;
 }
 .kurs-text {
   display: flex;
@@ -925,15 +917,6 @@ details.box[open] > summary::after {
 .kurs-beitreten {
   align-self: start;
   margin-top: 10px;
-}
-@media (max-width: 640px) {
-  .kurs-karte {
-    grid-template-columns: 1fr auto;
-    gap: 12px 16px;
-  }
-  .kurs-bild {
-    grid-column: 1 / -1;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .kurs-karte,

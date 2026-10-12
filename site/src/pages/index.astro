@@ -21,7 +21,6 @@ import { builtCourses } from '../release'
     {
       builtCourses.map((c) => (
         <a class="kurs-karte" href={courseUrl(c)} data-course={c.id}>
-          {c.cover && <div class="kurs-bild" set:html={c.cover()} />}
           <div class="kurs-text">
             <strong>{c.title}</strong>
             <span class="kurs-semester">{c.term}</span>

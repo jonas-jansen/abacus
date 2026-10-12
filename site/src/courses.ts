@@ -7,7 +7,6 @@
  */
 
 import type { NotebookScope } from '@abacus/quiz'
-import { growth } from './covers'
 
 export interface Course {
   /** Address and notebook scope: lower case, digits, '-'. */
@@ -17,12 +16,10 @@ export interface Course {
   semester: string
   /** Shown to students, e.g. "Wintersemester 2026/27". */
   term: string
-  /** The picture on the course's card on the landing page (an SVG string, see covers.ts). */
-  cover?: () => string
 }
 
 export const courses: readonly Course[] = [
-  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27', cover: growth },
+  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27' },
 ]
 
 for (const c of courses) {
