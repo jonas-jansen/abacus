@@ -71,7 +71,7 @@ export default defineApplet({
       yLogRange: [1e-17, 10],
       logToggle: true,
       logHilfe:
-        'Hier heißt jede Zehnerpotenz weiter unten: eine richtige Nachkommastelle mehr. Die Punkte fallen immer steiler – die Zahl der richtigen Stellen verdoppelt sich ungefähr in jedem Schritt. Bei $10^{-16}$ ist die Rechengenauigkeit des Computers erreicht.',
+        'Hier heißt jede Zehnerpotenz weiter unten: eine richtige Nachkommastelle mehr. Die Punkte fallen immer steiler, denn die Zahl der richtigen Stellen verdoppelt sich ungefähr in jedem Schritt. Bei $10^{-16}$ ist die Rechengenauigkeit des Computers erreicht.',
     },
   ],
   readouts: ['grenzwert', 'stellen', 'fehler'],

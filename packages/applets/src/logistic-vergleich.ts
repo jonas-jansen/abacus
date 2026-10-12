@@ -62,7 +62,7 @@ const model = closedForm({
     return {
       kontinuierlich: quantity('kontinuierlich: Grenzwert', p.N0 > 0 ? p.K : 0, { marks: [{ kind: 'value', v: p.K }] }),
       diskret: behaviour('diskret: Verhalten', long),
-      periode: index('diskret: Periode', periode, periode === null ? { note: 'keine Periode ≤ 16 – Chaos?' } : {}),
+      periode: index('diskret: Periode', periode, periode === null ? { note: 'keine Periode ≤ 16, vielleicht Chaos' } : {}),
       abstand: quantity('größter Abstand $|N_n - N(t_n)|$', abstand, { digits: 3 }),
     }
   },

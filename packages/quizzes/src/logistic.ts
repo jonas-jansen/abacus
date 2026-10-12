@@ -29,7 +29,7 @@ export default [
       tooLarge: (v) => `Bei $a = ${numText(v)}$ springt sie schon zwischen mehreren Werten.`,
     }),
     hints: ['Nutzen Sie die Lupe am Regler für $a$.'],
-    solution: '$a = 3$. Dort ist $|f\'(y^*)| = |2 - a| = 1$ – der Beweis auf dieser Seite zeigt, warum genau hier.',
+    solution: '$a = 3$. Dort ist $|f\'(y^*)| = |2 - a| = 1$. Warum genau hier, zeigt der Beweis auf dieser Seite.',
   }),
   defineQuiz({
     id: 'log-grenzwert-25',
@@ -47,7 +47,7 @@ export default [
     checker: condition((_p, o) => {
       const per = o.periode?.value
       if (per === 4) return { status: 'correct' }
-      if (per === 2) return { status: 'close', direction: 'too small', hint: 'Periode 2 – noch etwas weiter.' }
+      if (per === 2) return { status: 'close', direction: 'too small', hint: 'Periode 2, noch etwas weiter.' }
       if (per === 1) return { status: 'wrong', direction: 'too small', hint: 'Die Folge kommt noch auf einem Punkt zur Ruhe.' }
       return { status: 'wrong', direction: 'too large', hint: per == null ? 'Kein Muster mehr zu erkennen.' : `Periode ${per}.` }
     }),
@@ -56,7 +56,7 @@ export default [
     id: 'log-spirale-treppe',
     type: 'open',
     question:
-      'Bei $a = 2.8$ nähert sich die Folge dem Fixpunkt abwechselnd von beiden Seiten, bei $a = 1.8$ von einer Seite. Woran sehen Sie das im Diagramm – und welche Rolle spielt das Vorzeichen von $f\'(y^*)$?',
+      'Bei $a = 2.8$ nähert sich die Folge dem Fixpunkt abwechselnd von beiden Seiten, bei $a = 1.8$ von einer Seite. Woran sehen Sie das im Diagramm, und welche Rolle spielt das Vorzeichen von $f\'(y^*)$?',
     solution: '$f\'(y^*) = 2 - a$ ist bei $a = 2.8$ negativ (Spirale), bei $a = 1.8$ positiv (Treppe).',
   }),
 ]

@@ -83,7 +83,7 @@ export default defineApplet({
       yScale: 'log',
       yLogRange: [0.5, 2e5],
       logToggle: true,
-      logHilfe: 'Am Anfang ist fast jeder gesund, x₁ ≈ N: dann wächst x₂ in jedem Schritt um denselben Faktor q – auf der log-Achse eine Gerade.',
+      logHilfe: 'Am Anfang ist fast jeder gesund, x₁ ≈ N: dann wächst x₂ in jedem Schritt um denselben Faktor q. Auf der log-Achse ist das eine Gerade.',
       drag: { param: 'I0', axis: 'y' },
     },
     { type: 'timeSeriesDiscrete', series: ['neu'], title: 'Neuinfektionen', xLabel: 'n', yLabel: '\\beta x_1 x_2' },

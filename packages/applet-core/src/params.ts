@@ -128,7 +128,7 @@ export const point = (label: string, o: Opts<PointParam>): Def<PointParam> => ({
 export const ITERATION_LIMITS: Limits = {
   min: 0,
   max: 1_000_000,
-  reason: 'Höchstens eine Million Schritte – mehr kann der Browser nicht flüssig rechnen.',
+  reason: 'Höchstens eine Million Schritte, mehr kann der Browser nicht flüssig rechnen.',
 }
 
 /**
@@ -201,7 +201,7 @@ export function checkValue(spec: ParamSpec, raw: unknown): Checked | undefined {
       const v = parseNumber(raw)
       if (v === undefined) return undefined
       const r = applyLimits(Math.round(v), spec.limits)
-      return Number.isInteger(v) ? r : { value: r.value, message: r.message ?? 'Nur ganze Zahlen – der Wert wurde gerundet.' }
+      return Number.isInteger(v) ? r : { value: r.value, message: r.message ?? 'Nur ganze Zahlen, der Wert wurde gerundet.' }
     }
     case 'choice':
       return spec.options.some((o) => o.value === raw) ? { value: raw as string } : undefined

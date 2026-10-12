@@ -21,5 +21,5 @@ an $a$:
 
 ### Im Applet
 
-Ziehen Sie $x_0$ und den Punkt $x_1$ – damit stellen Sie $a = x_1 / x_0$ ein. Mit dem
+Ziehen Sie $x_0$ und den Punkt $x_1$. So stellen Sie $a = x_1 / x_0$ ein. Mit dem
 Schalter „log“ wird aus jeder geometrischen Folge eine Gerade.

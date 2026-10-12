@@ -15,7 +15,7 @@ $$
 y_{n+1} = a\,y_n\,(1 - y_n).
 $$
 
-Der Faktor $a\,y_n$ ist das ungebremste Wachstum wie in Woche 1, der Faktor $1 - y_n$ bremst es. Für manche Werte von $a$ pendelt sich die Population auf einen festen Wert ein, für andere schwankt sie für immer. Heute finden wir heraus, woran das liegt – zuerst mit Papier, dann mit dem Werkzeug rechts.
+Der Faktor $a\,y_n$ ist das ungebremste Wachstum wie in Woche 1, der Faktor $1 - y_n$ bremst es. Für manche Werte von $a$ pendelt sich die Population auf einen festen Wert ein, für andere schwankt sie für immer. Heute finden wir heraus, woran das liegt, zuerst mit Papier und dann mit dem Werkzeug rechts.
 
 ## Mit Papier
 
@@ -26,28 +26,28 @@ Ein Punkt $y^*$ heißt **Fixpunkt** der Abbildung $f$, wenn $f(y^*) = y^*$ gilt.
 </Definition>
 
 <Exercise number={1} title="Fixpunkte berechnen">
-Setzen Sie $f(y) = a\,y(1-y)$ gleich $y$ und lösen Sie nach $y$ auf. Sie sollten zwei Lösungen finden. Eine davon ist langweilig – welche? Bestimmen Sie außerdem die Ableitung $f'$ am anderen Fixpunkt; sie wird gleich eine Hauptrolle spielen.
+Setzen Sie $f(y) = a\,y(1-y)$ gleich $y$ und lösen Sie nach $y$ auf. Sie sollten zwei Lösungen finden. Eine davon ist langweilig. Welche? Bestimmen Sie außerdem die Ableitung $f'$ am anderen Fixpunkt; sie wird gleich eine Hauptrolle spielen.
 
 <Quiz id="log-fixpunkte" />
 </Exercise>
 
 ## Vorhersage
 
-Bevor Sie das Werkzeug benutzen, legen Sie sich fest. Es geht nicht darum, richtig zu raten – sondern darum, hinterher zu wissen, **was** Sie überrascht hat.
+Bevor Sie das Werkzeug benutzen, legen Sie sich fest. Es geht nicht darum, richtig zu raten. Sie sollen hinterher wissen, **was** Sie überrascht hat.
 
 <Quiz id="log-vorhersage-32" unlocks />
 
 Das Werkzeug zeigt zwei Bilder derselben Folge. Links das *Spinnwebdiagramm*: der Graph von $f$ und die Diagonale $y = x$. Ein Schritt der Folge besteht aus zwei Bewegungen:
 
-1. **senkrecht** vom aktuellen Wert $y_n$ bis zum Graphen – dort liest man $f(y_n) = y_{n+1}$ ab,
-2. **waagerecht** zur Diagonale – damit wird $y_{n+1}$ zum neuen Startwert.
+1. **senkrecht** vom aktuellen Wert $y_n$ bis zum Graphen, dort liest man $f(y_n) = y_{n+1}$ ab,
+2. **waagerecht** zur Diagonale, damit wird $y_{n+1}$ zum neuen Startwert.
 
 Rechts sehen Sie dieselbe Folge als Punkte über $n$. Den Startwert ziehen Sie am Kreis auf der Achse; mit ▶ gehen Sie Schritt für Schritt. Vergleichen Sie [a = 2.8](#logistic-cobweb.a=2.8) mit [a = 3.2](#logistic-cobweb.a=3.2).
 
 ## Aufgaben
 
 <Exercise number={2} title="Die Schwelle">
-Bei $a = 2.8$ kommt die Folge zur Ruhe, bei $a = 3.2$ nicht. Irgendwo dazwischen muss sich etwas ändern. Erhöhen Sie $a$ langsam und beobachten Sie, wie lange die Folge braucht, um sich einzupendeln. Kurz vor der Schwelle wird es immer mühsamer – mit der Lupe am Regler können Sie den Bereich eingrenzen.
+Bei $a = 2.8$ kommt die Folge zur Ruhe, bei $a = 3.2$ nicht. Irgendwo dazwischen muss sich etwas ändern. Erhöhen Sie $a$ langsam und beobachten Sie, wie lange die Folge braucht, um sich einzupendeln. Kurz vor der Schwelle wird es immer mühsamer. Mit der Lupe am Regler können Sie den Bereich eingrenzen.
 
 Tragen Sie Ihren Wert ein. Er wird nicht sofort beurteilt: Die Antwort gibt der Beweis weiter unten.
 
@@ -59,7 +59,7 @@ Tragen Sie Ihren Wert ein. Er wird nicht sofort beurteilt: Die Antwort gibt der 
 </Exercise>
 
 <Exercise number={4} title="Periode 4 herstellen">
-Jenseits der Schwelle springt die Folge zunächst zwischen zwei Werten. Erhöht man $a$ weiter, verdoppelt sich die Periode – und zwar immer schneller:
+Jenseits der Schwelle springt die Folge zunächst zwischen zwei Werten. Erhöht man $a$ weiter, verdoppelt sich die Periode, und zwar immer schneller:
 
 | Periode | ab etwa $a =$ |
 | --- | --- |
@@ -86,7 +86,7 @@ Für $1 < a < 3$ zieht $y^* = 1 - 1/a$ alle nahe startenden Folgen an. Für $a >
 </Claim>
 
 <Proof>
-Mit $e_n = y_n - y^*$ gibt der Mittelwertsatz $e_{n+1} = f'(\xi_n)\,e_n$ mit $\xi_n$ zwischen $y_n$ und $y^*$. Ist $|f'(y^*)| = |2-a| < 1$, so gilt $|f'| \le q < 1$ auf einem Intervall um $y^*$, also $|e_n| \le q^n |e_0| \to 0$ – das ist die geometrische Folge aus Woche 1. Ist $|2 - a| > 1$, wächst jeder kleine Abstand.
+Mit $e_n = y_n - y^*$ gibt der Mittelwertsatz $e_{n+1} = f'(\xi_n)\,e_n$ mit $\xi_n$ zwischen $y_n$ und $y^*$. Ist $|f'(y^*)| = |2-a| < 1$, so gilt $|f'| \le q < 1$ auf einem Intervall um $y^*$, also $|e_n| \le q^n |e_0| \to 0$. Das ist die geometrische Folge aus Woche 1. Ist $|2 - a| > 1$, wächst jeder kleine Abstand.
 </Proof>
 
 <Later>Dass für $1 < a \le 3$ **jeder** Startwert in $(0,1)$ gegen $y^*$ läuft.</Later>
@@ -94,7 +94,7 @@ Mit $e_n = y_n - y^*$ gibt der Mittelwertsatz $e_{n+1} = f'(\xi_n)\,e_n$ mit $\x
 ## Wo das Bild lügt
 
 <Caveat>
-Bei [a = 3](#logistic-cobweb.a=3) sieht es nach 40 Schritten nach einem Zweierzyklus aus: Die Folge ist noch etwa $0.03$ von $2/3$ entfernt. Mit [einer Million Schritten](#logistic-cobweb.a=3&logistic-cobweb.N=1000000) sieht es dagegen nach Konvergenz aus. Beides ist nur ein Ausschnitt: Der Abstand schrumpft wie $1/\sqrt n$ – nach $10^4$ Schritten etwa $0.002$, nach $10^6$ etwa $0.0002$. Ob er je null wird, entscheidet kein Bild, sondern nur der Beweis.
+Bei [a = 3](#logistic-cobweb.a=3) sieht es nach 40 Schritten nach einem Zweierzyklus aus: Die Folge ist noch etwa $0.03$ von $2/3$ entfernt. Mit [einer Million Schritten](#logistic-cobweb.a=3&logistic-cobweb.N=1000000) sieht es dagegen nach Konvergenz aus. Beides ist nur ein Ausschnitt: Der Abstand schrumpft wie $1/\sqrt n$, nach $10^4$ Schritten etwa $0.002$, nach $10^6$ etwa $0.0002$. Ob er je null wird, entscheidet kein Bild, sondern nur der Beweis.
 </Caveat>
 
 ## Weiterdenken

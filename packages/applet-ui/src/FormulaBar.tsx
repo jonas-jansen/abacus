@@ -157,8 +157,8 @@ export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusPa
       if (typeof v === 'number') el.setAttribute('aria-valuenow', String(v))
       el.title =
         spec.kind === 'bool' || spec.kind === 'choice'
-          ? `${spec.label} – klicken zum Umschalten`
-          : `${name} = ${typeof v === 'number' ? formatNumber(v, 6) : String(v)} – ziehen zum Ändern, klicken zum Eintippen`
+          ? `${spec.label}: klicken zum Umschalten`
+          : `${name} = ${typeof v === 'number' ? formatNumber(v, 6) : String(v)}: ziehen zum Ändern, klicken zum Eintippen`
       el.toggleAttribute('data-hot', spec.id === hot)
     })
   })

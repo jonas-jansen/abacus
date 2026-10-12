@@ -71,7 +71,7 @@ const model = iteration({
     const values = periode === null ? [] : [...cycle.slice(-periode)]
     return {
       periode: index('Periode', periode, {
-        note: periode === null ? `keine Periode ≤ ${MAX_PERIOD} – Chaos?` : undefined,
+        note: periode === null ? `keine Periode ≤ ${MAX_PERIOD}, vielleicht Chaos` : undefined,
         marks: values.flatMap((c) => [
           { kind: 'value', v: c } as const,
           { kind: 'point', x: p.a, y: c, in: 'phase' } as const,

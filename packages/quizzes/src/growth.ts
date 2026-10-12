@@ -32,7 +32,7 @@ export default [
     checker: condition((p, o) => {
       const t = o.wendepunkt?.value
       if (Math.abs((p.K as number) - 50) > 0.5) return { status: 'wrong', hint: 'Lassen Sie $K = 50$.' }
-      if (typeof t !== 'number') return { status: 'wrong', hint: 'Gerade gibt es keine steilste Stelle – woran liegt das?' }
+      if (typeof t !== 'number') return { status: 'wrong', hint: 'Gerade gibt es keine steilste Stelle. Woran liegt das?' }
       if (Math.abs(t - 5) <= 0.1) return { status: 'correct', hint: 'Finden Sie noch eine zweite Einstellung?' }
       return {
         status: Math.abs(t - 5) <= 0.5 ? 'close' : 'wrong',

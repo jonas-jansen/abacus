@@ -19,11 +19,3 @@ beginnt in den einzelnen Muskelzellen des Herzens mit einem kleinen elektrischen
    hinausgepumpt, und die Zelle entspannt sich.
 4. **Die Pause.** Erst jetzt lässt sich die Zelle wieder erregen. Vorher reagiert sie auf
    keinen Reiz, und genau das bewahrt das Herz davor, sich zu verkrampfen.
-
-### Was die Szenarien zeigen
-
-Viele Medikamente und manche Krankheiten wirken genau an diesen Toren. Ein Betäubungsmittel
-blockiert die Natriumkanäle, ein Blutdruckmittel die Kalziumkanäle, ein angeborener Fehler
-schwächt die Kaliumkanäle. Auch zu viel Kalium im Blut bringt die Zelle aus dem Takt. In jedem
-Szenario ist eine dieser Stellen verändert. Vergleichen Sie es mit dem gesunden Herzschlag:
-Mit der Stecknadel oben rechts („vergleichen“) bleibt er als blasse Kurve im Bild.

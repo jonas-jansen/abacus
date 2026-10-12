@@ -65,7 +65,7 @@ export default defineApplet({
       xLabel: 'n',
       yLabel: 'x_1, x_2',
       logToggle: true,
-      logHilfe: 'Am Anfang wächst die Zahl der Infizierten in jedem Schritt um denselben Faktor – auf dieser Achse eine Gerade. Wo sie abknickt, gehen die Gesunden zur Neige.',
+      logHilfe: 'Am Anfang wächst die Zahl der Infizierten in jedem Schritt um denselben Faktor. Auf dieser Achse ist das eine Gerade. Wo sie abknickt, gehen die Gesunden zur Neige.',
       y: [0, N * 1.02],
       drag: [{ param: 'I0', axis: 'y', at: (p) => [0, p.I0], set: (_x, y) => ({ I0: Math.round(Math.max(0, y)) }) }],
     },

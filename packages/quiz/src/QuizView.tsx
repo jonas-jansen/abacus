@@ -97,7 +97,7 @@ export function QuizView({ def, scope, number, star, unlocks }: QuizViewProps) {
           onSubmit={(v) => {
             const mode = def.checking ?? 'now'
             if (mode !== 'now' || !def.checker) {
-              commit(v, { status: 'saved', hint: mode === 'later' ? 'Wir kommen darauf zurück – beurteilen wird es der Beweis, nicht der Rechner.' : undefined })
+              commit(v, { status: 'saved', hint: mode === 'later' ? 'Wir kommen darauf zurück. Entscheiden wird es der Beweis, nicht der Rechner.' : undefined })
               return
             }
             const { p, o } = context()

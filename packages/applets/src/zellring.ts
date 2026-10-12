@@ -112,6 +112,6 @@ export default defineApplet({
     { label: 'eine Welle', text: 'd = 0.4: die Welle läuft in beide Richtungen und erlischt (Folie 69)', params: {} },
     { label: 'Szenario I', text: 'zweiter Reiz bei n = 37: die Zellen sind noch refraktär (Folie 70)', params: { zweiter: true, n2: 37 } },
     { label: 'Szenario II', text: 'bei n = 45: eine zweite Welle, die ebenfalls erlischt (Folie 71)', params: { zweiter: true, n2: 45 } },
-    { label: 'Szenario III', text: 'bei n = 41: die Welle läuft nur in eine Richtung – Reentry (Folie 72)', params: { zweiter: true, n2: 41 } },
+    { label: 'Szenario III', text: 'bei n = 41: Die Welle läuft nur noch in eine Richtung und kreist (Reentry, Folie 72)', params: { zweiter: true, n2: 41 } },
   ],
 })

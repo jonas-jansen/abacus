@@ -40,7 +40,7 @@ export default [
         ? { status: 'correct' }
         : o.verhalten?.value !== 'oscillating'
           ? { status: 'wrong', hint: 'Die Folge wechselt noch nicht das Vorzeichen. Welches $a$ bewirkt das?' }
-          : { status: 'close', hint: 'Sie springt – aber schrumpft sie auch?' },
+          : { status: 'close', hint: 'Sie springt. Aber schrumpft sie auch?' },
     ),
   }),
   defineQuiz({

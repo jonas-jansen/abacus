@@ -23,7 +23,7 @@
       "chapter": "I",
       "slides": "10–12, 58–64",
       "title": "Heron-Verfahren für √2",
-      "summary": "Mittelwert aus x und 2/x – und die Zahl der richtigen Stellen verdoppelt sich."
+      "summary": "Mittelwert aus x und 2/x. Die Zahl der richtigen Stellen verdoppelt sich in jedem Schritt."
     },
     {
       "id": "newton",
@@ -39,7 +39,7 @@
       "chapter": "I",
       "slides": "27–28",
       "title": "Newtonsches Abkühlen",
-      "summary": "Der Tee nähert sich der Raumtemperatur – wenn die Schritte nicht zu groß sind."
+      "summary": "Der Tee nähert sich der Raumtemperatur, wenn die Schritte nicht zu groß sind."
     },
     {
       "id": "updatefunction",
@@ -63,7 +63,7 @@
       "chapter": "I",
       "slides": "32–36",
       "title": "Diskretes logistisches Wachstum",
-      "summary": "Wachstumsrate r und Kapazität K – welcher Parameter entscheidet über Ruhe oder Chaos?"
+      "summary": "Wachstumsrate r und Kapazität K: Welcher Parameter entscheidet über Ruhe oder Chaos?"
     },
     {
       "id": "logistic-bifurcation",
@@ -79,7 +79,7 @@
       "chapter": "I",
       "slides": "41, 50–55",
       "title": "Stabil oder instabil?",
-      "summary": "Die Folge startet genau im Fixpunkt – dann kommen kleine Stöße."
+      "summary": "Die Folge startet genau im Fixpunkt, dann kommen kleine Stöße."
     },
     {
       "id": "predator-prey",
@@ -87,7 +87,7 @@
       "chapter": "II",
       "slides": "8–13",
       "title": "Räuber und Beute",
-      "summary": "Zwei Populationen, die voneinander leben – Gleichgewicht, Schwingung oder Aussterben."
+      "summary": "Zwei Populationen, die voneinander leben. Am Ende stehen Gleichgewicht, Schwingung oder Aussterben."
     },
     {
       "id": "predator-prey-map",
@@ -103,7 +103,7 @@
       "chapter": "II",
       "slides": "40–58",
       "title": "Epidemie-Modell",
-      "summary": "Gesunde stecken sich an, Kranke genesen – wann bricht eine Epidemie aus?"
+      "summary": "Gesunde stecken sich an, Kranke genesen. Wann bricht eine Epidemie aus?"
     },
     {
       "id": "sir-stabilitaet",
@@ -111,7 +111,7 @@
       "chapter": "II",
       "slides": "44–58",
       "title": "Epidemie: Gleichgewichte und Stabilität",
-      "summary": "Krankheitsfrei oder endemisch – die Basisreproduktionszahl R und die Jacobi-Matrix entscheiden."
+      "summary": "Krankheitsfrei oder endemisch? Das entscheiden die Basisreproduktionszahl R und die Jacobi-Matrix."
     },
     {
       "id": "krebs",
@@ -119,7 +119,7 @@
       "chapter": "II",
       "slides": "19–25",
       "title": "Krebserkrankung: drei Gruppen",
-      "summary": "Gesund, leicht und schwer erkrankt – niemand geht verloren, und die Anteile pendeln sich ein."
+      "summary": "Gesund, leicht und schwer erkrankt. Niemand geht verloren, und die Anteile pendeln sich ein."
     },
     {
       "id": "aktionspotential",
@@ -127,7 +127,7 @@
       "chapter": "II",
       "slides": "61–65",
       "title": "Aktionspotential einer Herzzelle",
-      "summary": "Zwei Zahlen pro Schritt: das Potential und seine Erholung – regelmäßig, chaotisch oder in Ruhe."
+      "summary": "Zwei Zahlen pro Schritt, das Potential und seine Erholung. Die Zelle feuert regelmäßig, chaotisch oder gar nicht."
     },
     {
       "id": "zellring",
@@ -135,7 +135,7 @@
       "chapter": "II",
       "slides": "66–72",
       "title": "Ring aus 50 Herzzellen",
-      "summary": "Eine Erregungswelle läuft um den Ring – ein zweiter Reiz zur falschen Zeit lässt sie ewig kreisen."
+      "summary": "Eine Erregungswelle läuft um den Ring. Ein zweiter Reiz zur falschen Zeit lässt sie ewig kreisen."
     },
     {
       "id": "leslie",
@@ -143,7 +143,7 @@
       "chapter": "II",
       "slides": "26–37",
       "title": "Leslie-Modell: Altersklassen",
-      "summary": "Geburten und Überleben in drei Altersklassen – der Spektralradius entscheidet über Wachstum oder Aussterben."
+      "summary": "Geburten und Überleben in drei Altersklassen. Der Spektralradius entscheidet über Wachstum oder Aussterben."
     },
     {
       "id": "linearsystem-discrete",
@@ -167,7 +167,7 @@
       "chapter": "III",
       "slides": "8–12",
       "title": "Allgemeine Lösung einer linearen Gleichung",
-      "summary": "Eine Differentialgleichung, unendlich viele Lösungen – die Konstante C wählt eine aus."
+      "summary": "Eine Differentialgleichung hat unendlich viele Lösungen, die Konstante C wählt eine aus."
     },
     {
       "id": "linear-ivp",
@@ -175,7 +175,7 @@
       "chapter": "III",
       "slides": "17–19",
       "title": "Anfangswertproblem",
-      "summary": "Der Anfangswert legt die Konstante fest – und damit genau eine Lösung."
+      "summary": "Der Anfangswert legt die Konstante fest und damit genau eine Lösung."
     },
     {
       "id": "log-ivp",
@@ -191,7 +191,7 @@
       "chapter": "III",
       "slides": "42–47, 71–72",
       "title": "Diskret oder kontinuierlich?",
-      "summary": "Dasselbe logistische Wachstum – nur die diskrete Version kann über das Ziel hinausschießen."
+      "summary": "Zweimal dasselbe logistische Wachstum, aber nur die diskrete Version kann über das Ziel hinausschießen."
     },
     {
       "id": "log-ivp-data",
@@ -223,7 +223,7 @@
       "chapter": "IV",
       "slides": "11–21",
       "title": "Romeo und Julia",
-      "summary": "Zwei Gefühle, die aufeinander reagieren – ein lineares System als Liebesgeschichte."
+      "summary": "Zwei Gefühle, die aufeinander reagieren: ein lineares System als Liebesgeschichte."
     },
     {
       "id": "pendel",
@@ -239,7 +239,7 @@
       "chapter": "IV",
       "slides": "23–28",
       "title": "Enzymkinetik nach Michaelis und Menten",
-      "summary": "Substrat wird über einen Komplex zu Produkt – vier Stoffe, zwei Erhaltungsgrößen."
+      "summary": "Substrat wird über einen Komplex zu Produkt. Vier Stoffe, zwei Erhaltungsgrößen."
     },
     {
       "id": "bioreaktor",
@@ -247,7 +247,7 @@
       "chapter": "IV",
       "slides": "9, 27–28",
       "title": "Bakterien im Bioreaktor",
-      "summary": "Nährstoff fließt zu, Kultur fließt ab – bei zu starkem Durchfluss wird sie ausgewaschen."
+      "summary": "Nährstoff fließt zu, Kultur fließt ab. Bei zu starkem Durchfluss wird sie ausgewaschen."
     },
     {
       "id": "herzzelle",
@@ -255,7 +255,7 @@
       "chapter": "IV",
       "slides": "29–32",
       "title": "Aktionspotential: Schrittmacher und Muskelzelle",
-      "summary": "Ein System aus vier Differentialgleichungen – periodisch von selbst oder im Takt eines Reizes."
+      "summary": "Ein System aus vier Differentialgleichungen, das von selbst schwingt oder im Takt eines Reizes."
     },
     {
       "id": "alcohol",
@@ -335,7 +335,7 @@
       "chapter": "Appendix",
       "slides": "56–57, 64, 80–91",
       "title": "Eigenvektoren: wann A v in dieselbe Richtung zeigt",
-      "summary": "Drehen Sie v, bis A v parallel liegt – dann ist v ein Eigenvektor."
+      "summary": "Drehen Sie v, bis A v parallel dazu liegt. Dann ist v ein Eigenvektor."
     }
   ]
 }
