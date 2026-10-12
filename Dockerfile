@@ -26,10 +26,9 @@ ARG ABACUS_BASE=/
 ARG ABACUS_SITE=
 RUN ABACUS_RELEASE=$ABACUS_RELEASE ABACUS_BASE=$ABACUS_BASE ABACUS_SITE=$ABACUS_SITE pnpm build
 
-# nginx without root rights, listening on port 8080 (no privileged port needed)
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginx:1.27-alpine
 ARG ABACUS_BASE=/
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 # the files sit under the base path, so the links the build wrote match without rewriting
 COPY --from=build /app/site/dist /usr/share/nginx/html${ABACUS_BASE}
-EXPOSE 8080
+EXPOSE 80
