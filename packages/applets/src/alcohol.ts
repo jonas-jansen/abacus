@@ -75,6 +75,8 @@ const model = ode({
   },
 })
 
+const yRange = (p: P): [number, number] => [0, 1.05 * Math.max(p.D0 / SEX[p.sex].r, LIMIT)]
+
 const PER_75KG = (D0: number) => `bei 75 kg also ${Math.round(D0 * 75)} g`
 
 export default defineApplet({
@@ -82,9 +84,12 @@ export default defineApplet({
   model,
   horizon: 'T',
   scenariosOnly: true,
+  // Both plots on one scale, so the blood curve is equally high in each: up to the stomach's
+  // start D₀/r (no compartment ever holds more, everything flows on from there), and at least
+  // past the legal limit.
   plots: [
-    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}' },
-    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}' },
+    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: (p) => yRange(p) },
+    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: (p) => yRange(p) },
   ],
   layout: { main: ['sex'] },
   readouts: ['spitze', 'wann', 'ueber', 'abgebaut'],

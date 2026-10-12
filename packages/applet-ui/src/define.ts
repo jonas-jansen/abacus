@@ -82,7 +82,7 @@ export interface LayoutHint<P = Params> {
 /** The chapters of the lecture slides ("Mathematik für Biowissenschaften"). */
 export const CHAPTERS = {
   // chapter 0 of the lecture, called only "Einführung"
-  '0': 'Modelle aus der Medizin',
+  '0': 'Modelle aus der Praxis',
   I: 'Diskrete dynamische Systeme mit einer Variablen',
   II: 'Diskrete dynamische Systeme mit mehreren Variablen',
   III: 'Kontinuierliche dynamische Systeme mit einer Variablen',
