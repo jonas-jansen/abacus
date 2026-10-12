@@ -7,7 +7,7 @@
  */
 
 import type { NotebookScope } from '@abacus/quiz'
-import { cobweb } from './covers'
+import { growth } from './covers'
 
 export interface Course {
   /** Address and notebook scope: lower case, digits, '-'. */
@@ -22,7 +22,7 @@ export interface Course {
 }
 
 export const courses: readonly Course[] = [
-  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27', cover: cobweb },
+  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27', cover: growth },
 ]
 
 for (const c of courses) {
