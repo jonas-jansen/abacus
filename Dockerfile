@@ -6,6 +6,7 @@
 
 FROM node:24-alpine AS build
 WORKDIR /app
+ENV ASTRO_TELEMETRY_DISABLED=1
 RUN npm install -g pnpm@11.21.0
 # dependencies first, so they are cached while only the content changes
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
