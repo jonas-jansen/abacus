@@ -2,23 +2,14 @@
 // The landing page of the platform: its courses. Everyone sees all of them for now; which
 // courses a visitor sees, and whether one can join, is decided in the browser by courseAccess
 // (src/access.ts), so a login later needs no change here.
-import { chapters, getApplet } from '@abacus/applets'
 import Seite from '../layouts/Seite.astro'
 import { courseUrl, platform } from '../config'
-import { builtCourses, included, release } from '../release'
-import { plotSvg } from '../preview'
-
-// the first listed applet, unless the course names one
-const first = chapters({ all: import.meta.env.DEV || !!release }).flatMap((k) => k.applets).find((a) => included('applets', a.id))
-const cover = (c: (typeof builtCourses)[number]) => {
-  const id = c.cover?.applet ?? first?.id
-  return id ? plotSvg(getApplet(id), { state: c.cover?.state, width: 300, height: 190 }) : ''
-}
+import { builtCourses } from '../release'
 ---
 <Seite title={platform.name} width="medium" topbar={false}>
   <header class="landing-hero" slot="hero">
     <div class="landing-marke">
-      <svg viewBox="0 0 24 24" width="52" height="52" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="38" height="38" aria-hidden="true">
         <path d="M3 20c3-12 6-12 9 0s6 0 9-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
       <span>{platform.name}</span>
@@ -30,7 +21,7 @@ const cover = (c: (typeof builtCourses)[number]) => {
     {
       builtCourses.map((c) => (
         <a class="kurs-karte" href={courseUrl(c)} data-course={c.id}>
-          <div class="kurs-bild" set:html={cover(c)} />
+          {c.cover && <div class="kurs-bild" set:html={c.cover()} />}
           <div class="kurs-text">
             <strong>{c.title}</strong>
             <span class="kurs-semester">{c.term}</span>

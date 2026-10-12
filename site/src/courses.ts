@@ -7,6 +7,7 @@
  */
 
 import type { NotebookScope } from '@abacus/quiz'
+import { cobweb } from './covers'
 
 export interface Course {
   /** Address and notebook scope: lower case, digits, '-'. */
@@ -16,12 +17,12 @@ export interface Course {
   semester: string
   /** Shown to students, e.g. "Wintersemester 2026/27". */
   term: string
-  /** The picture on the course's card: an applet's first plot (default: its first listed applet). */
-  cover?: { applet: string; state?: Record<string, unknown> }
+  /** The picture on the course's card on the landing page (an SVG string, see covers.ts). */
+  cover?: () => string
 }
 
 export const courses: readonly Course[] = [
-  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27' },
+  { id: 'mathe-bio', title: 'Mathematik für Biowissenschaften', semester: 'ws2026', term: 'Wintersemester 2026/27', cover: cobweb },
 ]
 
 for (const c of courses) {
