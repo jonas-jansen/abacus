@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# uploads built by `pnpm release` (site/releases.json)
+release/
 .astro/
 .DS_Store
 # colleague's MATLAB originals: reference only, not ours to publish

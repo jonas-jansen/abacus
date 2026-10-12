@@ -203,7 +203,9 @@ export function probeNodes(frame: Frame, spec: PlotSpec, run: Run, view: PlotVie
           y = s.y[i]
         } else y = valueAt(s, at)
         if (!Number.isFinite(y)) continue
-        rows.push({ tex: s.kind === 'discrete' && discrete ? atIndex(s.label, at) : s.label, value: num(y) })
+        // a series named in words only (no symbol) is named by its name
+        const tex = s.label || `\\text{${s.name ?? s.id}}`
+        rows.push({ tex: s.kind === 'discrete' && discrete ? atIndex(tex, at) : tex, value: num(y) })
         if (!ok(x, y)) continue
         dot(x, y, s.role)
         if (!anchor || Y(y) < anchor.y) anchor = { x: X(x), y: Y(y) }

@@ -53,6 +53,9 @@ import luoRudy from './luo-rudy'
 
 const modules: AppletModule<any>[] = [
   // @new-applet:entries
+  // 0 Einführung
+  alcohol,
+  luoRudy,
   // 1 sequences and recursions
   arithmetic,
   geometric,
@@ -91,8 +94,6 @@ const modules: AppletModule<any>[] = [
   michaelisMenten,
   bioreaktor,
   herzzelle,
-  luoRudy,
-  alcohol,
   // 8 numerics
   eulerHeun,
   // Anhang: mathematical foundations

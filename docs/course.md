@@ -102,7 +102,8 @@ anywhere. A server-backed store can implement the `NotebookStore` interface
 
 - `visible: false` keeps an applet out of the overview. Its address `/applet/<id>` still
   works (for sharing), and search engines are asked to skip it.
-- `chapter` is `I`, `II`, `III`, `IV` or `Appendix` (shown as "Anhang").
+- `chapter` is `0` (shown as "Einführung"), `I`, `II`, `III`, `IV` or `Appendix` (shown as
+  "Anhang").
 - The order of the entries is the order within a chapter.
 - `pnpm dev` shows every applet; unlisted ones carry a "nicht gelistet" badge.
 - A missing or extra entry fails the tests with a message naming it.

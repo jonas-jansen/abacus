@@ -2,41 +2,27 @@
 title: Worum es geht
 ---
 
-Getrunkener Alkohol gelangt nicht sofort ins Blut. Er sammelt sich zuerst im **Magen**, wird
-von dort in den **Darm** weitergegeben, dort aufgenommen und erst dann im **Blut** verteilt.
-Die Leber baut ihn ab – aber nur bis zu einer Höchstgeschwindigkeit. Für die Konzentrationen
-$C_S$ (Magen), $C_G$ (Darm) und $C_C$ (Blut) in g/L gilt das Modell von Pieters et al.:
+Getrunkener Alkohol ist nicht sofort im Blut. Er sammelt sich zuerst im **Magen**. Von dort
+gibt der Magen ihn nach und nach an den **Darm** weiter, wo er aufgenommen wird und erst dann
+ins **Blut** gelangt. Die Leber baut ihn wieder ab – aber nur mit einer begrenzten
+Geschwindigkeit, ganz gleich, wie viel man getrunken hat.
 
-$$
-\begin{aligned}
-C_S' &= -k_1\,\frac{C_S}{1 + a\,C_S^2}, \\
-C_G' &= k_1\,\frac{C_S}{1 + a\,C_S^2} - k_2\,C_G, \\
-C_C' &= k_2\,C_G - \frac{V_{\max}\,C_C}{K_m + C_C}.
-\end{aligned}
-$$
+### Was man im Applet sieht
 
-### Was die Terme bedeuten
+- Kurz nach dem Trinken ist fast aller Alkohol im Magen. Nach etwa einer Stunde ist der Magen
+  leer – bei viel Alkohol leert er sich langsamer.
+- Im Blut steigt die Konzentration zuerst rasch an und erreicht nach etwa einer Dreiviertelstunde
+  ihren höchsten Wert.
+- Danach sinkt sie fast gleichmäßig: Die Leber schafft pro Stunde etwa gleich viel, egal wie
+  hoch der Wert ist. Deshalb dauert es nach zwei Bier viel länger als nach einem, bis der
+  Alkohol abgebaut ist.
 
-- Der Magen leert sich mit der Rate $k_1$; der Faktor $1/(1 + a\,C_S^2)$ bremst das bei
-  viel Alkohol im Magen.
-- Aus dem Darm geht der Alkohol mit der Rate $k_2$ ins Blut.
-- Der Abbau folgt der **Michaelis-Menten-Kinetik**: Bei wenig Alkohol wächst er mit $C_C$,
-  bei viel erreicht er höchstens $V_{\max}$.
+### Mann und Frau
 
-### Die Werte
+Bei gleicher Menge pro Kilogramm Körpergewicht steigt der Wert bei Frauen höher. Ein Grund:
+Der Alkohol verteilt sich im Wasser des Körpers, und der Körper einer Frau enthält im Mittel
+anteilig weniger Wasser. Außerdem leert sich der Magen bei Frauen etwas langsamer.
 
-| Parameter | Mann | Frau |
-|---|---|---|
-| $V_{\max}$ (g L⁻¹ h⁻¹) | 0.470 | 0.480 |
-| $K_m$ (g/L) | 0.380 | 0.405 |
-| $a$ (L²/g²) | 0.42 | 0.75 |
-| $k_1$ (h⁻¹) | 5.55 | 4.96 |
-| $k_2$ (h⁻¹) | 7.05 | 4.96 |
-
-Eine Dosis $D_0$ (Gramm Alkohol pro Kilogramm Körpergewicht) beginnt im Magen mit
-$C_S(0) = D_0 / r$. Dabei ist $r$ der Verteilungsfaktor nach Widmark: 0.7 L/kg bei Männern,
-0.6 L/kg bei Frauen.
-
-Die Werte stammen aus Pieters et al. (1990), *Alcohol & Alcoholism* 25, 17–24; die Tabelle
-folgt Heck, *eJMT* 1(3). Gemessen wurde nach einer Nacht ohne Essen: Ein voller Magen
-verlangsamt die Aufnahme deutlich.
+Die Werte stammen aus einer Studie mit sechs Männern und sechs Frauen, die nach einer Nacht
+ohne Essen getrunken haben (Pieters et al., 1990). Mit vollem Magen steigt der Wert langsamer
+und weniger hoch.

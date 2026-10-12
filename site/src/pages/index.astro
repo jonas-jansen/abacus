@@ -6,10 +6,15 @@ import { chapters } from '@abacus/applets'
 import { listedWeeklyQuizzes } from '@abacus/quizzes'
 import Seite from '../layouts/Seite.astro'
 import { kurs, url } from '../config'
+import { included, release, withCourse } from '../release'
 
-const anzahlApplets = chapters({ all: import.meta.env.DEV }).reduce((n, k) => n + k.applets.length, 0)
-const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort((a, b) => a.data.week - b.data.week || a.data.order - b.data.order)
-const listed = listedWeeklyQuizzes({ all: import.meta.env.DEV })
+const kapitel = chapters({ all: import.meta.env.DEV || !!release })
+  .map((k) => ({ ...k, applets: k.applets.filter((a) => included('applets', a.id)) }))
+  .filter((k) => k.applets.length > 0)
+const anzahlApplets = kapitel.reduce((n, k) => n + k.applets.length, 0)
+const ZAHL = ['keinem', 'einem', 'zwei', 'drei', 'vier', 'fünf', 'sechs']
+const pages = (await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('course', s.id))).sort((a, b) => a.data.week - b.data.week || a.data.order - b.data.order)
+const listed = listedWeeklyQuizzes({ all: import.meta.env.DEV || !!release }).filter((w) => included('quizzes', w.id))
 const quizzes = listed.map((w) => ({ id: w.id, title: w.title, week: w.week, opens: w.opens ?? '', closes: w.closes ?? '' }))
 ---
 <Seite title="Start" active="start">
@@ -25,9 +30,10 @@ const quizzes = listed.map((w) => ({ id: w.id, title: w.title, week: w.week, ope
       </span>
       <strong>Applets</strong>
       <span>Jedes Modell der Vorlesung zum Ausprobieren: Parameter ziehen, zoomen, vergleichen.</span>
-      <span class="bereich-detail">{anzahlApplets} Applets in vier Kapiteln</span>
+      <span class="bereich-detail">{anzahlApplets} {anzahlApplets === 1 ? 'Applet' : 'Applets'} in {ZAHL[kapitel.length] ?? kapitel.length} {kapitel.length === 1 ? 'Kapitel' : 'Kapiteln'}</span>
     </a>
 
+    {withCourse && (
     <a class="bereich" href={url('/kurs')}>
       <span class="bereich-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" /></svg>
@@ -36,6 +42,7 @@ const quizzes = listed.map((w) => ({ id: w.id, title: w.title, week: w.week, ope
       <span>Geführte Seiten: eine Frage, mit Papier und Applet, und kleine Aufgaben zum Verstehen.</span>
       <span class="bereich-detail">{pages.length} Seiten{pages.length ? `, zuletzt: ${pages.at(-1)!.data.title}` : ''}</span>
     </a>
+    )}
 
     <a class="bereich" href={url('/quiz')} id="bereich-quiz">
       <span class="bereich-icon" aria-hidden="true">

@@ -5,6 +5,7 @@ import '../styles/site.css'
 import '../styles/thema.css'
 import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT, FARBEN } from '@abacus/applet-ui/settings'
 import { kurs, url } from '../config'
+import { withCourse } from '../release'
 
 interface Props {
   title: string
@@ -39,7 +40,7 @@ const { title, summary, width = 'wide', active, unlisted = false } = Astro.props
         </a>
         <nav>
           <a href={url('/applets')} aria-current={active === 'applets' ? 'page' : undefined}>Applets</a>
-          <a href={url('/kurs')} aria-current={active === 'kurs' ? 'page' : undefined}>Kurs</a>
+          {withCourse && <a href={url('/kurs')} aria-current={active === 'kurs' ? 'page' : undefined}>Kurs</a>}
           <a href={url('/quiz')} aria-current={active === 'quiz' ? 'page' : undefined}>Quizze</a>
           <a href={url('/notizbuch')} aria-current={active === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
         </nav>

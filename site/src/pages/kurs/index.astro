@@ -2,14 +2,16 @@
 import { getCollection } from 'astro:content'
 import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
+import { included } from '../../release'
 
-const pages = (await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)).sort(
+const pages = (await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('course', s.id))).sort(
   (a, b) => a.data.week - b.data.week || a.data.order - b.data.order || a.data.title.localeCompare(b.data.title, 'de'),
 )
 ---
 <Seite title="Kurs" active="kurs" width="narrow">
   <h1>Kurs</h1>
   <p class="lead">Geführte Seiten: eine Frage pro Woche, mit Papier, Applet und kleinen Aufgaben zum Verstehen.</p>
+  {pages.length === 0 && <p class="muted">Die Kursseiten folgen im Lauf des Semesters.</p>}
   <ol class="course-list">
     {
       pages.map((s) => (

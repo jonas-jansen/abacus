@@ -152,7 +152,7 @@ export function FigureLegend({
                     />
                   )}
                 </svg>
-                <TeX tex={s.label} />
+                {s.label && <TeX tex={s.label} />}
                 {s.name && <span className="ab-legend-name">{s.name}</span>}
               </button>
             )

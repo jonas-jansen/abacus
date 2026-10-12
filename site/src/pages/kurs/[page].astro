@@ -7,9 +7,10 @@ import { vocabulary } from '../../components'
 import { AppletIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { url } from '../../config'
+import { included } from '../../release'
 
 export async function getStaticPaths() {
-  const pages = await getCollection('course', (s) => import.meta.env.DEV || !s.data.draft)
+  const pages = await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('course', s.id))
   return pages.map((page) => ({ params: { page: page.id }, props: { page } }))
 }
 

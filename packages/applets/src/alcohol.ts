@@ -31,9 +31,10 @@ const model = ode({
     T: real('Zeitfenster', { latex: 'T', min: 1, max: 24, step: 0.5, default: 8, unit: 'h', limits: { min: 0.01, reason: 'Das Zeitfenster muss positiv sein.' } }),
   },
   components: [
-    { id: 'CS', label: 'C_S(t)', name: 'Magen', role: 'tertiary' },
-    { id: 'CG', label: 'C_G(t)', name: 'Darm', role: 'secondary' },
-    { id: 'CC', label: 'C_C(t)', name: 'Blut', role: 'primary' },
+    // named in words: the applet shows no formulas, so symbols like C_G would explain nothing
+    { id: 'CS', label: '', name: 'Alkoholkonzentration im Magen', role: 'tertiary' },
+    { id: 'CG', label: '', name: 'Alkoholkonzentration im Darm', role: 'secondary' },
+    { id: 'CC', label: '', name: 'Alkoholkonzentration im Blut', role: 'primary' },
   ],
   start: (p) => [p.D0 / SEX[p.sex].r, 0, 0],
   rhs: (_t, [CS, CG, CC], p) => {
@@ -45,7 +46,7 @@ const model = ode({
   samples: 600,
   extraSeries: ({ series }) => {
     const t = series.CC.x
-    return [{ id: 'limit', label: '0.5\\,‰', name: 'Grenze im Straßenverkehr', kind: 'continuous', x: t, y: t.map(() => LIMIT), role: 'reference' } satisfies Series]
+    return [{ id: 'limit', label: '', name: 'Grenze im Straßenverkehr (0.5 ‰)', kind: 'continuous', x: t, y: t.map(() => LIMIT), role: 'reference' } satisfies Series]
   },
   observables: ({ series }) => {
     const { x: t, y: c } = series.CC
@@ -74,7 +75,7 @@ const model = ode({
   },
 })
 
-const PER_75KG = (D0: number) => `${Math.round(D0 * 75)} g Alkohol bei 75 kg`
+const PER_75KG = (D0: number) => `bei 75 kg also ${Math.round(D0 * 75)} g`
 
 export default defineApplet({
   id: 'alcohol',
@@ -82,15 +83,15 @@ export default defineApplet({
   horizon: 'T',
   scenariosOnly: true,
   plots: [
-    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: 't \\text{ (h)}', yLabel: 'C_C \\text{ (g/L)}' },
-    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: 't \\text{ (h)}', yLabel: 'C \\text{ (g/L)}' },
+    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}' },
+    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}' },
   ],
   layout: { main: ['sex'] },
   readouts: ['spitze', 'wann', 'ueber', 'abgebaut'],
   scenarios: [
-    { label: 'ein kleines Bier', text: `$D_0 = 0.15$ g/kg: ${PER_75KG(0.15)}, etwa 0.3 l Bier`, params: { D0: 0.15 } },
-    { label: 'ein großes Bier', text: `$D_0 = 0.3$ g/kg: ${PER_75KG(0.3)}, etwa 0.5 l Bier oder 0.25 l Wein`, params: { D0: 0.3 } },
-    { label: 'eine Flasche Wein zu zweit', text: `$D_0 = 0.45$ g/kg: ${PER_75KG(0.45)}, etwa 0.4 l Wein oder 0.9 l Bier`, params: { D0: 0.45 } },
-    { label: 'zwei große Bier', text: `$D_0 = 0.6$ g/kg: ${PER_75KG(0.6)}, etwa 1.1 l Bier`, params: { D0: 0.6 } },
+    { label: 'ein kleines Bier', text: `0.15 g Alkohol pro kg Körpergewicht: ${PER_75KG(0.15)}, etwa 0.3 l Bier`, params: { D0: 0.15 } },
+    { label: 'ein großes Bier', text: `0.3 g Alkohol pro kg Körpergewicht: ${PER_75KG(0.3)}, etwa 0.5 l Bier oder 0.25 l Wein`, params: { D0: 0.3 } },
+    { label: 'eine Flasche Wein zu zweit', text: `0.45 g Alkohol pro kg Körpergewicht: ${PER_75KG(0.45)}, etwa 0.4 l Wein oder 0.9 l Bier`, params: { D0: 0.45 } },
+    { label: 'zwei große Bier', text: `0.6 g Alkohol pro kg Körpergewicht: ${PER_75KG(0.6)}, etwa 1.1 l Bier`, params: { D0: 0.6 } },
   ],
 })

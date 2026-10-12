@@ -4,13 +4,14 @@ import { listedWeeklyQuizzes } from '@abacus/quizzes'
 import { WeeklyQuizStatusIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { scope, url } from '../../config'
+import { included, release } from '../../release'
 ---
 <Seite title="Quizze" active="quiz" width="medium">
   <h1>Quizze</h1>
   <p class="lead">Zur Vorlesung: kurze Quizze zu jeder Woche. Ihre Antworten bleiben auf diesem Gerät, im Notizbuch.</p>
   <ol class="quiz-list">
     {
-      listedWeeklyQuizzes({ all: import.meta.env.DEV }).map((w) => (
+      listedWeeklyQuizzes({ all: import.meta.env.DEV || !!release }).filter((w) => included('quizzes', w.id)).map((w) => (
         <li>
           <a href={url(`/quiz/${w.id}`)}>
             <span class="course-week">{w.week !== undefined ? `Woche ${w.week}` : 'Quiz'}</span>

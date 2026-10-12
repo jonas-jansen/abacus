@@ -81,6 +81,8 @@ export interface LayoutHint<P = Params> {
 
 /** The chapters of the lecture slides ("Mathematik für Biowissenschaften"). */
 export const CHAPTERS = {
+  // chapter 0 of the lecture, called only "Einführung"
+  '0': 'Modelle aus der Medizin',
   I: 'Diskrete dynamische Systeme mit einer Variablen',
   II: 'Diskrete dynamische Systeme mit mehreren Variablen',
   III: 'Kontinuierliche dynamische Systeme mit einer Variablen',
@@ -89,7 +91,10 @@ export const CHAPTERS = {
 } as const
 
 export type Chapter = keyof typeof CHAPTERS
-export const CHAPTER_ORDER: readonly Chapter[] = ['I', 'II', 'III', 'IV', 'Appendix']
+export const CHAPTER_ORDER: readonly Chapter[] = ['0', 'I', 'II', 'III', 'IV', 'Appendix']
+
+/** How a chapter is named on the site: "Einführung", "Kapitel II", "Anhang". */
+export const chapterName = (c: Chapter): string => (c === '0' ? 'Einführung' : c === 'Appendix' ? 'Anhang' : `Kapitel ${c}`)
 
 export interface AppletDef<P extends Params = Params> {
   /** Stable, URL-safe, no dots. Used in the URL hash, on the channel and in routes. */

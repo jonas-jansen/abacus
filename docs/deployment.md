@@ -17,6 +17,25 @@ ABACUS_SITE=https://mathe.example.de ABACUS_BASE=/applets/ pnpm build
 
 Copy `site/dist/` to the server, e.g. `rsync -a --delete site/dist/ user@server:/var/www/applets/`.
 
+## An upload with only some of it
+
+`site/releases.json` names what an upload contains – applets, weekly quizzes, course pages:
+
+```json
+"einfuehrung": { "applets": ["alcohol", "luo-rudy"], "quizzes": ["vorkurs"], "course": [] }
+```
+
+```sh
+pnpm release einfuehrung                       # → release/einfuehrung/ and release/einfuehrung.zip
+ABACUS_BASE=/applets/ pnpm release einfuehrung # for a sub-path
+```
+
+Only the named pages are built and listed, whether or not they are `visible` in the catalogs;
+everything else has no page at all. Without course pages the "Kurs" area is left out of the
+navigation and the start page. The notebook is always there. (The applets' code still ships in
+the shared script bundle; only their pages are missing.) A plain `pnpm build` – as for GitHub
+Pages – builds everything, as before.
+
 ## Apache, public (current state)
 
 ```apache

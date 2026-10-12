@@ -5,9 +5,10 @@ import { weeklyQuizzes } from '@abacus/quizzes'
 import { WeeklyQuizIsland } from '../../islands'
 import Seite from '../../layouts/Seite.astro'
 import { scope, url } from '../../config'
+import { included } from '../../release'
 
 export function getStaticPaths() {
-  return weeklyQuizzes.map((w) => ({ params: { id: w.id }, props: { w } }))
+  return weeklyQuizzes.filter((w) => included('quizzes', w.id)).map((w) => ({ params: { id: w.id }, props: { w } }))
 }
 const { w } = Astro.props
 ---
