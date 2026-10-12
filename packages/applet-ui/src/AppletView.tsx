@@ -38,14 +38,19 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
   const { params, setParams, reset: resetParams, run, error, jumps } = useAppletState(def, initialState)
   // reset and scenarios let the plots fit their axes afresh; other changes keep them (holdRange)
   const [viewEpoch, setViewEpoch] = useState(0)
-  // plots over the same time axis share their x window (zoom one, the other follows)
+  // plots over the same time axis share their x window (zoom one, the other follows); plots
+  // that also share one y scale (the same `y` in each) share the y window as well
   const [sharedX, setSharedX] = useState<readonly [number, number] | null>(null)
+  const [sharedY, setSharedY] = useState<readonly [number, number] | null>(null)
   const isTime = (e: PlotEntry<P>) => e.type === 'timeSeriesDiscrete' || e.type === 'timeSeriesContinuous'
-  const linkX = def.plots.filter(isTime).length >= 2
+  const timePlots = def.plots.filter(isTime)
+  const linkX = timePlots.length >= 2
+  const linkY = linkX && timePlots[0].y !== undefined && timePlots.every((e) => e.y === timePlots[0].y)
   const reset = () => {
     resetParams()
     setViewEpoch((e) => e + 1)
     setSharedX(null)
+    setSharedY(null)
   }
   const history = useHistory(params, (p) => setParams(p))
 
@@ -303,7 +308,19 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                       onBahnenLoeschen={() => setStarts([])}
                       onDetail={detail}
                       viewEpoch={viewEpoch + jumps}
-                      xLink={linkX && isTime(entry) ? { x: sharedX, set: setSharedX } : undefined}
+                      xLink={
+                        linkX && isTime(entry)
+                          ? {
+                              x: sharedX,
+                              y: sharedY,
+                              withY: linkY,
+                              set: (x, y) => {
+                                setSharedX(x)
+                                setSharedY(y)
+                              },
+                            }
+                          : undefined
+                      }
                     />
                     ),
                   )}

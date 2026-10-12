@@ -16,6 +16,9 @@ import { magnification as magnificationOf, type Win } from './zoom'
 /** The hint over a zoomable plot (markup of tip.ts: keys | what they do). */
 const ZOOM_TIP = '{Mod} + {Rad} | zoomen\n{Finger} | zoomen mit zwei Fingern\n{Shift} + {Ziehen} | verschieben'
 
+/** How far the data may reach past the plot area: half a dot and a line's width. */
+const BLEED = 5
+
 /** Width assumed for the server render; the client re-lays out after measuring. */
 const SSR_WIDTH = 640
 const MIN_HEIGHT = 240
@@ -64,7 +67,8 @@ interface FigureProps<P extends Params> {
    * Plots side by side over the same time axis share their x window: zooming or panning one
    * moves the other (each keeps its own y axis).
    */
-  xLink?: { x: Range | null; set: (x: Range | null) => void }
+  /** Plots linked in zoom and pan: the x window, and the y window too when they share one y scale. */
+  xLink?: { x: Range | null; y: Range | null; withY: boolean; set: (x: Range | null, y: Range | null) => void }
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -74,8 +78,9 @@ function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
 
 /**
  * The layer sandwich (§5.2): SVG axes · canvas data · SVG annotations and handles.
- * The canvas is sized to the data rectangle exactly, so its coordinates are plot-area
- * coordinates and clipping at the axes is free. Marks and the probe live in the top layer,
+ * The canvas is the data rectangle plus a small bleed (BLEED px on every side): its origin is
+ * the plot area's corner, and a curve along an edge (y = 0 at the axis) keeps its full line
+ * width and its dots instead of being cut in half. Marks and the probe live in the top layer,
  * so pointing at things never redraws the data.
  */
 export function Figure<P extends Params>({
@@ -161,20 +166,21 @@ export function Figure<P extends Params>({
   const [zoom, setZoomState] = useState<Win | null>(null)
   const setZoom = (z: Win | null) => {
     setZoomState(z)
-    xLink?.set(z ? z.x : null)
+    xLink?.set(z ? z.x : null, z && xLink.withY ? z.y : null)
   }
   useEffect(() => setZoom(null), [logY])
-  // a linked plot zoomed or panned: take its x window, keep this plot's y
+  // a linked plot zoomed or panned: take its x window, and its y window on a shared y scale
   useEffect(() => {
     if (!xLink) return
-    const x = xLink.x
+    const { x, y } = xLink
     setZoomState((z) => {
       if (!x) return null
-      if (z && z.x[0] === x[0] && z.x[1] === x[1]) return z
-      return { x, y: z?.y ?? shown.current?.y ?? full.y }
+      const ny = (xLink.withY && y) || z?.y || shown.current?.y || full.y
+      if (z && z.x[0] === x[0] && z.x[1] === x[1] && z.y[0] === ny[0] && z.y[1] === ny[1]) return z
+      return { x, y: ny }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [xLink?.x])
+  }, [xLink?.x, xLink?.y])
   // Every settled view (zoom or pan, after a short rest) goes on a stack: "zurück" returns to
   // the one before – also from the whole picture back to the last zoom.
   const views = useRef<{ stack: (Win | null)[]; last: Win | null; skip: boolean }>({ stack: [], last: null, skip: false })
@@ -358,10 +364,26 @@ export function Figure<P extends Params>({
       const ctx = cv?.getContext('2d')
       if (!cv || !ctx) return
       const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
-      cv.width = Math.round(frame.plot.w * dpr)
-      cv.height = Math.round(frame.plot.h * dpr)
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctx.clearRect(0, 0, frame.plot.w, frame.plot.h)
+      cv.width = Math.round((frame.plot.w + 2 * BLEED) * dpr)
+      cv.height = Math.round((frame.plot.h + 2 * BLEED) * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, BLEED * dpr, BLEED * dpr)
+      ctx.clearRect(-BLEED, -BLEED, frame.plot.w + 2 * BLEED, frame.plot.h + 2 * BLEED)
+      // Past an edge only where nothing lies beyond it: the window reaches the whole picture's
+      // edge there (y = 0 under a concentration, t = 0, the last step). Elsewhere a curve leaving
+      // the window is cut at the axis, as before.
+      const [xd, yd] = [frame.xDomain, frame.yDomain]
+      const at = (v: number, edge: number, span: number) => Math.abs(v - edge) <= 1e-9 * Math.max(1, Math.abs(span))
+      const outside = (v: number, edge: number, span: number, beyond: boolean) => beyond || at(v, edge, span)
+      const sx = full.x[1] - full.x[0]
+      const sy = full.y[1] - full.y[0]
+      const left = outside(xd[0], full.x[0], sx, xd[0] < full.x[0]) ? BLEED : 0
+      const right = outside(xd[1], full.x[1], sx, xd[1] > full.x[1]) ? BLEED : 0
+      const bottom = outside(yd[0], full.y[0], sy, yd[0] < full.y[0]) ? BLEED : 0
+      const top = outside(yd[1], full.y[1], sy, yd[1] > full.y[1]) ? BLEED : 0
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(-left, -top, frame.plot.w + left + right, frame.plot.h + top + bottom)
+      ctx.clip()
       const css = getComputedStyle(cv)
       const color = (role: keyof typeof fallbackColors) => cssColor(css, colorVar(role), fallbackColors[role])
       const surface = new CanvasSurface(ctx, color, cssColor(css, '--ab-bg', '#ffffff'))
@@ -372,9 +394,10 @@ export function Figure<P extends Params>({
       }
       for (const b of bahnen ?? []) drawBahn(surface, frame, spec, b)
       drawPlot(surface, frame, spec, drawn, view)
+      ctx.restore()
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel])
+  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel, full])
 
   // SSR first paint: the same geometry through the SVG emitter.
   const ssrNodes = useMemo(() => {
@@ -424,7 +447,7 @@ export function Figure<P extends Params>({
   const xLabelMitte = plot.x + plot.w + AXIS_OVERHANG + 2 + labelWidth(spec.xLabel ?? '', frame.fontSize) / 2
   const aktionenLinks = Math.min(xLabelMitte - aktionenBreite / 2, figW - aktionenBreite)
 
-  const layer = { position: 'absolute', left: plot.x, top: plot.y, width: plot.w, height: plot.h } as const
+  const dataLayer = { position: 'absolute', left: plot.x - BLEED, top: plot.y - BLEED, width: plot.w + 2 * BLEED, height: plot.h + 2 * BLEED } as const
   const badgeW = frame.yExp ? estimateTextWidth('×10', frame.fontSize) + estimateTextWidth(String(frame.yExp), frame.fontSize * 0.75) + 12 + 6 : 0
   const fitButtonX = plot.x - TICK - 10 - badgeW - 4
 
@@ -606,10 +629,10 @@ export function Figure<P extends Params>({
           {renderSvg(axesNode(frame, { x: spec.xLabel, y: spec.yLabel }))}
         </svg>
         {hydrated ? (
-          <canvas ref={canvas} className="ab-data" style={{ ...layer, pointerEvents: 'none' }} aria-hidden="true" />
+          <canvas ref={canvas} className="ab-data" style={{ ...dataLayer, pointerEvents: 'none' }} aria-hidden="true" />
         ) : (
-          <svg width={plot.w} height={plot.h} className="ab-data" style={{ ...layer, overflow: 'hidden' }} aria-hidden="true">
-            {ssrNodes?.map((n, i) => renderSvg(n, i))}
+          <svg width={plot.w + 2 * BLEED} height={plot.h + 2 * BLEED} className="ab-data" style={{ ...dataLayer, overflow: 'hidden' }} aria-hidden="true">
+            <g transform={`translate(${BLEED} ${BLEED})`}>{ssrNodes?.map((n, i) => renderSvg(n, i))}</g>
           </svg>
         )}
         <svg width={figW} height={figH} className="ab-layer ab-top" aria-hidden="true">

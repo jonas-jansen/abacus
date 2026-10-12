@@ -86,10 +86,10 @@ export default defineApplet({
   scenariosOnly: true,
   // Both plots on one scale, so the blood curve is equally high in each: up to the stomach's
   // start D₀/r (no compartment ever holds more, everything flows on from there), and at least
-  // past the legal limit.
+  // past the legal limit. The same `y` in both also links their zoom in y.
   plots: [
-    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: (p) => yRange(p) },
-    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: (p) => yRange(p) },
+    { type: 'timeSeriesContinuous', series: ['CC', 'limit'], title: 'Alkohol im Blut', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: yRange },
+    { type: 'timeSeriesContinuous', series: ['CS', 'CG', 'CC'], title: 'Wo der Alkohol ist', xLabel: '\\text{Stunden}', yLabel: '\\text{g/L}', y: yRange },
   ],
   layout: { main: ['sex'] },
   readouts: ['spitze', 'wann', 'ueber', 'abgebaut'],

@@ -4,10 +4,6 @@ import Seite from '../layouts/Seite.astro'
 ---
 <Seite title="Notizbuch" width="narrow" active="notizbuch">
   <h1>Notizbuch</h1>
-  <p class="lead">
-    Alle Ihre Antworten und Quizversuche. Sie bleiben auf diesem Gerät und werden nicht übertragen. Exportieren Sie regelmäßig; mit
-    „Importieren“ holen Sie sie auf einem anderen Gerät zurück.
-  </p>
   <NotebookBar client:load />
   <NotebookOverview client:only="react" />
 </Seite>

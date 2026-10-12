@@ -8,7 +8,6 @@ import { included, release } from '../../release'
 ---
 <Seite title="Quizze" active="quiz" width="medium">
   <h1>Quizze</h1>
-  <p class="lead">Zur Vorlesung: kurze Quizze zu jeder Woche. Ihre Antworten bleiben auf diesem Gerät, im Notizbuch.</p>
   <ol class="quiz-list">
     {
       listedWeeklyQuizzes({ all: import.meta.env.DEV || !!release }).filter((w) => included('quizzes', w.id)).map((w) => (

@@ -293,6 +293,55 @@ function planarField(dim: number, rhs: (y: Float64Array) => ArrayLike<number>) {
   }
 }
 
+/**
+ * Evenly spaced samples, refined where a straight line between two of them would visibly
+ * miss the curve: an interval is halved while the midpoint of the dense solution lies more
+ * than REFINE_TOL of a component's range off the chord (at most REFINE_DEPTH times, and at
+ * most REFINE_FACTOR × as many points in all). Steep starts and sharp spikes stay smooth when
+ * zoomed in, at no cost where the curve is gentle.
+ */
+const REFINE_TOL = 5e-4
+const REFINE_DEPTH = 6
+const REFINE_FACTOR = 4
+function refine(sol: DenseSolution, t: Float64Array, y: Float64Array[]): { t: Float64Array; y: Float64Array[] } {
+  const n = y.length
+  if (t.length < 2 || n === 0) return { t, y }
+  const range = y.map((c) => {
+    let [lo, hi] = [Infinity, -Infinity]
+    for (const v of c) if (Number.isFinite(v)) (lo = Math.min(lo, v)), (hi = Math.max(hi, v))
+    return hi > lo ? hi - lo : 1
+  })
+  const budget = REFINE_FACTOR * t.length
+  const ts: number[] = []
+  const ys: number[][] = Array.from({ length: n }, () => [])
+  const buf = new Float64Array(n)
+  const push = (tt: number, v: ArrayLike<number>) => {
+    ts.push(tt)
+    for (let i = 0; i < n; i++) ys[i].push(v[i])
+  }
+  // between (ta, ya) and (tb, yb): the points strictly inside, in order
+  const split = (ta: number, ya: Float64Array, tb: number, yb: Float64Array, depth: number) => {
+    if (depth >= REFINE_DEPTH || ts.length >= budget) return
+    const tm = (ta + tb) / 2
+    const ym = Float64Array.from(sol.at(tm, buf))
+    let off = false
+    for (let i = 0; i < n && !off; i++) off = Math.abs(ym[i] - (ya[i] + yb[i]) / 2) > REFINE_TOL * range[i]
+    if (!off) return
+    split(ta, ya, tm, ym, depth + 1)
+    push(tm, ym)
+    split(tm, ym, tb, yb, depth + 1)
+  }
+  const at = (j: number) => Float64Array.from(y, (c) => c[j])
+  push(t[0], at(0))
+  for (let j = 1; j < t.length; j++) {
+    const [a, b] = [at(j - 1), at(j)]
+    split(t[j - 1], a, t[j], b, 0)
+    push(t[j], b)
+  }
+  if (ts.length === t.length) return { t, y }
+  return { t: Float64Array.from(ts), y: ys.map((c) => Float64Array.from(c)) }
+}
+
 export interface OdeContext<P> {
   p: P
   sol: DenseSolution
@@ -351,8 +400,11 @@ export function ode<const D extends ParamDefs>(cfg: OdeConfig<D>): Model<ParamsO
         series[c.id] = { id: c.id, label: c.label, name: c.name, kind: 'continuous', x: t, y: y[i], role: roleAt(c, i) }
       })
       const ctx: OdeContext<ParamsOf<D>> = { p, sol, series }
+      // measured on the even samples; drawn with extra points where the curves bend
+      const fine = refine(sol, t, y)
+      const drawn = cfg.components.map((c, i) => ({ ...series[c.id], x: fine.t, y: fine.y[i] }))
       return {
-        series: [...Object.values(series), ...(cfg.extraSeries?.(ctx) ?? [])],
+        series: [...drawn, ...(cfg.extraSeries?.(ctx) ?? [])],
         grids: cfg.grids?.(ctx),
         observables: opts.observables === false ? {} : (cfg.observables?.(ctx) ?? {}),
         meta: { solver: sol.solver, steps: sol.steps, warnings: sol.warnings.length ? sol.warnings : undefined },
