@@ -71,8 +71,6 @@ interface FigureProps<P extends Params> {
    */
   /** Plots linked in zoom and pan: the x window, and the y window too when they share one y scale. */
   xLink?: { x: Range | null; y: Range | null; withY: boolean; set: (x: Range | null, y: Range | null) => void }
-  /** Zooming out never shows more y than the whole picture (scenario-only applets). */
-  capY?: boolean
 }
 
 function resolveSpec<P extends Params>(entry: PlotEntry<P>, p: P): PlotSpec {
@@ -110,7 +108,6 @@ export function Figure<P extends Params>({
   onDetail,
   viewEpoch,
   xLink,
-  capY = false,
 }: FigureProps<P>) {
   const outer = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -495,7 +492,9 @@ export function Figure<P extends Params>({
   const zoomable = spec.type !== 'surface3d'
   const floors = useMemo(() => panFloors(spec, run, full), [spec, run, full])
   const inner = useRef<HTMLDivElement>(null)
-  const zoomPan = useZoomPan({ el: inner, frame, full, floors, enabled: zoomable, capY, setZoom })
+  // zoom and pan stay inside the whole picture; a phase plane may look further out (the arrow
+  // field, new trajectories)
+  const zoomPan = useZoomPan({ el: inner, frame, full, floors, enabled: zoomable, bounded: spec.type !== 'phasePlane', setZoom })
 
   // A click (not a drag, not on a handle) on empty plot space starts a new trajectory there.
   const press = useRef<{ x: number; y: number } | null>(null)

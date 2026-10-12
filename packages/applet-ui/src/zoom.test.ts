@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allowed, floored, magnification, MAX_ZOOM, panned, pinched, zoomedAbout, type Win } from './zoom'
+import { allowed, floored, inside, magnification, MAX_ZOOM, panned, pinched, zoomedAbout, type Win } from './zoom'
 
 const full: Win = { x: [0, 10], y: [0, 1] }
 
@@ -28,5 +28,20 @@ describe('zoom window', () => {
     expect(allowed(full, { x: [0, 100], y: [0, 1] }, false)).toBe(true)
     expect(floored({ x: [-2, 8], y: [-0.5, 0.5] }, { x: 0, y: 0 }, false)).toEqual({ x: [0, 10], y: [0, 1] })
     expect(floored({ x: [-2, 8], y: [-0.5, 0.5] }, { x: -Infinity, y: -Infinity }, false)).toEqual({ x: [-2, 8], y: [-0.5, 0.5] })
+  })
+})
+
+describe('zoom stays inside the whole picture', () => {
+  const full: Win = { x: [0, 8], y: [0, 0.5] }
+  it('zooming out past the picture on one axis gives the whole picture', () => {
+    expect(inside({ x: [1, 5], y: [-0.1, 0.6] }, full, false, 'zoom')).toBeNull()
+    expect(inside({ x: [-1, 9], y: [0.1, 0.3] }, full, false, 'zoom')).toBeNull()
+  })
+  it('a window inside stays; one over an edge moves back in', () => {
+    expect(inside({ x: [1, 5], y: [0.1, 0.3] }, full, false, 'zoom')).toEqual({ x: [1, 5], y: [0.1, 0.3] })
+    expect(inside({ x: [6, 10], y: [-0.1, 0.1] }, full, false, 'pan')).toEqual({ x: [4, 8], y: [0, 0.2] })
+  })
+  it('panning keeps an axis that shows everything', () => {
+    expect(inside({ x: [6, 10], y: [0, 0.5] }, full, false, 'pan')).toEqual({ x: [4, 8], y: [0, 0.5] })
   })
 })

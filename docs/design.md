@@ -59,7 +59,10 @@ typeset properly. The interface stays quiet so the mathematics can speak.
 - **Line styles.** Primary (Blau) and tertiary (Tanne) solid, secondary (Beere) dashed: Blau
   and Beere are equally dark (1.09 : 1) and look alike to the red-green blind; Tanne is about
   twice as light as either and stays apart. Reference lines are dashed grey.
-- **Scenario-only applets:** zooming out widens time, never y beyond the whole picture.
+- **Zoom stays inside the picture.** Zooming out ends at the whole picture, on both axes at
+  once, so the aspect never changes; panning stops at its edges. More time means a larger T
+  in the timeline, not zooming out. Phase planes are the exception: there one may look
+  further out, at the arrow field, and start trajectories there.
 - **Crisp on the projector.** The canvas is drawn with as many pixels as it covers on
   screen, also when the presentation mode enlarges it.
 - **No jumps on loading.** The server draws a plot at a guessed size and the default state; the

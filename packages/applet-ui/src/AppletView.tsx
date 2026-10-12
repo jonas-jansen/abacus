@@ -308,7 +308,6 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                       onBahnenLoeschen={() => setStarts([])}
                       onDetail={detail}
                       viewEpoch={viewEpoch + jumps}
-                      capY={!!def.scenariosOnly}
                       xLink={
                         linkX && isTime(entry)
                           ? {

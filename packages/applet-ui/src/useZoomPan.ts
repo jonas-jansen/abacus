@@ -6,7 +6,7 @@
 
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent, type RefObject } from 'react'
 import type { Frame } from '@abacus/applet-core'
-import { allowed, cappedY, floored, panned, pinched, zoomedAbout, type Win } from './zoom'
+import { allowed, floored, inside, panned, pinched, zoomedAbout, type Win } from './zoom'
 import { localPoint, scaleOf } from './scale'
 
 export interface ZoomPan {
@@ -24,7 +24,7 @@ export function useZoomPan({
   full,
   floors,
   enabled,
-  capY = false,
+  bounded = false,
   setZoom,
 }: {
   el: RefObject<HTMLElement | null>
@@ -32,15 +32,18 @@ export function useZoomPan({
   full: Win
   floors: { x: number; y: number }
   enabled: boolean
-  /** Never more y than the whole picture (zooming out widens time only). */
-  capY?: boolean
-  setZoom: (z: Win) => void
+  /** Zoom and pan stay inside the whole picture (all plots but phase planes). */
+  bounded?: boolean
+  /** The new window; null = the whole picture. */
+  setZoom: (z: Win | null) => void
 }): ZoomPan {
   const { plot } = frame
   const yLog = !!frame.yLog
   const current = (): Win => ({ x: frame.xDomain, y: frame.yDomain })
   const set = (z: Win, limit = true) => {
-    if (!limit || allowed(full, z, yLog)) setZoom(floored(capY ? cappedY(z, full, yLog) : z, floors, yLog))
+    // `limit` is false only for a pan
+    if (bounded) setZoom(inside(z, full, yLog, limit ? 'zoom' : 'pan'))
+    else if (!limit || allowed(full, z, yLog)) setZoom(floored(z, floors, yLog))
   }
 
   useEffect(() => {

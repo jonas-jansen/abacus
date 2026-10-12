@@ -29,12 +29,26 @@ export function allowed(full: Win, z: Win, yLog: boolean): boolean {
 }
 
 /**
- * The y window no larger than the whole picture's (scenario-only applets): zooming out then
- * shows more time, not a curve shrinking into a corner.
+ * A window inside the whole picture: zooming out ends at the whole picture (both axes at
+ * once, so the aspect never changes; `null` = the whole picture), and panning stops at its
+ * edges. More time is a larger T in the timeline, not a zoom.
  */
-export function cappedY(z: Win, full: Win, yLog: boolean): Win {
-  const t = ly(yLog)
-  return t(z.y[1]) - t(z.y[0]) > t(full.y[1]) - t(full.y[0]) ? { x: z.x, y: full.y } : z
+export function inside(z: Win, full: Win, yLog: boolean, how: 'zoom' | 'pan'): Win | null {
+  const [t, ti] = [ly(yLog), lyInv(yLog)]
+  // an axis as wide as the whole picture or wider: null; otherwise moved back inside
+  const fit = (r: readonly [number, number], f: readonly [number, number], tr: (v: number) => number, inv: (v: number) => number) => {
+    const [a, b, fa, fb] = [tr(r[0]), tr(r[1]), tr(f[0]), tr(f[1])]
+    if (b - a >= (fb - fa) * (1 - 1e-9)) return null
+    const shift = a < fa ? fa - a : b > fb ? fb - b : 0
+    return [inv(a + shift), inv(b + shift)] as const
+  }
+  const id = (v: number) => v
+  const x = fit(z.x, full.x, id, id)
+  const y = fit(z.y, full.y, t, ti)
+  // zooming out past the picture on either axis: the whole picture (never one axis alone);
+  // panning: an axis that already shows everything stays as it is
+  if (how === 'zoom') return x && y ? { x, y } : null
+  return x || y ? { x: x ?? full.x, y: y ?? full.y } : null
 }
 
 /** Pushed back up where the window would go below an axis' floor (time before 0, …). */
