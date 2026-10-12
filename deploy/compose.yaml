@@ -1,0 +1,13 @@
+# The student version of abacus on the uni server.
+#   first time:   docker compose up -d
+#   to update:    docker compose pull && docker compose up -d
+# The image is built by GitHub on every push to main (.github/workflows/docker.yml); `latest`
+# is the newest, and every build is also tagged with its commit (e.g. :sha-51da677), so an
+# older version can be pinned here if an update ever needs to be undone.
+services:
+  abacus:
+    image: ghcr.io/jonas-jansen/abacus:latest
+    restart: unless-stopped
+    ports:
+      # the uni's web server (Apache, Shibboleth later) forwards to this port
+      - "127.0.0.1:8080:80"

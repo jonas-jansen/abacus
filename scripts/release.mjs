@@ -1,12 +1,12 @@
 // Builds an upload: only what the release profile in site/releases.json names, into
-// release/<name>/ and release/<name>.zip. `pnpm release [name]` (default: einfuehrung).
+// release/<name>/ and release/<name>.zip. `pnpm release [name]` (default: students).
 // Set ABACUS_BASE when the site will live under a sub-path, e.g. ABACUS_BASE=/applets/.
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 const root = new URL('..', import.meta.url).pathname
-const name = process.argv[2] ?? 'einfuehrung'
+const name = process.argv[2] ?? 'students'
 const profiles = JSON.parse(readFileSync(join(root, 'site/releases.json'), 'utf8'))
 if (!profiles[name] || typeof profiles[name] === 'string') {
   console.error(`No release "${name}" in site/releases.json. Known: ${Object.keys(profiles).filter((k) => k !== 'note').join(', ')}`)

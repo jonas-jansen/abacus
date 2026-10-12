@@ -6,7 +6,7 @@ import { WeeklyQuizIsland } from '../../../islands'
 import Seite from '../../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../../courses'
 import { courseUrl } from '../../../config'
-import { included, builtCourses } from '../../../release'
+import { builtCourses, included, release } from '../../../release'
 
 export function getStaticPaths() {
   const ws = weeklyQuizzes.filter((w) => included('quizzes', w.id))
@@ -15,7 +15,7 @@ export function getStaticPaths() {
 const { w, course } = Astro.props as { w: (typeof weeklyQuizzes)[number]; course: Course }
 Astro.locals.course = course
 ---
-<Seite course={course} title={w.title} summary={w.description} active="quiz" width="medium" unlisted={w.visible === false}>
+<Seite course={course} title={w.title} summary={w.description} active="quiz" width="medium" unlisted={!release && w.visible === false}>
   <p class="eyebrow"><a href={courseUrl(course, '/quiz')}>Quizze</a>{w.week !== undefined && <> · Woche {w.week}</>}</p>
   <h1>{w.title}</h1>
   {w.description && <p class="lead" set:html={renderMathText(w.description)} />}

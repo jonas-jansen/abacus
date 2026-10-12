@@ -1,4 +1,5 @@
-# Builds the site and publishes it on GitHub Pages at https://<user>.github.io/<repo>/.
+# Builds the beta (everything, hidden items marked) and publishes it on GitHub Pages at
+# https://<user>.github.io/<repo>/. The student version is the Docker image (docker.yml).
 # Runs on every push to main; tests and dependency rules must pass first.
 name: Pages
 
@@ -30,6 +31,8 @@ jobs:
       - run: pnpm check
       - run: pnpm build
         env:
+          # the beta for colleagues: everything, also what students don't see yet
+          ABACUS_ALL: '1'
           ABACUS_SITE: https://${{ github.repository_owner }}.github.io
           ABACUS_BASE: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3

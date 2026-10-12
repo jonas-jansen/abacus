@@ -17,24 +17,64 @@ ABACUS_SITE=https://mathe.example.de ABACUS_BASE=/applets/ pnpm build
 
 Copy `site/dist/` to the server, e.g. `rsync -a --delete site/dist/ user@server:/var/www/applets/`.
 
-## An upload with only some of it
+## Two versions from one commit
 
-`site/releases.json` names what an upload contains: courses, applets, weekly quizzes, guided pages.
+| | GitHub Pages: the beta | Uni server: the student version |
+|---|---|---|
+| for | colleagues trying things out | students |
+| shows | everything; hidden applets and quizzes marked "nicht gelistet", draft course pages | only the profile `students` in `site/releases.json` |
+| built by | `.github/workflows/pages.yml` (`ABACUS_ALL=1`) | `.github/workflows/docker.yml` → `ghcr.io/jonas-jansen/abacus` |
+| updated | on every push to `main` | on every push to `main`; the server pulls |
+
+Both are built from the same commit after the same checks, so the student version is always
+the beta, filtered.
+
+### What students see
+
+`site/releases.json`, profile `students`, names the courses, applets, weekly quizzes and
+guided pages of the student version. Add to it as the lecture goes on, push, and the next
+image has it:
 
 ```json
-"einfuehrung": { "courses": ["mathe-bio"], "applets": ["alcohol", "luo-rudy"], "quizzes": ["vorkurs"], "pages": [] }
+"students": { "courses": ["mathe-bio"], "applets": ["alcohol", "luo-rudy"], "quizzes": ["vorkurs"], "pages": [] }
 ```
+
+Without guided pages the "Kurs" area is left out of the navigation. The applets' code ships in
+the shared script bundle; only the pages of the others are missing.
+
+### The uni server
+
+Once: copy `deploy/compose.yaml` to the server and start it.
 
 ```sh
-pnpm release einfuehrung                       # → release/einfuehrung/ and release/einfuehrung.zip
-ABACUS_BASE=/applets/ pnpm release einfuehrung # for a sub-path
+docker compose up -d                     # serves on 127.0.0.1:8080
 ```
 
-Only the named pages are built and listed, whether or not they are `visible` in the catalogs;
-everything else has no page at all. Without course pages the "Kurs" area is left out of the
-navigation and the start page. The notebook is always there. (The applets' code still ships in
-the shared script bundle; only their pages are missing.) A plain `pnpm build` – as for GitHub
-Pages – builds everything, as before.
+To update to the newest version (after a push, once the "Docker" workflow is green):
+
+```sh
+docker compose pull && docker compose up -d
+```
+
+Every image is also tagged with its commit (`:sha-51da677`); put such a tag into
+`compose.yaml` instead of `latest` to go back to an earlier version.
+
+- **Path on the server.** Set the repository variable `UNI_BASE` (Settings → Secrets and
+  variables → Actions → Variables) to the path the site lives under, e.g. `/abacus/`, and
+  `UNI_SITE` to the origin. The image serves the site under that path, so the uni's web server
+  forwards it unchanged: `ProxyPass /abacus/ http://127.0.0.1:8080/abacus/`.
+- **Access to the image.** The first push creates the package `abacus` on GitHub as private.
+  Either make it public (GitHub → Packages → abacus → Package settings → Change visibility),
+  or log in on the server once with a token that may read packages:
+  `docker login ghcr.io -u jonas-jansen`.
+- **Automatic updates** are possible with a watcher such as Watchtower, but a deliberate
+  `docker compose pull` keeps you in control of when students see changes.
+
+### A zip instead of Docker
+
+`pnpm release` builds the same student version into `release/students/` and
+`release/students.zip`, e.g. to copy by hand (`ABACUS_BASE=/abacus/ pnpm release` for a
+sub-path).
 
 ## Apache, public (current state)
 

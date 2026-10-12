@@ -8,10 +8,10 @@ import { AppletIsland } from '../../../islands'
 import Seite from '../../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../../courses'
 import { courseUrl } from '../../../config'
-import { included, builtCourses } from '../../../release'
+import { builtCourses, included, showAll } from '../../../release'
 
 export async function getStaticPaths() {
-  const pages = await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))
+  const pages = await getCollection('course', (s) => (showAll || !s.data.draft) && included('pages', s.id))
   return builtCourses.flatMap((course) => pages.map((page) => ({ params: { course: course.id, page: page.id }, props: { page, course } })))
 }
 

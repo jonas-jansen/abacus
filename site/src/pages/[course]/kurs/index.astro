@@ -3,9 +3,9 @@ import { getCollection } from 'astro:content'
 import Seite from '../../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../../courses'
 import { courseUrl } from '../../../config'
-import { included, builtCourses } from '../../../release'
+import { builtCourses, included, showAll } from '../../../release'
 
-const pages = (await getCollection('course', (s) => (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))).sort(
+const pages = (await getCollection('course', (s) => (showAll || !s.data.draft) && included('pages', s.id))).sort(
   (a, b) => a.data.week - b.data.week || a.data.order - b.data.order || a.data.title.localeCompare(b.data.title, 'de'),
 )
 export function getStaticPaths() {

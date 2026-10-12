@@ -4,12 +4,12 @@ import { chapterName } from '@abacus/applet-ui/define'
 import Seite from '../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../courses'
 import { courseUrl } from '../../config'
-import { included, release, builtCourses } from '../../release'
+import { builtCourses, included, listAll, release, unlistedMark } from '../../release'
 import { previewSvg } from '../../preview'
 
 // listed applets only ("sichtbar" in packages/applets/applets.json); the dev server shows all, marked
 // an upload (release profile) lists exactly what it contains
-const kapitelListe = chapters({ all: import.meta.env.DEV || !!release })
+const kapitelListe = chapters({ all: listAll })
   .map((k) => ({ ...k, applets: k.applets.filter((a) => included('applets', a.id)) }))
   .filter((k) => k.applets.length > 0)
 // the search hint names what is there: a word from the first few titles
@@ -45,7 +45,7 @@ Astro.locals.course = course
             <a class="card" href={courseUrl(course, `/applet/${a.id}`)} data-suche={`${a.title} ${a.summary} ${k.title} ${chapterName(k.id)} ${a.id}`}>
               <div class="card-preview" set:html={previewSvg(a)} />
               <div class="card-body">
-                {a.visible === false && <span class="nicht-gelistet">nicht gelistet</span>}
+                {unlistedMark(a.visible) && <span class="nicht-gelistet">nicht gelistet</span>}
                 <strong>{a.title}</strong>
                 <span>{a.summary}</span>
               </div>

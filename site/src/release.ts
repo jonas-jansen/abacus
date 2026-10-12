@@ -33,5 +33,18 @@ export const included = (kind: Kind, id: string): boolean => !release || release
 /** Whether this build has guided pages at all (the "Kurs" area is left out otherwise). */
 export const withPages = !release || release.pages.length > 0
 
+/**
+ * Everything listed, also what is not (yet) for students: hidden applets and quizzes with a
+ * "nicht gelistet" badge, draft course pages. The dev server, and the beta on GitHub Pages
+ * (ABACUS_ALL=1) for colleagues to try things out.
+ */
+export const showAll = import.meta.env.DEV || process.env.ABACUS_ALL === '1'
+
+/** List items regardless of their `visible` flag: everything (showAll), or exactly a profile's list. */
+export const listAll = showAll || !!release
+
+/** "nicht gelistet" in the beta; a profile's items are listed for real. */
+export const unlistedMark = (visible: boolean | undefined) => showAll && !release && visible === false
+
 /** The courses this build contains. */
 export const builtCourses = courses.filter((c) => included('courses', c.id))

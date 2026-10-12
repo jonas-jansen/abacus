@@ -1,6 +1,6 @@
 {
-  "note": "What an upload contains: `ABACUS_RELEASE=<name> pnpm build` builds only these courses, applets, weekly quizzes and guided pages (docs/deployment.md). Without ABACUS_RELEASE everything is built.",
-  "einfuehrung": {
+  "note": "students: what the uni server shows (the Docker image, .github/workflows/docker.yml); extend it as the lecture goes on. What an upload contains: `ABACUS_RELEASE=<name> pnpm build` builds only these courses, applets, weekly quizzes and guided pages (docs/deployment.md). Without ABACUS_RELEASE everything is built.",
+  "students": {
     "courses": ["mathe-bio"],
     "applets": ["alcohol", "luo-rudy"],
     "quizzes": ["vorkurs"],

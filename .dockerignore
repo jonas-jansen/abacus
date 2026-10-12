@@ -1,0 +1,12 @@
+# only what the build needs; never the colleague's originals, slides or quiz drafts
+**/node_modules
+**/dist
+**/.astro
+release
+apps
+slides
+uploads
+.git
+.github
+*.md
+!site/src/content/**/*.md

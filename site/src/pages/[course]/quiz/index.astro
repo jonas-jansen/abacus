@@ -5,7 +5,7 @@ import { WeeklyQuizStatusIsland } from '../../../islands'
 import Seite from '../../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../../courses'
 import { courseUrl } from '../../../config'
-import { included, release, builtCourses } from '../../../release'
+import { builtCourses, included, listAll, unlistedMark } from '../../../release'
 export function getStaticPaths() {
   return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
 }
@@ -16,11 +16,11 @@ Astro.locals.course = course
   <h1>Quizze</h1>
   <ol class="quiz-list">
     {
-      listedWeeklyQuizzes({ all: import.meta.env.DEV || !!release }).filter((w) => included('quizzes', w.id)).map((w) => (
+      listedWeeklyQuizzes({ all: listAll }).filter((w) => included('quizzes', w.id)).map((w) => (
         <li>
           <a href={courseUrl(course, `/quiz/${w.id}`)}>
             <span class="course-week">{w.week !== undefined ? `Woche ${w.week}` : 'Quiz'}</span>
-            <strong>{w.title}{w.visible === false && <span class="nicht-gelistet">nicht gelistet</span>}</strong>
+            <strong>{w.title}{unlistedMark(w.visible) && <span class="nicht-gelistet">nicht gelistet</span>}</strong>
             {w.description && <span class="course-kurz" set:html={renderMathText(w.description)} />}
             <span class="quiz-meta">
               {windowText(w) && <span>{windowText(w)}</span>}

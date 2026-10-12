@@ -7,7 +7,7 @@ import { AppletIsland } from '../../../islands'
 import Seite from '../../../layouts/Seite.astro'
 import { scopeOf, type Course } from '../../../courses'
 import { courseUrl } from '../../../config'
-import { included, builtCourses } from '../../../release'
+import { builtCourses, included, release, showAll } from '../../../release'
 
 export function getStaticPaths() {
   const ids = Object.keys(applets).filter((id) => included('applets', id))
@@ -20,11 +20,11 @@ const { id } = Astro.params
 const def = getApplet(id!)
 const intro = await getEntry('intro', id!)
 const Intro = intro ? (await render(intro)).Content : null
-const pages = (await getCollection('course', (s) => s.data.applet === id && (import.meta.env.DEV || !s.data.draft) && included('pages', s.id))).sort(
+const pages = (await getCollection('course', (s) => s.data.applet === id && (showAll || !s.data.draft) && included('pages', s.id))).sort(
   (a, b) => a.data.week - b.data.week,
 )
 ---
-<Seite course={course} title={def.title} summary={def.summary} active="applets" unlisted={def.visible === false}>
+<Seite course={course} title={def.title} summary={def.summary} active="applets" unlisted={!release && def.visible === false}>
   <div class="explore-head">
     <div>
       <p class="eyebrow chapter-badge">
