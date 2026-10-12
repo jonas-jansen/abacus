@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { decimalsOf, defaultParams, explainChange, formatNumber, roundTo, updateParams, type Detail, type Run, type Params, type ParamSpec, type ParamValue } from '@abacus/applet-core'
 import { subscribe } from '@abacus/channel'
 import { ParamControl } from './controls'
-import { handlesOf, type AppletDef, type PlotEntry } from './define'
+import { handlesOf, type AppletDef, type PlotEntry, type Scenario } from './define'
 import { Figure } from './Figure'
 import { Figure3D, type Spec3D } from './Figure3D'
 import { FormulaBar } from './FormulaBar'
@@ -86,6 +86,8 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
       .slice(0, 2)
       .map((s) => {
         const v = vergleich.params[s.id]
+        // a choice by its name: "festgehalten: Mann"
+        if (s.kind === 'choice') return s.options.find((o) => o.value === v)?.label ?? String(v)
         const text = typeof v === 'number' ? formatNumber(v, 3) : Array.isArray(v) ? `(${v.map((c) => formatNumber(c, 3)).join(', ')})` : String(v)
         return 'latex' in s && s.latex ? `$${s.latex}$ = ${text}` : `${s.label} = ${text}`
       })
@@ -140,9 +142,18 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
   const specs = def.model.params.filter(shown)
   const all = def.model.params
   const horizonSpec = def.horizon ? all.find((s) => s.id === def.horizon) : undefined
-  const main = def.layout?.main ?? (all.length <= 4 ? all.map((s) => s.id) : all.slice(0, 3).map((s) => s.id))
+  const main = def.scenariosOnly ? (def.layout?.main ?? []) : def.layout?.main ?? (all.length <= 4 ? all.map((s) => s.id) : all.slice(0, 3).map((s) => s.id))
   const primary = specs.filter((s) => main.includes(s.id))
-  const more = specs.filter((s) => !main.includes(s.id))
+  const more = def.scenariosOnly ? [] : specs.filter((s) => !main.includes(s.id))
+  // a scenario sets the defaults with its values; with scenarios only, the switches stay as they are
+  const scenarioParams = (s: Scenario): Record<string, unknown> => ({
+    ...defaultParams(def.model),
+    ...(def.scenariosOnly ? Object.fromEntries(main.map((id) => [id, params[id]])) : {}),
+    ...s.params,
+  })
+  const activeScenario = def.scenarios?.find((s) =>
+    Object.entries(scenarioParams(s)).every(([id, v]) => id === def.horizon || JSON.stringify(params[id]) === JSON.stringify(v)),
+  )
 
   // Linked highlighting: readouts → marks in the plots; plots → the same step everywhere;
   // a parameter row → its handle in the plot.
@@ -187,7 +198,11 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
       <ParamControl
         spec={s}
         value={params[s.id]}
-        onChange={(v) => change(s.id, v)}
+        onChange={(v) => {
+          change(s.id, v)
+          // with scenarios only, a switch is a new situation like a scenario: the axes fit afresh
+          if (def.scenariosOnly) setViewEpoch((e) => e + 1)
+        }}
         message={hints[s.id]}
         onInvalid={(m) => setHints((h) => ({ ...h, [s.id]: m }))}
       />
@@ -238,7 +253,7 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
 
       <div className="ab-body">
         <div className="ab-stage">
-          {formulas && formulas.length > 0 && (
+          {!def.scenariosOnly && formulas && formulas.length > 0 && (
             <FormulaBar
               formulas={formulas}
               specs={all}
@@ -365,16 +380,20 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                   <HilfeKnopf bahnen={!!bahnParam} timeline={!!timeline} />
                 </span>
           </div>
+          {def.scenariosOnly && primary.length > 0 && (
+            <div className="ab-panel-section">
+              <div className="ab-controls">{primary.map(control)}</div>
+            </div>
+          )}
           {def.scenarios && def.scenarios.length > 0 && (
             <div className="ab-panel-section">
               <h3 className="ab-section-title">Szenarien</h3>
               <div className="ab-szenarien" role="group" aria-label="Szenarien">
                 {def.scenarios.map((s) => {
-                  const target: Record<string, unknown> = { ...defaultParams(def.model), ...s.params }
-                  const active = Object.entries(target).every(([id, v]) => id === def.horizon || JSON.stringify(params[id]) === JSON.stringify(v))
+                  const active = s === activeScenario
                   return (
                     <button key={s.label} type="button" className="ab-pill ab-szenario" aria-pressed={active} data-tip={s.text} onClick={() => {
-                      setParams({ ...defaultParams(def.model), ...s.params })
+                      setParams(scenarioParams(s))
                       setViewEpoch((e) => e + 1)
                     }}>
                       <MathLabel text={s.label} />
@@ -382,19 +401,27 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
                   )
                 })}
               </div>
-                        </div>
+              {/* with scenarios only, the chosen one is described in words, not only in a tooltip */}
+              {def.scenariosOnly && activeScenario?.text && (
+                <p className="ab-szenario-text">
+                  <MathLabel text={activeScenario.text} />
+                </p>
+              )}
+            </div>
           )}
-          <div className="ab-panel-section">
-            <h3 className="ab-section-title">Parameter</h3>
-            <div className="ab-controls">{primary.map(control)}</div>
-            {more.length > 0 && (
-              <details className="ab-more">
-                <summary>weitere Parameter ({more.length})</summary>
-                <div className="ab-controls">{more.map(control)}</div>
-              </details>
-            )}
-            {def.model.constraintNote && <p className="ab-note">Es gilt: {def.model.constraintNote}.</p>}
-          </div>
+          {!def.scenariosOnly && (
+            <div className="ab-panel-section">
+              <h3 className="ab-section-title">Parameter</h3>
+              <div className="ab-controls">{primary.map(control)}</div>
+              {more.length > 0 && (
+                <details className="ab-more">
+                  <summary>weitere Parameter ({more.length})</summary>
+                  <div className="ab-controls">{more.map(control)}</div>
+                </details>
+              )}
+              {def.model.constraintNote && <p className="ab-note">Es gilt: {def.model.constraintNote}.</p>}
+            </div>
+          )}
           {run && !locked && def.readouts && def.readouts.length > 0 && (
             <div className="ab-panel-section">
               <h3 className="ab-section-title">Messwerte</h3>

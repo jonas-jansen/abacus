@@ -1136,6 +1136,12 @@ html[data-werte='aus'] .ab-probe-step {
   flex-wrap: wrap;
   gap: 6px;
 }
+.ab-szenario-text {
+  margin: 10px 0 0;
+  color: var(--ab-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
 .ab-szenario[aria-pressed='true'] {
   background: var(--ab-accent-soft);
   color: var(--ab-accent);

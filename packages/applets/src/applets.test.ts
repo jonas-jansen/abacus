@@ -312,6 +312,34 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(m.periode.value as number).toBeCloseTo(0.7, 2)
     expect(szenario('herzzelle', 'Muskelzelle ohne Reiz').art.value).toBe('ruht')
   })
+
+  it('alcohol (Pieters 1990): 0.6 g/kg peaks at about 0.64 g/L after 0.7 h in men; higher and later in women', () => {
+    const man = observe('alcohol', { D0: 0.6 })
+    expect(man.spitze.value as number).toBeCloseTo(0.64, 2)
+    expect(man.wann.value as number).toBeCloseTo(0.73, 1)
+    const woman = observe('alcohol', { D0: 0.6, sex: 'female' })
+    expect(woman.spitze.value as number).toBeGreaterThan(man.spitze.value as number)
+    expect(woman.wann.value as number).toBeGreaterThan(man.wann.value as number)
+    // one small beer stays below the limit
+    expect(observe('alcohol', { D0: 0.15 }).ueber.value).toBe(0)
+  })
+
+  it('Luo–Rudy (1991): an action potential of about 0.37 s; threshold, refractoriness, shorter at a fast rhythm, afterdepolarisations', () => {
+    const one = szenario('luo-rudy', 'ein Herzschlag')
+    expect(one.antwort.value).toBe('jeder Reiz löst aus')
+    expect(one.apd.value as number).toBeGreaterThan(330)
+    expect(one.apd.value as number).toBeLessThan(400)
+    expect(one.ruhe.value as number).toBeCloseTo(-84.5, 0)
+    expect(szenario('luo-rudy', 'zu schwacher Reiz').antwort.value).toBe('keine Erregung')
+    expect(szenario('luo-rudy', 'zweiter Reiz zu früh').schlaege.value).toBe(1)
+    expect(szenario('luo-rudy', 'zweiter Reiz später').schlaege.value).toBe(2)
+    expect(szenario('luo-rudy', 'schneller Puls').apd.value as number).toBeLessThan((one.apd.value as number) - 40)
+    expect(szenario('luo-rudy', 'zu viel Kalium im Blut').ruhe.value as number).toBeGreaterThan(-75)
+    expect(szenario('luo-rudy', 'Kalziumkanäle blockiert').apd.value as number).toBeLessThan(250)
+    expect(szenario('luo-rudy', 'Natriumkanäle blockiert').antwort.value).toBe('jeder Reiz löst aus')
+    expect(szenario('luo-rudy', 'Kaliumkanäle geschwächt').apd.value as number).toBeGreaterThan(450)
+    expect(szenario('luo-rudy', 'Nacherregungen').antwort.value).toBe('Nacherregungen')
+  })
 })
 
 describe('catalog (applets.json)', () => {

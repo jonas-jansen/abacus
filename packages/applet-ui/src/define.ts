@@ -132,6 +132,12 @@ export interface AppletDef<P extends Params = Params> {
    * the defaults with these values. Shown as chips above the parameters.
    */
   scenarios?: readonly Scenario<P>[]
+  /**
+   * Scenarios only: no formulas and no parameter panel – the plots (with timeline, zoom,
+   * compare …) and the scenarios beside them. The parameters in `layout.main` stay as switches
+   * (e.g. male | female) and keep their value when a scenario is chosen.
+   */
+  scenariosOnly?: boolean
 }
 
 export interface Scenario<P = Params> {
@@ -165,6 +171,7 @@ export function defineApplet<P extends Params>(def: AppletModule<P>): AppletModu
   for (const s of def.scenarios ?? []) {
     for (const id of Object.keys(s.params)) if (!ids.has(id)) throw new Error(`Applet "${def.id}": Szenario "${s.label}" sets unknown parameter "${id}".`)
   }
+  if (def.scenariosOnly && !def.scenarios?.length) throw new Error(`Applet "${def.id}": scenariosOnly needs scenarios.`)
   for (const id of [...(def.layout?.main ?? []), ...Object.keys(def.layout?.visible ?? {}), ...(def.horizon ? [def.horizon] : [])]) {
     if (!ids.has(id)) throw new Error(`Applet "${def.id}": layout.main refers to unknown parameter "${id}".`)
   }

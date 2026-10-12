@@ -258,6 +258,22 @@
       "summary": "Ein System aus vier Differentialgleichungen – periodisch von selbst oder im Takt eines Reizes."
     },
     {
+      "id": "alcohol",
+      "visible": false,
+      "chapter": "IV",
+      "slides": "",
+      "title": "Alkohol im Körper",
+      "summary": "Vom Magen über den Darm ins Blut – und wie lange es dauert, bis der Alkohol wieder abgebaut ist."
+    },
+    {
+      "id": "luo-rudy",
+      "visible": false,
+      "chapter": "IV",
+      "slides": "",
+      "title": "Herzmuskelzelle nach Luo und Rudy",
+      "summary": "Ein Herzschlag in einer einzelnen Zelle – und was Medikamente, Kalium und der Takt daran ändern."
+    },
+    {
       "id": "folgen-grenzwert",
       "visible": true,
       "chapter": "Appendix",

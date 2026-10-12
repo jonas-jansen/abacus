@@ -9,8 +9,11 @@ import { describe, expect, it } from 'vitest'
 const render = (tex: string) =>
   katex.renderToString(tex, { throwOnError: true, strict: false, trust: (c) => c.command === '\\htmlData' })
 
+// applets driven by scenarios only show no formulas (their intro states the model)
+const withFormulas = Object.keys(applets).filter((id) => !applets[id].scenariosOnly)
+
 describe('formulas', () => {
-  it.each(Object.keys(applets))('%s: formulas render in both modes', (id) => {
+  it.each(withFormulas)('%s: formulas render in both modes', (id) => {
     const def = applets[id]
     const p = defaultParams(def.model)
     const formulas = typeof def.formulas === 'function' ? def.formulas(p) : def.formulas
@@ -24,7 +27,7 @@ describe('formulas', () => {
     }
   })
 
-  it.each(Object.keys(applets))('%s: every parameter can be changed in the formulas', (id) => {
+  it.each(withFormulas)('%s: every parameter can be changed in the formulas', (id) => {
     const def = applets[id]
     const p0 = defaultParams(def.model)
     // formulas may depend on a choice (e.g. linear or quadratic): look at every option

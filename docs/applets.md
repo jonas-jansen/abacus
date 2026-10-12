@@ -172,6 +172,12 @@ Helpers in `@abacus/applet-core`:
 - `layout: { main: [...], visible: { b: (p) => p.form === 'linear' } }`: which parameters are
   up front, and which only in some settings.
 - `timeline: true` gives a closed form a timeline; `stepwise: true` opens it at the start.
+- `scenariosOnly: true`: an applet driven by scenarios alone, for models too large to explore
+  by hand (`alcohol.ts`, `luo-rudy.ts`). No formulas and no parameter panel: the plots with
+  everything they have (timeline, zoom, pan, compare), the scenarios on the right, and the
+  chosen scenario's `text` written out below them. The parameters in `layout.main` stay as
+  switches (e.g. Mann | Frau); a scenario keeps them, and changing one fits the axes afresh.
+  The model's equations belong in the applet's introduction (`site/src/content/intro/<id>.md`).
 
 ## Conventions
 

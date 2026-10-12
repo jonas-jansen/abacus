@@ -48,6 +48,8 @@ import linearsystemPhase from './linearsystem-phase'
 import logIvp from './log-ivp'
 import logisticVergleich from './logistic-vergleich'
 import logisticCobweb from './logistic-cobweb'
+import alcohol from './alcohol'
+import luoRudy from './luo-rudy'
 
 const modules: AppletModule<any>[] = [
   // @new-applet:entries
@@ -89,6 +91,8 @@ const modules: AppletModule<any>[] = [
   michaelisMenten,
   bioreaktor,
   herzzelle,
+  luoRudy,
+  alcohol,
   // 8 numerics
   eulerHeun,
   // Anhang: mathematical foundations
