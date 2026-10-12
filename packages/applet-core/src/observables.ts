@@ -9,7 +9,7 @@
 import type { Observable, ObservableValue } from './model'
 import { derivative, roots } from './numeric'
 
-type Extra = Pick<Observable, 'format' | 'tol' | 'note' | 'digits' | 'marks' | 'form' | 'names' | 'unit'>
+type Extra = Pick<Observable, 'format' | 'tol' | 'note' | 'info' | 'digits' | 'marks' | 'form' | 'names' | 'unit'>
 
 export const quantity = (label: string, value: number | null, extra: Extra = {}): Observable => ({
   kind: 'quantity',

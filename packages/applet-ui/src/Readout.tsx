@@ -92,7 +92,13 @@ export function Readout({
         : {})}
     >
       <dt>
-        <MathLabel text={o.label} />
+        {o.info ? (
+          <span className="ab-stat-info" data-tip={o.info}>
+            <MathLabel text={o.label} />
+          </span>
+        ) : (
+          <MathLabel text={o.label} />
+        )}
         {linked && (
           <svg className="ab-stat-link" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
             <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />

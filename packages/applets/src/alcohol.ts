@@ -70,7 +70,12 @@ const model = ode({
         note: above ? 'noch über der Grenze am Ende des Zeitfensters' : undefined,
         marks: above ? above.filter((x): x is number => x !== null).map((x) => ({ kind: 'time' as const, t: x })) : [],
       }),
-      abgebaut: quantity('abgebaut nach (h)', gone, { digits: 2, note: 'noch nicht im Zeitfenster', marks: gone === null ? [] : [{ kind: 'time', t: gone }] }),
+      abgebaut: quantity('abgebaut nach (h)', gone, {
+        digits: 2,
+        note: 'noch nicht im Zeitfenster',
+        info: 'Ganz auf null fällt der Wert nie, denn je weniger Alkohol im Blut ist, desto langsamer baut die Leber ihn ab. Gezählt wird deshalb, bis weniger als 0.01 g/L übrig sind. Das ist ein Fünfzigstel der Grenze im Straßenverkehr.',
+        marks: gone === null ? [] : [{ kind: 'time', t: gone }],
+      }),
     }
   },
 })

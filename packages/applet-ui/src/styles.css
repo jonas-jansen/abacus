@@ -2030,6 +2030,12 @@ html[data-hinweise='aus'] .ab-hint {
      the readout next to them */
   pointer-events: none;
 }
+/* a readout whose value needs a word of explanation: its name is underlined, the tooltip says how */
+.ab-stat-info {
+  text-decoration: underline dotted color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+  cursor: help;
+}
 .ab-stat-link {
   margin-left: 5px;
   vertical-align: -1px;

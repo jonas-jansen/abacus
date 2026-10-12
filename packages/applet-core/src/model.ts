@@ -96,6 +96,8 @@ export interface Observable {
   tol?: number
   /** Shown to the student, e.g. "keine Periode ≤ 16 gefunden". */
   note?: string
+  /** How the value is found, for the student who wonders: a tooltip on the readout's name. */
+  info?: string
   /** Significant digits for numbers (default 4). */
   digits?: number
   /** Highlighted in the plots while the readout is pointed at. */

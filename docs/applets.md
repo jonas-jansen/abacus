@@ -165,6 +165,10 @@ Helpers in `@abacus/applet-core`:
 | `eigenvalues(A)`, `spectralRadiusOf(A)`, `eigenvalueTexts` | small n×n matrices (Leslie, compartments) |
 | `jacobian(f, x)`, `equilibria2(f, box, 'ode' \| 'map')` | Jacobian; all equilibria in a box with type and stability |
 
+A readout whose value rests on a choice gets `info`: a tooltip on its name (dotted
+underline) that says how it is found, e.g. the threshold behind "abgebaut nach" in
+`alcohol.ts`.
+
 ## Scenarios, layout, timeline
 
 - `scenarios: [{ label, text, params }]`: chips above the parameters, each the defaults plus
