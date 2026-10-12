@@ -171,11 +171,6 @@ h1 {
   color: var(--ab-text);
   box-shadow: 0 1px 2px rgb(16 24 40 / 0.12);
 }
-.settings-foot {
-  margin: 8px 0 0;
-  color: var(--ab-muted);
-  font-size: 0.78rem;
-}
 /* a switch */
 .settings input[role='switch'] {
   flex: none;
