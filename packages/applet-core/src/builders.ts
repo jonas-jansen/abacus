@@ -70,8 +70,6 @@ export interface IterationConfig<D extends ParamDefs> extends Common<D> {
   seed?: Resolvable<number, ParamsOf<D>>
   /** Id, label (TeX) and role of the orbit series. Default `{ id: 'x', label: 'x_n' }`. */
   series?: Partial<Component>
-  /** Time per step on the x axis, e.g. 2 for a 48-hour cycle drawn in days. Default 1 (x = n). */
-  stepLength?: number
   /** Additional series, e.g. the graph of f for a cobweb. */
   extraSeries?: (ctx: IterationContext<ParamsOf<D>>) => Series[]
   /** Values over two axes, e.g. cells × steps for a heat map or a bar plot per cell. */
@@ -113,7 +111,7 @@ export function iteration<const D extends ParamDefs>(cfg: IterationConfig<D>): M
         label: s.label ?? 'x_n',
         name: s.name,
         kind: 'discrete',
-        x: cfg.stepLength ? n.map((k) => k * cfg.stepLength!) : n,
+        x: n,
         y: x,
         role: s.role ?? 'primary',
       }

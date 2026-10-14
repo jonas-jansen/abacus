@@ -228,13 +228,20 @@ export function Figure<P extends Params>({
   const autoAxes = useSetting('achsen') !== 'aus'
   const [refit, setRefit] = useState(0)
   const heldKey = `${viewEpoch ?? 0}|${logY}|${refit}|${spec.type}|${equal}`
+  // following the timeline: fitted to the sequence up to the current step (at least `follow` steps)
+  const follow = entry.followTimeline
+  const upTo = follow === undefined ? undefined : Math.max(follow, view.steps ?? Infinity)
   const full = useMemo(() => {
-    const fit = plotDomains(spec, run)
+    const fitRun =
+      upTo === undefined
+        ? run
+        : { ...run, series: run.series.filter((s) => s.kind === 'discrete').map((s) => ({ ...s, x: s.x.subarray(0, upTo + 1), y: s.y.subarray(0, upTo + 1) })) }
+    const fit = plotDomains(spec, fitRun)
     const h = held.current
     if (h.key !== heldKey) Object.assign(h, { key: heldKey, x: null, y: null })
     const auto = (v: unknown) => v === undefined || v === 'auto'
     const log = spec.yScale === 'log'
-    const holdY = auto(entry.y) && spec.type !== 'heatmap' && spec.type !== 'surface3d'
+    const holdY = auto(entry.y) && spec.type !== 'heatmap' && spec.type !== 'surface3d' && follow === undefined
     const holdX = auto(entry.x) && (spec.type === 'phasePlane' || spec.type === 'cobweb')
     const y = holdY ? holdRange(h.y, fit.y, { log, grow: autoAxes }) : fit.y
     const x = holdX ? holdRange(h.x, fit.x, { grow: autoAxes }) : fit.x
@@ -264,7 +271,7 @@ export function Figure<P extends Params>({
     const span = (d.x[1] - d.x[0]) * k
     const wide: [number, number] = d.x[0] === 0 ? [0, span] : [(d.x[0] + d.x[1]) / 2 - span / 2, (d.x[0] + d.x[1]) / 2 + span / 2]
     return { ...d, x: wide }
-  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y, autoAxes, equal])
+  }, [spec, run, square, figW, figH, heldKey, entry.x, entry.y, autoAxes, equal, upTo])
   const magnification = (z: Win) => magnificationOf(full, z, spec.yScale === 'log')
   const detailWanted = useMemo((): Detail | null => {
     if (!settled) return null

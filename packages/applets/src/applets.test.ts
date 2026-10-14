@@ -324,16 +324,16 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(observe('alcohol', { D0: 0.15 }).ueber.value).toBe(0)
   })
 
-  it('malaria: ×8 per 48 hours from 10⁵ parasites, visible on day 8, fever on day 10; treatment clears them', () => {
+  it('malaria (lecture slide): x₀ = 1, ×8 per day; visible on day 9, fever on day 10; treatment clears them', () => {
     const none = szenario('malaria', 'ohne Behandlung')
-    expect([none.nachweisbar.value, none.fieber.value, none.lebensbedrohlich.value]).toEqual([8, 10, 14])
+    expect([none.nachweisbar.value, none.fieber.value, none.lebensbedrohlich.value]).toEqual([9, 10, null])
     const treated = szenario('malaria', 'Behandlung bei Fieber')
     expect(treated.lebensbedrohlich.value).toBeNull()
-    expect(treated.verschwunden.value).toBe(16)
-    expect(szenario('malaria', 'zu späte Behandlung').verschwunden.value).toBe(20)
-    // ten times as many at the start: one cycle earlier (log₈ 10 ≈ 1.1)
-    expect(szenario('malaria', 'mehr Stiche').fieber.value).toBe(8)
-    expect(szenario('malaria', 'teilweise immun').fieber.value).toBe(28)
+    expect(treated.verschwunden.value).toBe(15)
+    expect(szenario('malaria', 'zu späte Behandlung').lebensbedrohlich.value).toBe(13)
+    // ten times as many at the start: one day earlier (log₈ 10 ≈ 1.1)
+    expect(szenario('malaria', 'mehr Stiche').fieber.value).toBe(9)
+    expect(szenario('malaria', 'teilweise immun').fieber.value).toBe(30)
   })
 
   it('Luo–Rudy (1991): an action potential of about 0.37 s; threshold, refractoriness, shorter at a fast rhythm, afterdepolarisations', () => {

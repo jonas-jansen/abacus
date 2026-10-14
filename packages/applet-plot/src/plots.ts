@@ -22,6 +22,13 @@ interface PlotCommon {
   yScale?: 'linear' | 'log'
   /** Offer a switch between linear and logarithmic y axis (with an explanation). */
   logToggle?: boolean
+  /**
+   * The axes follow the timeline: they fit the sequence up to the current step, but show at
+   * least this many steps. Levels and references (continuous series) do not stretch them.
+   * For fast growth on a linear axis: the first steps fill the picture, each later one
+   * squashes those before it.
+   */
+  followTimeline?: number
   /** Why a log scale helps in this plot, added to the general explanation. */
   logHilfe?: string
   /** y range on the log scale (default: from the data). */
