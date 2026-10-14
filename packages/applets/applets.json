@@ -2,6 +2,14 @@
   "note": "All applets, one entry each. \"visible\": false takes an applet out of the overview; its address /applet/<id> keeps working (to share). The order here is the order in the overview (within a chapter). chapter: I, II, III, IV or Appendix.",
   "applets": [
     {
+      "id": "malaria",
+      "visible": true,
+      "chapter": "I",
+      "slides": "",
+      "title": "Malaria im Blut",
+      "summary": "In jedem Zyklus entwickelt Malaria achtmal so viele Parasiten. Wie schnell wird man krank?"
+    },
+    {
       "id": "arithmetic",
       "visible": true,
       "chapter": "I",
@@ -256,14 +264,6 @@
       "slides": "29–32",
       "title": "Aktionspotential: Schrittmacher und Muskelzelle",
       "summary": "Ein System aus vier Differentialgleichungen, das von selbst schwingt oder im Takt eines Reizes."
-    },
-    {
-      "id": "malaria",
-      "visible": true,
-      "chapter": "0",
-      "slides": "",
-      "title": "Malaria im Blut",
-      "summary": "Alle zwei Tage achtmal so viele Parasiten. Wann wird man krank, und was ändert ein Medikament?"
     },
     {
       "id": "alcohol",

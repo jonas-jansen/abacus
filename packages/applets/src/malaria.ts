@@ -102,13 +102,19 @@ export default defineApplet({
       guides: (_p, { step, run }) => {
         const x = run.series.find((s) => s.id === 'x')?.y
         if (!x) return []
+        const arrow = (n: number) => {
+          if (n < 1 || !(x[n - 1] > 0) || !(x[n] > 0)) return []
+          const f = x[n] / x[n - 1]
+          const factor = f >= 1 ? String(Math.round(f * 100) / 100) : String.raw`\tfrac{1}{${Math.round(1 / f)}}`
+          return [{ kind: 'factor' as const, from: [n - 1, x[n - 1]] as const, to: [n, x[n]] as const, label: String.raw`\cdot ${factor}` }]
+        }
         let n = Math.min(step, x.length - 1)
-        // once the parasites are gone (0): the step where the treatment began, the big drop
-        if (n >= 1 && !(x[n] > 0)) n = x.findIndex((v, k) => k >= 1 && v < x[k - 1])
-        if (n < 1 || !(x[n - 1] > 0) || !(x[n] > 0)) return []
-        const f = x[n] / x[n - 1]
-        const factor = f >= 1 ? String(Math.round(f * 100) / 100) : String.raw`\tfrac{1}{${Math.round(1 / f)}}`
-        return [{ kind: 'factor', from: [n - 1, x[n - 1]], to: [n, x[n]], label: String.raw`\cdot ${factor}` }]
+        // the day the treatment began: the first drop
+        const drop = x.findIndex((v, k) => k >= 1 && v < x[k - 1])
+        // once the parasites are gone (0): that drop, the change that matters
+        if (n >= 1 && !(x[n] > 0)) n = drop
+        // after the turn, the last day of growth (· 8 into the peak) stays in view too
+        return drop > 1 && n >= drop ? [...arrow(drop - 1), ...arrow(n)] : arrow(n)
       },
       logToggle: true,
       logHilfe: 'Auf dieser Achse wird aus dem Wachstum eine Gerade, denn jeder Tag multipliziert mit demselben Faktor.',

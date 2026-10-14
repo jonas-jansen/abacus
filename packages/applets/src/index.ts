@@ -55,10 +55,10 @@ import luoRudy from './luo-rudy'
 const modules: AppletModule<any>[] = [
   // @new-applet:entries
   // 0 Einführung
-  malaria,
   alcohol,
   luoRudy,
   // 1 sequences and recursions
+  malaria,
   arithmetic,
   geometric,
   heron,

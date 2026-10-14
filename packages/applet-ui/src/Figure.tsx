@@ -598,6 +598,14 @@ export function Figure<P extends Params>({
         out.push({ id: `g${i}`, param: g.param, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, plain: !v, x: lx, y: Math.min(plot.y + plot.h - 14, Math.max(plot.y + 12, mid[1] + ny * 4)), side: left ? 'left' : 'right' }] })
       }
     })
+    // two guides meeting at one point (the peak): a label that would cover an earlier one
+    // moves down a line
+    const placed: { x: number; y: number }[] = []
+    for (const g of out)
+      for (const l of g.labels) {
+        while (placed.some((q) => Math.abs(q.x - l.x) < 64 && Math.abs(q.y - l.y) < 24)) l.y += 24
+        placed.push({ x: l.x, y: l.y })
+      }
     return out
   })()
 
