@@ -101,10 +101,14 @@ export default defineApplet({
       // the step just taken: from yesterday's count to today's, with its factor
       guides: (_p, { step, run }) => {
         const x = run.series.find((s) => s.id === 'x')?.y
-        if (!x || step < 1 || !(x[step - 1] > 0) || !(x[step] > 0)) return []
-        const f = x[step] / x[step - 1]
+        if (!x) return []
+        let n = Math.min(step, x.length - 1)
+        // once the parasites are gone (0): the step where the treatment began, the big drop
+        if (n >= 1 && !(x[n] > 0)) n = x.findIndex((v, k) => k >= 1 && v < x[k - 1])
+        if (n < 1 || !(x[n - 1] > 0) || !(x[n] > 0)) return []
+        const f = x[n] / x[n - 1]
         const factor = f >= 1 ? String(Math.round(f * 100) / 100) : String.raw`\tfrac{1}{${Math.round(1 / f)}}`
-        return [{ kind: 'factor', from: [step - 1, x[step - 1]], to: [step, x[step]], label: String.raw`\cdot ${factor}` }]
+        return [{ kind: 'factor', from: [n - 1, x[n - 1]], to: [n, x[n]], label: String.raw`\cdot ${factor}` }]
       },
       logToggle: true,
       logHilfe: 'Auf dieser Achse wird aus dem Wachstum eine Gerade, denn jeder Tag multipliziert mit demselben Faktor.',
