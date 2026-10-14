@@ -720,6 +720,11 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
     case 'timeSeriesDiscrete':
       for (const series of shown(run, spec.series, view)) {
         s.fade(dim(series, view))
+        // a level or reference among the sequences: a whole line, not dots
+        if (series.kind === 'continuous') {
+          drawLine(s, frame, series)
+          continue
+        }
         const count = visible(series, view)
         drawDiscrete(s, frame, series, count, (view.connect ?? true) && (spec.connect ?? series.connect ?? true))
         if (timed(view) && series.kind === 'discrete' && count <= frame.plot.w) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)

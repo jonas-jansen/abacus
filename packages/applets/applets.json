@@ -258,6 +258,14 @@
       "summary": "Ein System aus vier Differentialgleichungen, das von selbst schwingt oder im Takt eines Reizes."
     },
     {
+      "id": "malaria",
+      "visible": true,
+      "chapter": "0",
+      "slides": "",
+      "title": "Malaria im Blut",
+      "summary": "Alle zwei Tage achtmal so viele Parasiten. Wann wird man krank, und was ändert ein Medikament?"
+    },
+    {
       "id": "alcohol",
       "visible": true,
       "chapter": "0",

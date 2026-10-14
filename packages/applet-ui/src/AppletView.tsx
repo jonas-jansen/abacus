@@ -121,7 +121,8 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
   const iterative = def.model.kind === 'iteration' || run?.series[0]?.kind === 'discrete'
   const timeline = def.timeline ?? def.model.kind !== 'closedForm'
   const clock = run?.series.find((s) => s.kind === (iterative ? 'discrete' : 'continuous'))
-  const [tMin, tMax] = clock?.x.length ? [clock.x[0], clock.x[clock.x.length - 1]] : [0, 0]
+  // a sequence's timeline counts its steps n = 0 … N, also when they are drawn in days
+  const [tMin, tMax] = !clock?.x.length ? [0, 0] : iterative ? [0, clock.x.length - 1] : [clock.x[0], clock.x[clock.x.length - 1]]
   const [cursor, setCursor] = useState<number | undefined>(def.stepwise ? 0 : undefined)
   useEffect(installTips, [])
   useEffect(() => {

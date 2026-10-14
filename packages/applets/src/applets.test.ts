@@ -324,6 +324,18 @@ describe('answer key of the new applets (values from the slides)', () => {
     expect(observe('alcohol', { D0: 0.15 }).ueber.value).toBe(0)
   })
 
+  it('malaria: ×8 per 48 hours from 10⁵ parasites, visible on day 8, fever on day 10; treatment clears them', () => {
+    const none = szenario('malaria', 'ohne Behandlung')
+    expect([none.nachweisbar.value, none.fieber.value, none.lebensbedrohlich.value]).toEqual([8, 10, 14])
+    const treated = szenario('malaria', 'Behandlung bei Fieber')
+    expect(treated.lebensbedrohlich.value).toBeNull()
+    expect(treated.verschwunden.value).toBe(16)
+    expect(szenario('malaria', 'zu späte Behandlung').verschwunden.value).toBe(20)
+    // ten times as many at the start: one cycle earlier (log₈ 10 ≈ 1.1)
+    expect(szenario('malaria', 'mehr Stiche').fieber.value).toBe(8)
+    expect(szenario('malaria', 'teilweise immun').fieber.value).toBe(28)
+  })
+
   it('Luo–Rudy (1991): an action potential of about 0.37 s; threshold, refractoriness, shorter at a fast rhythm, afterdepolarisations', () => {
     const one = szenario('luo-rudy', 'ein Herzschlag')
     expect(one.antwort.value).toBe('jeder Reiz löst aus')

@@ -49,11 +49,13 @@ import logIvp from './log-ivp'
 import logisticVergleich from './logistic-vergleich'
 import logisticCobweb from './logistic-cobweb'
 import alcohol from './alcohol'
+import malaria from './malaria'
 import luoRudy from './luo-rudy'
 
 const modules: AppletModule<any>[] = [
   // @new-applet:entries
   // 0 Einführung
+  malaria,
   alcohol,
   luoRudy,
   // 1 sequences and recursions
