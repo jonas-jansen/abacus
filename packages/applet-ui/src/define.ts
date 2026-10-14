@@ -4,7 +4,7 @@
  * part of it: they are quizzes (`@abacus/quiz`), reusable on their own.
  */
 
-import type { Model, Params, RunOptions } from '@abacus/applet-core'
+import type { Model, Params, Run, RunOptions } from '@abacus/applet-core'
 import type { Domain, PlotSpec } from '@abacus/applet-plot'
 import type { Formula } from './formula'
 
@@ -49,9 +49,11 @@ export type PlotEntry<P> = DistributiveOmit<PlotSpec, 'x' | 'y'> & {
   drag?: DragHandle<P> | readonly DragHandle<P>[]
   /**
    * Where a parameter acts, drawn in the plot – so a handle can be named by the point it
-   * sits on (x₁, x_N) while the parameter it changes is shown honestly beside it.
+   * sits on (x₁, x_N) while the parameter it changes is shown honestly beside it. `at` gives
+   * the timeline's current step and the computed run, for a guide that moves with the time
+   * (the step just taken).
    */
-  guides?: (p: P) => readonly Guide[]
+  guides?: (p: P, at: { step: number; run: Run }) => readonly Guide[]
 }
 
 /**

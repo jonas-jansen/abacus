@@ -551,13 +551,15 @@ export function Figure<P extends Params>({
   // Guides: where a parameter acts (a slope triangle for an increment, an arrow for a factor),
   // in figure pixels; left out when their points are out of view.
   type GuideGeom = { id: string; param?: string; d: string; fill?: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above'; plain?: boolean }[] }
+  // where the timeline stands, for guides that move with it (the step just taken)
+  const guideAt = { step: view.steps ?? Math.max(0, (run.series[0]?.x.length ?? 1) - 1), run }
   const guideGeom: GuideGeom[] = (() => {
     if (!entry.guides || spec.type === 'surface3d') return []
     const P = (v: readonly [number, number]): [number, number] => [plot.x + frame.xScale(v[0]), plot.y + frame.yScale(v[1])]
     const inView = (q: [number, number]) => Number.isFinite(q[0]) && Number.isFinite(q[1]) && q[0] >= plot.x - 1 && q[0] <= plot.x + plot.w + 1 && q[1] >= plot.y - 1 && q[1] <= plot.y + plot.h + 1
     const out: GuideGeom[] = []
     const valueOf = (id: string | undefined) => (id !== undefined && typeof params[id] === 'number' ? texNumber(params[id] as number, 3) : null)
-    entry.guides(params).forEach((g, i) => {
+    entry.guides(params, guideAt).forEach((g, i) => {
       const v = valueOf(g.param)
       const [a, c] = [P(g.from), P(g.to)]
       if (!inView(a) || !inView(c)) return
@@ -577,7 +579,7 @@ export function Figure<P extends Params>({
         if (nx < 0 || (Math.abs(nx) < 1e-6 && ny > 0)) [nx, ny] = [-nx, -ny]
         const bend = Math.min(60, 0.35 * len + 10)
         // …but never out of the plot (a step along the bottom edge bulges up)
-        const outside = (n: number, m: number) => { const y = (a[1] + c[1]) / 2 + m * bend, x = (a[0] + c[0]) / 2 + n * bend; return y > plot.y + plot.h || y < plot.y || x < plot.x }
+        const outside = (n: number, m: number) => { const y = (a[1] + c[1]) / 2 + m * bend, x = (a[0] + c[0]) / 2 + n * bend; return y > plot.y + plot.h || y < plot.y || x < plot.x || x > plot.x + plot.w }
         if (outside(nx, ny) && !outside(-nx, -ny)) [nx, ny] = [-nx, -ny]
         const k: [number, number] = [(a[0] + c[0]) / 2 + nx * bend, (a[1] + c[1]) / 2 + ny * bend]
         // the arrowhead along the curve's end tangent, stopping short of the point's dot
@@ -587,9 +589,13 @@ export function Figure<P extends Params>({
         const tip: [number, number] = [c[0] - ux * 7, c[1] - uy * 7]
         const head = `M${tip[0] - ux * 7 - uy * 4} ${tip[1] - uy * 7 + ux * 4}L${tip[0]} ${tip[1]}L${tip[0] - ux * 7 + uy * 4} ${tip[1] - uy * 7 - ux * 4}`
         const mid: [number, number] = [0.25 * a[0] + 0.5 * k[0] + 0.25 * tip[0], 0.25 * a[1] + 0.5 * k[1] + 0.25 * tip[1]]
-        // beside the arrow ("·a = 0.8"); for a short one, clear of the handles' own labels (right of the points)
+        // beside the arrow on the side it bulges to ("·a = 0.8"); for a short one, clear of the
+        // handles' own labels (right of the points)
         const tex = v ? `${g.label} = ${v}` : g.label
-        out.push({ id: `g${i}`, param: g.param, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, plain: !v, x: len < 90 ? Math.max(mid[0] + nx * 4, Math.max(a[0], c[0]) + 48) : mid[0] + nx * 4, y: Math.min(plot.y + plot.h - 14, Math.max(plot.y + 12, mid[1] + ny * 4)), side: 'right' }] })
+        // left of the arrow when it bulges left, or when the right would leave the plot
+        const left = nx < 0 || mid[0] + nx * 4 > plot.x + plot.w - 70
+        const lx = len < 90 ? (left ? Math.min(mid[0] + nx * 4, Math.min(a[0], c[0]) - 48) : Math.max(mid[0] + nx * 4, Math.max(a[0], c[0]) + 48)) : mid[0] + nx * 4
+        out.push({ id: `g${i}`, param: g.param, d: `M${a[0]} ${a[1]}Q${k[0]} ${k[1]} ${tip[0]} ${tip[1]}`, head, labels: [{ tex, plain: !v, x: lx, y: Math.min(plot.y + plot.h - 14, Math.max(plot.y + 12, mid[1] + ny * 4)), side: left ? 'left' : 'right' }] })
       }
     })
     return out
@@ -604,7 +610,7 @@ export function Figure<P extends Params>({
   // that sits at its own value (x₀) – its label reads "x₀ = 23". Only handles that change
   // several parameters, or a derived one without a guide, still get the tooltip.
   const h0 = active ? handles[active.i] : undefined
-  const shownByGuide = !!h0 && !h0.also?.length && (entry.guides?.(params) ?? []).some((g) => g.param === h0.param)
+  const shownByGuide = !!h0 && !h0.also?.length && (entry.guides?.(params, guideAt) ?? []).some((g) => g.param === h0.param)
   const ownValue = !!h0 && !h0.at && !h0.also?.length && typeof params[h0.param] === 'number'
   const handleTip = !!active && !!at && !shownByGuide && !(ownValue && active.state === 'drag')
   if (active && at && handleTip) {

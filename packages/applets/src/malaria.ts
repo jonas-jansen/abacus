@@ -11,7 +11,8 @@
 // here; fewer than one parasite counts as cleared.
 //
 // The axes follow the timeline (as in the MATLAB app): the first four days fill the picture,
-// then the axes grow with the sequence, so each new day squashes the ones before it.
+// then the axes grow with the sequence, so each new day squashes the ones before it. An arrow
+// shows the step just taken, as in the geometric progression: "· 8" from yesterday to today.
 
 import { choice, iteration, quantity, real, steps, type Series } from '@abacus/applet-core'
 import { defineApplet } from '@abacus/applet-ui/define'
@@ -97,6 +98,14 @@ export default defineApplet({
       xLabel: 'n \\text{ (Tage)}',
       yLabel: 'x_n',
       followTimeline: 4,
+      // the step just taken: from yesterday's count to today's, with its factor
+      guides: (_p, { step, run }) => {
+        const x = run.series.find((s) => s.id === 'x')?.y
+        if (!x || step < 1 || !(x[step - 1] > 0) || !(x[step] > 0)) return []
+        const f = x[step] / x[step - 1]
+        const factor = f >= 1 ? String(Math.round(f * 100) / 100) : String.raw`\tfrac{1}{${Math.round(1 / f)}}`
+        return [{ kind: 'factor', from: [step - 1, x[step - 1]], to: [step, x[step]], label: String.raw`\cdot ${factor}` }]
+      },
       logToggle: true,
       logHilfe: 'Auf dieser Achse wird aus dem Wachstum eine Gerade, denn jeder Tag multipliziert mit demselben Faktor.',
     },
