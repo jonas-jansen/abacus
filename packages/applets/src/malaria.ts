@@ -6,7 +6,7 @@
 // Reference levels for the whole body (about 5 L of blood, 2.5·10¹³ red blood cells):
 //   10⁸    seen under the microscope (about 20 per µL)
 //   10⁹    fever in people without immunity
-//   10¹¹   life-threatening: a few percent of the red blood cells infected
+//   5·10¹¹ life-threatening (severe malaria): about 2 % of the red blood cells infected
 // An artemisinin drug cuts the number about 10 000-fold per 48 hours, so about 100-fold a day
 // here; fewer than one parasite counts as cleared.
 //
@@ -20,7 +20,7 @@ import { defineApplet } from '@abacus/applet-ui/define'
 type Treat = 'none' | 'fever' | 'late'
 type P = { x0: number; a: number; treat: Treat; N: number }
 
-const LEVELS = { nachweisbar: 1e8, fieber: 1e9, lebensbedrohlich: 1e11 }
+const LEVELS = { nachweisbar: 1e8, fieber: 1e9, lebensbedrohlich: 5e11 }
 /** The drug's factor per day. */
 const DRUG = 1e-2
 
@@ -68,11 +68,11 @@ const model = iteration({
     const peak = x.indexOf(top)
     const gone = x.findIndex((v, n) => n > peak && v === 0)
     const mark = (d: number | null) => (d === null ? [] : [{ kind: 'time' as const, t: d }])
-    const at = (level: number, what: string) => quantity(`${what} ab Tag`, day(level), { digits: 3, note: 'nicht erreicht', marks: mark(day(level)) })
+    const at = (level: number, what: string, info: string) => quantity(`${what} ab Tag`, day(level), { digits: 3, note: 'nicht erreicht', info, marks: mark(day(level)) })
     return {
-      nachweisbar: at(LEVELS.nachweisbar, 'nachweisbar'),
-      fieber: at(LEVELS.fieber, 'Fieber'),
-      lebensbedrohlich: at(LEVELS.lebensbedrohlich, 'lebensbedrohlich'),
+      nachweisbar: at(LEVELS.nachweisbar, 'nachweisbar', 'Der erste Tag, an dem man die Parasiten unter dem Mikroskop findet. Dafür braucht es etwa 100 Millionen im ganzen Blut, gut 20 in einem Mikroliter.'),
+      fieber: at(LEVELS.fieber, 'Fieber', 'Der erste Tag mit Fieber. Bei Menschen ohne Immunität beginnt es bei etwa einer Milliarde Parasiten im Blut.'),
+      lebensbedrohlich: at(LEVELS.lebensbedrohlich, 'lebensbedrohlich', 'Der erste Tag, an dem die Krankheit lebensbedrohlich wird: bei etwa 500 Milliarden Parasiten, wenn ungefähr jedes fünfzigste rote Blutkörperchen befallen ist.'),
       verschwunden: quantity('Parasiten verschwunden ab Tag', gone < 0 ? null : gone, {
         digits: 3,
         note: 'nicht im Zeitfenster',
@@ -106,7 +106,7 @@ export default defineApplet({
           if (n < 1 || !(x[n - 1] > 0) || !(x[n] > 0)) return []
           const f = x[n] / x[n - 1]
           const factor = f >= 1 ? String(Math.round(f * 100) / 100) : String.raw`\tfrac{1}{${Math.round(1 / f)}}`
-          return [{ kind: 'factor' as const, from: [n - 1, x[n - 1]] as const, to: [n, x[n]] as const, label: String.raw`\cdot ${factor}` }]
+          return [{ kind: 'factor' as const, from: [n - 1, x[n - 1]] as const, to: [n, x[n]] as const, label: String.raw`\cdot ${factor}`, above: true }]
         }
         let n = Math.min(step, x.length - 1)
         // the day the treatment began: the first drop

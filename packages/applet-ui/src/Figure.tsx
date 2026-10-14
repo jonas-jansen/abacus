@@ -574,13 +574,14 @@ export function Figure<P extends Params>({
         const [dx, dy] = [c[0] - a[0], c[1] - a[1]]
         const len = Math.hypot(dx, dy)
         if (len < 6) return
-        // bulge to the right (or up, when the step is flat), away from the y axis numbers
+        // bulge to the right (or up, when the step is flat), away from the y axis numbers; or,
+        // with `above`, always upward, over the graph
         let [nx, ny] = [-dy / len, dx / len]
-        if (nx < 0 || (Math.abs(nx) < 1e-6 && ny > 0)) [nx, ny] = [-nx, -ny]
+        if (g.above ? ny > 0 : nx < 0 || (Math.abs(nx) < 1e-6 && ny > 0)) [nx, ny] = [-nx, -ny]
         const bend = Math.min(60, 0.35 * len + 10)
         // …but never out of the plot (a step along the bottom edge bulges up)
         const outside = (n: number, m: number) => { const y = (a[1] + c[1]) / 2 + m * bend, x = (a[0] + c[0]) / 2 + n * bend; return y > plot.y + plot.h || y < plot.y || x < plot.x || x > plot.x + plot.w }
-        if (outside(nx, ny) && !outside(-nx, -ny)) [nx, ny] = [-nx, -ny]
+        if (!g.above && outside(nx, ny) && !outside(-nx, -ny)) [nx, ny] = [-nx, -ny]
         const k: [number, number] = [(a[0] + c[0]) / 2 + nx * bend, (a[1] + c[1]) / 2 + ny * bend]
         // the arrowhead along the curve's end tangent, stopping short of the point's dot
         const [tx, ty] = [c[0] - k[0], c[1] - k[1]]

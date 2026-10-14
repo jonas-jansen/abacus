@@ -65,7 +65,8 @@ export type PlotEntry<P> = DistributiveOmit<PlotSpec, 'x' | 'y'> & {
  */
 export type Guide = (
   | { kind: 'rise'; from: readonly [number, number]; to: readonly [number, number]; label: string; run?: string }
-  | { kind: 'factor'; from: readonly [number, number]; to: readonly [number, number]; label: string }
+  /** `above`: the arrow always bulges upward, over the graph (default: to the right, away from the y axis). */
+  | { kind: 'factor'; from: readonly [number, number]; to: readonly [number, number]; label: string; above?: boolean }
 ) & {
   /** The parameter the guide shows: its value is written beside it ("b = 1.5"), and the handle that changes it needs no tooltip. */
   param?: string
