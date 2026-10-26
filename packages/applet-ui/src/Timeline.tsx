@@ -221,7 +221,8 @@ export function Timeline({
         step={continuous ? 'any' : 1}
         value={k}
         disabled={empty}
-        style={{ '--fill': span ? (k - min) / span : 1 } as CSSProperties}
+        // a string, as the server writes it: a number would not match on hydration
+        style={{ '--fill': String(span ? (k - min) / span : 1) } as CSSProperties}
         onChange={(e) => step(+e.target.value)}
         aria-label={continuous ? 'Zeit t' : 'Schritt n'}
         aria-valuetext={`${sym} = ${show(k)} von ${show(max)}`}

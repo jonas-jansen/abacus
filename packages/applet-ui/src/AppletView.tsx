@@ -259,7 +259,7 @@ export function AppletView<P extends Params>({ def, initialState, startLocked = 
 
       <div className="ab-body">
         <div className="ab-stage">
-          {!def.scenariosOnly && formulas && formulas.length > 0 && (
+          {formulas && formulas.length > 0 && (
             <FormulaBar
               formulas={formulas}
               specs={all}

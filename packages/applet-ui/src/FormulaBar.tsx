@@ -237,6 +237,8 @@ export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusPa
   }
 
   const values = mode === 'zahlen'
+  // the switch only where symbols and values differ: an exercise's fixed numbers need none
+  const switchable = cells.some((c) => !c.cls.startsWith('ab-eq-title') && c.sym !== c.num)
   // the formula columns from the left, a flexible gap, the switch's column at the right edge
   const wideCols = Array.from({ length: columns }, () => 'auto auto auto').join(' var(--ab-col-gap) ') + ' minmax(var(--ab-col-gap), 1fr) auto'
   const switchCol = 4 * columns + 1
@@ -276,6 +278,8 @@ export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusPa
               </span>
             )
           })}
+          {switchable && (
+            <>
           <span className="ab-eq-title ab-values-title" style={{ '--wc': switchCol, '--wr': 1, '--nc': '1 / -1', '--nr': 1 } as CSSProperties}>
             Parameter / Werte
           </span>
@@ -296,6 +300,8 @@ export function FormulaBar({ formulas, specs, params, onChange, onHot, onFocusPa
               </span>
             </button>
           </span>
+            </>
+          )}
         </div>
       </div>
     </div>

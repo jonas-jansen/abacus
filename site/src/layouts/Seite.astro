@@ -6,14 +6,14 @@ import '../styles/thema.css'
 import { EINSTELLUNGEN, EINSTELLUNGEN_SCRIPT, FARBEN } from '@abacus/applet-ui/settings'
 import { courseUrl, platform, url } from '../config'
 import type { Course } from '../courses'
-import { withPages } from '../release'
+import { builtSheets, withPages } from '../release'
 
 interface Props {
   title: string
   summary?: string
   /** Page width: 'wide' for applet and course pages, 'medium' for quizzes, 'narrow' for text pages. */
   width?: 'wide' | 'medium' | 'narrow'
-  active?: 'start' | 'applets' | 'kurs' | 'quiz' | 'notizbuch'
+  active?: 'start' | 'applets' | 'kurs' | 'quiz' | 'uebung' | 'notizbuch'
   /** Reachable by its address, but not listed: kept out of search engines too. */
   unlisted?: boolean
   /** The course the page belongs to: its name and areas in the top bar. None on the landing page. */
@@ -51,6 +51,7 @@ const c = (path: string) => courseUrl(course!, path)
             <a href={c('/applets')} aria-current={active === 'applets' ? 'page' : undefined}>Applets</a>
             {withPages && <a href={c('/kurs')} aria-current={active === 'kurs' ? 'page' : undefined}>Kurs</a>}
             <a href={c('/quiz')} aria-current={active === 'quiz' ? 'page' : undefined}>Quizze</a>
+            {builtSheets.length > 0 && <a href={c('/uebung')} aria-current={active === 'uebung' ? 'page' : undefined}>Übungen</a>}
             <a href={c('/notizbuch')} aria-current={active === 'notizbuch' ? 'page' : undefined}>Notizbuch</a>
           </nav>
         )}

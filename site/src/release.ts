@@ -7,9 +7,10 @@
 import { applets } from '@abacus/applets'
 import { weeklyQuizzes } from '@abacus/quizzes'
 import { courses } from './courses'
+import { sheets } from './exercises'
 import releases from '../releases.json'
 
-type Profile = { courses: string[]; applets: string[]; quizzes: string[]; pages: string[] }
+type Profile = { courses: string[]; applets: string[]; quizzes: string[]; pages: string[]; exercises?: string[] }
 type Kind = keyof Profile
 
 // read at build time (Node); the site's types have no Node globals
@@ -28,7 +29,10 @@ function load(): Profile | null {
 export const release = load()
 
 /** Whether this build contains the course, applet, quiz or guided page `id`. */
-export const included = (kind: Kind, id: string): boolean => !release || release[kind].includes(id)
+export const included = (kind: Kind, id: string): boolean => !release || (release[kind] ?? []).includes(id)
+
+/** The exercise sheets this build contains ("Übungen" in the nav when there is one). */
+export const builtSheets = sheets.filter((s) => included('exercises', s.id))
 
 /** Whether this build has guided pages at all (the "Kurs" area is left out otherwise). */
 export const withPages = !release || release.pages.length > 0

@@ -130,7 +130,14 @@ export function Figure<P extends Params>({
     let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => setReady(true))))
     const el = outer.current
     if (!el) return () => cancelAnimationFrame(id)
-    const measure = () => setMaxH(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round((window.innerHeight / scaleOf(el)) * SCREEN_SHARE))))
+    // a page may instead keep room for what surrounds the plot (--ab-screen-reserve, in px), e.g.
+    // an exercise sheet: tabs, equation box and timeline on one screen with the plot
+    const reserve = () => parseFloat(getComputedStyle(el).getPropertyValue('--ab-screen-reserve'))
+    const measure = () => {
+      const screen = window.innerHeight / scaleOf(el)
+      const r = reserve()
+      setMaxH(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(r > 0 ? screen - r : screen * SCREEN_SHARE))))
+    }
     const ro = new ResizeObserver(([e]) => {
       const w = Math.round(e.contentRect.width)
       if (w > 0) setWidth(w)

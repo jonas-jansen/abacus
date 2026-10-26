@@ -91,6 +91,22 @@ and semester (`site/src/courses.ts`: `id`, `semester`; changing them orphans sto
 anywhere. A server-backed store can implement the `NotebookStore` interface
 (`packages/quiz/src/notebook.ts`), see [quizzes.md](quizzes.md#next-a-server-statistics-retakes-across-devices).
 
+## Exercise sheets
+
+One page per sheet for the exercise class: `/<course>/uebung/<id>`, a tab per part (← → switch,
+each part has its own address, e.g. `…/uebung/1#1.4`), each with its equation box and a
+scenario applet sized so that one part fits on the projector.
+
+1. The applets: `packages/applets/src/exercises/blatt<id>.ts`, one `defineApplet` per part with
+   `scenariosOnly: true`, `stepwise: true`, `formulas` (the exercise's equations, fixed numbers
+   as plain TeX) and scenarios for what the part asks ("n = 0 … 4") or a look further. They
+   are registered in `exerciseApplets` (`packages/applets/src/index.ts`), never in the gallery.
+2. The sheet: an entry in `site/src/exercises.ts` with its parts (tab, title, applet).
+3. Which build shows it: the beta always; a release profile only with `"exercises": ["1"]`
+   in `site/releases.json`.
+
+The sheets themselves (PDF) are not published by the site.
+
 ## Which applets are listed
 
 `packages/applets/applets.json` holds one entry per applet:

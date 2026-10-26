@@ -1,0 +1,24 @@
+---
+import Seite from '../../../layouts/Seite.astro'
+import { type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { builtCourses, builtSheets } from '../../../release'
+
+export function getStaticPaths() {
+  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+}
+const { course } = Astro.props as { course: Course }
+---
+<Seite course={course} title="Übungen" active="uebung" width="narrow">
+  <h1>Übungen</h1>
+  <ol class="course-list">
+    {builtSheets.map((s) => (
+      <li>
+        <a href={courseUrl(course, `/uebung/${s.id}`)}>
+          <strong>{s.title}</strong>
+          <span class="course-kurz">{s.parts.map((p) => p.tab).join(' · ')}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</Seite>

@@ -1044,3 +1044,81 @@ details.box[open] > summary::after {
 .einfuehrung {
   box-shadow: inset 3px 0 0 var(--ab-accent), 0 1px 3px rgb(16 24 40 / 0.05), 0 12px 32px -16px rgb(16 24 40 / 0.14);
 }
+
+/* ------------------------------------------------------------------ exercise sheets */
+
+/* the sheet's name and its parts as tabs, staying in view while one scrolls */
+.blatt {
+  /* one part fits on the screen: the plot gets what tabs, equation box and timeline leave */
+  --ab-screen-reserve: 480px;
+}
+.blatt-leiste {
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  margin: -8px 0 18px;
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--ab-page, var(--ab-bg)) 92%, transparent);
+  backdrop-filter: blur(6px);
+}
+.blatt-name {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.blatt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--ab-line);
+  border-radius: var(--ab-radius);
+  background: var(--ab-bg);
+}
+.blatt-tabs button {
+  min-width: 52px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--ab-radius);
+  background: none;
+  color: var(--ab-muted);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.blatt-tabs button:hover {
+  background: var(--ab-panel);
+  color: var(--ab-text);
+}
+.blatt-tabs button[aria-selected='true'] {
+  background: var(--ab-accent);
+  color: var(--ab-bg);
+}
+.blatt-tasten {
+  color: var(--ab-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+.blatt-titel {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+.blatt-nr {
+  color: var(--ab-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+@media (max-width: 640px) {
+  .blatt-tasten {
+    display: none;
+  }
+}

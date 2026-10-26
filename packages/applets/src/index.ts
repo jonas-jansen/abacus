@@ -7,6 +7,7 @@
 
 import { CHAPTERS, CHAPTER_ORDER, type AnyAppletDef, type AppletModule, type Chapter } from '@abacus/applet-ui/define'
 import catalog from '../applets.json'
+import { blatt1 } from './exercises/blatt1'
 // @new-applet:imports
 import folgenGrenzwert from './folgen-grenzwert'
 import differenzenquotient from './differenzenquotient'
@@ -153,8 +154,16 @@ export function chapters({ all = false } = {}): { id: Chapter; title: string; ap
   )
 }
 
+/**
+ * Applets of the exercise sheets (./exercises): one per part, shown on the sheet's page only,
+ * never in the gallery or the catalog.
+ */
+export const exerciseApplets: Readonly<Record<string, AnyAppletDef>> = Object.fromEntries(
+  blatt1.map((m) => [m.id, { visible: false, ...m } as AnyAppletDef]),
+)
+
 export function getApplet(id: string): AnyAppletDef {
-  const def = applets[id]
+  const def = applets[id] ?? exerciseApplets[id]
   if (!def) throw new Error(`Unknown applet "${id}". Registered: ${Object.keys(applets).join(', ')}`)
   return def
 }
