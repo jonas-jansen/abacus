@@ -102,8 +102,8 @@ scenario applet sized so that one part fits on the projector.
    as plain TeX) and scenarios for what the part asks ("n = 0 … 4") or a look further. They
    are registered in `exerciseApplets` (`packages/applets/src/index.ts`), never in the gallery.
 2. The sheet: an entry in `site/src/exercises.ts` with its parts (tab, title, applet).
-3. Which build shows it: the beta always; a release profile only with `"exercises": ["1"]`
-   in `site/releases.json`.
+3. Which build shows it: the beta on GitHub Pages always. The student version (Docker) has no
+   Übungen at all; a release profile would need `"exercises": ["1"]` in `site/releases.json`.
 
 The sheets themselves (PDF) are not published by the site.
 

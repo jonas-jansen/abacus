@@ -5,7 +5,8 @@ import { courseUrl } from '../../../config'
 import { builtCourses, builtSheets } from '../../../release'
 
 export function getStaticPaths() {
-  return builtCourses.map((course) => ({ params: { course: course.id }, props: { course } }))
+  // no sheets in this build (the student version): no Übungen page at all
+  return builtSheets.length ? builtCourses.map((course) => ({ params: { course: course.id }, props: { course } })) : []
 }
 const { course } = Astro.props as { course: Course }
 ---
