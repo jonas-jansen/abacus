@@ -164,6 +164,11 @@ h1 {
   font-weight: 500;
 }
 /* light, dark or as the system says: three equal segments */
+/* the name of a choice above its buttons, in the row's own type */
+.settings-sub {
+  margin: 10px 0 6px;
+  font-size: 0.88rem;
+}
 .settings-seg {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

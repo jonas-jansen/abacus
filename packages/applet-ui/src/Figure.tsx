@@ -7,6 +7,7 @@ import { TeX } from './TeX'
 import { cssColor, useFarbwechsel } from './cssColor'
 import { texNumber } from './formula'
 import { useSetting } from './useSetting'
+import { DICKE } from './settings'
 import { localPoint, scaleOf } from './scale'
 import { AspectSwitch, AxisSwitch, FigureActions, FigureHead, FigureLegend, legendEntries } from './FigureHead'
 import { Handle, handlePosition } from './Handle'
@@ -158,8 +159,11 @@ export function Figure<P extends Params>({
   }, [])
 
   const farbwechsel = useFarbwechsel()
-  // setting "Punkte von Folgen verbinden": off draws sequences as points only
-  const connect = useSetting('verbinden') !== 'aus'
+  // setting "Linien zwischen Punkten": solid, dashed, or points only
+  const verbinden = useSetting('verbinden')
+  const connect = verbinden === 'aus' ? false : verbinden === 'gestrichelt' ? ('dashed' as const) : true
+  // setting "Linien und Punkte": thicker for the back of the room
+  const thickness = DICKE[useSetting('dicke')] ?? 1
   const view = useMemo(() => ({ ...viewProp, connect }), [viewProp, connect])
   const [logY, setLogY] = useState(entry.yScale === 'log')
   // phase planes: free axes, or equal units on both ("1:1")
@@ -412,7 +416,7 @@ export function Figure<P extends Params>({
       ctx.clip()
       const css = getComputedStyle(cv)
       const color = (role: keyof typeof fallbackColors) => cssColor(css, colorVar(role), fallbackColors[role])
-      const surface = new CanvasSurface(ctx, color, cssColor(css, '--ab-bg', '#ffffff'))
+      const surface = new CanvasSurface(ctx, color, cssColor(css, '--ab-bg', '#ffffff'), thickness)
       if (vergleich) {
         // the held state first, faint and complete (no timeline cut), then the current one
         drawPlot(surface, frame, spec, ghost ?? vergleich.run, { hidden: view.hidden, ghost: true, connect: view.connect })
@@ -423,7 +427,7 @@ export function Figure<P extends Params>({
       ctx.restore()
     })
     return () => cancelAnimationFrame(id)
-  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel, full, screenSize])
+  }, [hydrated, frame, spec, drawn, view, vergleich, ghost, bahnen, farbwechsel, full, screenSize, thickness])
   // redraw when the canvas changes size on screen without a new layout (presentation zoom)
   useEffect(() => {
     const cv = canvas.current

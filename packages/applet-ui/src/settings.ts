@@ -9,14 +9,42 @@ export const EINSTELLUNGEN = {
   hinweise: { label: 'Hinweise beim Zeigen', standard: 'an' },
   /** the value box and crosshair that follow the pointer over a plot */
   werte: { label: 'Werte am Mauszeiger', standard: 'aus' },
-  /** a faint line between the points of a sequence (off: points only) */
-  verbinden: { label: 'Punkte von Folgen verbinden', standard: 'an' },
   /** axes that grow by themselves when a curve no longer fits; off: a button on the y axis does it */
   achsen: { label: 'Achsen automatisch anpassen', standard: 'aus' },
-} as const satisfies Record<string, { label: string; standard: 'an' | 'aus' }>
+  /** the line between the points of a sequence: solid ("an", as before), dashed, or points only */
+  verbinden: {
+    label: 'Linien zwischen Punkten',
+    standard: 'an',
+    werte: [
+      { wert: 'an', label: 'durchgezogen' },
+      { wert: 'gestrichelt', label: 'gestrichelt' },
+      { wert: 'aus', label: 'aus' },
+    ],
+  },
+  /** thicker lines and larger points, e.g. for a projector at the back of the room */
+  dicke: {
+    label: 'Linien und Punkte',
+    standard: 'normal',
+    werte: [
+      { wert: 'normal', label: 'normal' },
+      { wert: 'dick', label: 'dick' },
+      { wert: 'sehr-dick', label: 'sehr dick' },
+    ],
+  },
+} as const satisfies Record<string, { label: string; standard: string; werte?: readonly { wert: string; label: string }[] }>
 
 export type Einstellung = keyof typeof EINSTELLUNGEN
-export type Wert = 'an' | 'aus'
+/** 'an' | 'aus' for a switch; one of its `werte` for a choice. */
+export type Wert = string
+
+/** The values a setting can take. */
+const werteOf = (name: Einstellung): readonly string[] => {
+  const e = EINSTELLUNGEN[name] as { werte?: readonly { wert: string }[] }
+  return e.werte ? e.werte.map((w) => w.wert) : ['an', 'aus']
+}
+
+/** How much thicker lines and points are drawn for the setting "Linien und Punkte". */
+export const DICKE: Record<string, number> = { normal: 1, dick: 1.6, 'sehr-dick': 2.3 }
 
 const KEY = 'abacus:einstellungen'
 
@@ -32,8 +60,9 @@ function read(): Partial<Record<Einstellung, Wert>> {
 export function einstellung(name: Einstellung): Wert {
   if (typeof document === 'undefined') return EINSTELLUNGEN[name].standard
   const attr = document.documentElement.dataset[name]
-  if (attr === 'an' || attr === 'aus') return attr
-  return read()[name] ?? EINSTELLUNGEN[name].standard
+  if (attr !== undefined && werteOf(name).includes(attr)) return attr
+  const stored = read()[name]
+  return stored !== undefined && werteOf(name).includes(stored) ? stored : EINSTELLUNGEN[name].standard
 }
 
 export function setEinstellung(name: Einstellung, wert: Wert): void {

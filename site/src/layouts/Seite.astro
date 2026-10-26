@@ -77,11 +77,21 @@ const c = (path: string) => courseUrl(course!, path)
             ))}
           </div>
           <div class="settings-title">Anzeige</div>
-          {Object.entries(EINSTELLUNGEN).map(([name, e]) => (
+          {Object.entries(EINSTELLUNGEN).filter(([, e]) => !('werte' in e)).map(([name, e]) => (
             <label class="settings-row">
               <span class="settings-label">{e.label}</span>
               <input type="checkbox" role="switch" data-einstellung={name} checked />
             </label>
+          ))}
+          {Object.entries(EINSTELLUNGEN).flatMap(([name, e]) => ('werte' in e ? [{ name, e }] : [])).map(({ name, e }) => (
+            <>
+              <div class="settings-sub">{e.label}</div>
+              <div class="settings-seg" role="radiogroup" aria-label={e.label}>
+                {e.werte.map((w) => (
+                  <button type="button" role="radio" data-wahl={name} data-wert={w.wert} aria-checked={w.wert === e.standard ? 'true' : 'false'}>{w.label}</button>
+                ))}
+              </div>
+            </>
           ))}
         </div>
       </div>
@@ -97,6 +107,16 @@ const c = (path: string) => courseUrl(course!, path)
         const name = box.dataset.einstellung as Einstellung
         box.checked = einstellung(name) !== 'aus'
         box.addEventListener('change', () => setEinstellung(name, box.checked ? 'an' : 'aus'))
+      }
+      // choices of several values (lines between points, thickness): one button each
+      const wahl = document.querySelectorAll<HTMLButtonElement>('button[data-wahl]')
+      const zeigeWahl = () => wahl.forEach((b) => b.setAttribute('aria-checked', String(einstellung(b.dataset.wahl as Einstellung) === b.dataset.wert)))
+      zeigeWahl()
+      for (const b of wahl) {
+        b.addEventListener('click', () => {
+          setEinstellung(b.dataset.wahl as Einstellung, b.dataset.wert!)
+          zeigeWahl()
+        })
       }
       const knoepfe = document.querySelectorAll<HTMLButtonElement>('button[data-farbe]')
       const zeige = (f: Farbe) => knoepfe.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.farbe === f)))

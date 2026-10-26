@@ -113,6 +113,8 @@ export class CanvasSurface implements Surface {
     private readonly color: (role: SeriesRole) => string,
     /** The page colour behind the plot: where a raster starts. */
     private readonly background = '#ffffff',
+    /** Lines this many times wider, points a little larger (a setting, for the back of the room). */
+    private readonly thickness = 1,
   ) {}
 
   /** Colours as [r, g, b], parsed once through a 1×1 canvas (any CSS colour works). */
@@ -182,10 +184,12 @@ export class CanvasSurface implements Surface {
     ctx.globalAlpha = style.alpha * this.factor
     ctx.strokeStyle = col
     ctx.fillStyle = col
-    ctx.lineWidth = style.width
+    const k = this.thickness
+    ctx.lineWidth = style.width * k
     ctx.lineJoin = 'round'
     ctx.lineCap = 'round'
-    ctx.setLineDash(style.dash as number[])
+    // dashes grow with the line, or a thick dashed line would turn solid
+    ctx.setLineDash(k === 1 ? (style.dash as number[]) : style.dash.map((d) => d * k))
     ctx.stroke()
     if (this.polys.length) {
       ctx.beginPath()
@@ -208,7 +212,8 @@ export class CanvasSurface implements Surface {
       }
       for (let i = 0; i < this.dots.length; i += 3) {
         const x = this.dots[i], y = this.dots[i + 1]
-        if (Math.abs(x) < LIMIT && Math.abs(y) < LIMIT) markerPath(sink, style.marker, x, y, this.dots[i + 2])
+        // points grow less than lines, so neighbours don't merge
+        if (Math.abs(x) < LIMIT && Math.abs(y) < LIMIT) markerPath(sink, style.marker, x, y, this.dots[i + 2] * (1 + 0.6 * (k - 1)))
       }
       ctx.fill()
     }

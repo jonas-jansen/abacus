@@ -90,8 +90,8 @@ export interface PlotView {
   focus?: string | null
   /** Drawing a held comparison: no fields or other background, only the data. */
   ghost?: boolean
-  /** Connect the points of sequences with a faint line (page setting; default true). */
-  connect?: boolean
+  /** Connect the points of sequences with a faint line, solid or dashed (page setting; default true). */
+  connect?: boolean | 'dashed'
 }
 
 /** The series a plot shows: those it selects, minus the ones switched off. */
@@ -583,7 +583,7 @@ const FADE_BANDS = 16
  * dots with a faint connector while there is room, a solid line once dots would merge, and
  * the envelope once there are more steps than pixels. Strokes never get thinner than 2 px.
  */
-function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, connect: boolean, envelope = true) {
+function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, connect: boolean | 'dashed', envelope = true) {
   const room = frame.plot.w / Math.max(1, series.x.length - 1)
   if (envelope && count > frame.plot.w) {
     drawEnvelope(s, frame, series.x, series.y, count, series.role)
@@ -596,7 +596,8 @@ function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, c
     return
   }
   if (connect) {
-    s.begin({ role: series.role, width: room < 9 ? 1 : 1.25, dash: [], alpha: 0.45 })
+    // dashed: a little stronger, so the gaps don't make it vanish
+    s.begin({ role: series.role, width: room < 9 ? 1 : 1.25, dash: connect === 'dashed' ? [5, 4] : [], alpha: connect === 'dashed' ? 0.7 : 0.45 })
     polyline(s, frame, series.x, series.y, count)
     s.end()
   }
@@ -733,7 +734,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
           continue
         }
         const count = visible(series, view)
-        drawDiscrete(s, frame, series, count, (view.connect ?? true) && (spec.connect ?? series.connect ?? true))
+        drawDiscrete(s, frame, series, count, (spec.connect ?? series.connect ?? true) && (view.connect ?? true))
         if (timed(view) && series.kind === 'discrete' && count <= frame.plot.w) head(s, frame, series.x[count - 1], series.y[count - 1], series.role)
       }
       s.fade(base(view))
@@ -752,7 +753,7 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
           continue
         }
         if (series.kind === 'discrete') {
-          drawDiscrete(s, frame, series, visible(series, view), (view.connect ?? true) && (series.connect ?? true), series.role !== 'data')
+          drawDiscrete(s, frame, series, visible(series, view), (series.connect ?? true) && (view.connect ?? true), series.role !== 'data')
           continue
         }
         // reference lines and the faint family stay whole; the solution itself runs with the timeline
