@@ -1738,6 +1738,8 @@ html[data-werte='aus'] .ab-probe-step {
 }
 .ab-val[data-scrub]:not(:focus) {
   cursor: ew-resize;
+  /* a finger dragging sideways changes the value; up and down still scroll the page */
+  touch-action: pan-y;
 }
 .ab-val[data-scrub='active'] {
   background: var(--ab-accent-soft);

@@ -158,20 +158,34 @@ const fische = defineApplet({
   ],
 })
 
+// 1.3: the same model from x₀ = 1/2, whose start can be dragged in the plot (also by touch)
 const fischeFormel = defineApplet({
   id: 'blatt1-fische-formel',
   title: 'Beverton–Holt mit Startwert 1/2',
   summary: 'x_{n+1} = 2x_n / (1 + x_n), x_0 = 1/2',
   chapter: 'I',
-  model: bevertonHolt('blatt1-fische-formel'),
+  model: iteration({
+    id: 'blatt1-fische-formel',
+    params: {
+      x0: real('Startwert', { latex: 'x_0', min: 0.05, max: 2, step: 0.01, default: 0.5 }),
+      N: steps('Jahre', { latex: 'N', default: 3, max: 30 }),
+    },
+    start: (p) => p.x0,
+    step: (x) => bh(x),
+    horizon: (p) => p.N,
+    series: { label: 'x_n', name: 'Fische' },
+  }),
   horizon: 'N',
   scenariosOnly: true,
   stepwise: true,
-  formulas: bhFormulas,
-  plots: [bhPlot],
+  formulas: [
+    { label: 'Vorschrift', tex: String.raw`x_{n+1} = \frac{2x_n}{1 + x_n}` },
+    { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
+  ],
+  plots: [{ type: 'timeSeriesDiscrete', xLabel: 'n \\text{ (Jahre)}', yLabel: 'x_n \\text{ (Tausend Fische)}', y: [0, 2.2], drag: { param: 'x0', axis: 'y' } }],
   scenarios: [
-    { label: 'x₀ … x₃', text: 'Die Werte, aus denen die Formel erraten wird.', params: { start: 'half', N: 3 } },
-    { label: 'weiter', text: 'Wie geht es weiter? 15 Jahre.', params: { start: 'half', N: 15 } },
+    { label: 'x₀ … x₃', text: 'Die Werte, aus denen die Formel erraten wird. Den Startwert kann man im Bild ziehen.', params: { x0: 0.5, N: 3 } },
+    { label: 'weiter', text: 'Wie geht es weiter? 15 Jahre.', params: { x0: 0.5, N: 15 } },
   ],
 })
 

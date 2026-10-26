@@ -55,7 +55,7 @@ export function NumberField({
   onInvalid?: (message: string) => void
   label: string
   className?: string
-  /** Allow changing the value by dragging it (mouse only; touch taps to type). */
+  /** Allow changing the value by dragging it sideways (mouse, finger or pen); a tap or click types. */
   scrubStep?: number
   /** Dragging stops here (typing may still go further, within the parameter's hard limits). */
   scrubMin?: number
@@ -88,7 +88,7 @@ export function NumberField({
       data-scrub={scrubStep ? (scrubbing ? 'active' : 'ready') : undefined}
       data-tip={scrubStep ? '{Ziehen} | ziehen zum Ändern\nKlick | eintippen' : undefined}
       onPointerDown={(e) => {
-        if (!scrubStep || e.pointerType !== 'mouse' || e.button !== 0 || document.activeElement === e.currentTarget) return
+        if (!scrubStep || e.button !== 0 || document.activeElement === e.currentTarget) return
         e.preventDefault() // no focus, no text selection: this may become a drag
         e.currentTarget.setPointerCapture(e.pointerId)
         // the step is fixed for the whole drag, even if it depends on the value

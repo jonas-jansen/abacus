@@ -1055,7 +1055,7 @@ details.box[open] > summary::after {
 /* low screens (an iPad in landscape, a small projector): less room for what surrounds the plot */
 @media (max-height: 820px) {
   .blatt {
-    --ab-screen-reserve: 400px;
+    --ab-screen-reserve: 460px;
   }
 }
 .blatt-leiste {
