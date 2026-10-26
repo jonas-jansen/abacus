@@ -366,6 +366,11 @@ button.ab-icon {
 .ab-applet[data-vortrag] {
   position: fixed;
   inset: 0;
+  /* the visible height on a tablet, whose toolbars come and go */
+  height: 100dvh;
+  /* the plots fill the screen's height: all of it but title, equation box and timeline */
+  --ab-fill-height: 1;
+  --ab-screen-reserve: 320px;
   z-index: 900;
   overflow: auto;
   border: 0;

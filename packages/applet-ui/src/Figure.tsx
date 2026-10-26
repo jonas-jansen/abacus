@@ -114,6 +114,8 @@ export function Figure<P extends Params>({
   const [width, setWidth] = useState(SSR_WIDTH)
   // how high a plot may be: a share of the screen, in the applet's own pixels (lecture mode scales)
   const [maxH, setMaxH] = useState(SSR_HEIGHT)
+  // in the presentation mode a plot fills the screen's height, whatever its width (--ab-fill-height)
+  const [fill, setFill] = useState(false)
   const [hydrated, setHydrated] = useState(false)
   // when the page came up: what happens while it loads (the state from the address, the first
   // measurement of the size) is shown at once, not as a glide
@@ -134,8 +136,9 @@ export function Figure<P extends Params>({
     // an exercise sheet: tabs, equation box and timeline on one screen with the plot
     const reserve = () => parseFloat(getComputedStyle(el).getPropertyValue('--ab-screen-reserve'))
     const measure = () => {
-      const screen = window.innerHeight / scaleOf(el)
+      const screen = (window.visualViewport?.height ?? window.innerHeight) / scaleOf(el)
       const r = reserve()
+      setFill(getComputedStyle(el).getPropertyValue('--ab-fill-height').trim() === '1')
       setMaxH(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(r > 0 ? screen - r : screen * SCREEN_SHARE))))
     }
     const ro = new ResizeObserver(([e]) => {
@@ -145,9 +148,11 @@ export function Figure<P extends Params>({
     })
     ro.observe(el)
     window.addEventListener('resize', measure)
+    window.visualViewport?.addEventListener('resize', measure)
     return () => {
       cancelAnimationFrame(id)
       ro.disconnect()
+      window.visualViewport?.removeEventListener('resize', measure)
       window.removeEventListener('resize', measure)
     }
   }, [])
@@ -165,7 +170,7 @@ export function Figure<P extends Params>({
   // both x axes sit at one height; no plot is higher than a good part of the screen.
   const figW = width
   const aspect = spec.aspect ?? (square || pair ? 1 : width < 640 ? 4 / 3 : 16 / 10)
-  const figH = Math.min(maxH, Math.max(MIN_HEIGHT, Math.round(figW / aspect)))
+  const figH = fill ? maxH : Math.min(maxH, Math.max(MIN_HEIGHT, Math.round(figW / aspect)))
 
   // While a handle is dragged the axes hold still: an axis that rescales under the pointer
   // would make the handle run away. They catch up when the handle is let go.

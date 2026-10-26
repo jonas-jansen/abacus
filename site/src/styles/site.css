@@ -1052,6 +1052,12 @@ details.box[open] > summary::after {
   /* one part fits on the screen: the plot gets what tabs, equation box and timeline leave */
   --ab-screen-reserve: 480px;
 }
+/* low screens (an iPad in landscape, a small projector): less room for what surrounds the plot */
+@media (max-height: 820px) {
+  .blatt {
+    --ab-screen-reserve: 400px;
+  }
+}
 .blatt-leiste {
   position: sticky;
   top: var(--topbar-h);

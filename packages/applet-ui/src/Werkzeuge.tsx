@@ -12,7 +12,15 @@ import { renderTip } from './tip'
 const ZOOM_MIN = 1
 const ZOOM_MAX = 3
 /** A first guess from the screen's size; the fit below then shrinks it until nothing scrolls. */
-const passend = () => Math.min(2.5, Math.max(ZOOM_MIN, Math.round(Math.min(innerWidth / 1180, innerHeight / 700) * 20) / 20))
+/** The element in full screen, also under Safari's old name. */
+const fullscreenElement = () => document.fullscreenElement ?? (document as Document & { webkitFullscreenElement?: Element | null }).webkitFullscreenElement ?? null
+
+// the visible area: on a tablet without the browser's bars
+const passend = () => {
+  const w = window.visualViewport?.width ?? innerWidth
+  const h = window.visualViewport?.height ?? innerHeight
+  return Math.min(2.5, Math.max(ZOOM_MIN, Math.round(Math.min(w / 1180, h / 700) * 20) / 20))
+}
 
 /**
  * Lecture mode: full screen for the applet (or, where a browser has no full screen, a layer
@@ -29,13 +37,36 @@ export function useVortrag(root: RefObject<HTMLElement | null>) {
   }
   useEffect(() => {
     const sync = () => {
-      const on = !!root.current && document.fullscreenElement === root.current
+      const on = !!root.current && fullscreenElement() === root.current
       if (on) fit()
       setAn(on)
     }
     document.addEventListener('fullscreenchange', sync)
-    return () => document.removeEventListener('fullscreenchange', sync)
+    document.addEventListener('webkitfullscreenchange', sync)
+    return () => {
+      document.removeEventListener('fullscreenchange', sync)
+      document.removeEventListener('webkitfullscreenchange', sync)
+    }
   }, [root])
+  // the screen changes size while on (a rotated iPad, toolbars that hide, a window resized):
+  // fit again, unless a size was chosen by hand
+  useEffect(() => {
+    if (!an || !anpassen) return
+    let id = 0
+    const refit = () => {
+      cancelAnimationFrame(id)
+      id = requestAnimationFrame(() => setZoom(passend()))
+    }
+    window.addEventListener('resize', refit)
+    window.addEventListener('orientationchange', refit)
+    window.visualViewport?.addEventListener('resize', refit)
+    return () => {
+      cancelAnimationFrame(id)
+      window.removeEventListener('resize', refit)
+      window.removeEventListener('orientationchange', refit)
+      window.visualViewport?.removeEventListener('resize', refit)
+    }
+  }, [an, anpassen])
   // Plots take their size from the width, so the height only shows after a layout: step down
   // until the applet fits the screen without scrolling.
   useEffect(() => {
@@ -61,7 +92,7 @@ export function useVortrag(root: RefObject<HTMLElement | null>) {
       if (e.key === '+' || e.key === '=') groesser(1)
       else if (e.key === '-') groesser(-1)
       else if (e.key === '0') fit()
-      else if (e.key === 'Escape' && !document.fullscreenElement) setAn(false)
+      else if (e.key === 'Escape' && !fullscreenElement()) setAn(false)
       else return
       e.preventDefault()
     }
@@ -73,14 +104,21 @@ export function useVortrag(root: RefObject<HTMLElement | null>) {
     const el = root.current
     if (!el) return
     try {
-      await el.requestFullscreen()
+      // Safari on the iPad knows full screen only by its old name
+      const w = el as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void }
+      if (el.requestFullscreen) await el.requestFullscreen()
+      else if (w.webkitRequestFullscreen) await w.webkitRequestFullscreen()
+      else throw new Error('no full screen')
     } catch {
+      // no full screen (iPad apps other than Safari): a layer over the page instead
       fit()
       setAn(true)
     }
   }
   const ende = () => {
+    const d = document as Document & { webkitExitFullscreen?: () => void }
     if (document.fullscreenElement) void document.exitFullscreen()
+    else if (fullscreenElement()) d.webkitExitFullscreen?.()
     else setAn(false)
   }
   return { an, zoom, start, ende }
