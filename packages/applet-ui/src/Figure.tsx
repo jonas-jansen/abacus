@@ -567,7 +567,7 @@ export function Figure<P extends Params>({
 
   // Guides: where a parameter acts (a slope triangle for an increment, an arrow for a factor),
   // in figure pixels; left out when their points are out of view.
-  type GuideGeom = { id: string; param?: string; d: string; fill?: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above'; plain?: boolean }[] }
+  type GuideGeom = { id: string; param?: string; d: string; dotted?: boolean; fill?: string; head?: string; labels: { tex: string; x: number; y: number; side: 'right' | 'left' | 'below' | 'above'; plain?: boolean }[] }
   // where the timeline stands, for guides that move with it (the step just taken)
   const guideAt = { step: view.steps ?? Math.max(0, (run.series[0]?.x.length ?? 1) - 1), run }
   const guideGeom: GuideGeom[] = (() => {
@@ -580,6 +580,14 @@ export function Figure<P extends Params>({
       const v = valueOf(g.param)
       const [a, c] = [P(g.from), P(g.to)]
       if (!inView(a) || !inView(c)) return
+      if (g.kind === 'drop') {
+        // to the y axis (horizontal): the name above the line, just right of the axis; to the x
+        // axis (vertical): right of the line, just above the axis
+        const horizontal = Math.abs(c[1] - a[1]) < Math.abs(c[0] - a[0])
+        const at = horizontal ? { x: c[0] + 6, y: c[1] - 2, side: 'above' as const } : { x: c[0], y: c[1] - 12, side: 'right' as const }
+        out.push({ id: `g${i}`, d: `M${a[0]} ${a[1]}L${c[0]} ${c[1]}`, dotted: true, labels: [{ tex: g.label, plain: true, ...at, x: horizontal ? at.x + 18 : at.x }] })
+        return
+      }
       if (g.kind === 'rise') {
         const b: [number, number] = [c[0], a[1]]
         if (Math.abs(c[1] - b[1]) < 3 && Math.abs(b[0] - a[0]) < 3) return
@@ -708,7 +716,7 @@ export function Figure<P extends Params>({
           {guideGeom.map((g) => (
             <g key={g.id} className="ab-guide" data-hot={hotGuide(g) || undefined}>
               {g.fill && <path className="ab-guide-fill" d={g.fill} />}
-              <path d={g.d} />
+              <path d={g.d} strokeDasharray={g.dotted ? '2 4' : undefined} />
               {g.head && <path d={g.head} />}
             </g>
           ))}
