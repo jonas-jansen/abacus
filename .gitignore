@@ -10,3 +10,5 @@ apps/
 slides/
 # Markdown drafts for new quizzes, handed over for implementation: not published
 uploads/
+# lecture slides handed over for building applets: not for the public repository
+/lectures/

@@ -107,6 +107,15 @@ scenario applet sized so that one part fits on the projector.
 
 The sheets themselves (PDF) are not published by the site.
 
+## Lectures
+
+One page per slide set for the beamer: `/<course>/vorlesung/<id>`, a tab per slide with a
+visualisation (← → switch, `…/vorlesung/1b#f22`). The applets are fully interactive
+(parameters, equation box, handles), with the slide's parameters as scenarios:
+`packages/applets/src/lectures/<id>.ts`, an entry in `lectures` in `site/src/exercises.ts`.
+Only in the beta on GitHub Pages. The slides themselves (`lectures/`) are not in the
+repository.
+
 ## Which applets are listed
 
 `packages/applets/applets.json` holds one entry per applet:

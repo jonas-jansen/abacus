@@ -1,0 +1,65 @@
+---
+// A collection of applets with a tab each: an exercise sheet (a tab per part) or a lecture (a
+// tab per slide). ← → (or the tabs) switch; each tab has its own address (#1.4, #f22).
+import { AppletIsland } from '../islands'
+import type { Sheet } from '../exercises'
+
+interface Props {
+  sheet: Sheet
+  /** What a tab stands for, e.g. "Aufgabe" or "Folie". */
+  noun: string
+}
+const { sheet, noun } = Astro.props
+---
+  <div class="blatt" data-blatt>
+    <div class="blatt-leiste">
+      <h1 class="blatt-name">{sheet.title}</h1>
+      <div class="blatt-tabs" role="tablist" aria-label={noun}>
+        {sheet.parts.map((part, i) => (
+          <button type="button" role="tab" data-teil={part.id} aria-selected={i === 0 ? 'true' : 'false'} data-tip={part.title}>
+            {part.tab}
+          </button>
+        ))}
+      </div>
+      <span class="blatt-tasten" aria-hidden="true">← →</span>
+    </div>
+    {sheet.parts.map((part, i) => (
+      <section class="blatt-teil" role="tabpanel" data-teil={part.id} hidden={i > 0} aria-label={`${noun} ${part.tab}`}>
+        <h2 class="blatt-titel">
+          <span class="blatt-nr">{noun} {part.tab}</span>
+          {part.title}
+        </h2>
+        <AppletIsland client:visible id={part.applet} showHeader={false} />
+      </section>
+    ))}
+  </div>
+
+  <script>
+    // Tabs: one part at a time; the address (#1.4) and ← → follow along.
+    const root = document.querySelector<HTMLElement>('[data-blatt]')!
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
+    const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')]
+    const show = (id: string, push = true) => {
+      if (!tabs.some((t) => t.dataset.teil === id)) return
+      for (const t of tabs) t.setAttribute('aria-selected', String(t.dataset.teil === id))
+      for (const p of panels) p.hidden = p.dataset.teil !== id
+      if (push) history.replaceState(null, '', `#${id}`)
+    }
+    for (const t of tabs) t.addEventListener('click', () => show(t.dataset.teil!))
+    const fromHash = () => show(decodeURIComponent(location.hash.slice(1)), false)
+    fromHash()
+    window.addEventListener('hashchange', fromHash)
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      // not while typing, or while a slider, the timeline or a plot has the keys
+      const el = document.activeElement
+      if (el && el !== document.body && !(el instanceof HTMLButtonElement && el.getAttribute('role') === 'tab')) return
+      const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true')
+      const next = tabs[i + (e.key === 'ArrowRight' ? 1 : -1)]
+      if (next) {
+        e.preventDefault()
+        show(next.dataset.teil!)
+        next.focus()
+      }
+    })
+  </script>

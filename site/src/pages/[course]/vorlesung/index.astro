@@ -1,0 +1,25 @@
+---
+import Seite from '../../../layouts/Seite.astro'
+import { type Course } from '../../../courses'
+import { courseUrl } from '../../../config'
+import { builtCourses, builtLectures } from '../../../release'
+
+export function getStaticPaths() {
+  // no lectures in this build (the student version): no page at all
+  return builtLectures.length ? builtCourses.map((course) => ({ params: { course: course.id }, props: { course } })) : []
+}
+const { course } = Astro.props as { course: Course }
+---
+<Seite course={course} title="Vorlesung" active="vorlesung" width="narrow">
+  <h1>Vorlesung</h1>
+  <ol class="course-list">
+    {builtLectures.map((s) => (
+      <li>
+        <a href={courseUrl(course, `/vorlesung/${s.id}`)}>
+          <strong>{s.title}</strong>
+          <span class="course-kurz">Folien {s.parts.map((p) => p.tab).join(' · ')}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</Seite>

@@ -450,6 +450,17 @@ function drawCloud(s: Surface, frame: Frame, series: Series) {
   const cols = Math.ceil(frame.plot.w / CELL) + 1
   const rows = Math.ceil(frame.plot.h / CELL) + 1
   const seen = new Uint8Array(cols * rows)
+  // a few points (long-term values at a handful of parameters): real dots; a dense diagram: specks
+  if (series.x.length <= 2000) {
+    s.begin({ role: series.role })
+    for (let i = 0; i < series.x.length; i++) {
+      const X = frame.xScale(series.x[i])
+      const Y = frame.yScale(series.y[i])
+      if (X >= 0 && X <= frame.plot.w && Y >= 0 && Y <= frame.plot.h) s.dot(X, Y, 3)
+    }
+    s.end()
+    return
+  }
   s.begin({ role: series.role, width: 1.6, dash: [], alpha: 0.75 })
   for (let i = 0; i < series.x.length; i++) {
     const X = frame.xScale(series.x[i])

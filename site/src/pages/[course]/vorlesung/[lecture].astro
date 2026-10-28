@@ -1,0 +1,18 @@
+---
+// One slide set for the lecture: a tab per slide with a visualisation, each a fully
+// interactive applet with the slide's parameters as scenarios. For the beamer.
+import Seite from '../../../layouts/Seite.astro'
+import Sammlung from '../../../components/Sammlung.astro'
+import { type Course } from '../../../courses'
+import type { Sheet } from '../../../exercises'
+import { builtCourses, builtLectures } from '../../../release'
+
+export function getStaticPaths() {
+  return builtCourses.flatMap((course) => builtLectures.map((lecture) => ({ params: { course: course.id, lecture: lecture.id }, props: { course, lecture } })))
+}
+const { course, lecture } = Astro.props as { course: Course; lecture: Sheet }
+Astro.locals.course = course
+---
+<Seite course={course} title={lecture.title} active="vorlesung" unlisted>
+  <Sammlung sheet={lecture} noun="Folie" />
+</Seite>

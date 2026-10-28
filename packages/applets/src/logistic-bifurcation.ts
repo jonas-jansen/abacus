@@ -16,7 +16,7 @@ const A_MIN = 2.4
  * about equally dense at any magnification — a thin slice of the chaotic band included.
  */
 const cache = new Map<string, { x: Float64Array; y: Float64Array }>()
-function bifurcation(lo = 0, hi = 4, ylo = -Infinity, yhi = Infinity) {
+export function bifurcation(lo = 0, hi = 4, ylo = -Infinity, yhi = Infinity) {
   const COUNT = 900 // values of a across the window
   const TRANSIENT = 600
   const HITS = 140 // points per a we aim for in the window
