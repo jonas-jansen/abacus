@@ -169,7 +169,8 @@ export function Figure<P extends Params>({
   // phase planes: free axes, or equal units on both ("1:1")
   const [equal, setEqual] = useState(false)
   const spec = useMemo(() => ({ ...resolveSpec(entry, params), yScale: logY ? 'log' : 'linear' }) as PlotSpec, [entry, params, logY])
-  const square = isSquare(spec)
+  // a square plot keeps equal units (more x in a wide box), unless it may stretch to fill it
+  const square = isSquare(spec) && !entry.stretch
   // Every plot fills its box's width. Side by side, every figure is as high as it is wide, so
   // both x axes sit at one height; no plot is higher than a good part of the screen.
   const figW = width

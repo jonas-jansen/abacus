@@ -46,6 +46,8 @@ const heronV = defineApplet({
   title: 'Beispiel: Aktualisierungsfunktion',
   summary: 'f(x) = ½ (x + 2/x)',
   chapter: 'I',
+  // only the cobweb, in the slide's window: no plot of the error
+  plots: [{ ...heron.plots[0], x: [0, 5], y: [0, 5], stretch: true }],
   scenarios: [
     { label: 'Folie 3: der erste Schritt', text: 'x₀ = 0.5, ein Schritt zu x₁.', params: { x0: 0.5, N: 1 } },
     { label: 'weiter', text: 'Die nächsten Schritte von x₀ = 0.5 aus.', params: { x0: 0.5, N: 6 } },

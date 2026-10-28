@@ -23,6 +23,11 @@ interface PlotCommon {
   /** Offer a switch between linear and logarithmic y axis (with an explanation). */
   logToggle?: boolean
   /**
+   * A cobweb or phase plane that fills a wide box instead of keeping equal units on both axes
+   * (which shows more x): e.g. a slide's window on the beamer.
+   */
+  stretch?: boolean
+  /**
    * The axes follow the timeline: they fit the sequence up to the current step, but show at
    * least this many steps. Levels and references (continuous series) do not stretch them.
    * For fast growth on a linear axis: the first steps fill the picture, each later one

@@ -1,6 +1,7 @@
 ---
 // A collection of applets with a tab each: an exercise sheet (a tab per part) or a lecture (a
 // tab per slide). ← → (or the tabs) switch; each tab has its own address (#1.4, #f22).
+import { getApplet } from '@abacus/applets'
 import { AppletIsland } from '../islands'
 import type { Sheet } from '../exercises'
 
@@ -29,7 +30,8 @@ const { sheet, noun } = Astro.props
           <span class="blatt-nr">{noun} {part.tab}</span>
           {part.title}
         </h2>
-        <AppletIsland client:visible id={part.applet} showHeader={false} />
+        {/* opens in its first scenario: the slide's or the part's own values */}
+        <AppletIsland client:visible id={part.applet} showHeader={false} initialState={getApplet(part.applet).scenarios?.[0]?.params} />
       </section>
     ))}
   </div>
