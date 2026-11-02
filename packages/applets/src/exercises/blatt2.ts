@@ -2,7 +2,7 @@
 // for sheet 1. They show the sequences, not the solutions' working. Registered in ../index.ts,
 // not in the gallery.
 
-import { bool, iteration, iterationN, steps, type Run, type Series } from '@abacus/applet-core'
+import { bool, iteration, iterationN, real, steps, type Run, type Series } from '@abacus/applet-core'
 import { defineApplet, type AppletModule, type Guide } from '@abacus/applet-ui/define'
 
 // ---------------------------------------------------------------------------------- 2.1
@@ -18,10 +18,11 @@ const zellkultur = defineApplet({
   model: iteration({
     id: 'blatt2-zellkultur',
     params: {
+      c0: real('Startwert', { latex: 'c_0', min: 0, max: 5, step: 0.05, default: 1 }),
       formel: bool('Lösungsformel', { default: false, labelOn: 'an', labelOff: 'aus' }),
       N: steps('Schritte', { latex: 'N', default: 4, max: 40 }),
     },
-    start: () => 1,
+    start: (p) => p.c0,
     step: (c, _p, n) => factor(n) * c,
     horizon: (p) => p.N,
     series: { label: 'c_n', name: 'Zelldichte' },
@@ -29,7 +30,9 @@ const zellkultur = defineApplet({
     extraSeries: ({ p }) => {
       if (!p.formel) return []
       const x = Float64Array.from({ length: 200 }, (_, i) => (p.N * i) / 199)
-      return [{ id: 'formel', label: String.raw`\frac{2^n}{n+1}`, name: 'Lösungsformel', kind: 'continuous', x, y: x.map((t) => 2 ** t / (t + 1)), role: 'reference', dash: [5, 4] } satisfies Series]
+      // with another start the formula scales: c_0 · 2ⁿ/(n + 1)
+      const label = p.c0 === 1 ? String.raw`\frac{2^n}{n+1}` : String.raw`${+p.c0.toFixed(2)} \cdot \frac{2^n}{n+1}`
+      return [{ id: 'formel', label, name: 'Lösungsformel', kind: 'continuous', x, y: x.map((t) => (p.c0 * 2 ** t) / (t + 1)), role: 'reference', dash: [5, 4] } satisfies Series]
     },
   }),
   horizon: 'N',
@@ -37,7 +40,7 @@ const zellkultur = defineApplet({
   stepwise: true,
   formulas: [
     { label: 'Vorschrift', tex: String.raw`c_{n+1} = \frac{2(n+1)}{n+2}\,c_n` },
-    { label: 'Start', tex: String.raw`c_0 = 1` },
+    { label: 'Start', tex: String.raw`c_0 = {{#c0}}` },
   ],
   plots: [
     {
@@ -46,6 +49,7 @@ const zellkultur = defineApplet({
       xLabel: 'n',
       yLabel: 'c_n \\text{ (Mio. Zellen/ml)}',
       logToggle: true,
+      drag: { param: 'c0', axis: 'y' },
       // the step just taken, with its own factor: · 1, · 4/3, · 3/2, · 8/5, …
       guides: (_p: unknown, { step, run }: { step: number; run: Run }): readonly Guide[] => {
         const x = run.series[0]?.y
@@ -59,9 +63,9 @@ const zellkultur = defineApplet({
     },
   ],
   scenarios: [
-    { label: 'c₀ … c₄', text: 'Die ersten fünf Werte.', params: { formel: false, N: 4 } },
-    { label: 'mit Lösungsformel', text: 'Die Formel 2ⁿ/(n + 1) als Kurve durch die Punkte.', params: { formel: true, N: 4 } },
-    { label: 'weiter', text: 'Wie geht es weiter? 15 Schritte.', params: { formel: false, N: 15 } },
+    { label: 'c₀ … c₄', text: 'Die ersten fünf Werte. Den Startwert kann man im Bild ziehen.', params: { c0: 1, formel: false, N: 4 } },
+    { label: 'mit Lösungsformel', text: 'Die Formel 2ⁿ/(n + 1) als Kurve durch die Punkte.', params: { c0: 1, formel: true, N: 4 } },
+    { label: 'weiter', text: 'Wie geht es weiter? 15 Schritte.', params: { c0: 1, formel: false, N: 15 } },
   ],
 })
 
@@ -76,13 +80,18 @@ const mohn = defineApplet({
   chapter: 'I',
   model: iterationN({
     id: 'blatt2-mohn',
-    params: { N: steps('Jahre', { latex: 'N', default: 2, max: 30 }) },
+    params: {
+      x0: real('Pflanzen im Jahr 0', { latex: 'x_0', min: 0, max: 100, step: 1, default: 10 }),
+      x1: real('Pflanzen im Jahr 1', { latex: 'x_1', min: 0, max: 200, step: 1, default: 20 }),
+      N: steps('Jahre', { latex: 'N', default: 2, max: 30 }),
+    },
     // the state (x_n, x_{n+1}): a recursion of second order needs both
     components: [
       { id: 'x', label: 'x_n', name: 'blühende Pflanzen', role: 'primary' },
       { id: 'next', label: 'x_{n+1}', role: 'reference' },
     ],
-    start: () => [10, 20],
+    // a recursion of second order has two start values; the sheet's are x₀ = 10, x₁ = 20
+    start: (p) => [p.x0, p.x1],
     step: ([x, next]) => [next, 2 * next + 3 * x],
     horizon: (p) => p.N,
   }),
@@ -90,7 +99,7 @@ const mohn = defineApplet({
   scenariosOnly: true,
   stepwise: true,
   formulas: [
-    { label: 'Start', tex: String.raw`x_0 = 10` },
+    { label: 'Start', tex: String.raw`x_0 = {{#x0}}` },
     { label: 'jede Pflanze', tex: String.raw`\text{2 Pflanzen im nächsten, 3 im übernächsten Jahr}` },
   ],
   plots: [
@@ -100,6 +109,10 @@ const mohn = defineApplet({
       xLabel: 'n \\text{ (Jahre)}',
       yLabel: 'x_n',
       logToggle: true,
+      drag: [
+        { param: 'x0', axis: 'y' },
+        { param: 'x1', axis: 'y', at: (p) => [1, p.x1] },
+      ],
       // into the new year: from the year before (· 2) and from the one before that (· 3)
       guides: (_p: unknown, { step, run }: { step: number; run: Run }): readonly Guide[] => {
         const x = run.series.find((s) => s.id === 'x')?.y
@@ -112,9 +125,9 @@ const mohn = defineApplet({
     },
   ],
   scenarios: [
-    { label: 'x₀ … x₂', text: 'Teil a).', params: { N: 2 } },
-    { label: 'x₀ … x₅', text: 'Teil b).', params: { N: 5 } },
-    { label: 'weiter', text: 'Wie geht es weiter? 15 Jahre.', params: { N: 15 } },
+    { label: 'x₀ … x₂', text: 'Teil a). Die beiden Startwerte kann man im Bild ziehen.', params: { x0: 10, x1: 20, N: 2 } },
+    { label: 'x₀ … x₅', text: 'Teil b).', params: { x0: 10, x1: 20, N: 5 } },
+    { label: 'weiter', text: 'Wie geht es weiter? 15 Jahre.', params: { x0: 10, x1: 20, N: 15 } },
   ],
 })
 
