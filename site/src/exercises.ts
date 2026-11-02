@@ -35,6 +35,14 @@ export const sheets: readonly Sheet[] = [
       { id: '1.5', tab: '1.5', title: 'Welse im Teich', applet: 'blatt1-welse' },
     ],
   },
+  {
+    id: '2',
+    title: 'Übungsblatt 2',
+    parts: [
+      { id: '2.1', tab: '2.1', title: 'Zellkultur mit Verdünnung', applet: 'blatt2-zellkultur' },
+      { id: '2.2', tab: '2.2', title: 'Klatschmohn', applet: 'blatt2-mohn' },
+    ],
+  },
 ]
 
 /**

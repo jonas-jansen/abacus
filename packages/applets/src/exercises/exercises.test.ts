@@ -36,3 +36,15 @@ describe('Übungsblatt 1', () => {
     expect(values('blatt1-welse', '400 im Monat').at(-1)).toBeCloseTo(5000, 6)
   })
 })
+
+describe('Übungsblatt 2', () => {
+  it('2.1: c₀ … c₄ = 1, 1, 4/3, 2, 16/5, and the formula 2ⁿ/(n + 1) fits', () => {
+    const c = values('blatt2-zellkultur', 'c₀ … c₄')
+    expect(c.map((v) => +v.toFixed(9))).toEqual([1, 1, +(4 / 3).toFixed(9), 2, 3.2])
+    for (const [n, v] of c.entries()) expect(v).toBeCloseTo(2 ** n / (n + 1), 12)
+  })
+
+  it('2.2: x₀ … x₅ = 10, 20, 70, 200, 610, 1820', () => {
+    expect(values('blatt2-mohn', 'x₀ … x₅')).toEqual([10, 20, 70, 200, 610, 1820])
+  })
+})
