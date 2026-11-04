@@ -10,6 +10,7 @@ import catalog from '../applets.json'
 import { blatt1 } from './exercises/blatt1'
 import { blatt2 } from './exercises/blatt2'
 import { kapitel1b } from './lectures/kapitel1b'
+import { anhangA } from './lectures/anhang-a'
 // @new-applet:imports
 import folgenGrenzwert from './folgen-grenzwert'
 import differenzenquotient from './differenzenquotient'
@@ -161,7 +162,7 @@ export function chapters({ all = false } = {}): { id: Chapter; title: string; ap
  * slide, shown on their page only, never in the gallery or the catalog.
  */
 export const exerciseApplets: Readonly<Record<string, AnyAppletDef>> = Object.fromEntries(
-  [...blatt1, ...blatt2, ...kapitel1b].map((m) => [m.id, { visible: false, ...m } as AnyAppletDef]),
+  [...blatt1, ...blatt2, ...kapitel1b, ...anhangA].map((m) => [m.id, { visible: false, ...m } as AnyAppletDef]),
 )
 
 export function getApplet(id: string): AnyAppletDef {

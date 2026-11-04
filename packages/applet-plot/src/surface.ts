@@ -215,7 +215,14 @@ export class CanvasSurface implements Surface {
         // points grow less than lines, so neighbours don't merge
         if (Math.abs(x) < LIMIT && Math.abs(y) < LIMIT) markerPath(sink, style.marker, x, y, this.dots[i + 2] * (1 + 0.6 * (k - 1)))
       }
-      ctx.fill()
+      if (style.marker === 'ring') {
+        // the page inside, the colour around
+        ctx.fillStyle = this.background
+        ctx.fill()
+        ctx.setLineDash([])
+        ctx.lineWidth = 2 * k
+        ctx.stroke()
+      } else ctx.fill()
     }
     ctx.restore()
   }
@@ -304,6 +311,7 @@ export class SvgPathSurface implements Surface {
         },
       })
     }
-    if (this.fillD.length) this.nodes.push({ tag: 'path', attrs: { d: this.fillD.join(''), fill: color, opacity } })
+    if (this.fillD.length && style.marker === 'ring') this.nodes.push({ tag: 'path', attrs: { d: this.fillD.join(''), fill: 'var(--ab-bg)', stroke: color, 'stroke-width': 2, opacity } })
+    else if (this.fillD.length) this.nodes.push({ tag: 'path', attrs: { d: this.fillD.join(''), fill: color, opacity } })
   }
 }

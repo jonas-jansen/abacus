@@ -30,6 +30,8 @@ export interface Series {
   role: SeriesRole
   /** Discrete series only: join the points (default true). Measured data usually is not joined. */
   connect?: boolean
+  /** Discrete series: open circles, e.g. the hole where a function is not defined or jumps. */
+  hollow?: boolean
   /** Continuous series: the pieces between NaN gaps are closed and filled (areas, rectangles). */
   fill?: boolean
   /** Continuous series: an arrowhead at the end of each piece (vectors). */

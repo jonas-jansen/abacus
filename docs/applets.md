@@ -118,7 +118,8 @@ Common options: `title`, `xLabel`, `yLabel` (TeX-lite: `y_n`, `\alpha`, `\text{A
 
 Series carry `label` (TeX symbol) and `name` (what it is: legend shows "y₁ Beute"), `role`
 (`primary`, `secondary`, `tertiary`, `reference`, `ghost`, `data`, `annotation`) and may be
-`fill` (areas), `arrow` (vectors, labelled at the tip), `dash`, `legend: false`, and
+`fill` (areas), `arrow` (vectors, labelled at the tip), `dash`, `legend: false`, `hollow`
+(discrete points as open circles: the hole where a function jumps or is not defined), and
 `stepOf` + `stepMode` (a construction that unfolds with the timeline, as in `newton.ts`).
 
 **Guides** – `guides: (p) => [...]` on a plot shows where a parameter acts: `{ kind: 'rise',

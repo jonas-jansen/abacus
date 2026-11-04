@@ -617,8 +617,8 @@ function drawDiscrete(s: Surface, frame: Frame, series: Series, count: number, c
     polyline(s, frame, series.x, series.y, count)
     s.end()
   }
-  s.begin({ role: series.role })
-  dots(s, frame, series.x, series.y, count, room < 9 ? 2.4 : Math.min(4, Math.max(3, room / 4)))
+  s.begin({ role: series.role, marker: series.hollow ? 'ring' : undefined })
+  dots(s, frame, series.x, series.y, count, series.hollow ? 4.5 : room < 9 ? 2.4 : Math.min(4, Math.max(3, room / 4)))
   s.end()
 }
 

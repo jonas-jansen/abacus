@@ -9,7 +9,8 @@
 
 import type { SeriesRole } from '@abacus/applet-core'
 
-export type Marker = 'circle' | 'square' | 'triangle' | 'diamond' | 'none'
+/** `ring`: an open circle, the page showing through (a hole in a graph). */
+export type Marker = 'circle' | 'square' | 'triangle' | 'diamond' | 'ring' | 'none'
 
 export interface RoleStyle {
   width: number

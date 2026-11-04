@@ -51,3 +51,45 @@ describe('Vorlesung Kapitel 1b: the slides’ numbers', () => {
     expect(run('v1b-chaos', 'a = 2.8').observables.art.value).toBe('bleiben beieinander')
   })
 })
+
+describe('Vorlesung Anhang A: the slides’ numbers', () => {
+  it('Folien 3–5: N = 4 for the slides’ ε, N = 1/ε for 1/n', () => {
+    expect(run('va-grenzwert', 'Folien 3–4').observables.N.value).toBe(4)
+    expect(run('va-eins-durch-n', 'Folie 5').observables.N.value).toBe(4)
+    expect(run('va-eins-durch-n', 'ε = 0.1').observables.N.value).toBe(10)
+    expect(run('va-eins-durch-n', 'ε = 0.01').observables.N.value).toBe(100)
+  })
+
+  it('Folien 6–7: (−1)ⁿ, Heron, the drug and malaria', () => {
+    expect(values('va-folgen-6', 'Folie 6: (−1)ⁿ', 'x').slice(0, 4)).toEqual([1, -1, 1, -1])
+    expect(values('va-folgen-6', 'Folie 6: Heron', 'x').at(-1)).toBeCloseTo(Math.SQRT2, 12)
+    expect(values('va-folgen-7', 'Folie 7: Medikament', 'x').at(-1)).toBeCloseTo(250 - 250 * 0.8 ** 20, 9)
+    expect(values('va-folgen-7', 'Folie 7: Malaria', 'x').at(-1)).toBe(8 ** 10)
+  })
+
+  it('Folie 16: x_n = 1/n, f(x_n) = 1 but f(0) = −1', () => {
+    expect(values('va-unstetig', 'Folie 16', 'folge').slice(1, 4)).toEqual([1, 0.5, 1 / 3])
+    const o = run('va-unstetig', 'Folie 16').observables
+    expect([o.fa.value, o.fxN.value]).toEqual([-1, 1])
+  })
+
+  it('Folie 19: (x² − 1)/(x − 1) is not defined at 1, f(x_n) → 2', () => {
+    const o = run('va-grenzwert-a', 'Folie 19').observables
+    expect(o.fa.value).toBeNull()
+    expect(o.fxN.value).toBeCloseTo(2 + 1 / 12, 9)
+  })
+
+  it('Folien 22–25: secant slope 10 for h = 1, f′(1) = 5, t(x) = 5x − 3', () => {
+    expect(run('va-sekante', 'Folie 22').observables.quotient.value).toBe(10)
+    expect(run('va-tangente', 'Folie 25').observables.ableitung.value).toBe(5)
+    const t = run('va-tangente', 'Folie 25').series.find((s) => s.id === 'tangente')!
+    expect(t.y[0]).toBeCloseTo(5 * t.x[0] - 3, 12)
+  })
+
+  it('Folie 23: g(h) is 2 at h = −1 and 10 at h = 1, with a hole at 0', () => {
+    const g = run('va-quotient', 'Folie 23').series.find((s) => s.id === 'g')!
+    expect(g.y[0]).toBeCloseTo(2, 12)
+    expect(g.y.at(-1)).toBeCloseTo(10, 12)
+    expect(g.y[200]).toBeNaN()
+  })
+})
