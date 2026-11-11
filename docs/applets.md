@@ -109,7 +109,7 @@ Common options: `title`, `xLabel`, `yLabel` (TeX-lite: `y_n`, `\alpha`, `\text{A
 | `timeSeriesDiscrete` | values over n | `series`, `connect` |
 | `timeSeriesContinuous` | curves over t | `series`, `field` (slope field of a scalar ODE) |
 | `functionGraph` | graphs y = f(x) | `series`, `diagonal` |
-| `cobweb` | cobweb of an iteration | `f`, `orbit` |
+| `cobweb` | cobweb of an iteration | `f`, `orbit`; `orbits` (more staircases: a second start, the tangent's), `series` (lines and points in the picture, with a legend) |
 | `phasePlane` | trajectory in the plane | `xSeries`, `ySeries`, `field`, `nullclines`, `bahnen` (click adds a trajectory), `overlay`, `start` |
 | `scatter` | point clouds (bifurcation) | `series` |
 | `bars` | values at the current step as bars | `series` (one bar each) or `grid` (one bar per row), `share` (fractions) |

@@ -244,7 +244,13 @@ export function AspectSwitch({ equal, set }: { equal: boolean; set: (on: boolean
 /** Series shown in a plot that deserve a legend entry (time series and function graphs). */
 export function legendEntries(spec: PlotSpec, run: Run) {
   if (spec.type === 'phasePlane') return nullclineSeries(spec)
-  if (spec.legend === false || spec.type === 'cobweb' || spec.type === 'surface3d' || spec.type === 'heatmap') return []
+  if (spec.legend === false || spec.type === 'surface3d' || spec.type === 'heatmap') return []
+  // a cobweb names its graph only when there is more in the picture (a tangent, a second start)
+  if (spec.type === 'cobweb') {
+    if (!spec.series && !spec.orbits) return []
+    const ids = [spec.f, ...(spec.series ?? []), ...(spec.orbits ?? [])]
+    return run.series.filter((s) => ids.includes(s.id) && s.role !== 'annotation' && s.legend !== false)
+  }
   if (spec.type === 'bars' && spec.grid) return []
   const ids = spec.series
   // annotations (brackets, arrows) explain themselves where they are drawn

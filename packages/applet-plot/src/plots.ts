@@ -49,7 +49,15 @@ export type PlotSpec =
       field?: boolean
     })
   | (PlotCommon & { type: 'functionGraph'; series?: readonly string[]; diagonal?: boolean })
-  | (PlotCommon & { type: 'cobweb'; f: string; orbit: string })
+  | (PlotCommon & {
+      type: 'cobweb'
+      f: string
+      orbit: string
+      /** More staircases, each in its series' role and dash (a second start, the tangent's). */
+      orbits?: readonly string[]
+      /** More series drawn in the picture: lines (a tangent, a frame) and points (fixed points). With them the plot gets a legend. */
+      series?: readonly string[]
+    })
   | (PlotCommon & {
       type: 'phasePlane'
       /** The trajectory; without it only the field and overlays are drawn (vectors, lines). */
@@ -591,6 +599,36 @@ export function drawBahn(s: Surface, frame: Frame, spec: PlotSpec, run: Run) {
 }
 
 const MAX_STAIRS = 4000
+/**
+ * A cobweb's staircase (x₀, 0) → (x₀, x₁) → (x₁, x₁) → (x₁, x₂) → … up to step k, ending in a
+ * dot. For very long orbits only the last MAX_STAIRS steps: earlier ones lie underneath anyway.
+ */
+function staircase(s: Surface, frame: Frame, xs: ArrayLike<number>, k: number, role: Series['role'], dash: readonly number[]) {
+  if (k < 0) return
+  const first = Math.max(0, k - MAX_STAIRS)
+  const y0 = Math.min(Math.max(0, frame.yDomain[0]), frame.yDomain[1])
+  const bands = Math.max(1, Math.min(FADE_BANDS, k - first))
+  const width = k - first > 400 ? 1.25 : 1.75
+  for (let b = 0; b < bands; b++) {
+    const from = first + Math.floor(((k - first) * b) / bands)
+    const to = first + Math.floor(((k - first) * (b + 1)) / bands)
+    if (to <= from) continue
+    s.begin({ role, width, dash, alpha: bands === 1 ? 1 : 0.25 + (0.75 * (b + 1)) / bands })
+    s.moveTo(frame.xScale(xs[from]), frame.yScale(from === 0 ? y0 : xs[from]))
+    for (let i = from; i < to; i++) {
+      const X = frame.xScale(xs[i])
+      const Xn = frame.xScale(xs[i + 1])
+      if (!Number.isFinite(Xn)) break
+      s.lineTo(X, frame.yScale(xs[i + 1]))
+      s.lineTo(Xn, frame.yScale(xs[i + 1]))
+    }
+    s.end()
+  }
+  s.begin({ role, marker: 'circle' })
+  if (Number.isFinite(xs[k])) s.dot(frame.xScale(xs[k]), frame.yScale(xs[k]), 4)
+  s.end()
+}
+
 /** The cobweb fades from old steps to recent ones, so the direction of time is visible. */
 const FADE_BANDS = 16
 
@@ -789,33 +827,14 @@ export function drawPlot(s: Surface, frame: Frame, spec: PlotSpec, run: Run, vie
         polyline(s, frame, f.x, f.y)
         s.end()
       }
-      if (!orbit || orbit.y.length === 0) return
-      const k = visible(orbit, view) - 1
-      const xs = orbit.y
-      // Staircase (x₀, 0) → (x₀, x₁) → (x₁, x₁) → (x₁, x₂) → …
-      // For very long orbits only the last MAX_STAIRS steps: earlier ones lie underneath anyway.
-      const first = Math.max(0, k - MAX_STAIRS)
-      const y0 = Math.min(Math.max(0, frame.yDomain[0]), frame.yDomain[1])
-      const bands = Math.max(1, Math.min(FADE_BANDS, k - first))
-      const width = k - first > 400 ? 1.25 : 1.75
-      for (let b = 0; b < bands; b++) {
-        const from = first + Math.floor(((k - first) * b) / bands)
-        const to = first + Math.floor(((k - first) * (b + 1)) / bands)
-        if (to <= from) continue
-        s.begin({ role: 'secondary', width, dash: [], alpha: bands === 1 ? 1 : 0.25 + (0.75 * (b + 1)) / bands })
-        s.moveTo(frame.xScale(xs[from]), frame.yScale(from === 0 ? y0 : xs[from]))
-        for (let i = from; i < to; i++) {
-          const X = frame.xScale(xs[i])
-          const Xn = frame.xScale(xs[i + 1])
-          if (!Number.isFinite(Xn)) break
-          s.lineTo(X, frame.yScale(xs[i + 1]))
-          s.lineTo(Xn, frame.yScale(xs[i + 1]))
-        }
-        s.end()
+      const extra = spec.series ? selected(run, spec.series) : []
+      for (const series of extra) if (series.kind === 'continuous') drawLine(s, frame, series)
+      for (const id of spec.orbits ?? []) {
+        const o = seriesById(run, id)
+        if (o && o.y.length) staircase(s, frame, o.y, visible(o, view) - 1, o.role, o.dash ?? [])
       }
-      s.begin({ role: 'secondary', marker: 'circle' })
-      if (Number.isFinite(xs[k])) s.dot(frame.xScale(xs[k]), frame.yScale(xs[k]), 4)
-      s.end()
+      if (orbit && orbit.y.length) staircase(s, frame, orbit.y, visible(orbit, view) - 1, 'secondary', [])
+      for (const series of extra) if (series.kind === 'discrete') drawDiscrete(s, frame, series, series.x.length, false, false)
       return
     }
     case 'phasePlane': {

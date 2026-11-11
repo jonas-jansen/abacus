@@ -22,6 +22,8 @@ const G_FUNKTIONEN = {
   e1: { label: '$e^{-x} - x$', tex: 'e^{-x} - x', g: (x) => Math.exp(-x) - x, dg: (x) => -Math.exp(-x) - 1, roots: [[0, 1]], x: [-1, 3], y: [-3, 2.5] },
   quadrat: { label: '$x^2 - 2$', tex: 'x^2 - 2', g: (x) => x * x - 2, dg: (x) => 2 * x, roots: [[-2, -1], [1, 2]], x: [-3, 3], y: [-3, 7] },
   kubisch: { label: '$x^3 - 2x + 2$', tex: 'x^3 - 2x + 2', g: (x) => x ** 3 - 2 * x + 2, dg: (x) => 3 * x * x - 2, roots: [[-2, -1.5]], x: [-2.5, 2], y: [-6, 8] },
+  // the end of an epidemic with R = 2 (slides I 67–71): besides 0, the share x ≈ 0.797 falls ill
+  epidemie: { label: '$1 - e^{-2x} - x$', tex: '1 - e^{-2x} - x', g: (x) => 1 - Math.exp(-2 * x) - x, dg: (x) => 2 * Math.exp(-2 * x) - 1, roots: [[-0.2, 0.3], [0.5, 1]], x: [0.3, 1.8], y: [-1, 0.3] },
   arctan: { label: '$\\arctan x$', tex: '\\arctan x', g: Math.atan, dg: (x) => 1 / (1 + x * x), roots: [[-1, 1]], x: [-6, 6], y: [-2, 2] },
 } satisfies Record<string, G>
 

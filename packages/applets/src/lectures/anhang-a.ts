@@ -207,7 +207,7 @@ interface Fn {
   dot?: readonly [number, number]
 }
 
-const FUNKTIONEN: Record<'glatt' | 'sprung' | 'vorzeichen' | 'quotient', Fn> = {
+const FUNKTIONEN: Record<'glatt' | 'sprung' | 'vorzeichen' | 'quotient' | 'wurzel', Fn> = {
   glatt: { label: 'stetig', tex: String.raw`f(x) = 1.5 + 0.35\,(x-2) + 0.1\,(x-2)^3`, f: (x) => 1.5 + 0.35 * (x - 2) + 0.1 * (x - 2) ** 3, x: [0, 4], y: [0, 3.2] },
   sprung: {
     label: 'Sprung bei 2',
@@ -229,6 +229,7 @@ const FUNKTIONEN: Record<'glatt' | 'sprung' | 'vorzeichen' | 'quotient', Fn> = {
     hole: [0, 1],
     dot: [0, -1],
   },
+  wurzel: { label: '$\\sqrt{x}$', tex: String.raw`f(x) = \sqrt{x}`, f: (x) => (x < 0 ? NaN : Math.sqrt(x)), x: [0, 2], y: [0, 1.6] },
   quotient: { label: '$(x^2 - 1)/(x - 1)$', tex: String.raw`f(x) = \frac{x^2 - 1}{x - 1}, \quad x \ne 1`, f: (x) => (x === 1 ? NaN : (x * x - 1) / (x - 1)), x: [-0.5, 3], y: [0, 4], hole: [1, 2] },
 }
 type FnId = keyof typeof FUNKTIONEN
@@ -305,7 +306,7 @@ const stetigModel = iteration({
   },
 })
 
-const stetigApplet = (id: string, title: string, scenarios: { label: string; text?: string; params: Record<string, unknown> }[], timeline = true) =>
+export const stetigApplet = (id: string, title: string, scenarios: { label: string; text?: string; params: Record<string, unknown> }[], timeline = true) =>
   defineApplet({
     id,
     title,
@@ -547,7 +548,7 @@ const ableitungModel = closedForm({
 })
 
 const fOf = (p: any) => ABLEITUNGEN[p.f as DfId]
-const graphPlot = (series: readonly string[], extra: { guides?: boolean } = {}) => ({
+export const graphPlot = (series: readonly string[], extra: { guides?: boolean } = {}) => ({
   type: 'functionGraph' as const,
   series,
   xLabel: 'x',
@@ -593,7 +594,7 @@ const quotientPlot = {
   drag: [{ param: 'h', axis: 'x' as const, at: (p: any): [number, number] | null => (p.h === 0 ? null : [p.h, quotient(fOf(p), p.a, p.h)]), set: (x: number) => ({ h: x }) }],
 }
 
-const ableitungApplet = (id: string, title: string, summary: string, plots: readonly any[], formulas: (p: any) => { label: string; tex: string }[], scenarios: { label: string; text?: string; params: Record<string, unknown> }[], readouts = ['quotient', 'ableitung'], shown = ['f', 'a', 'h', 'sekanten', 'tangente']) =>
+export const ableitungApplet = (id: string, title: string, summary: string, plots: readonly any[], formulas: (p: any) => { label: string; tex: string }[], scenarios: { label: string; text?: string; params: Record<string, unknown> }[], readouts = ['quotient', 'ableitung'], shown = ['f', 'a', 'h', 'sekanten', 'tangente']) =>
   defineApplet({
     id,
     title,
@@ -608,9 +609,9 @@ const ableitungApplet = (id: string, title: string, summary: string, plots: read
     scenarios,
   })
 
-const fFormula = { label: 'Funktion', tex: String.raw`f(x) = {{f}}` }
-const quotientFormula = { label: 'Differenzenquotient', tex: String.raw`g(h) = \frac{f({{a}} + {{h}}) - f({{a}})}{{{h}}}` }
-const tangentFormula = (p: any) => {
+export const fFormula = { label: 'Funktion', tex: String.raw`f(x) = {{f}}` }
+export const quotientFormula = { label: 'Differenzenquotient', tex: String.raw`g(h) = \frac{f({{a}} + {{h}}) - f({{a}})}{{{h}}}` }
+export const tangentFormula = (p: any) => {
   const F = fOf(p)
   return { label: 'Tangente', tex: String.raw`t(x) = f(a) + f'(a)\,(x - a) = ${num(F.f(p.a))} ${F.df(p.a) < 0 ? '-' : '+'} ${num(Math.abs(F.df(p.a)))}\,(x - ${num(p.a)})` }
 }
@@ -670,7 +671,7 @@ const ableitungsfunktion = ableitungApplet(
 const halb = (p: { zoom: number }) => 1 / p.zoom
 const hoch = (F: Df, a: number) => Math.max(0.5, Math.abs(F.df(a)))
 
-const lupe = defineApplet({
+export const lupe = defineApplet({
   id: 'va-lupe',
   title: 'Blick durch die Lupe',
   summary: 'Nahe bei a sieht f aus wie seine Tangente',

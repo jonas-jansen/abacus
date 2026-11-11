@@ -93,3 +93,45 @@ describe('Vorlesung Anhang A: the slides’ numbers', () => {
     expect(g.y[200]).toBeNaN()
   })
 })
+
+describe('Vorlesung Kapitel 1, stationäre Zustände und Stabilität: the slides’ numbers', () => {
+  it('Folien 36–40: the stationary states', () => {
+    expect(run('vs-fixpunkte-36', 'Folie 36').observables.fix.value).toEqual([0, 1 - 1 / 2.8])
+    expect(run('vs-fixpunkte-37', 'Folie 37').observables.fix.value).toEqual([expect.closeTo(250, 9)])
+    expect(run('vs-fixpunkte-38', 'Folie 38').observables.fix.value).toBe('keine')
+    expect(run('vs-fixpunkte-39', 'Folie 39').observables.fix.value).toEqual([0, 1])
+    expect((run('vs-fixpunkte-40', 'a = 3.2').observables.fix.value as number[])[1]).toBeCloseTo(0.6875, 12)
+  })
+
+  it('Folien 44–48: the staircases run into x* = 100 or away from it', () => {
+    expect(values('vs-spinnweb-44', 'x₃', 'x')).toEqual([10, 55, 77.5, 88.75])
+    expect(values('vs-spinnweb-45', 'Folie 45', 'x2').at(-1)).toBeCloseTo(100, 2)
+    expect(values('vs-spinnweb-46', 'Folie 46', 'x').at(-1)).toBeCloseTo(100 - 10 * 1.5 ** 8, 9)
+    expect(values('vs-spinnweb-47', 'a = −1.2', 'x').at(-1)).toBeCloseTo(100 + 10 * 1.2 ** 12, 6)
+  })
+
+  it('Folie 68: from 0.5 the epidemic reaches 0.7968 after 40 steps, f′(x*) ≈ 0.41', () => {
+    const o = run('vs-spinnweb-68', 'Folie 68').observables
+    expect(o.xN.value).toBeCloseTo(0.7968, 4)
+    expect((o.steigung.value as number[])[1]).toBeCloseTo(0.41, 2)
+  })
+
+  it('Folien 56–59: f′(x*) = ½, 1.8, −0.6 and −1.2', () => {
+    expect(run('vs-lupe-56', 'Folie 56').observables.steigung.value).toBeCloseTo(0.5, 12)
+    expect(run('vs-lupe-57', 'Folie 57').observables.steigung.value).toBeCloseTo(1.8, 12)
+    expect(run('vs-lupe-58', 'Folie 58').observables.steigung.value).toBeCloseTo(-0.6, 12)
+    expect(run('vs-lupe-59', 'Folie 59').observables.art.value).toBe('instabil')
+  })
+
+  it('Folie 71: Newton from 1 gives 0.8144387, 0.7970151, 0.7968121582', () => {
+    const x = values('vs-newton', 'Folie 71', 'x')
+    expect(x[1]).toBeCloseTo(0.8144387, 7)
+    expect(x[2]).toBeCloseTo(0.7970151, 7)
+    expect(x[3]).toBeCloseTo(0.7968121582, 10)
+  })
+
+  it('Folie 73: the best step for √x at 1 is about h = 10⁻⁸', () => {
+    expect(run('vs-numerisch', 'Folie 73').observables.bester.value).toBeGreaterThanOrEqual(7)
+    expect(run('vs-numerisch', 'Folie 73').observables.bester.value).toBeLessThanOrEqual(9)
+  })
+})
