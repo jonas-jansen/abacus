@@ -327,6 +327,23 @@ const langzeit42 = langzeitApplet('vs-langzeit-42', 'Was der Satz nicht sagt', [
 
 // ------------------------------------------------------- Folien 44–55: Spinnwebdiagramme
 
+type SP = FP & { x0: number; zwei: boolean; x0b: number; fenster: number; folgen: boolean }
+/**
+ * The cobweb's window. Linear equations with "Fenster um x*": a square around x* that also
+ * holds the start values, at least as wide as the window size, so that changing a or b keeps a
+ * large neighbourhood of x* in view (without x*, around the start). Otherwise [0, X].
+ */
+function spinnwebFenster(p: SP): [number, number] {
+  if (p.art !== 'linear' || !p.folgen) return [0, p.fenster]
+  const { xs } = fixpunkte(p)
+  const starts = p.zwei ? [p.x0, p.x0b] : [p.x0]
+  const c = xs.length ? xs[0] : (Math.min(...starts) + Math.max(...starts)) / 2
+  const R = Math.max(p.fenster / 2, ...starts.map((s) => 1.15 * Math.abs(s - c)))
+  // just below 0: start the window at 0, as on the slides
+  if (c - R < 0 && c - R > -0.2 * R) return [0, 2 * R]
+  return [c - R, c + R]
+}
+
 const spinnwebModel = iteration({
   id: 'vs-spinnweb',
   params: {
@@ -334,7 +351,8 @@ const spinnwebModel = iteration({
     x0: real('Startwert', { latex: 'x_0', min: 0, max: 400, step: 0.01, default: 10 }),
     zwei: bool('zweiter Start', { default: false, labelOn: 'an', labelOff: 'aus' }),
     x0b: real('zweiter Startwert', { latex: 'z_0', min: 0, max: 400, step: 0.01, default: 190 }),
-    fenster: real('Fenster bis', { latex: 'X', min: 0.05, max: 1000, step: 0.01, default: 150 }),
+    fenster: real('Fenstergröße', { latex: 'X', min: 0.05, max: 1000, step: 0.01, default: 150 }),
+    folgen: bool('Fenster um x*', { default: true, labelOn: 'an', labelOff: 'aus' }),
     N: steps('Schritte', { latex: 'N', default: 10, max: 200 }),
   },
   start: (p) => p.x0,
@@ -342,7 +360,7 @@ const spinnwebModel = iteration({
   horizon: (p) => p.N,
   extraSeries: ({ p, detail }) => {
     const F = f(p as FP)
-    const [lo, hi] = detail?.x ?? [0, p.fenster]
+    const [lo, hi] = detail?.x ?? spinnwebFenster(p as SP)
     const w = hi - lo
     const g = sample(F, p.art === 'wurzel' ? Math.max(0, lo - w) : lo - w, hi + w, 1201)
     const { xs } = fixpunkte(p as FP)
@@ -384,23 +402,24 @@ const spinnwebApplet = (id: string, title: string, scenarios: Scenarios) =>
         series: ['fix'],
         xLabel: 'x',
         yLabel: 'f(x)',
-        x: (p) => [0, p.fenster],
-        y: (p) => [0, p.fenster],
+        x: (p) => spinnwebFenster(p as SP),
+        y: (p) => spinnwebFenster(p as SP),
         stretch: true,
+        // the start values on the lower edge (the window need not reach down to 0)
         drag: [
-          { param: 'x0', axis: 'x' },
-          { param: 'x0b', axis: 'x', at: (p) => (p.zwei ? [p.x0b, 0] : null) },
+          { param: 'x0', axis: 'x', at: (p) => [p.x0, Math.max(0, spinnwebFenster(p as SP)[0])], set: (x) => ({ x0: x }) },
+          { param: 'x0b', axis: 'x', at: (p) => (p.zwei ? [p.x0b, Math.max(0, spinnwebFenster(p as SP)[0])] : null), set: (x) => ({ x0b: x }) },
         ],
         // the value just reached, on the x axis
-        guides: (_p: unknown, { step, run }: { step: number; run: Run }): readonly Guide[] => {
+        guides: (p: any, { step, run }: { step: number; run: Run }): readonly Guide[] => {
           const x = run.series.find((s) => s.id === 'x')?.y
           const k = Math.min(step, (x?.length ?? 0) - 1)
           if (!x || k < 1 || !Number.isFinite(x[k])) return []
-          return [{ kind: 'drop', from: [x[k], x[k]], to: [x[k], 0], label: `x_{${k}}` }]
+          return [{ kind: 'drop', from: [x[k], x[k]], to: [x[k], Math.max(0, spinnwebFenster(p as SP)[0])], label: `x_{${k}}` }]
         },
       },
     ],
-    layout: { main: ['art', 'a', 'b', 'x0', 'zwei', 'x0b'], visible: { ...artVisible, x0b: (p: any) => p.zwei } },
+    layout: { main: ['art', 'a', 'b', 'x0', 'zwei', 'x0b', 'folgen'], visible: { ...artVisible, x0b: (p: any) => p.zwei, folgen: (p: any) => p.art === 'linear' } },
     readouts: ['xN', 'fix', 'steigung'],
     scenarios,
   })
