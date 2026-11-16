@@ -48,3 +48,41 @@ describe('Übungsblatt 2', () => {
     expect(values('blatt2-mohn', 'x₀ … x₅')).toEqual([10, 20, 70, 200, 610, 1820])
   })
 })
+
+describe('Übungsblatt 4', () => {
+  const obs = (id: string, scenario: string, key: string) => {
+    const def = exerciseApplets[id]
+    const s = def.scenarios!.find((x) => x.label === scenario)!
+    const p = { ...defaultParams(def.model), ...s.params } as never
+    return def.model.run(p).observables![key].value
+  }
+
+  it('4.1: x₀ = 1900 dies out at once (x₁ = −152), the limit is K(1 + 1/r) ≈ 1833.3', () => {
+    expect(values('blatt4-ausloeschung', 'x₀ = 1900')[1]).toBeCloseTo(-152, 9)
+    expect(values('blatt4-ausloeschung', 'x₀ = 500')[1]).toBeCloseTo(800, 9)
+    expect(obs('blatt4-ausloeschung', 'Grenze', 'grenze')).toBeCloseTo(1000 * (1 + 1 / 1.2), 9)
+    expect(obs('blatt4-gleichgewicht', 'Gleichgewichte', 'fix')).toEqual([0, 1000])
+  })
+
+  it('4.2: W at 0, 1000, 2000, 3000 and x₁, x₂, x₃ = 602.4, 970.7, 1005.4 from 2000', () => {
+    const w = obs('blatt4-ricker-faktor', 'W(0), W(1000), W(2000), W(3000)', 'werte') as number[]
+    expect(w.map((v) => +v.toFixed(4))).toEqual([3.3201, 1, 0.3012, 0.0907])
+    expect(values('blatt4-ricker-folge', 'x₁, x₂, x₃').map((v) => +v.toFixed(1))).toEqual([2000, 602.4, 970.7, 1005.4])
+  })
+
+  it('4.3: the sequence from 1/2 is 2ⁿ/(1 + 2ⁿ), f(X) → 2, the quotient at 0 → 2', () => {
+    for (const [n, v] of values('blatt4-bh', 'a) Grenzwert').entries()) expect(v).toBeCloseTo(2 ** n / (1 + 2 ** n), 12)
+    expect(obs('blatt4-bh-unendlich', 'x bis 100 000', 'fX')).toBeCloseTo(2, 4)
+    expect(obs('blatt4-bh-ableitung', 'h = 0.01', 'quotient')).toBeCloseTo(2 / 1.01, 9)
+    expect(obs('blatt4-bh-ableitung', 'h = 0.01', 'rechts')).toBeCloseTo(2, 5)
+  })
+
+  it('4.4: (1 − x)/(2 + x) has f′(1) = −1/3, |x| at 0 has −1 and 1', () => {
+    expect(obs('blatt4-differenzierbar', 'a) h = 0.5', 'links')).toBeCloseTo(-1 / 3, 5)
+    expect(obs('blatt4-differenzierbar', 'a) h = 0.5', 'rechts')).toBeCloseTo(-1 / 3, 5)
+    expect(obs('blatt4-differenzierbar', 'b) h > 0', 'links')).toBe(-1)
+    expect(obs('blatt4-differenzierbar', 'b) h > 0', 'rechts')).toBe(1)
+    expect(obs('blatt4-differenzierbar', 'b) h > 0', 'ergebnis')).toMatch(/^nein/)
+    expect(obs('blatt4-differenzierbar', 'b) a = 1', 'ergebnis')).toBe("ja, f'(a) = 1")
+  })
+})

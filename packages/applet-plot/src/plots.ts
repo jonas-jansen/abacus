@@ -612,7 +612,8 @@ function staircase(s: Surface, frame: Frame, xs: ArrayLike<number>, k: number, r
   for (let b = 0; b < bands; b++) {
     const from = first + Math.floor(((k - first) * b) / bands)
     const to = first + Math.floor(((k - first) * (b + 1)) / bands)
-    if (to <= from) continue
+    // a start that is not a number (a second start switched off) draws nothing
+    if (to <= from || !Number.isFinite(xs[from])) continue
     s.begin({ role, width, dash, alpha: bands === 1 ? 1 : 0.25 + (0.75 * (b + 1)) / bands })
     s.moveTo(frame.xScale(xs[from]), frame.yScale(from === 0 ? y0 : xs[from]))
     for (let i = from; i < to; i++) {

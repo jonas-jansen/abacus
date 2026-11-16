@@ -43,6 +43,23 @@ export const sheets: readonly Sheet[] = [
       { id: '2.2', tab: '2.2', title: 'Klatschmohn', applet: 'blatt2-mohn' },
     ],
   },
+  {
+    id: '4',
+    title: 'Übungsblatt 4',
+    parts: [
+      { id: '4.1a', tab: '4.1 a', title: 'Logistisches Modell: sofortige Auslöschung', applet: 'blatt4-ausloeschung' },
+      { id: '4.1b', tab: '4.1 b', title: 'Vermehrungsfaktor pro Tier', applet: 'blatt4-faktor' },
+      { id: '4.1c', tab: '4.1 c', title: 'Gleichgewichtspunkte', applet: 'blatt4-gleichgewicht' },
+      { id: '4.2a', tab: '4.2 a', title: 'Vermehrungsfaktor nach Ricker', applet: 'blatt4-ricker-faktor' },
+      { id: '4.2b', tab: '4.2 b', title: 'Ricker-Modell ab x₀ = 2000', applet: 'blatt4-ricker-folge' },
+      { id: '4.2c', tab: '4.2 c', title: 'Gleichgewichtspunkte im Ricker-Modell', applet: 'blatt4-ricker-gleichgewicht' },
+      { id: '4.3ab', tab: '4.3 a–b', title: 'Beverton–Holt: Grenzwert und Fixpunkte', applet: 'blatt4-bh' },
+      { id: '4.3c', tab: '4.3 c', title: 'Beverton–Holt: sehr große Bestände', applet: 'blatt4-bh-unendlich' },
+      { id: '4.3d', tab: '4.3 d', title: "Beverton–Holt: f'(0) mit der Definition", applet: 'blatt4-bh-ableitung' },
+      { id: '4.3d-t', tab: '4.3 d Tangente', title: 'Beverton–Holt: die Tangente und eine kleine Population', applet: 'blatt4-bh-tangente' },
+      { id: '4.4', tab: '4.4', title: 'Differenzierbar oder nicht?', applet: 'blatt4-differenzierbar' },
+    ],
+  },
 ]
 
 /**
